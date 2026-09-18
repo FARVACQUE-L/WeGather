@@ -157,11 +157,14 @@ function UserReport() {
       if (!response.ok) {
         if (response.status === 400 || response.status === 409) {
           const data = await response.json().catch(() => null);
+          // Les validations métier répondent { message }, le handler
+          // d'erreurs et les refus d'upload répondent { error }.
+          const serverMessage = data?.message ?? data?.error;
 
-          if (data?.message) {
+          if (serverMessage) {
             toast.fire({
               icon: "warning",
-              text: data.message,
+              text: serverMessage,
               customClass: {
                 popup: "toast-error-popup",
               },

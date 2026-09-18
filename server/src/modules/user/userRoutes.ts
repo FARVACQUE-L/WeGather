@@ -1,6 +1,6 @@
 import express from "express";
 import authorization from "../../middleware/auth";
-import upload from "../../middleware/upload";
+import upload, { verifyFileSignatures } from "../../middleware/upload";
 import userActions from "./userActions";
 
 const userRoutes = express.Router();
@@ -29,6 +29,7 @@ userRoutes.post(
   "/api/users/:id/photo",
   authorization,
   upload.single("photo"),
+  verifyFileSignatures,
   userActions.uploadPhoto,
 );
 userRoutes.post("/api/login", userActions.login);

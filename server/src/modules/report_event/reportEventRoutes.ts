@@ -1,6 +1,10 @@
 import express from "express";
 import authorization from "../../middleware/auth";
-import upload from "../../middleware/upload";
+import {
+  MAX_FILES,
+  uploadEvidence,
+  verifyFileSignatures,
+} from "../../middleware/upload";
 import reportEventActions from "./reportEventActions";
 
 const reportEventRoutes = express.Router();
@@ -13,7 +17,8 @@ reportEventRoutes.get(
 reportEventRoutes.post(
   "/api/userreport-event",
   authorization,
-  upload.array("reported_event_image"),
+  uploadEvidence.array("reported_event_image", MAX_FILES),
+  verifyFileSignatures,
   reportEventActions.add,
 );
 

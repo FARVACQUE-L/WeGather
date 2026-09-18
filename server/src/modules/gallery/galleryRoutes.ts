@@ -1,6 +1,6 @@
 import express from "express";
 import authorization from "../../middleware/auth";
-import upload from "../../middleware/upload";
+import upload, { verifyFileSignatures } from "../../middleware/upload";
 import galleryActions from "./galleryActions";
 
 const galleryRoutes = express.Router();
@@ -15,6 +15,7 @@ galleryRoutes.post(
   "/api/gallery",
   authorization,
   upload.single("photo"),
+  verifyFileSignatures,
   galleryActions.uploadPhoto,
 );
 
