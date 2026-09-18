@@ -6,13 +6,24 @@ import { encodeJWT } from "../../helper/jwtHelper";
 import eventRepository from "../event/eventRepository";
 import userRepository from "./userRepository";
 
-const authVerif: RequestHandler = (req, res) => {
-  if (!req.user) {
-    res.sendStatus(401);
-    return;
-  }
+const authVerif: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      res.sendStatus(401);
+      return;
+    }
 
-  res.status(200).json(req.user);
+    // Le rôle est relu en base : le JWT vit 30 jours, il porterait un isAdmin
+    // périmé si les droits de l'utilisateur ont changé depuis sa connexion.
+    const user = await userRepository.readUserAdmin(req.user.id);
+
+    res.status(200).json({
+      ...req.user,
+      isAdmin: Boolean(user?.user_is_admin),
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 const transporter = nodemailer.createTransport({
@@ -419,17 +430,6 @@ const editUserName: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
-const browseUserAdmin: RequestHandler = async (req, res, next) => {
-  try {
-    const userId = Number(req.params.id);
-
-    const user = await userRepository.readUserAdmin(userId);
-
-    res.json(user);
-  } catch (error) {
-    next(error);
-  }
-};
 const readUserJoinEvent: RequestHandler = async (req, res, next) => {
   try {
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
@@ -466,7 +466,6 @@ export default {
   changePassword,
   uploadPhoto,
   editUserName,
-  browseUserAdmin,
   readUserName,
   readUserJoinEvent,
 };

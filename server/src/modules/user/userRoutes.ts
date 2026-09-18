@@ -47,11 +47,6 @@ userRoutes.put(
   userActions.forgotPassword,
 );
 userRoutes.get(
-  "/api/users/admin/:id",
-  authorization,
-  userActions.browseUserAdmin,
-);
-userRoutes.get(
   "/api/user/event/:eventUuid",
   authorization,
   userActions.readUserJoinEvent,

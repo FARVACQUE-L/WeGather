@@ -40,6 +40,7 @@ function Profil() {
       })
       .then((data) => {
         setUserId(data.id);
+        setIsAdmin(Boolean(data.isAdmin));
       })
       .catch(console.error);
   }, []);
@@ -61,16 +62,6 @@ function Profil() {
       })
       .catch((error) => console.error(error));
   }, [userId]);
-  useEffect(() => {
-    if (!userId) return;
-    fetch(`${import.meta.env.VITE_API_URL}/api/users/admin/${userId}`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setIsAdmin(Boolean(data.user_is_admin)))
-      .catch((err) => console.error(err));
-  }, [userId]);
-
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {

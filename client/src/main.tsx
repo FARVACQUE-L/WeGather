@@ -6,6 +6,7 @@ import Admin from "../src/pages/Admin/Admin";
 import App from "./App";
 import DashboardReport from "./components/DashboardReport/DashboardReport";
 import AuthRequire from "./helper/AuthRequire";
+import AuthRequireAdmin from "./helper/AuthRequireAdmin";
 import AdminReport from "./pages/AdminReport/AdminReport";
 import ChangePassword from "./pages/ChangePassword/ChangePassword";
 import Connexion from "./pages/Connexion/Connexion";
@@ -66,9 +67,9 @@ const router = createBrowserRouter([
       {
         path: "/admin",
         element: (
-          <AuthRequire>
+          <AuthRequireAdmin>
             <Admin />
-          </AuthRequire>
+          </AuthRequireAdmin>
         ),
       },
       {
@@ -78,17 +79,17 @@ const router = createBrowserRouter([
       {
         path: "/dashboardreport",
         element: (
-          <AuthRequire>
+          <AuthRequireAdmin>
             <DashboardReport />
-          </AuthRequire>
+          </AuthRequireAdmin>
         ),
       },
       {
         path: "/admin/report/:type/:id",
         element: (
-          <AuthRequire>
+          <AuthRequireAdmin>
             <AdminReport />
-          </AuthRequire>
+          </AuthRequireAdmin>
         ),
       },
       {
