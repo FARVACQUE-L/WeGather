@@ -14,10 +14,15 @@
     background-color: #feb47b5b;
     border-radius: 40px;
     .logo-sidebar-container {
-      margin: 0 0 0 20px;
       display: flex;
       align-items: center;
+      justify-content: center;
       padding-bottom: 3vh;
+      background: none;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+      width: 100%;
 
       .logo-sidebar-image {
         width: 30px;

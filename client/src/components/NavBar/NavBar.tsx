@@ -16,7 +16,7 @@ function NavBar() {
       <Link to="/homeevents" className="logo-sidebar-container">
         <img src={Logo} alt="logo-wedoo" className="logo-sidebar-image" />
         <h2 className="logo-sidebar-h2">
-          WE<i>D</i>OO
+          We<i>G</i>ather
           {isAdmin && <span className="logo-admin-text"> Admin</span>}
         </h2>
       </Link>

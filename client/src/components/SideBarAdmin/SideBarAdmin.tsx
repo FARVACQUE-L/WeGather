@@ -14,12 +14,17 @@ function SideBarAdmin({
 }: SideBarAdminProps) {
   return (
     <nav className="sidebar-admin">
-      <div className="logo-sidebar-container">
+      <button
+        type="button"
+        className="logo-sidebar-container"
+        aria-label="Aller au tableau de bord"
+        onClick={() => handleChangeComponent("tableau")}
+      >
         <img src={Logo} alt="logo-wedoo" className="logo-sidebar-image" />
         <h2 className="logo-sidebar-h2">
-          WE<i>D</i>OO <span className="logo-admin-text"> Admin</span>
+          We<i>G</i>ather <span className="logo-admin-text"> Admin</span>
         </h2>
-      </div>
+      </button>
       <ul className="sidebar-menu">
         <li className={activeComponent === "tableau" ? "active" : ""}>
           <button

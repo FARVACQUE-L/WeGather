@@ -16,10 +16,15 @@
     background: var(--sideBar-color);
     border-radius: 40px;
     .logo-sidebar-container {
-      margin: 0 25% 0 25%;
       display: flex;
       align-items: center;
+      justify-content: center;
       padding-bottom: 3vh;
+      background: none;
+      border: none;
+      font: inherit;
+      cursor: pointer;
+      width: 100%;
 
       .logo-sidebar-image {
         width: 30px;
