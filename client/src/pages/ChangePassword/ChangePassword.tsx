@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import connexionImg from "../../assets/images/Connexion-img.png";
 import eye from "../../assets/images/eye.png";
 import hide from "../../assets/images/hide.png";
-import logo from "../../assets/images/logo-wedoo.png";
+import logo from "../../assets/images/logo-wegather.png";
 
 function ChangePassword() {
   const [showPassword, setShowPassword] = useState(false);
@@ -102,7 +102,7 @@ function ChangePassword() {
     <>
       <nav className="navbar-changepassword">
         <Link to="/">
-          <img src={logo} alt="logo-wedoo" />
+          <img src={logo} alt="logo-wegather" />
           <h1>
             We<i>G</i>ather
           </h1>

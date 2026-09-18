@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
-import Logo from "../../assets/images/logo-wedoo.png";
+import Logo from "../../assets/images/logo-wegather.png";
 import notificationSound from "../../assets/sounds/notification.mp3";
 import { socket } from "../../socket/socket";
 
@@ -198,7 +198,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
       >
-        <img src={Logo} alt="logo-wedoo" className="logo-sidebar-image" />
+        <img src={Logo} alt="logo-wegather" className="logo-sidebar-image" />
         <h2 className="logo-sidebar-h2">
           We<i>G</i>ather
         </h2>

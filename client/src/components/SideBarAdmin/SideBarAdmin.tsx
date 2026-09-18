@@ -6,7 +6,7 @@ type SideBarAdminProps = {
   handleChangeComponent: (componentName: "tableau" | "signalement") => void;
 };
 
-import Logo from "../../assets/images/logo-wedoo.png";
+import Logo from "../../assets/images/logo-wegather.png";
 
 function SideBarAdmin({
   activeComponent,
@@ -20,7 +20,7 @@ function SideBarAdmin({
         aria-label="Aller au tableau de bord"
         onClick={() => handleChangeComponent("tableau")}
       >
-        <img src={Logo} alt="logo-wedoo" className="logo-sidebar-image" />
+        <img src={Logo} alt="logo-wegather" className="logo-sidebar-image" />
         <h2 className="logo-sidebar-h2">
           We<i>G</i>ather <span className="logo-admin-text"> Admin</span>
         </h2>

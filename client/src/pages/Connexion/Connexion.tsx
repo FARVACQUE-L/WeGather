@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router";
 import connexionImg from "../../assets/images/Connexion-img.png";
 import eye from "../../assets/images/eye.png";
 import hide from "../../assets/images/hide.png";
-import logo from "../../assets/images/logo-wedoo.png";
+import logo from "../../assets/images/logo-wegather.png";
 
 function Connexion() {
   const [showPassword, setShowPassword] = useState(false);
@@ -58,7 +58,7 @@ function Connexion() {
     <>
       <div className="navbar-connexion">
         <Link to="/" className="nav-connexion">
-          <img src={logo} alt="logo-wedoo" />
+          <img src={logo} alt="logo-wegather" />
           <h1>
             We<i>G</i>ather
           </h1>

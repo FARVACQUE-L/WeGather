@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import connexionImg from "../../assets/images/Connexion-img.png";
-import logo from "../../assets/images/logo-wedoo.png";
+import logo from "../../assets/images/logo-wegather.png";
 
 function ForgetPassword() {
   const [identifier, setIdentifier] = useState("");
@@ -60,7 +60,7 @@ function ForgetPassword() {
     <>
       <div className="navbar-forgetpassword">
         <Link to="/" className="nav-forgetpassword">
-          <img src={logo} alt="logo-wedoo" />
+          <img src={logo} alt="logo-wegather" />
           <h1>
             We<i>G</i>ather
           </h1>

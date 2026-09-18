@@ -8,7 +8,7 @@ import reservation from "../../assets/images/logo-feature-reservation.png";
 import todo from "../../assets/images/logo-feature-todo.png";
 import note from "../../assets/images/logo-info-note.png";
 import user from "../../assets/images/logo-info-user.png";
-import logo from "../../assets/images/logo-wedoo.png";
+import logo from "../../assets/images/logo-wegather.png";
 
 type User = {
   id: number;
@@ -38,7 +38,7 @@ function Presentation() {
     <div className="presentation-content">
       <div className="navbar-presentation">
         <section>
-          <img src={logo} alt="logo-wedoo" />
+          <img src={logo} alt="logo-wegather" />
           <h1 className="title-presentation">
             We<i>G</i>ather
           </h1>
