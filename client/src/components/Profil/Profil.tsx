@@ -1,13 +1,14 @@
 import "./Profil.css";
 import { AnimatePresence, motion } from "framer-motion";
-import { Pencil } from "lucide-react";
-import { LockKeyhole } from "lucide-react";
-import { Camera } from "lucide-react";
-import { ShieldUser, User } from "lucide-react";
-import { LogOut } from "lucide-react";
-import { useState } from "react";
-import { useEffect } from "react";
-import { useRef } from "react";
+import {
+  Camera,
+  LockKeyhole,
+  LogOut,
+  Pencil,
+  ShieldUser,
+  User,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 
@@ -40,6 +41,7 @@ function Profil() {
       })
       .then((data) => {
         setUserId(data.id);
+        setIsAdmin(Boolean(data.isAdmin));
       })
       .catch(console.error);
   }, []);
@@ -61,16 +63,6 @@ function Profil() {
       })
       .catch((error) => console.error(error));
   }, [userId]);
-  useEffect(() => {
-    if (!userId) return;
-    fetch(`${import.meta.env.VITE_API_URL}/api/users/admin/${userId}`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setIsAdmin(Boolean(data.user_is_admin)))
-      .catch((err) => console.error(err));
-  }, [userId]);
-
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {

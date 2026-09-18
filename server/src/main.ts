@@ -2,7 +2,6 @@ import "dotenv/config";
 import "../database/checkConnection";
 
 import http from "node:http";
-import { Server } from "socket.io";
 import app from "./app";
 import { initSocket } from "./socket";
 

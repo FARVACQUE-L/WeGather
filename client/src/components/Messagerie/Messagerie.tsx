@@ -1,9 +1,9 @@
 import "./Messagerie.css";
-import EmojiPicker from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
+import EmojiPicker from "emoji-picker-react";
 import { motion } from "framer-motion";
 import { ContactRound, Send } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { socket } from "../../socket/socket";
 
@@ -56,11 +56,33 @@ function Messagerie() {
     setMessagesUser((prev) => prev + emojiData.emoji);
   };
 
+  const fetchUserEvent = useCallback(async () => {
+    if (!eventUuid || !userId) return;
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/user-in-event/${eventUuid}/${userId}`,
+      {
+        credentials: "include",
+      },
+    );
+
+    const data = await response.json();
+    setUserInEvent(data.joined);
+  }, [eventUuid, userId]);
+
+  const fetchMessages = useCallback(() => {
+    if (!eventUuid) return;
+    fetch(`${import.meta.env.VITE_API_URL}/api/messages/${eventUuid}`, {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => setReceptionMessagesUser(data));
+  }, [eventUuid]);
+
   useEffect(() => {
     if (!eventUuid || !userId) return;
     fetchUserEvent();
     fetchMessages();
-  }, [eventUuid, userId]);
+  }, [eventUuid, userId, fetchUserEvent, fetchMessages]);
 
   useEffect(() => {
     if (!eventUuid || !userId) return;
@@ -91,19 +113,6 @@ function Messagerie() {
         setReceptionMessagesUser(data);
       });
   }, [eventUuid]);
-
-  async function fetchUserEvent() {
-    if (!eventUuid || !userId) return;
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/user-in-event/${eventUuid}/${userId}`,
-      {
-        credentials: "include",
-      },
-    );
-
-    const data = await response.json();
-    setUserInEvent(data.joined);
-  }
 
   useEffect(() => {
     if (!eventUuid) return;
@@ -170,15 +179,6 @@ function Messagerie() {
     } catch (error) {
       console.error("Messagerie: erreur envoi message", error);
     }
-  }
-
-  function fetchMessages() {
-    if (!eventUuid) return;
-    fetch(`${import.meta.env.VITE_API_URL}/api/messages/${eventUuid}`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setReceptionMessagesUser(data));
   }
 
   function formatMonthYear(dateString: string): string {

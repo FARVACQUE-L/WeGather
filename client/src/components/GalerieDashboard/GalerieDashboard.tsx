@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Images } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 type Gallery = {

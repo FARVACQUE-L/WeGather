@@ -1,15 +1,17 @@
 import { ArrowLeft } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router";
-import ReportDetails from "../../components/ReportUser/ReportDetails";
-import ReportEvidence from "../../components/ReportUser/ReportEvidence";
-import ReportType from "../../components/ReportUser/ReportType";
-import "./UserReport.css";
 import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
 import Swal from "sweetalert2";
 import NavBar from "../../components/NavBar/NavBar";
 import Profil from "../../components/Profil/Profil";
+import ReportDetails from "../../components/ReportUser/ReportDetails";
+import ReportEvidence from "../../components/ReportUser/ReportEvidence";
+import ReportType from "../../components/ReportUser/ReportType";
 import ReportUserModal from "../../components/ReportUser/ReportUserModal";
 import type { EventUserJoin } from "../../types/eventUserJoining";
+
+import "./UserReport.css";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 function UserReport() {
@@ -111,7 +113,6 @@ function UserReport() {
           formData.append("event_uuid", eventUuid ?? "");
           formData.append("reported_user_description", repDetail);
           formData.append("reported_user_id_user", reportedUserId.toString());
-          formData.append("reported_user_by_id_user", currentUserId.toString());
           for (const file of repEvidence) {
             formData.append("reported_user_image", file);
           }
@@ -126,10 +127,6 @@ function UserReport() {
           const formData = new FormData();
           formData.append("event_uuid", eventUuid ?? "");
           formData.append("reported_event_description", repDetail);
-          formData.append(
-            "reported_event_by_id_user",
-            currentUserId.toString(),
-          );
           for (const file of repEvidence) {
             formData.append("reported_event_image", file);
           }
@@ -143,7 +140,6 @@ function UserReport() {
         case "bug": {
           const formData = new FormData();
           formData.append("reported_bug_description", repDetail);
-          formData.append("reported_bug_by_id_user", currentUserId.toString());
           for (const file of repEvidence) {
             formData.append("reported_bug_image", file);
           }
@@ -159,16 +155,22 @@ function UserReport() {
       }
 
       if (!response.ok) {
-        if (response.status === 409) {
-          const data = await response.json();
-          toast.fire({
-            icon: "warning",
-            text: data.message,
-            customClass: {
-              popup: "toast-error-popup",
-            },
-          });
-          return;
+        if (response.status === 400 || response.status === 409) {
+          const data = await response.json().catch(() => null);
+          // Les validations métier répondent { message }, le handler
+          // d'erreurs et les refus d'upload répondent { error }.
+          const serverMessage = data?.message ?? data?.error;
+
+          if (serverMessage) {
+            toast.fire({
+              icon: "warning",
+              text: serverMessage,
+              customClass: {
+                popup: "toast-error-popup",
+              },
+            });
+            return;
+          }
         }
         throw new Error(`Erreur serveur : ${response.status}`);
       }

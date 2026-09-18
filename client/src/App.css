@@ -86,7 +86,7 @@ body {
   background: var(--bg-color);
 
   .toast-success-popup {
-    border-radius: 24px !important;
+    border-radius: 24px;
 
     .swal2-title {
       color: var(--font-green);
@@ -94,7 +94,7 @@ body {
   }
 
   .toast-warning-popup {
-    border-radius: 24px !important;
+    border-radius: 24px;
 
     .swal2-title {
       color: var(--font-red);
@@ -102,7 +102,7 @@ body {
   }
 
   .toast-error-popup {
-    border-radius: 24px !important;
+    border-radius: 24px;
 
     .swal2-title {
       color: var(--font-red);
@@ -110,6 +110,6 @@ body {
   }
 
   .swal2-container {
-    z-index: 99999 !important;
+    z-index: 99999;
   }
 }

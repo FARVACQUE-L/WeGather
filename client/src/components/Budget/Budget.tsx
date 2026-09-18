@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
 import "./Budget.css";
@@ -132,14 +132,7 @@ function Budget() {
   const [priceCreateForm, setPriceCreateForm] = useState<number>();
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    if (!eventUuid || userID === null) return;
-
-    fetchUserInEvent();
-    fetchBudgetLists();
-  }, [eventUuid, userID]);
-
-  function fetchBudgetLists() {
+  const fetchBudgetLists = useCallback(() => {
     if (!eventUuid) return;
     fetch(`${apiUrl}/api/budget/event/${eventUuid}`, {
       credentials: "include",
@@ -158,9 +151,9 @@ function Budget() {
     })
       .then((res) => res.json())
       .then((data: Budget[]) => setListBudget(data));
-  }
+  }, [eventUuid]);
 
-  async function fetchUserInEvent() {
+  const fetchUserInEvent = useCallback(async () => {
     if (!eventUuid || userID === null) return;
 
     try {
@@ -182,7 +175,14 @@ function Budget() {
       console.error(error);
       setUserInEvent(false);
     }
-  }
+  }, [eventUuid, userID]);
+
+  useEffect(() => {
+    if (!eventUuid || userID === null) return;
+
+    fetchUserInEvent();
+    fetchBudgetLists();
+  }, [eventUuid, userID, fetchUserInEvent, fetchBudgetLists]);
   async function addBudget(e: React.FormEvent) {
     e.preventDefault();
 
@@ -302,6 +302,8 @@ function Budget() {
         id="swal-budget-price"
         class="swal2-input"
         type="number"
+        step="0.01"
+        min="0"
         placeholder="Prix"
         value="${budget.budget_price}"
       />
@@ -316,13 +318,22 @@ function Budget() {
           document.getElementById("swal-budget-name") as HTMLInputElement
         ).value;
 
-        const price = Number(
-          (document.getElementById("swal-budget-price") as HTMLInputElement)
-            .value,
-        );
+        const priceInput = document.getElementById(
+          "swal-budget-price",
+        ) as HTMLInputElement;
+
+        const price = Number(priceInput.value);
 
         if (!name.trim()) {
           Swal.showValidationMessage("Nom obligatoire");
+          return;
+        }
+
+        // Sweetalert ne soumet pas de formulaire, donc la validation HTML de
+        // step="0.01" et min="0" n'est jamais déclenchée. On l'appelle à la
+        // main pour réutiliser le message natif du formulaire d'ajout.
+        if (!priceInput.checkValidity()) {
+          Swal.showValidationMessage(priceInput.validationMessage);
           return;
         }
 
@@ -463,6 +474,7 @@ function Budget() {
           <h1>{budgetEvent?.event_name}</h1>
           <button
             type="button"
+            className="button-header"
             onClick={() => setShowCreateForm(!showCreateForm)}
           >
             <FilePlusCorner size={20} />
@@ -491,6 +503,8 @@ function Budget() {
               {/* Price */}
               <input
                 type="number"
+                step="0.01"
+                min="0"
                 placeholder="Le prix de la dépense"
                 onChange={(e) => setPriceCreateForm(Number(e.target.value))}
                 required
@@ -545,7 +559,7 @@ function Budget() {
         >
           <div className="expenses">
             <div className="mobileExpenses">
-              <h5>Dépenses</h5>
+              <h5 className="titleExpenses">Dépenses</h5>
               <button
                 type="button"
                 className="addButton"

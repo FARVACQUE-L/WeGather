@@ -1,5 +1,5 @@
-import databaseClient from "../../../database/client";
 import type { Rows } from "../../../database/client";
+import databaseClient from "../../../database/client";
 import type EventUserJoin from "../../types/eventUserJoining";
 
 type UserJoinEvent = {

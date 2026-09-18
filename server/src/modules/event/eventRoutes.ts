@@ -1,6 +1,6 @@
 import express from "express";
 import authorization from "../../middleware/auth";
-import upload from "../../middleware/upload";
+import upload, { verifyFileSignatures } from "../../middleware/upload";
 import eventActions from "./eventActions";
 
 const eventRoutes = express.Router();
@@ -25,6 +25,7 @@ eventRoutes.put(
   "/api/events/:eventUuid/",
   authorization,
   upload.single("picture"),
+  verifyFileSignatures,
   eventActions.edit,
 );
 eventRoutes.delete(

@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-
-import type { EventData, FilterType } from "../../types/Events";
-
 import ButtonAddEvent from "../../components/AddEvents/ButtonAddEvent";
 import CardEvents from "../../components/AddEvents/CardEvents";
 import EventEmpty from "../../components/AddEvents/EventEmpty";
@@ -10,8 +7,10 @@ import Filter from "../../components/AddEvents/Filter";
 import ModalAddEvent from "../../components/AddEvents/ModalAddEvent";
 import NavBar from "../../components/NavBar/NavBar";
 import Profil from "../../components/Profil/Profil";
+import type { EventData, FilterType } from "../../types/Events";
 
 import "./HomeEvents.css";
+
 type User = {
   id: number;
 };

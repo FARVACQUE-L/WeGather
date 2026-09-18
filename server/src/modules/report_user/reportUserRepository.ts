@@ -1,16 +1,8 @@
-import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
+import databaseClient from "../../../database/client";
 import type RepUser from "../../types/reportedUser";
 
 class reportUserRepository {
-  async readAll() {
-    const [rows] = await databaseClient.query<Rows>(
-      "SELECT * FROM reported_user",
-    );
-
-    return rows as RepUser[];
-  }
-
   async create(
     reported_user: Omit<
       RepUser,

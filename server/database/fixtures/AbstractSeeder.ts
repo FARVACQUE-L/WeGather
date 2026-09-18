@@ -1,7 +1,7 @@
-import { faker } from "@faker-js/faker";
 import type { Faker } from "@faker-js/faker";
-import database from "../client";
+import { faker } from "@faker-js/faker";
 import type { Result } from "../client";
+import database from "../client";
 
 type Ref = object & { insertId: number };
 

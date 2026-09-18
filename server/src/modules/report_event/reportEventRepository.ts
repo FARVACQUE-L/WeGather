@@ -1,16 +1,8 @@
-import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
+import databaseClient from "../../../database/client";
 import type RepEvent from "../../types/reportedEvent";
 
 class reportEventRepository {
-  async readAll() {
-    const [rows] = await databaseClient.query<Rows>(
-      "SELECT * FROM reported_event",
-    );
-
-    return rows as RepEvent[];
-  }
-
   async create(
     reported_event: Omit<
       RepEvent,

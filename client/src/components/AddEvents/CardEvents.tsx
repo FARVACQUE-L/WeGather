@@ -1,7 +1,6 @@
 import { MapPin, PencilLine, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
-import { useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
 import Swal from "sweetalert2";
 import type { CardEventsProps, EventData } from "../../types/Events";
 import ModalEditEvent from "./ModalEditEvent";

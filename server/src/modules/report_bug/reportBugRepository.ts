@@ -1,16 +1,8 @@
-import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
+import databaseClient from "../../../database/client";
 import type RepBug from "../../types/reportedBug";
 
 class reportBugRepository {
-  async readAll() {
-    const [rows] = await databaseClient.query<Rows>(
-      "SELECT * FROM reported_bug",
-    );
-
-    return rows as RepBug[];
-  }
-
   async create(
     reported_bug: Omit<
       RepBug,

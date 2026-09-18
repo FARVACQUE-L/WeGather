@@ -1,19 +1,19 @@
 import express from "express";
 import authorization from "../../middleware/auth";
-import upload from "../../middleware/upload";
+import {
+  MAX_FILES,
+  uploadEvidence,
+  verifyFileSignatures,
+} from "../../middleware/upload";
 import reportBugActions from "./reportBugActions";
 
 const reportBugRoutes = express.Router();
 
-reportBugRoutes.get(
-  "/api/userreport-bug",
-  authorization,
-  reportBugActions.browse,
-);
 reportBugRoutes.post(
   "/api/userreport-bug",
   authorization,
-  upload.array("reported_bug_image"),
+  uploadEvidence.array("reported_bug_image", MAX_FILES),
+  verifyFileSignatures,
   reportBugActions.add,
 );
 

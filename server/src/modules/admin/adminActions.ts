@@ -1,8 +1,51 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import type { RequestHandler } from "express";
+import { detectMimeType, REPORTS_DESTINATION } from "../../middleware/upload";
 import transporter from "../services/mailer";
 import adminRepository from "./adminRepository";
 
-const readAllUsers: RequestHandler = async (req, res, next) => {
+// multer nomme ses fichiers avec un hash hexadécimal de 32 caractères. Tout
+// autre nom est refusé, ce qui ferme la traversée de répertoire sans avoir à
+// raisonner sur des « ../ » normalisés.
+const REPORT_FILENAME = /^[a-f0-9]{32}$/;
+
+const readReportImage: RequestHandler = async (req, res, next) => {
+  try {
+    const { filename } = req.params;
+
+    if (!REPORT_FILENAME.test(filename)) {
+      res.status(400).json({ message: "Nom de fichier invalide" });
+      return;
+    }
+
+    const filePath = path.join(
+      path.resolve(process.cwd(), REPORTS_DESTINATION),
+      filename,
+    );
+
+    try {
+      await fs.access(filePath);
+    } catch {
+      res.status(404).json({ message: "Pièce jointe introuvable" });
+      return;
+    }
+
+    const mimeType = await detectMimeType(filePath);
+
+    res.setHeader("X-Content-Type-Options", "nosniff");
+
+    if (mimeType) {
+      res.type(mimeType);
+    }
+
+    res.sendFile(filePath);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const readAllUsers: RequestHandler = async (_req, res, next) => {
   try {
     const allUsers = await adminRepository.readAllUser();
     res.json(allUsers);
@@ -11,7 +54,7 @@ const readAllUsers: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readAllEvents: RequestHandler = async (req, res, next) => {
+const readAllEvents: RequestHandler = async (_req, res, next) => {
   try {
     const allEvents = await adminRepository.readAllEvent();
     res.json(allEvents);
@@ -20,7 +63,7 @@ const readAllEvents: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readArrayReport: RequestHandler = async (req, res, next) => {
+const readArrayReport: RequestHandler = async (_req, res, next) => {
   try {
     const arrayReport = await adminRepository.readArrayReport();
     res.json(arrayReport);
@@ -29,7 +72,7 @@ const readArrayReport: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readArrayUsers: RequestHandler = async (req, res, next) => {
+const readArrayUsers: RequestHandler = async (_req, res, next) => {
   try {
     const arrayUsers = await adminRepository.readArrayUser();
     res.json(arrayUsers);
@@ -48,7 +91,7 @@ const readDashboardChart: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readAvailableYears: RequestHandler = async (req, res, next) => {
+const readAvailableYears: RequestHandler = async (_req, res, next) => {
   try {
     const years = await adminRepository.readAvailableYears();
     res.json(years);
@@ -57,7 +100,7 @@ const readAvailableYears: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readReportEvent: RequestHandler = async (req, res, next) => {
+const readReportEvent: RequestHandler = async (_req, res, next) => {
   try {
     const reportEvent = await adminRepository.readReportEvent();
     res.json(reportEvent);
@@ -66,7 +109,7 @@ const readReportEvent: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readReportBug: RequestHandler = async (req, res, next) => {
+const readReportBug: RequestHandler = async (_req, res, next) => {
   try {
     const reportBug = await adminRepository.readReportBug();
     res.json(reportBug);
@@ -75,7 +118,7 @@ const readReportBug: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readReportUser: RequestHandler = async (req, res, next) => {
+const readReportUser: RequestHandler = async (_req, res, next) => {
   try {
     const reportUser = await adminRepository.readReportUser();
     res.json(reportUser);
@@ -251,6 +294,7 @@ export default {
   readReportBugById,
   readReportEventById,
   readReportUserById,
+  readReportImage,
   markBugAsDone,
   markEventAsDone,
   markUserAsDone,

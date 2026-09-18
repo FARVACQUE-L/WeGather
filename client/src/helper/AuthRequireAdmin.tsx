@@ -3,11 +3,11 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface AuthRequireProps {
+interface AuthRequireAdminProps {
   children: ReactNode;
 }
 
-const AuthRequire = ({ children }: AuthRequireProps) => {
+const AuthRequireAdmin = ({ children }: AuthRequireAdminProps) => {
   const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
 
@@ -16,7 +16,14 @@ const AuthRequire = ({ children }: AuthRequireProps) => {
       .get(`${import.meta.env.VITE_API_URL}/api/auth/authVerif`, {
         withCredentials: true,
       })
-      .then(() => setChecking(false))
+      .then(({ data }) => {
+        if (!data?.isAdmin) {
+          navigate("/homeevents");
+          return;
+        }
+
+        setChecking(false);
+      })
       .catch(() => navigate("/connexion"));
   }, [navigate]);
 
@@ -25,4 +32,4 @@ const AuthRequire = ({ children }: AuthRequireProps) => {
   return <>{children}</>;
 };
 
-export default AuthRequire;
+export default AuthRequireAdmin;

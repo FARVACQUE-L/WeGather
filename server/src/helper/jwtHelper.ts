@@ -14,4 +14,4 @@ const decodeJWT = (token: string): JwtUser => {
   return jwt.verify(token, process.env.TOKEN_SECRET as string) as JwtUser;
 };
 
-export { encodeJWT, decodeJWT };
+export { decodeJWT, encodeJWT };
