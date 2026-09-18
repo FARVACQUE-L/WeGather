@@ -20,6 +20,8 @@ type Reservation = {
   event_date_end: string;
 };
 
+const capitalize = (str = "") => str.charAt(0).toUpperCase() + str.slice(1);
+
 function Reservation() {
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
@@ -122,10 +124,10 @@ function Reservation() {
     const resa = reservations.find((r) => r.reservation_id === reservationId);
     if (!resa) return;
 
-    setReservationName(resa.reservation_name);
+    setReservationName(capitalize(resa.reservation_name));
     setReservationDate(resa.reservation_date.split("T")[0]);
-    setReservationLocation(resa.reservation_location);
-    setReservationDescription(resa.reservation_description);
+    setReservationLocation(capitalize(resa.reservation_location));
+    setReservationDescription(capitalize(resa.reservation_description));
     setReservationPicture(null);
     setPreview(`${import.meta.env.VITE_API_URL}${resa.reservation_picture}`);
     setEditingReservationId(reservationId);
@@ -193,12 +195,12 @@ function Reservation() {
       credentials: "include",
     });
     await fetchReservations();
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
     if (!response.ok) {
       toast.fire({
         icon: "error",
-        text: `Marche pas : ${data.message}`,
+        text: `Marche pas : ${data?.error ?? data?.message ?? response.statusText ?? "erreur inconnue"}`,
         customClass: {
           popup: "toast-error-popup",
         },
@@ -324,7 +326,9 @@ function Reservation() {
                   type="text"
                   placeholder="Nom"
                   value={reservationName}
-                  onChange={(e) => setReservationName(e.target.value)}
+                  onChange={(e) =>
+                    setReservationName(capitalize(e.target.value))
+                  }
                 />
 
                 <input
@@ -339,13 +343,17 @@ function Reservation() {
                   type="text"
                   placeholder="Lieu"
                   value={reservationLocation}
-                  onChange={(e) => setReservationLocation(e.target.value)}
+                  onChange={(e) =>
+                    setReservationLocation(capitalize(e.target.value))
+                  }
                 />
 
                 <textarea
                   placeholder="Description"
                   value={reservationDescription}
-                  onChange={(e) => setReservationDescription(e.target.value)}
+                  onChange={(e) =>
+                    setReservationDescription(capitalize(e.target.value))
+                  }
                 />
 
                 <label htmlFor="photo-upload" className="custom-upload">

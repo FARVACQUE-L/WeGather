@@ -28,7 +28,9 @@ JOIN user AS u
 JOIN event AS e
   ON e.event_id = r.reservation_id_event
 
-WHERE e.event_id = ?;
+WHERE e.event_id = ?
+
+ORDER BY r.reservation_id DESC;
       `,
       [eventId],
     );
@@ -40,7 +42,9 @@ WHERE e.event_id = ?;
       `
       SELECT * FROM reservation
 
-      WHERE reservation_id_event = ?;
+      WHERE reservation_id_event = ?
+
+      ORDER BY reservation_date ASC, reservation_id ASC;
       `,
       [eventId],
     );
