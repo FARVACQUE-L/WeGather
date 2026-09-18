@@ -1,10 +1,10 @@
-DROP DATABASE IF EXISTS wedoo;
+DROP DATABASE IF EXISTS wegather;
 
 -- -----------------------------------------------------
--- Schema Wedoo
+-- Schema wegather
 -- -----------------------------------------------------
-CREATE DATABASE `Wedoo` DEFAULT CHARACTER SET utf8 ;
-USE `Wedoo` ;
+CREATE DATABASE `wegather` DEFAULT CHARACTER SET utf8 ;
+USE `wegather` ;
 
 -- -----------------------------------------------------
 -- Table `user`

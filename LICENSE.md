@@ -1,4 +1,4 @@
-Copyright (c) 2026   (hit Enter to use an empty string)
+Copyright (c) 2026 FARVACQUE-L
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

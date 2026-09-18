@@ -8,11 +8,18 @@
   flex-direction: column;
   align-items: center;
   .navbar-presentation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     padding: 10px;
+    background-color: rgba(255, 248, 245, 0.85);
+    backdrop-filter: blur(8px);
     section {
       display: flex;
       flex-direction: row;
@@ -364,6 +371,48 @@
     }
   }
 }
+/* Scroll page par page : chaque section fait 100vh et le scroll s'y aligne.
+   Désactivé sur petit écran / écran bas, où les sections dépassent la fenêtre. */
+@media screen and (min-width: 769px) and (min-height: 600px) {
+  .presentation-content {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+
+    .presentation-page {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .page-features .features-wedoo-presentation {
+      margin: 0 10vw;
+    }
+
+    .page-infos {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      justify-items: center;
+      align-items: center;
+
+      .infos-wedoo-presentation {
+        margin: 0;
+      }
+
+      .footer-presentation {
+        padding: 20px 0;
+      }
+    }
+  }
+}
+
 @media screen and (max-width: 428px) {
   .presentation-content {
     overflow-x: hidden;

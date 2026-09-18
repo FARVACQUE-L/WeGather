@@ -1,14 +1,14 @@
 {
-  "name": "Js-Team-vert-WildWlaker-P3-G3",
+  "name": "wegather",
   "version": "0.0.1",
-  "description": "",
-  "homepage": "https://github.com/  (hit Enter to use an empty string)/Js-Team-vert-WildWlaker-P3-G3#readme",
+  "description": "Plateforme événementielle collaborative — création d'événements, chat, budget partagé, to-do, galerie photo et réservations.",
+  "homepage": "https://github.com/FARVACQUE-L/WeGather#readme",
   "bugs": {
-    "url": "https://github.com/  (hit Enter to use an empty string)/Js-Team-vert-WildWlaker-P3-G3/issues"
+    "url": "https://github.com/FARVACQUE-L/WeGather/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/  (hit Enter to use an empty string)/Js-Team-vert-WildWlaker-P3-G3.git"
+    "url": "git+https://github.com/FARVACQUE-L/WeGather.git"
   },
   "workspaces": ["client", "server"],
   "scripts": {
@@ -26,7 +26,7 @@
     "test": "npm run test --workspaces --if-present"
   },
   "keywords": [],
-  "author": "  (hit Enter to use an empty string)",
+  "author": "FARVACQUE-L",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

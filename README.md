@@ -1,4 +1,4 @@
-# Js-Team-vert-WildWlaker-P3-G3
+# WeGather
 
 Ce projet est un monorepo JS, suivant l'architecture React-Express-MySQL telle qu'enseignée à la Wild Code School (v7.2.4) :
 
@@ -43,7 +43,7 @@ Il est pré-configuré avec un ensemble d'outils pour aider les étudiants à pr
 
 ## Table des Matières
 
-- [Js-Team-vert-WildWlaker-P3-G3](#name)
+- [WeGather](#wegather)
   - [Table des Matières](#table-des-matières)
   - [Installation \& Utilisation](#installation--utilisation)
   - [Les choses à retenir](#les-choses-à-retenir)
