@@ -83,7 +83,7 @@ function Presentation() {
         </div>
       </section>
       <section className="presentation-page page-features">
-        <div className="features-wedoo-presentation">
+        <div className="features-wegather-presentation">
           <div className="feature-presentation-1">
             <img
               src={messagerie}
@@ -176,18 +176,18 @@ function Presentation() {
         </div>
       </section>
       <section className="presentation-page page-infos">
-        <div className="infos-wedoo-presentation">
-          <div className="info-wedoo-presentation">
+        <div className="infos-wegather-presentation">
+          <div className="info-wegather-presentation">
             <img src={reservation} alt="logo-info" />
             <h4>500+</h4>
             <p>Evenement crée</p>
           </div>
-          <div className="info-wedoo-presentation">
+          <div className="info-wegather-presentation">
             <img src={user} alt="logo-info" />
             <h4>12K</h4>
             <p>Utilisateurs</p>
           </div>
-          <div className="info-wedoo-presentation">
+          <div className="info-wegather-presentation">
             <img src={note} alt="logo-info" />
             <h4>4.9/5</h4>
             <p>Satisfaction</p>
