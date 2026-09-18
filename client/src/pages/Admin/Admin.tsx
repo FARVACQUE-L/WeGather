@@ -9,18 +9,15 @@ import SideBarAdmin from "../../components/SideBarAdmin/SideBarAdmin";
 type ActiveComponent = "tableau" | "signalement";
 
 function Admin() {
-  const [activeComponent, setActiveComponent] = useState<ActiveComponent>(
-    () => {
-      return (
-        (localStorage.getItem("adminActiveComponent") as ActiveComponent) ||
-        "tableau"
-      );
-    },
-  );
+  // Volontairement non persisté : on entre toujours par le tableau de bord,
+  // quel que soit l'onglet quitté la fois précédente.
+  const [activeComponent, setActiveComponent] =
+    useState<ActiveComponent>("tableau");
+
   const handleChangeComponent = (componentName: ActiveComponent) => {
     setActiveComponent(componentName);
-    localStorage.setItem("adminActiveComponent", componentName);
   };
+
   return (
     <>
       <NavBar />
