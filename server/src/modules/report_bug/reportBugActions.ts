@@ -1,16 +1,6 @@
 import type { RequestHandler } from "express";
 import reportBugRepository from "./reportBugRepository";
 
-const browse: RequestHandler = async (_req, res, next) => {
-  try {
-    const reported_bug = await reportBugRepository.readAll();
-
-    res.json(reported_bug);
-  } catch (err) {
-    next(err);
-  }
-};
-
 const add: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -46,4 +36,4 @@ const add: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, add };
+export default { add };

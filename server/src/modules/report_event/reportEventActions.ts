@@ -2,16 +2,6 @@ import type { RequestHandler } from "express";
 import eventRepository from "../event/eventRepository";
 import reportEventRepository from "./reportEventRepository";
 
-const browse: RequestHandler = async (_req, res, next) => {
-  try {
-    const reported_event = await reportEventRepository.readAll();
-
-    res.json(reported_event);
-  } catch (err) {
-    next(err);
-  }
-};
-
 const add: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -57,4 +47,4 @@ const add: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, add };
+export default { add };

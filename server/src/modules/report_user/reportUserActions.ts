@@ -3,16 +3,6 @@ import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import reportUserRepository from "./reportUserRepository";
 
-const browse: RequestHandler = async (_req, res, next) => {
-  try {
-    const reported_user = await reportUserRepository.readAll();
-
-    res.json(reported_user);
-  } catch (err) {
-    next(err);
-  }
-};
-
 const add: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -81,4 +71,4 @@ const add: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, add };
+export default { add };

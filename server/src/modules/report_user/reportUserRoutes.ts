@@ -9,11 +9,6 @@ import reportUserActions from "./reportUserActions";
 
 const reportUserRoutes = express.Router();
 
-reportUserRoutes.get(
-  "/api/userreport-user",
-  authorization,
-  reportUserActions.browse,
-);
 reportUserRoutes.post(
   "/api/userreport-user",
   authorization,

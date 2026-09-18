@@ -9,11 +9,6 @@ import reportEventActions from "./reportEventActions";
 
 const reportEventRoutes = express.Router();
 
-reportEventRoutes.get(
-  "/api/userreport-event",
-  authorization,
-  reportEventActions.browse,
-);
 reportEventRoutes.post(
   "/api/userreport-event",
   authorization,

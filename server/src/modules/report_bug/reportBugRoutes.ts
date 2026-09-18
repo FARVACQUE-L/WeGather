@@ -9,11 +9,6 @@ import reportBugActions from "./reportBugActions";
 
 const reportBugRoutes = express.Router();
 
-reportBugRoutes.get(
-  "/api/userreport-bug",
-  authorization,
-  reportBugActions.browse,
-);
 reportBugRoutes.post(
   "/api/userreport-bug",
   authorization,
