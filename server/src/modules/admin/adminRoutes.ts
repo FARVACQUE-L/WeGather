@@ -79,6 +79,13 @@ adminRoutes.get(
   adminActions.readReportUserById,
 );
 
+adminRoutes.get(
+  "/api/admin/report-image/:filename",
+  authorization,
+  isAdmin,
+  adminActions.readReportImage,
+);
+
 adminRoutes.patch(
   "/api/admin/reportBug/:id/done",
   authorization,

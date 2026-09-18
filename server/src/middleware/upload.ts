@@ -4,6 +4,11 @@ import multer from "multer";
 
 const DESTINATION = "public/uploads/";
 
+// Les pièces jointes d'un signalement contiennent souvent des captures de
+// conversations privées : elles sont stockées hors de public/, donc hors de
+// portée d'express.static, et servies par une route réservée aux admins.
+const REPORTS_DESTINATION = "private/reports/";
+
 // 8 Mo : une photo prise au téléphone passe, un envoi abusif est coupé.
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_FILES = 5;
@@ -49,7 +54,7 @@ const upload = multer({
 });
 
 export const uploadEvidence = multer({
-  dest: DESTINATION,
+  dest: REPORTS_DESTINATION,
   limits,
   fileFilter: (_req, file, callback) => {
     if (!EVIDENCE_MIME_TYPES.includes(file.mimetype)) {
@@ -152,6 +157,24 @@ const verifyFileSignatures: RequestHandler = async (req, res, next) => {
   }
 };
 
-export { MAX_FILE_SIZE, MAX_FILES, verifyFileSignatures };
+// Les fichiers sont stockés sans extension : pour les servir avec un vrai
+// Content-Type, on relit leur signature plutôt que de deviner.
+const detectMimeType = async (filePath: string) => {
+  const header = await readHeader(filePath);
+
+  return (
+    Object.keys(SIGNATURES).find((mimetype) =>
+      matchesSignature(header, mimetype),
+    ) ?? null
+  );
+};
+
+export {
+  detectMimeType,
+  MAX_FILE_SIZE,
+  MAX_FILES,
+  REPORTS_DESTINATION,
+  verifyFileSignatures,
+};
 
 export default upload;

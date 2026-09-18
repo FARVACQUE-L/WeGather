@@ -219,7 +219,7 @@ function AdminReport() {
 
   const handleImageClick = (image: string) => {
     Swal.fire({
-      imageUrl: `${API_URL}/uploads/${image}`,
+      imageUrl: `${API_URL}/api/admin/report-image/${image}`,
       imageAlt: "preuve jointe",
       showConfirmButton: false,
       showCloseButton: false,
@@ -250,7 +250,7 @@ function AdminReport() {
                 <h1>Signalement #{id} - Détails</h1>
               </div>
               <p>
-                <span aria-label="Statut">
+                <span role="status" aria-label="Statut">
                   <CircleEllipsis size={10} />{" "}
                   {(report.reported_bug_is_done ??
                   report.reported_event_is_done ??
@@ -297,7 +297,7 @@ function AdminReport() {
                           onClick={() => handleImageClick(image)}
                         >
                           <img
-                            src={`${API_URL}/uploads/${image}`}
+                            src={`${API_URL}/api/admin/report-image/${image}`}
                             alt="preuve jointe"
                           />
                         </button>
