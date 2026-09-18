@@ -104,7 +104,7 @@ function ChangePassword() {
         <Link to="/">
           <img src={logo} alt="logo-wedoo" />
           <h1>
-            WE<i>D</i>OO
+            We<i>G</i>ather
           </h1>
         </Link>
       </nav>
@@ -120,7 +120,8 @@ function ChangePassword() {
           <div className="text-overlay">
             <h2>Facilitez vos prochains événements.</h2>
             <p>
-              Wedoo vous propose une expérience utilisateur simple et efficace.
+              WeGather vous propose une expérience utilisateur simple et
+              efficace.
             </p>
           </div>
         </div>

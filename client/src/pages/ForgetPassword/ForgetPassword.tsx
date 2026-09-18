@@ -62,7 +62,7 @@ function ForgetPassword() {
         <Link to="/" className="nav-forgetpassword">
           <img src={logo} alt="logo-wedoo" />
           <h1>
-            WE<i>D</i>OO
+            We<i>G</i>ather
           </h1>
         </Link>
       </div>
@@ -77,7 +77,8 @@ function ForgetPassword() {
           <div className="forgetPassword-text">
             <h2>Facilitez vos prochains événements.</h2>
             <p className="forgetPassword-parag">
-              Wedoo vous propose une expérience utilisateur simple et efficace.
+              WeGather vous propose une expérience utilisateur simple et
+              efficace.
             </p>
           </div>
         </div>

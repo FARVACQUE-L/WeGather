@@ -211,10 +211,10 @@ const banUser: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe Wedoo" <${process.env.EMAIL_USER}>`,
+        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
         to: user.user_mail,
-        subject: "Votre compte Wedoo a été suspendu",
-        text: `Bonjour ${user.user_username},\n\nVotre compte Wedoo a été suspendu suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe Wedoo.`,
+        subject: "Votre compte WeGather a été suspendu",
+        text: `Bonjour ${user.user_username},\n\nVotre compte WeGather a été suspendu suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
       });
     } catch (mailErr) {
       console.error("Échec de l'envoi du mail :", mailErr);
@@ -239,10 +239,10 @@ const banUserFromEvent: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe Wedoo" <${process.env.EMAIL_USER}>`,
+        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
         to: user.user_mail,
-        subject: "Vous avez été retiré d'un événement Wedoo",
-        text: `Bonjour ${user.user_username},\n\nVous avez été retiré d'un événement suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe Wedoo.`,
+        subject: "Vous avez été retiré d'un événement WeGather",
+        text: `Bonjour ${user.user_username},\n\nVous avez été retiré d'un événement suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
       });
     } catch (mailErr) {
       console.error("Échec de l'envoi du mail :", mailErr);
@@ -266,10 +266,10 @@ const banEvent: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe Wedoo" <${process.env.EMAIL_USER}>`,
+        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
         to: data.user_mail,
-        subject: "Votre événement Wedoo a été retiré",
-        text: `Bonjour ${data.user_username},\n\nVotre événement "${data.event_name}" a été retiré des listes publiques suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe Wedoo.`,
+        subject: "Votre événement WeGather a été retiré",
+        text: `Bonjour ${data.user_username},\n\nVotre événement "${data.event_name}" a été retiré des listes publiques suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
       });
     } catch (mailErr) {
       console.error("Échec de l'envoi du mail :", mailErr);

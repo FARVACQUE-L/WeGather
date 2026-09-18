@@ -60,7 +60,7 @@ function Connexion() {
         <Link to="/" className="nav-connexion">
           <img src={logo} alt="logo-wedoo" />
           <h1>
-            WE<i>D</i>OO
+            We<i>G</i>ather
           </h1>
         </Link>
       </div>
@@ -76,7 +76,8 @@ function Connexion() {
           <div className="connection-text">
             <h2>Facilitez vos prochains événements.</h2>
             <p>
-              Wedoo vous propose une expérience utilisateur simple et efficace.
+              WeGather vous propose une expérience utilisateur simple et
+              efficace.
             </p>
           </div>
         </div>

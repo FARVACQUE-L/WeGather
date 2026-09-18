@@ -177,7 +177,7 @@ function UserReport() {
 
       toast.fire({
         icon: "success",
-        text: "Votre signalement a bien été pris en compte, merci pour votre retour !\nL'équipe Wedoo.",
+        text: "Votre signalement a bien été pris en compte, merci pour votre retour !\nL'équipe WeGather.",
         customClass: {
           popup: "toast-success-popup",
         },
@@ -219,7 +219,7 @@ function UserReport() {
             <h1>Signaler un problème</h1>
             <p>
               Votre confort est notre priorité. <br /> Aidez-nous à maintenir
-              l'excellence de Wedoo en nous faisant part de vos observations.
+              l'excellence de WeGather en nous faisant part de vos observations.
             </p>
           </div>
         </div>

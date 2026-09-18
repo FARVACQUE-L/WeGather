@@ -108,7 +108,7 @@ function Register() {
         <Link to="/" className="nav-register">
           <img src={logo} alt="logo-wedoo" />
           <h1>
-            WE<i>D</i>OO
+            We<i>G</i>ather
           </h1>
         </Link>
       </div>
@@ -118,14 +118,15 @@ function Register() {
           <div className="register-text">
             <h2>Facilitez vos prochains événements.</h2>
             <p className="register-parag">
-              Wedoo vous propose une expérience utilisateur simple et efficace.
+              WeGather vous propose une expérience utilisateur simple et
+              efficace.
             </p>
           </div>
         </div>
         <form className="register-content" onSubmit={handleSubmit}>
           <div className="wel-para-title-register">
             <h2>Bienvenue</h2>
-            <p>Inscrivez-vous à WEDOO.</p>
+            <p>Inscrivez-vous à WeGather.</p>
           </div>
           <div className="input-group">
             <label htmlFor="username">Identifiant</label>
@@ -151,7 +152,7 @@ function Register() {
             <input
               type="email"
               id="email"
-              placeholder="nom@wedoo.com"
+              placeholder="nom@wegather.com"
               required
               className="input-focus"
               value={email}
@@ -245,7 +246,7 @@ function Register() {
             />
             <label htmlFor="terms">
               J'accepte les <span>conditions générales d'utilisation</span> de
-              WEDOO
+              WeGather
             </label>
           </div>
           <button

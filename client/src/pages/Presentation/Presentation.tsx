@@ -79,7 +79,7 @@ function Presentation() {
             Créez un évenement
           </button>
 
-          <p>Créez, gérez et partagez avec Wedoo en toute simplicité.</p>
+          <p>Créez, gérez et partagez avec WeGather en toute simplicité.</p>
         </div>
       </section>
       <section className="presentation-page page-features">
@@ -194,7 +194,7 @@ function Presentation() {
           </div>
         </div>
         <footer className="footer-presentation">
-          <p>copyright 2026 Wedoo. Tous droits réservés.</p>
+          <p>copyright 2026 WeGather. Tous droits réservés.</p>
           <Link to="/cgv" className="footer-presentation-link">
             CGV
           </Link>
