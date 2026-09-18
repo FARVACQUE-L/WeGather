@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import reportBugRepository from "./reportBugRepository";
 
-const browse: RequestHandler = async (req, res, next) => {
+const browse: RequestHandler = async (_req, res, next) => {
   try {
     const reported_bug = await reportBugRepository.readAll();
 
@@ -13,12 +13,17 @@ const browse: RequestHandler = async (req, res, next) => {
 
 const add: RequestHandler = async (req, res, next) => {
   try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const files = req.files as Express.Multer.File[] | undefined;
     const imagePaths = files?.map((file) => file.filename) ?? [];
 
     const newReportBug = {
       reported_bug_description: req.body.reported_bug_description,
-      reported_bug_by_id_user: req.body.reported_bug_by_id_user,
+      reported_bug_by_id_user: req.user.id,
     };
 
     const alreadyExists = await reportBugRepository.exists(

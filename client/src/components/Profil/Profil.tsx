@@ -1,13 +1,14 @@
 import "./Profil.css";
 import { AnimatePresence, motion } from "framer-motion";
-import { Pencil } from "lucide-react";
-import { LockKeyhole } from "lucide-react";
-import { Camera } from "lucide-react";
-import { ShieldUser, User } from "lucide-react";
-import { LogOut } from "lucide-react";
-import { useState } from "react";
-import { useEffect } from "react";
-import { useRef } from "react";
+import {
+  Camera,
+  LockKeyhole,
+  LogOut,
+  Pencil,
+  ShieldUser,
+  User,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 

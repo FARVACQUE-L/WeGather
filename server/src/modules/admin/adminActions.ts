@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import transporter from "../services/mailer";
 import adminRepository from "./adminRepository";
 
-const readAllUsers: RequestHandler = async (req, res, next) => {
+const readAllUsers: RequestHandler = async (_req, res, next) => {
   try {
     const allUsers = await adminRepository.readAllUser();
     res.json(allUsers);
@@ -11,7 +11,7 @@ const readAllUsers: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readAllEvents: RequestHandler = async (req, res, next) => {
+const readAllEvents: RequestHandler = async (_req, res, next) => {
   try {
     const allEvents = await adminRepository.readAllEvent();
     res.json(allEvents);
@@ -20,7 +20,7 @@ const readAllEvents: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readArrayReport: RequestHandler = async (req, res, next) => {
+const readArrayReport: RequestHandler = async (_req, res, next) => {
   try {
     const arrayReport = await adminRepository.readArrayReport();
     res.json(arrayReport);
@@ -29,7 +29,7 @@ const readArrayReport: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readArrayUsers: RequestHandler = async (req, res, next) => {
+const readArrayUsers: RequestHandler = async (_req, res, next) => {
   try {
     const arrayUsers = await adminRepository.readArrayUser();
     res.json(arrayUsers);
@@ -48,7 +48,7 @@ const readDashboardChart: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readAvailableYears: RequestHandler = async (req, res, next) => {
+const readAvailableYears: RequestHandler = async (_req, res, next) => {
   try {
     const years = await adminRepository.readAvailableYears();
     res.json(years);
@@ -57,7 +57,7 @@ const readAvailableYears: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readReportEvent: RequestHandler = async (req, res, next) => {
+const readReportEvent: RequestHandler = async (_req, res, next) => {
   try {
     const reportEvent = await adminRepository.readReportEvent();
     res.json(reportEvent);
@@ -66,7 +66,7 @@ const readReportEvent: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readReportBug: RequestHandler = async (req, res, next) => {
+const readReportBug: RequestHandler = async (_req, res, next) => {
   try {
     const reportBug = await adminRepository.readReportBug();
     res.json(reportBug);
@@ -75,7 +75,7 @@ const readReportBug: RequestHandler = async (req, res, next) => {
   }
 };
 
-const readReportUser: RequestHandler = async (req, res, next) => {
+const readReportUser: RequestHandler = async (_req, res, next) => {
   try {
     const reportUser = await adminRepository.readReportUser();
     res.json(reportUser);

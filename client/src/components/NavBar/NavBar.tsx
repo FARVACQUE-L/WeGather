@@ -1,6 +1,7 @@
 import Logo from "../../assets/images/logo-wedoo.png";
 import "./NavBar.css";
 import { Link, useLocation } from "react-router";
+
 function NavBar() {
   const location = useLocation();
   const navbarDesktop =

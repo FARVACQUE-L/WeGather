@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type { RowDataPacket } from "mysql2";
-import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
+import databaseClient from "../../../database/client";
 import type EventData from "../../types/event";
+
 const generateLinkKey = (): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   return Array.from({ length: 6 }, () =>

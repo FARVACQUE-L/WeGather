@@ -49,7 +49,7 @@ if (fs.existsSync(clientBuildPath)) {
 
 import type { ErrorRequestHandler } from "express";
 
-const logErrors: ErrorRequestHandler = (err, req, res, next) => {
+const logErrors: ErrorRequestHandler = (err, req, res, _next) => {
   console.error("Error occurred:", err.message);
   console.error("Stack:", err.stack);
   console.error("Request:", req.method, req.path);

@@ -1,4 +1,3 @@
-import "./TableauDeBord.css";
 import { useState } from "react";
 import Dashboard from "../../components/Dashboard/Dashboard.tsx";
 import Galerie from "../../components/Galerie/Galerie";

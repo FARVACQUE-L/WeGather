@@ -347,7 +347,7 @@ function DashboardAdmin() {
 
                 <div>
                   <h3>{user.user_name}</h3>
-                  <p>
+                  <p className="user-name-datejoin">
                     {user.user_username} • Rejoint le{" "}
                     {formatDate(user.user_joining_date)}
                   </p>

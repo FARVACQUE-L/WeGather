@@ -34,7 +34,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const browseInscription: RequestHandler = async (req, res, next) => {
+const browseInscription: RequestHandler = async (_req, res, next) => {
   try {
     const users = await userRepository.readAll();
 
@@ -182,7 +182,7 @@ const login: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
-const logout: RequestHandler = (req, res) => {
+const logout: RequestHandler = (_req, res) => {
   res.clearCookie("auth_token", {
     httpOnly: true,
     secure: false,
@@ -311,7 +311,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
     <p>Votre mot de passe a été modifié avec succès.</p>
   `,
       })
-      .catch((err) => {});
+      .catch((_err) => {});
     return;
   } catch (err) {
     next(err);

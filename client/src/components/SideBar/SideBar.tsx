@@ -11,11 +11,11 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import Logo from "../../assets/images/logo-wedoo.png";
 import notificationSound from "../../assets/sounds/notification.mp3";
 import { socket } from "../../socket/socket";
+
 const containerVariants = {
   hidden: {},
   visible: {
@@ -35,6 +35,8 @@ const itemVariants = {
     x: 0,
   },
 };
+
+const MotionLink = motion(Link);
 type SideBarProps = {
   activeComponent:
     | "tableau"
@@ -54,7 +56,6 @@ type SideBarProps = {
 function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
-  const MotionLink = motion(Link);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const [isHost, setIsHost] = useState<number | null>(null);
@@ -149,14 +150,12 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
       .catch(console.error);
   }, [eventUuid, userId]);
 
-  if (eventUuid === null) {
-    return null;
-  }
-
   const activeComponentRef = useRef(activeComponent);
+
   useEffect(() => {
     activeComponentRef.current = activeComponent;
   }, [activeComponent]);
+
   useEffect(() => {
     if (!eventUuid || !userId) return;
 
@@ -180,210 +179,207 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   if (eventUuid === null) {
     return null;
   }
+
   return (
-    <>
-      <motion.nav
-        className="sidebar"
-        initial={{ x: -80, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.4 }}
+    <motion.nav
+      className="sidebar"
+      initial={{ x: -80, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      <motion.div
+        className="logo-sidebar-container"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
       >
-        <motion.div
-          className="logo-sidebar-container"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
+        <img src={Logo} alt="logo-wedoo" className="logo-sidebar-image" />
+        <h2 className="logo-sidebar-h2">
+          WE<i>D</i>OO
+        </h2>
+      </motion.div>
+
+      <motion.ul
+        className="sidebar-menu"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.li
+          variants={itemVariants}
+          className={activeComponent === "tableau" ? "active" : ""}
         >
-          <img src={Logo} alt="logo-wedoo" className="logo-sidebar-image" />
-          <h2 className="logo-sidebar-h2">
-            WE<i>D</i>OO
-          </h2>
-        </motion.div>
+          <motion.button
+            type="button"
+            onClick={() => handleChangeComponent("tableau")}
+            whileHover={{ x: 6, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <LayoutDashboard size={20} className="layout" />
+            <span>Tableau de bord</span>
+          </motion.button>
+        </motion.li>
 
-        <motion.ul
-          className="sidebar-menu"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
+        <motion.li
+          variants={itemVariants}
+          className={activeComponent === "messagerie" ? "active" : ""}
         >
-          <motion.li
-            variants={itemVariants}
-            className={activeComponent === "tableau" ? "active" : ""}
+          <motion.button
+            type="button"
+            onClick={() => {
+              handleChangeComponent("messagerie");
+              setUnreadCount(0);
+            }}
+            whileHover={{ x: 6, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <motion.button
-              type="button"
-              onClick={() => handleChangeComponent("tableau")}
-              whileHover={{ x: 6, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <LayoutDashboard size={20} className="layout" />
-              <span>Tableau de bord</span>
-            </motion.button>
-          </motion.li>
-
-          <motion.li
-            variants={itemVariants}
-            className={activeComponent === "messagerie" ? "active" : ""}
-          >
-            <motion.button
-              type="button"
-              onClick={() => {
-                handleChangeComponent("messagerie");
-                setUnreadCount(0);
-              }}
-              whileHover={{ x: 6, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <MessageCircle size={20} className="message" />
-              <span>Messagerie</span>
-              {unreadCount > 0 && (
-                <span className="notification-badge">{unreadCount}</span>
-              )}
-            </motion.button>
-          </motion.li>
-
-          <motion.li
-            variants={itemVariants}
-            className={activeComponent === "reservation" ? "active" : ""}
-          >
-            <motion.button
-              type="button"
-              onClick={() => handleChangeComponent("reservation")}
-              whileHover={{ x: 6, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Book size={20} className="book" />
-              <span>Reservation</span>
-            </motion.button>
-          </motion.li>
-
-          <motion.li
-            variants={itemVariants}
-            className={activeComponent === "budget" ? "active" : ""}
-          >
-            <motion.button
-              type="button"
-              onClick={() => handleChangeComponent("budget")}
-              whileHover={{ x: 6, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <BadgeDollarSign size={20} className="dollar" />
-              <span>Budget</span>
-            </motion.button>
-          </motion.li>
-
-          <motion.li
-            variants={itemVariants}
-            className={activeComponent === "galerie" ? "active" : ""}
-          >
-            <motion.button
-              type="button"
-              onClick={() => handleChangeComponent("galerie")}
-              whileHover={{ x: 6, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Images size={20} className="image" />
-              <span>Galerie</span>
-            </motion.button>
-          </motion.li>
-        </motion.ul>
-
-        <motion.ul
-          className="sidebar-end-menu"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.li variants={itemVariants} className="sidebar-signal">
-            <MotionLink
-              whileHover={{ x: 6, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              to={`/events/${eventUuid}/report`}
-              className="link"
-            >
-              <TriangleAlert size={20} />
-              <span>Signaler</span>
-            </MotionLink>
-          </motion.li>
-
-          <motion.li variants={itemVariants} className="sidebar-delete-event">
-            {host ? (
-              <>
-                <motion.button
-                  type="button"
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  whileHover={{ x: 6, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Trash2 size={20} />
-                  <span>Supprimer l'évenement</span>
-                </motion.button>
-
-                {isDeleteModalOpen && (
-                  <div className="delete-modal-overlay">
-                    <div className="delete-modal">
-                      <h3>Supprimer l'évenement</h3>
-
-                      <p>
-                        Êtes-vous sûr de vouloir supprimer votre évenement ?
-                      </p>
-
-                      <div className="delete-modal-actions">
-                        <button
-                          type="button"
-                          onClick={() => setIsDeleteModalOpen(false)}
-                        >
-                          Annuler
-                        </button>
-
-                        <button type="button" onClick={handleDeleteEvent}>
-                          <Link to="/homeevents">Supprimer</Link>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <motion.button
-                  type="button"
-                  onClick={() => setIsExitModalOpen(true)}
-                  whileHover={{ x: 6, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <LogOut size={20} />
-                  <span>Quitter l'évenement</span>
-                </motion.button>
-
-                {isExitModalOpen && (
-                  <div className="delete-modal-overlay">
-                    <div className="delete-modal">
-                      <h3>Quitter l'évenement</h3>
-
-                      <p>Êtes-vous sûr de vouloir quitter l'évenement ?</p>
-
-                      <div className="delete-modal-actions">
-                        <button
-                          type="button"
-                          onClick={() => setIsExitModalOpen(false)}
-                        >
-                          Annuler
-                        </button>
-
-                        <button type="button" onClick={handleDeleteUserJoining}>
-                          <Link to="/homeevents">Quitter</Link>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
+            <MessageCircle size={20} className="message" />
+            <span>Messagerie</span>
+            {unreadCount > 0 && (
+              <span className="notification-badge">{unreadCount}</span>
             )}
-          </motion.li>
-        </motion.ul>
-      </motion.nav>
-    </>
+          </motion.button>
+        </motion.li>
+
+        <motion.li
+          variants={itemVariants}
+          className={activeComponent === "reservation" ? "active" : ""}
+        >
+          <motion.button
+            type="button"
+            onClick={() => handleChangeComponent("reservation")}
+            whileHover={{ x: 6, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Book size={20} className="book" />
+            <span>Reservation</span>
+          </motion.button>
+        </motion.li>
+
+        <motion.li
+          variants={itemVariants}
+          className={activeComponent === "budget" ? "active" : ""}
+        >
+          <motion.button
+            type="button"
+            onClick={() => handleChangeComponent("budget")}
+            whileHover={{ x: 6, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <BadgeDollarSign size={20} className="dollar" />
+            <span>Budget</span>
+          </motion.button>
+        </motion.li>
+
+        <motion.li
+          variants={itemVariants}
+          className={activeComponent === "galerie" ? "active" : ""}
+        >
+          <motion.button
+            type="button"
+            onClick={() => handleChangeComponent("galerie")}
+            whileHover={{ x: 6, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Images size={20} className="image" />
+            <span>Galerie</span>
+          </motion.button>
+        </motion.li>
+      </motion.ul>
+
+      <motion.ul
+        className="sidebar-end-menu"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.li variants={itemVariants} className="sidebar-signal">
+          <MotionLink
+            whileHover={{ x: 6, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            to={`/events/${eventUuid}/report`}
+            className="link"
+          >
+            <TriangleAlert size={20} />
+            <span>Signaler</span>
+          </MotionLink>
+        </motion.li>
+
+        <motion.li variants={itemVariants} className="sidebar-delete-event">
+          {host ? (
+            <>
+              <motion.button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(true)}
+                whileHover={{ x: 6, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Trash2 size={20} />
+                <span>Supprimer l'évenement</span>
+              </motion.button>
+
+              {isDeleteModalOpen && (
+                <div className="delete-modal-overlay">
+                  <div className="delete-modal">
+                    <h3>Supprimer l'évenement</h3>
+
+                    <p>Êtes-vous sûr de vouloir supprimer votre évenement ?</p>
+
+                    <div className="delete-modal-actions">
+                      <button
+                        type="button"
+                        onClick={() => setIsDeleteModalOpen(false)}
+                      >
+                        Annuler
+                      </button>
+
+                      <button type="button" onClick={handleDeleteEvent}>
+                        <Link to="/homeevents">Supprimer</Link>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <motion.button
+                type="button"
+                onClick={() => setIsExitModalOpen(true)}
+                whileHover={{ x: 6, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <LogOut size={20} />
+                <span>Quitter l'évenement</span>
+              </motion.button>
+
+              {isExitModalOpen && (
+                <div className="delete-modal-overlay">
+                  <div className="delete-modal">
+                    <h3>Quitter l'évenement</h3>
+
+                    <p>Êtes-vous sûr de vouloir quitter l'évenement ?</p>
+
+                    <div className="delete-modal-actions">
+                      <button
+                        type="button"
+                        onClick={() => setIsExitModalOpen(false)}
+                      >
+                        Annuler
+                      </button>
+
+                      <button type="button" onClick={handleDeleteUserJoining}>
+                        <Link to="/homeevents">Quitter</Link>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </motion.li>
+      </motion.ul>
+    </motion.nav>
   );
 }
 

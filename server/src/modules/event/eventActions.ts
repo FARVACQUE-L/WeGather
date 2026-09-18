@@ -106,7 +106,7 @@ const join: RequestHandler = async (req, res, next) => {
   }
 };
 
-const browseImages: RequestHandler = (req, res, next) => {
+const browseImages: RequestHandler = (_req, res, next) => {
   try {
     const dir = path.join(process.cwd(), "public/assets/images");
     const files = fs

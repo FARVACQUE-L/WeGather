@@ -27,7 +27,9 @@
       font-weight: 700;
       font-size: 0.8rem;
       letter-spacing: 0.5px;
-      transition: opacity 0.2s ease, transform 0.1s ease;
+      transition:
+        opacity 0.2s ease,
+        transform 0.1s ease;
       width: auto;
 
       &:hover {
@@ -197,7 +199,6 @@
 }
 @media screen and (max-width: 428px) {
   .reservation {
-    padding: 10vh 1rem 2rem 1rem;
     width: 100%;
     padding: 10vh 1rem 0 1rem;
     .reservation-card-global {

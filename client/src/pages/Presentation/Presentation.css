@@ -54,7 +54,8 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
       url(../../assets/images/img-presentation-wedoo.png);
     background-repeat: no-repeat;
     background-size: cover;
@@ -230,10 +231,9 @@
       gap: 20px;
       color: white;
       .card-presentation-1 {
-        background-image: linear-gradient(
-            rgba(0, 0, 0, 0.3),
-            rgba(0, 0, 0, 0.4)
-          ), url(../../assets/images/img-card-romantique.png);
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)),
+          url(../../assets/images/img-card-romantique.png);
         background-repeat: no-repeat;
         background-position: center;
         background-size: cover;
@@ -253,10 +253,9 @@
         }
       }
       .card-presentation-2 {
-        background-image: linear-gradient(
-            rgba(0, 0, 0, 0.3),
-            rgba(0, 0, 0, 0.4)
-          ), url(../../assets/images/img-card-camping.png);
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)),
+          url(../../assets/images/img-card-camping.png);
         background-repeat: no-repeat;
         background-position: center;
         background-size: cover;
@@ -276,10 +275,9 @@
         }
       }
       .card-presentation-3 {
-        background-image: linear-gradient(
-            rgba(0, 0, 0, 0.3),
-            rgba(0, 0, 0, 0.4)
-          ), url(../../assets/images/img-card-entreprise.png);
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)),
+          url(../../assets/images/img-card-entreprise.png);
         background-repeat: no-repeat;
         background-position: center;
         background-size: cover;
@@ -299,10 +297,9 @@
         }
       }
       .card-presentation-4 {
-        background-image: linear-gradient(
-            rgba(0, 0, 0, 0.3),
-            rgba(0, 0, 0, 0.4)
-          ), url(../../assets/images/img-card-retraite.png);
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)),
+          url(../../assets/images/img-card-retraite.png);
         background-repeat: no-repeat;
         background-position: center;
         background-size: cover;
