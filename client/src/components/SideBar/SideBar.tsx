@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   BadgeDollarSign,
   Book,
+  CalendarDays,
   Images,
   LayoutDashboard,
   LogOut,
@@ -298,6 +299,18 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
         initial="hidden"
         animate="visible"
       >
+        <motion.li variants={itemVariants} className="sidebar-events">
+          <MotionLink
+            whileHover={{ x: 6, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            to="/homeevents"
+            className="link"
+          >
+            <CalendarDays size={20} />
+            <span>Mes Événements</span>
+          </MotionLink>
+        </motion.li>
+
         <motion.li variants={itemVariants} className="sidebar-signal">
           <MotionLink
             whileHover={{ x: 6, scale: 1.02 }}
