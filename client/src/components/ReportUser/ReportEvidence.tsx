@@ -2,6 +2,9 @@ import { FileUp, StickyNoteCheck, X } from "lucide-react";
 import { useRef } from "react";
 import "./ReportEvidence.css";
 
+const fileKey = (file: File) =>
+  `${file.name}-${file.size}-${file.lastModified}`;
+
 interface ReportEvidenceProps {
   reportEvidence: File[];
   setReportEvidence: (value: File[]) => void;
@@ -15,7 +18,11 @@ function ReportEvidence({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setReportEvidence([...reportEvidence, ...files]);
+    const newFiles = files.filter(
+      (file) =>
+        !reportEvidence.some((existing) => fileKey(existing) === fileKey(file)),
+    );
+    setReportEvidence([...reportEvidence, ...newFiles]);
   };
 
   const handleRemove = (index: number) => {
@@ -32,7 +39,7 @@ function ReportEvidence({
       >
         <div className="reportEvidence-previews">
           {reportEvidence.map((file, index) => (
-            <div key={`${file.name}-${index}`} className="reportEvidence-item">
+            <div key={fileKey(file)} className="reportEvidence-item">
               <button
                 type="button"
                 className="reportEvidence-remove"
@@ -62,7 +69,7 @@ function ReportEvidence({
           <FileUp size={32} className="reportEvidences-icon" />
         </div>
         Faites glisser ou partager vos fichiers ici.
-        <p>JPG, PNG ou PDF (Max. 10Mo par fichier)</p>
+        <p>JPG, PNG ou PDF (Max. 8Mo par fichier)</p>
         <input
           ref={inputRef}
           type="file"

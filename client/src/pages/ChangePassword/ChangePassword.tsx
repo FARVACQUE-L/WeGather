@@ -1,5 +1,5 @@
 import "./ChangePassword.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import connexionImg from "../../assets/images/Connexion-img.png";
@@ -8,6 +8,14 @@ import hide from "../../assets/images/hide.png";
 import logo from "../../assets/images/logo-wegather.png";
 
 function ChangePassword() {
+  // Le premier champ reçoit le focus à l'ouverture : on peut taper
+  // directement, sans cliquer dans le formulaire.
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    firstInputRef.current?.focus();
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -137,6 +145,7 @@ function ChangePassword() {
 
             <div className="password-container">
               <input
+                ref={firstInputRef}
                 id="currentPassword"
                 type={showCurrentPassword ? "text" : "password"}
                 placeholder="Entrer votre ancien mot de passe"

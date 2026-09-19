@@ -9,7 +9,7 @@ body {
 
 .input-focus:focus {
   outline: none;
-  border: 1px solid #ff7e5f !important;
+  border: 1px solid #ff7e5f;
 }
 .navbar-connexion {
   width: 100%;
@@ -169,6 +169,10 @@ body {
         border: 1px solid rgba(194, 118, 118, 0.2);
         font-size: 13px;
         display: block;
+        &:focus {
+          outline: none;
+          border: 1px solid #ff7e5f;
+        }
       }
       .password-input {
         padding-right: 45px;

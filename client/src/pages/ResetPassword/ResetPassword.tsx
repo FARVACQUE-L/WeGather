@@ -1,5 +1,5 @@
 import "./ResetPassword.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import Swal from "sweetalert2";
 import connexionImg from "../../assets/images/Connexion-img.png";
@@ -8,6 +8,14 @@ import hide from "../../assets/images/hide.png";
 import logo from "../../assets/images/logo-wegather.png";
 
 function ResetPassword() {
+  // Le premier champ reçoit le focus à l'ouverture : on peut taper
+  // directement, sans cliquer dans le formulaire.
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    firstInputRef.current?.focus();
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -123,6 +131,7 @@ function ResetPassword() {
 
             <div className="password-container">
               <input
+                ref={firstInputRef}
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Entrer votre nouveau mot de passe"

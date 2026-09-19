@@ -1,5 +1,5 @@
 import "./Connexion.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import connexionImg from "../../assets/images/Connexion-img.png";
 import eye from "../../assets/images/eye.png";
@@ -7,6 +7,14 @@ import hide from "../../assets/images/hide.png";
 import logo from "../../assets/images/logo-wegather.png";
 
 function Connexion() {
+  // Le premier champ reçoit le focus à l'ouverture : on peut taper
+  // directement, sans cliquer dans le formulaire.
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    firstInputRef.current?.focus();
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [identifier, setIdentifier] = useState("");
   const [_submitted, setSubmitted] = useState(false);
@@ -92,6 +100,7 @@ function Connexion() {
               <label htmlFor="identifier">Pseudo ou Email</label>
             </div>
             <input
+              ref={firstInputRef}
               id="identifier"
               type="text"
               placeholder="Entrez votre pseudo ou email"

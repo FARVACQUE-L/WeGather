@@ -6,11 +6,12 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  &::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+  }
 }
-.ModalEditEvent-Backdrop::backdrop {
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
-}
+
 .ModalEditEvent-Global {
   padding: 3rem 2rem;
   width: 35rem;
@@ -45,9 +46,9 @@
         &::placeholder {
           color: var(--font-placeholder);
         }
-      }
-      .ModalEditEvent-Input:focus {
-        outline: none;
+        &:focus {
+          outline: none;
+        }
       }
       .ModalEditEvent-DateGlobal {
         display: flex;
@@ -64,9 +65,9 @@
             padding-left: 0.5rem;
             border: 1px solid var(--border-color);
             border-radius: 0.5rem 0.5rem 0 0;
-          }
-          .ModalEditEvent-DateInput:focus {
-            outline: none;
+            &:focus {
+              outline: none;
+            }
           }
         }
       }
@@ -78,6 +79,9 @@
         padding-left: 0.5rem;
         padding-top: 0.2rem;
         resize: vertical;
+        &:focus {
+          outline: none;
+        }
       }
       .ModalEditEvent-Counter {
         text-align: end;
@@ -102,9 +106,9 @@
           border: none;
           box-shadow: 1px 1px 5px black;
           transition: transform 0.2s;
-        }
-        .ModalEditEvent-ImageButton:hover {
-          transform: scale(0.95);
+          &:hover {
+            transform: scale(0.95);
+          }
         }
       }
     }
@@ -121,10 +125,11 @@
         border: none;
         box-shadow: 1px 1px 5px black;
         transition: transform 0.2s;
+        &:hover {
+          transform: scale(0.95);
+        }
       }
-      .ModalEditEvent-ButtonCancel:hover {
-        transform: scale(0.95);
-      }
+
       .ModalEditEvent-ButtonSubmit {
         height: 2rem;
         width: 12rem;
@@ -134,9 +139,9 @@
         border: none;
         box-shadow: 1px 1px 5px black;
         transition: transform 0.2s;
-      }
-      .ModalEditEvent-ButtonSubmit:hover {
-        transform: scale(0.95);
+        &:hover {
+          transform: scale(0.95);
+        }
       }
     }
   }

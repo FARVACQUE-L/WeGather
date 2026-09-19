@@ -1,11 +1,19 @@
 import "./ForgetPassword.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import connexionImg from "../../assets/images/Connexion-img.png";
 import logo from "../../assets/images/logo-wegather.png";
 
 function ForgetPassword() {
+  // Le premier champ reçoit le focus à l'ouverture : on peut taper
+  // directement, sans cliquer dans le formulaire.
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    firstInputRef.current?.focus();
+  }, []);
+
   const [identifier, setIdentifier] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -93,6 +101,7 @@ function ForgetPassword() {
           <div className="input-group">
             <label htmlFor="id">Pseudo ou Email</label>
             <input
+              ref={firstInputRef}
               id="id"
               type="text"
               placeholder="Entrez votre pseudo ou email"
