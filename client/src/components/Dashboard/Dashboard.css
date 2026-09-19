@@ -321,8 +321,13 @@
       }
     }
 
+    /* La todo list occupe toute la colonne de droite : elle grandit d'abord
+       dans la case vide à côté de la galerie, avant de repousser quoi que ce
+       soit. align-self: start lui garde sa hauteur naturelle. */
     .component-todo {
-      grid-area: "todo";
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: start;
     }
     .dashboard-gallery {
       display: flex;
@@ -385,6 +390,13 @@
       gap: 16px;
       height: auto;
       width: 100%;
+
+      /* Une seule colonne en mobile : on revient au placement automatique,
+         dans l'ordre du document. */
+      .component-todo {
+        grid-column: auto;
+        grid-row: auto;
+      }
 
       .component-recent-reservations {
         width: 100%;

@@ -361,6 +361,7 @@ function Dashboard() {
 
         {eventUuid && userId && (
           <motion.div
+            className="component-todo"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
