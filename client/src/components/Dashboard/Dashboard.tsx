@@ -198,7 +198,11 @@ function Dashboard() {
             }}
           />
         </motion.h1>
+        {/* Le code s'affiche dans le même conteneur que le bouton, en
+            position absolue sur toute sa surface : les deux se superposent
+            exactement, quelle que soit la largeur d'écran. */}
         <motion.div
+          className="code-wrapper"
           initial={{ opacity: 0, height: 0, y: -10 }}
           animate={{ opacity: 1, height: "auto", y: 0 }}
           exit={{ opacity: 0, height: 0, y: -10 }}
@@ -211,30 +215,30 @@ function Dashboard() {
           >
             Code de l'événement
           </button>
-        </motion.div>
-        {isModalCode && (
-          <motion.div
-            className="modal-code"
-            initial={{ opacity: 0, height: 0, y: -10 }}
-            animate={{ opacity: 1, height: 45, y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -10 }}
-            transition={{ duration: 0.25 }}
-          >
-            <h1>{eventData?.event_link_key}</h1>
-            <button
-              className="copy"
-              type="button"
-              onClick={async () => {
-                await navigator.clipboard.writeText(
-                  eventData?.event_link_key || "",
-                );
-                setIsModalCode(false);
-              }}
+          {isModalCode && (
+            <motion.div
+              className="modal-code"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
             >
-              <Copy />
-            </button>
-          </motion.div>
-        )}
+              <span className="code-value">{eventData?.event_link_key}</span>
+              <button
+                className="copy"
+                type="button"
+                aria-label="Copier le code"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(
+                    eventData?.event_link_key || "",
+                  );
+                  setIsModalCode(false);
+                }}
+              >
+                <Copy size={16} />
+              </button>
+            </motion.div>
+          )}
+        </motion.div>
       </section>
 
       <motion.p
