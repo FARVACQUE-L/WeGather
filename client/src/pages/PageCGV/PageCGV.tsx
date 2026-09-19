@@ -11,7 +11,7 @@ function PageCGV() {
       </header>
       <main className="cgv-Page">
         <h1>
-          Conditions Générales de Vente et d'Utilisation — WE<i>D</i>OO
+          Conditions Générales de Vente et d'Utilisation — We<i>G</i>ather
         </h1>
         <p className="cgv-Updated">Dernière mise à jour : 03 juillet 2026</p>
 
@@ -20,13 +20,13 @@ function PageCGV() {
           <p>
             Les présentes Conditions Générales de Vente et d'Utilisation
             (ci-après « CGV ») régissent l'accès et l'utilisation de
-            l'application WeDoo (ci-après « le Service »), éditée par la
-            WedooCorp, dont le siège social est situé à Toulouse.
+            l'application WeGather (ci-après « le Service »), éditée par la
+            WeGatherCorp, dont le siège social est situé à Toulouse.
           </p>
           <p>
-            WeDoo permet à ses utilisateurs de créer des événements, d'inviter
-            des participants, de communiquer via un chat dédié à chaque
-            événement, de partager des photos, de suivre et répartir des
+            WeGather permet à ses utilisateurs de créer des événements,
+            d'inviter des participants, de communiquer via un chat dédié à
+            chaque événement, de partager des photos, de suivre et répartir des
             dépenses de groupe, et d'effectuer des réservations liées à
             l'événement (restaurants, activités, hébergements, etc.) auprès de
             prestataires tiers.
@@ -36,7 +36,7 @@ function PageCGV() {
         <section>
           <h2>Article 2 — Acceptation des CGV</h2>
           <p>
-            La création d'un compte WeDoo implique l'acceptation pleine et
+            La création d'un compte WeGather implique l'acceptation pleine et
             entière des présentes CGV. Si l'utilisateur n'accepte pas tout ou
             partie de ces conditions, il doit renoncer à l'inscription et à
             l'utilisation du Service.
@@ -46,13 +46,13 @@ function PageCGV() {
         <section>
           <h2>Article 3 — Accès au Service et création de compte</h2>
           <p>
-            L'accès à WeDoo nécessite la création d'un compte personnel.
+            L'accès à WeGather nécessite la création d'un compte personnel.
             L'utilisateur s'engage à fournir des informations exactes et à jour,
             et à ne pas usurper l'identité d'un tiers. Il est seul responsable
             de la confidentialité de ses identifiants de connexion.
           </p>
           <p>
-            WeDoo est accessible aux personnes physiques majeures capables de
+            WeGather est accessible aux personnes physiques majeures capables de
             contracter, ainsi qu'aux mineurs disposant de l'autorisation de leur
             représentant légal, sous réserve des conditions spécifiques définies
             par les plateformes de distribution.
@@ -74,9 +74,9 @@ function PageCGV() {
             <li>
               <strong>Gestion des dépenses :</strong> les participants peuvent
               ajouter, répartir et suivre les dépenses liées à l'événement. Ce
-              module est un outil de calcul et de suivi ; WeDoo n'effectue aucun
-              transfert d'argent entre utilisateurs et n'intervient pas comme
-              intermédiaire de paiement.
+              module est un outil de calcul et de suivi ; WeGather n'effectue
+              aucun transfert d'argent entre utilisateurs et n'intervient pas
+              comme intermédiaire de paiement.
             </li>
             <li>
               <strong>Partage de photos :</strong> les participants peuvent
@@ -84,19 +84,20 @@ function PageCGV() {
               participants invités.
             </li>
             <li>
-              <strong>Réservations :</strong> WeDoo peut permettre d'effectuer
-              des réservations pour faciliter vos évènements (restaurants,
-              activités, etc.). Dans ce cas, le contrat de réservation est
-              conclu directement entre l'utilisateur et le prestataire tiers ;
-              WeDoo agit uniquement en tant qu'intermédiaire technique et n'est
-              pas partie à cette transaction.
+              <strong>Réservations :</strong> WeGather peut permettre
+              d'effectuer des réservations pour faciliter vos évènements
+              (restaurants, activités, etc.). Dans ce cas, le contrat de
+              réservation est conclu directement entre l'utilisateur et le
+              prestataire tiers ; WeGather agit uniquement en tant
+              qu'intermédiaire technique et n'est pas partie à cette
+              transaction.
             </li>
           </ul>
         </section>
         <section>
           <h2>Article 5 — Obligations et responsabilité de l'utilisateur</h2>
           <p>
-            L'utilisateur s'engage à utiliser WeDoo conformément à sa
+            L'utilisateur s'engage à utiliser WeGather conformément à sa
             destination et à la réglementation en vigueur. Il s'engage notamment
             à ne pas publier de contenu illicite, injurieux, diffamatoire, ou
             portant atteinte aux droits de tiers via le chat ou le partage de
@@ -109,11 +110,12 @@ function PageCGV() {
         </section>
 
         <section>
-          <h2>Article 6 — Responsabilité de WeDoo</h2>
+          <h2>Article 6 — Responsabilité de WeGather</h2>
           <p>
-            WeDoo met en œuvre les moyens raisonnables pour assurer un accès
+            WeGather met en œuvre les moyens raisonnables pour assurer un accès
             continu et sécurisé au Service, sans garantie d'absence
-            d'interruption ou d'erreur. WeDoo ne saurait être tenu responsable :
+            d'interruption ou d'erreur. WeGather ne saurait être tenu
+            responsable :
           </p>
           <ul>
             <li>
@@ -135,7 +137,7 @@ function PageCGV() {
           <h2>Article 7 — Données personnelles</h2>
           <p>
             Le traitement des données personnelles collectées dans le cadre de
-            l'utilisation de WeDoo est décrit dans la{" "}
+            l'utilisation de WeGather est décrit dans la{" "}
             <a href="/politique-de-confidentialite">
               Politique de Confidentialité
             </a>
@@ -149,11 +151,11 @@ function PageCGV() {
         <section>
           <h2>Article 8 — Propriété intellectuelle</h2>
           <p>
-            L'ensemble des éléments composant WeDoo (marque, logo, interface,
+            L'ensemble des éléments composant WeGather (marque, logo, interface,
             code source) est protégé par le droit de la propriété intellectuelle
-            et demeure la propriété exclusive de WeDoo. Les contenus publiés par
-            les utilisateurs (photos, messages) restent leur propriété, sous
-            réserve d'une licence d'utilisation accordée à WeDoo pour les
+            et demeure la propriété exclusive de WeGather. Les contenus publiés
+            par les utilisateurs (photos, messages) restent leur propriété, sous
+            réserve d'une licence d'utilisation accordée à WeGather pour les
             besoins du fonctionnement du Service.
           </p>
         </section>
@@ -162,16 +164,17 @@ function PageCGV() {
           <h2>Article 9 — Résiliation</h2>
           <p>
             L'utilisateur peut supprimer son compte à tout moment depuis les
-            paramètres de l'application. WeDoo se réserve le droit de suspendre
-            ou résilier un compte en cas de manquement grave aux présentes CGV,
-            après notification préalable sauf urgence caractérisée.
+            paramètres de l'application. WeGather se réserve le droit de
+            suspendre ou résilier un compte en cas de manquement grave aux
+            présentes CGV, après notification préalable sauf urgence
+            caractérisée.
           </p>
         </section>
 
         <section>
           <h2>Article 10 — Modification des CGV</h2>
           <p>
-            WeDoo se réserve le droit de modifier les présentes CGV à tout
+            WeGather se réserve le droit de modifier les présentes CGV à tout
             moment. Les utilisateurs seront informés de toute modification
             substantielle. La poursuite de l'utilisation du Service après
             modification vaut acceptation des nouvelles CGV.

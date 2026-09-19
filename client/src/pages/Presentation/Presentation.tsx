@@ -8,7 +8,7 @@ import reservation from "../../assets/images/logo-feature-reservation.png";
 import todo from "../../assets/images/logo-feature-todo.png";
 import note from "../../assets/images/logo-info-note.png";
 import user from "../../assets/images/logo-info-user.png";
-import logo from "../../assets/images/logo-wedoo.png";
+import logo from "../../assets/images/logo-wegather.png";
 
 type User = {
   id: number;
@@ -38,7 +38,7 @@ function Presentation() {
     <div className="presentation-content">
       <div className="navbar-presentation">
         <section>
-          <img src={logo} alt="logo-wedoo" />
+          <img src={logo} alt="logo-wegather" />
           <h1 className="title-presentation">
             We<i>G</i>ather
           </h1>
@@ -79,11 +79,11 @@ function Presentation() {
             Créez un évenement
           </button>
 
-          <p>Créez, gérez et partagez avec Wedoo en toute simplicité.</p>
+          <p>Créez, gérez et partagez avec WeGather en toute simplicité.</p>
         </div>
       </section>
       <section className="presentation-page page-features">
-        <div className="features-wedoo-presentation">
+        <div className="features-wegather-presentation">
           <div className="feature-presentation-1">
             <img
               src={messagerie}
@@ -176,25 +176,25 @@ function Presentation() {
         </div>
       </section>
       <section className="presentation-page page-infos">
-        <div className="infos-wedoo-presentation">
-          <div className="info-wedoo-presentation">
+        <div className="infos-wegather-presentation">
+          <div className="info-wegather-presentation">
             <img src={reservation} alt="logo-info" />
             <h4>500+</h4>
             <p>Evenement crée</p>
           </div>
-          <div className="info-wedoo-presentation">
+          <div className="info-wegather-presentation">
             <img src={user} alt="logo-info" />
             <h4>12K</h4>
             <p>Utilisateurs</p>
           </div>
-          <div className="info-wedoo-presentation">
+          <div className="info-wegather-presentation">
             <img src={note} alt="logo-info" />
             <h4>4.9/5</h4>
             <p>Satisfaction</p>
           </div>
         </div>
         <footer className="footer-presentation">
-          <p>copyright 2026 Wedoo. Tous droits réservés.</p>
+          <p>copyright 2026 WeGather. Tous droits réservés.</p>
           <Link to="/cgv" className="footer-presentation-link">
             CGV
           </Link>

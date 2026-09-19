@@ -1,12 +1,20 @@
 import "./Connexion.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import connexionImg from "../../assets/images/Connexion-img.png";
 import eye from "../../assets/images/eye.png";
 import hide from "../../assets/images/hide.png";
-import logo from "../../assets/images/logo-wedoo.png";
+import logo from "../../assets/images/logo-wegather.png";
 
 function Connexion() {
+  // Le premier champ reçoit le focus à l'ouverture : on peut taper
+  // directement, sans cliquer dans le formulaire.
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    firstInputRef.current?.focus();
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [identifier, setIdentifier] = useState("");
   const [_submitted, setSubmitted] = useState(false);
@@ -58,9 +66,9 @@ function Connexion() {
     <>
       <div className="navbar-connexion">
         <Link to="/" className="nav-connexion">
-          <img src={logo} alt="logo-wedoo" />
+          <img src={logo} alt="logo-wegather" />
           <h1>
-            WE<i>D</i>OO
+            We<i>G</i>ather
           </h1>
         </Link>
       </div>
@@ -76,7 +84,8 @@ function Connexion() {
           <div className="connection-text">
             <h2>Facilitez vos prochains événements.</h2>
             <p>
-              Wedoo vous propose une expérience utilisateur simple et efficace.
+              WeGather vous propose une expérience utilisateur simple et
+              efficace.
             </p>
           </div>
         </div>
@@ -91,6 +100,7 @@ function Connexion() {
               <label htmlFor="identifier">Pseudo ou Email</label>
             </div>
             <input
+              ref={firstInputRef}
               id="identifier"
               type="text"
               placeholder="Entrez votre pseudo ou email"

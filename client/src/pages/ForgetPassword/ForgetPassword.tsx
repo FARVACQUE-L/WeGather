@@ -1,11 +1,19 @@
 import "./ForgetPassword.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import connexionImg from "../../assets/images/Connexion-img.png";
-import logo from "../../assets/images/logo-wedoo.png";
+import logo from "../../assets/images/logo-wegather.png";
 
 function ForgetPassword() {
+  // Le premier champ reçoit le focus à l'ouverture : on peut taper
+  // directement, sans cliquer dans le formulaire.
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    firstInputRef.current?.focus();
+  }, []);
+
   const [identifier, setIdentifier] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -60,9 +68,9 @@ function ForgetPassword() {
     <>
       <div className="navbar-forgetpassword">
         <Link to="/" className="nav-forgetpassword">
-          <img src={logo} alt="logo-wedoo" />
+          <img src={logo} alt="logo-wegather" />
           <h1>
-            WE<i>D</i>OO
+            We<i>G</i>ather
           </h1>
         </Link>
       </div>
@@ -77,7 +85,8 @@ function ForgetPassword() {
           <div className="forgetPassword-text">
             <h2>Facilitez vos prochains événements.</h2>
             <p className="forgetPassword-parag">
-              Wedoo vous propose une expérience utilisateur simple et efficace.
+              WeGather vous propose une expérience utilisateur simple et
+              efficace.
             </p>
           </div>
         </div>
@@ -92,6 +101,7 @@ function ForgetPassword() {
           <div className="input-group">
             <label htmlFor="id">Pseudo ou Email</label>
             <input
+              ref={firstInputRef}
               id="id"
               type="text"
               placeholder="Entrez votre pseudo ou email"

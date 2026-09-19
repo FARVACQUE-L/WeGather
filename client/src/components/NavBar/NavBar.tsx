@@ -1,4 +1,4 @@
-import Logo from "../../assets/images/logo-wedoo.png";
+import Logo from "../../assets/images/logo-wegather.png";
 import "./NavBar.css";
 import { Link, useLocation } from "react-router";
 
@@ -14,9 +14,9 @@ function NavBar() {
   return (
     <nav className={navbarDesktop ? "desktop" : "mobile"}>
       <Link to="/homeevents" className="logo-sidebar-container">
-        <img src={Logo} alt="logo-wedoo" className="logo-sidebar-image" />
+        <img src={Logo} alt="logo-wegather" className="logo-sidebar-image" />
         <h2 className="logo-sidebar-h2">
-          WE<i>D</i>OO
+          We<i>G</i>ather
           {isAdmin && <span className="logo-admin-text"> Admin</span>}
         </h2>
       </Link>

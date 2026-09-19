@@ -115,9 +115,9 @@ const add: RequestHandler = async (req, res, next) => {
     transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: newUser.email,
-      subject: "Bienvenue sur Wedoo",
+      subject: "Bienvenue sur WeGather",
       html: `
-    <h1>Bienvenue sur Wedoo 🎉</h1>
+    <h1>Bienvenue sur WeGather 🎉</h1>
     <p>Votre compte a été créé avec succès.</p>
     <p>Pseudo : ${newUser.username}</p>
   `,
@@ -259,7 +259,7 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
       to: user.user_mail,
       subject: "Réinitialisation du mot de passe",
       html: `
-    <h1>Wedoo</h1>
+    <h1>WeGather</h1>
     <h2>Réinitialisation du mot de passe</h2>
     <p>Cliquez sur le lien suivant :</p>
     <a href="${link}">${link}</a>
@@ -307,7 +307,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
         to: user.user_mail,
         subject: "Mot de passe modifié",
         html: `
-    <h1>Wedoo</h1>
+    <h1>WeGather</h1>
     <p>Votre mot de passe a été modifié avec succès.</p>
   `,
       })
@@ -363,7 +363,7 @@ const changePassword: RequestHandler = async (req, res, next) => {
       to: user.email,
       subject: "Mot de passe modifié",
       html: `
-        <h1>Wedoo</h1>
+        <h1>WeGather</h1>
         <p>Votre mot de passe a été modifié avec succès.</p>
         <p>Si ce n’était pas vous, contactez le support client.</p>
       `,

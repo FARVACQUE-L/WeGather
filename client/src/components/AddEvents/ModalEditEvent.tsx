@@ -126,11 +126,7 @@ function ModalEditEvent({
       onCancel={onClose}
       aria-labelledby="modal-edit-title"
     >
-      <div
-        className="ModalEditEvent-Global"
-        onClick={(e) => e.stopPropagation()}
-        onKeyUp={(e) => e.stopPropagation()}
-      >
+      <div className="ModalEditEvent-Global">
         <h2 className="ModalEditEvent-Title" id="modal-edit-title">
           Modifiez votre événement
         </h2>

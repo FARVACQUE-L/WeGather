@@ -1,13 +1,21 @@
 import "./ResetPassword.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import Swal from "sweetalert2";
 import connexionImg from "../../assets/images/Connexion-img.png";
 import eye from "../../assets/images/eye.png";
 import hide from "../../assets/images/hide.png";
-import logo from "../../assets/images/logo-wedoo.png";
+import logo from "../../assets/images/logo-wegather.png";
 
 function ResetPassword() {
+  // Le premier champ reçoit le focus à l'ouverture : on peut taper
+  // directement, sans cliquer dans le formulaire.
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    firstInputRef.current?.focus();
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -89,9 +97,9 @@ function ResetPassword() {
     <>
       <div className="navbar-resetpassword">
         <Link to="/">
-          <img src={logo} alt="logo-wedoo" />
+          <img src={logo} alt="logo-wegather" />
           <h1>
-            WE<i>D</i>OO
+            We<i>G</i>ather
           </h1>
         </Link>
       </div>
@@ -107,7 +115,8 @@ function ResetPassword() {
           <div className="text">
             <h2>Facilitez vos prochains événements.</h2>
             <p>
-              Wedoo vous propose une expérience utilisateur simple et efficace.
+              WeGather vous propose une expérience utilisateur simple et
+              efficace.
             </p>
           </div>
         </div>
@@ -122,6 +131,7 @@ function ResetPassword() {
 
             <div className="password-container">
               <input
+                ref={firstInputRef}
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Entrer votre nouveau mot de passe"

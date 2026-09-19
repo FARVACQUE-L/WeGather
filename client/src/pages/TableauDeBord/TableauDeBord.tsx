@@ -19,17 +19,13 @@ type ActiveComponent =
   | "galerie";
 
 function TableauDeBord() {
-  const [activeComponent, setActiveComponent] = useState<ActiveComponent>(
-    () => {
-      return (
-        (localStorage.getItem("activeComponent") as ActiveComponent) ||
-        "tableau"
-      );
-    },
-  );
+  // Volontairement non persisté : on entre toujours dans un événement par son
+  // tableau de bord, quel que soit l'onglet quitté la fois précédente.
+  const [activeComponent, setActiveComponent] =
+    useState<ActiveComponent>("tableau");
+
   const handleChangeComponent = (componentName: ActiveComponent) => {
     setActiveComponent(componentName);
-    localStorage.setItem("activeComponent", componentName);
   };
 
   return (

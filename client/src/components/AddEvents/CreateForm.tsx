@@ -45,7 +45,7 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
           event_date_end: form.dateEnd,
           event_description: form.description,
           event_location: form.location,
-          event_picture: `${import.meta.env.VITE_API_URL}/assets/images/logo-wedoo.png`,
+          event_picture: `${import.meta.env.VITE_API_URL}/assets/images/logo-wegather.png`,
         }),
       });
 
