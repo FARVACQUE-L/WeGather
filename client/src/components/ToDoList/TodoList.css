@@ -6,8 +6,6 @@
 	border-radius: 5px;
 	padding: 1.5rem;
 	width: 15.3vw;
-	/* Hauteur minimale et non fixe : le bloc garde sa taille d'origine avec
-     peu de tâches, puis s'agrandit avec la liste au lieu de la faire défiler. */
 	min-height: 32vh;
 	border: 1px solid var(--border-color);
 	gap: 1rem;
