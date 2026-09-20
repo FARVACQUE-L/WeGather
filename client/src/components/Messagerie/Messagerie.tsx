@@ -1,6 +1,6 @@
 import "./Messagerie.css";
 import type { EmojiClickData } from "emoji-picker-react";
-import EmojiPicker from "emoji-picker-react";
+import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
 import { motion } from "framer-motion";
 import { ContactRound, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -300,15 +300,31 @@ function Messagerie() {
               onKeyDown={handleKeyDown}
               placeholder="Écrire un message..."
             />
-            <button type="button" onClick={() => setShowPicker(!showPicker)}>
-              😊
-            </button>
+            {/* Le sélecteur est ancré à son bouton via ce conteneur en
+                position relative : il s'ouvre juste au-dessus, quelle que
+                soit la largeur d'écran. */}
+            <div className="emoji-wrapper">
+              <button
+                type="button"
+                aria-label="Ouvrir le sélecteur d'emoji"
+                aria-expanded={showPicker}
+                onClick={() => setShowPicker(!showPicker)}
+              >
+                😊
+              </button>
 
-            {showPicker && (
-              <div className="emoji-picker">
-                <EmojiPicker onEmojiClick={handleEmojiClick} />
-              </div>
-            )}
+              {showPicker && (
+                <div className="emoji-picker">
+                  {/* NATIVE : les emojis sont rendus avec la police du
+                      système. Par défaut la bibliothèque télécharge une image
+                      par emoji depuis un CDN, soit 128 requêtes à l'ouverture. */}
+                  <EmojiPicker
+                    onEmojiClick={handleEmojiClick}
+                    emojiStyle={EmojiStyle.NATIVE}
+                  />
+                </div>
+              )}
+            </div>
             <button
               className="send-button"
               type="button"

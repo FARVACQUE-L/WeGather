@@ -120,11 +120,24 @@
           outline: none;
         }
 
+        .emoji-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
         .emoji-picker {
           position: absolute;
-          bottom: 18vh;
-          left: 57vw;
+          bottom: calc(100% + 0.5rem);
+          right: 0;
           z-index: 1000;
+
+          /* Le sélecteur fait 350px par défaut : on le borne pour qu'il
+             tienne dans l'écran sur mobile. */
+          .EmojiPickerReact {
+            width: min(320px, 80vw);
+            height: min(350px, 45vh);
+          }
         }
         button {
           border-style: none;
@@ -237,6 +250,13 @@
         .massagerie-input {
           height: 44px;
           margin-bottom: 0;
+          /* Le sélecteur s'aligne sur toute la barre et non sur le bouton,
+             qui est trop près du bord droit pour le contenir. */
+          position: relative;
+
+          .emoji-wrapper {
+            position: static;
+          }
 
           input {
             width: 85%;
