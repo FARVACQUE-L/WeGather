@@ -6,7 +6,7 @@
   border-radius: 5px;
   padding: 1.5rem;
   width: 15.3vw;
-  height: 32vh;
+  min-height: 32vh;
   border: 1px solid var(--border-color);
   gap: 1rem;
   margin-left: 1.6vw;
@@ -19,7 +19,7 @@
   }
   .todolist-text {
     display: flex;
-    gap: 0.5rem;
+    gap: 1.5rem;
   }
 
   .task-text {
@@ -51,13 +51,6 @@
     list-style-type: none;
     padding: 0;
     margin: 0;
-    max-height: 400px;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
     .task-item-li {
       display: flex;
       align-items: center;
@@ -125,10 +118,12 @@
 }
 @media screen and (max-width: 428px) {
   .todolist-global {
-    margin-left: 13vw;
-    width: 70vw;
+    margin-left: 0;
+    width: 100%;
+    min-height: 40vh;
     .task-text {
-      width: 50vw;
+      width: 65vw;
+      padding-left: 0.5rem;
     }
   }
 }

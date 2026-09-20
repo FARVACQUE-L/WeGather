@@ -85,6 +85,7 @@
       padding: 0;
       position: absolute;
       bottom: 0;
+      .sidebar-events,
       .sidebar-signal {
         margin: 0 0 0 20px;
         display: flex;
@@ -251,6 +252,10 @@
       gap: 15px;
 
       position: static;
+
+      .sidebar-events {
+        display: none;
+      }
 
       .sidebar-signal {
         a {

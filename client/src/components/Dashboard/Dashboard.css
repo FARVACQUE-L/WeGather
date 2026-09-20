@@ -37,43 +37,50 @@
         transform: scale(0.98);
       }
     }
+    .code-wrapper {
+      position: relative;
+      /* Sans ça, le flex parent l'étire à la hauteur du titre voisin, et le
+         code en inset: 0 deviendrait plus haut que le bouton. */
+      align-self: flex-start;
+    }
+    /* Recouvre exactement .button-code : même conteneur, inset: 0, et même
+       forme, dégradé et typographie que le bouton. */
     .modal-code {
       position: absolute;
-      top: 8rem;
-      right: 11rem;
+      inset: 0;
       z-index: 2;
       display: flex;
-      justify-content: space-evenly;
+      justify-content: center;
       align-items: center;
+      gap: 0.6rem;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ff8a65 0%, #b2553d 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
 
-      padding: 1rem 1.5rem;
-      min-width: 220px;
+      .code-value {
+        letter-spacing: 2px;
+      }
 
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-      overflow: hidden;
       .copy {
+        display: flex;
+        align-items: center;
+        padding: 0;
         background: none;
         border: none;
-        .lucide.lucide-copy {
-          color: var(--font-title);
-          cursor: pointer;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+
+        &:hover {
+          opacity: 0.9;
         }
-      }
-      h1 {
-        margin: 0;
 
-        color: var(--font-title);
-        font-size: 1.3rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-align: center;
-        word-break: break-all;
-      }
-
-      &:hover {
-        transform: scale(1.02);
+        &:active {
+          transform: scale(0.9);
+        }
       }
     }
     .user-name {
@@ -314,8 +321,13 @@
       }
     }
 
+    /* La todo list occupe toute la colonne de droite : elle grandit d'abord
+       dans la case vide à côté de la galerie, avant de repousser quoi que ce
+       soit. align-self: start lui garde sa hauteur naturelle. */
     .component-todo {
-      grid-area: "todo";
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: start;
     }
     .dashboard-gallery {
       display: flex;
@@ -328,23 +340,19 @@
     width: 100vw;
     height: auto;
     padding: 10vh 4vw 10vh;
-    h1 {
+    :where(h1) {
       padding: 1.5rem 0 1rem 0;
       font-size: 1.5rem;
     }
     .section-nameCode {
-      .modal-code {
-        top: 8.625rem;
-        right: 2.5rem;
-      }
-    }
-    .user-name {
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      .lucide.lucide-hand {
-        width: 15px;
+      width: 100%;
+      .user-name {
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        .lucide.lucide-hand {
+          width: 2rem;
+        }
       }
     }
 
@@ -382,6 +390,13 @@
       gap: 16px;
       height: auto;
       width: 100%;
+
+      /* Une seule colonne en mobile : on revient au placement automatique,
+         dans l'ordre du document. */
+      .component-todo {
+        grid-column: auto;
+        grid-row: auto;
+      }
 
       .component-recent-reservations {
         width: 100%;
