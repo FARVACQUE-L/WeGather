@@ -46,6 +46,7 @@ function Messagerie() {
   const { eventUuid } = useParams();
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const messageInputRef = useRef<HTMLInputElement | null>(null);
 
   const [userId, setUserId] = useState<number | null>(null);
 
@@ -68,6 +69,9 @@ function Messagerie() {
   }, [receptionMessagesUser]);
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setMessagesUser((prev) => prev + emojiData.emoji);
+    setShowPicker(false);
+    // Le focus revient au champ pour enchaîner la saisie sans cliquer.
+    messageInputRef.current?.focus();
   };
 
   const fetchUserEvent = useCallback(async () => {
@@ -308,6 +312,7 @@ function Messagerie() {
 
           <div className="massagerie-input">
             <input
+              ref={messageInputRef}
               type="text"
               value={messagesUser}
               onChange={(e) => setMessagesUser(e.target.value)}
