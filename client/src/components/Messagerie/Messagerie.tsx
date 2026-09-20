@@ -1,11 +1,25 @@
 import "./Messagerie.css";
 import type { EmojiClickData } from "emoji-picker-react";
-import EmojiPicker, { EmojiStyle } from "emoji-picker-react";
+import EmojiPicker, { Categories, EmojiStyle } from "emoji-picker-react";
 import { motion } from "framer-motion";
 import { ContactRound, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { socket } from "../../socket/socket";
+
+// La bibliothèque n'est pas traduite : on redéfinit les catégories pour
+// imposer leur nom. L'ordre de ce tableau est celui du sélecteur.
+const EMOJI_CATEGORIES = [
+  { category: Categories.SUGGESTED, name: "Récemment utilisés" },
+  { category: Categories.SMILEYS_PEOPLE, name: "Émojis et personnes" },
+  { category: Categories.ANIMALS_NATURE, name: "Animaux et nature" },
+  { category: Categories.FOOD_DRINK, name: "Nourriture et boissons" },
+  { category: Categories.TRAVEL_PLACES, name: "Voyages et lieux" },
+  { category: Categories.ACTIVITIES, name: "Activités" },
+  { category: Categories.OBJECTS, name: "Objets" },
+  { category: Categories.SYMBOLS, name: "Symboles" },
+  { category: Categories.FLAGS, name: "Drapeaux" },
+];
 
 type ReceptionMessagesUser = {
   message_id: number;
@@ -318,11 +332,17 @@ function Messagerie() {
                   {/* NATIVE : les emojis sont rendus avec la police du
                       système. Par défaut la bibliothèque télécharge une image
                       par emoji depuis un CDN, soit 128 requêtes à l'ouverture. */}
+                  {/* La taille passe par les props : la bibliothèque la pose
+                      en style en ligne, qu'aucune règle CSS ne peut battre. */}
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
                     emojiStyle={EmojiStyle.NATIVE}
                     previewConfig={{ showPreview: false }}
                     skinTonesDisabled
+                    width="min(320px, 80vw)"
+                    height="min(350px, 45vh)"
+                    searchPlaceHolder="Rechercher un emoji"
+                    categories={EMOJI_CATEGORIES}
                   />
                 </div>
               )}

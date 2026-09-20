@@ -110,13 +110,16 @@
         border: 1px solid #ff7e5f;
         border-radius: 21px;
         margin-bottom: 10px;
-        input {
+        /* Enfant direct uniquement : sans ça, ces règles s'appliquaient aussi
+           au champ de recherche du sélecteur d'emoji, imbriqué plus bas — il
+           perdait son fond, sa bordure, et son texte passait sous la loupe. */
+        > input {
           padding-left: 10px;
           width: 94%;
           border-style: none;
           background: none;
         }
-        input:focus-visible {
+        > input:focus-visible {
           outline: none;
         }
 
@@ -132,14 +135,68 @@
           right: 0;
           z-index: 1000;
 
-          /* Le sélecteur fait 350px par défaut : on le borne pour qu'il
-             tienne dans l'écran sur mobile. */
+          /* La bibliothèque expose toutes ses couleurs en variables CSS :
+             on les branche sur les jetons du projet plutôt que de lutter
+             contre ses styles. La taille, elle, se règle par les props du
+             composant, posées en style en ligne. */
           .EmojiPickerReact {
-            width: min(320px, 80vw);
-            height: min(350px, 45vh);
+            --epr-bg-color: var(--bg-neutral);
+            --epr-text-color: var(--font-darkBrown);
+            --epr-picker-border-color: var(--border-color);
+            --epr-picker-border-radius: 1rem;
+
+            --epr-category-label-bg-color: var(--bg-color);
+            --epr-category-label-text-color: var(--font-brown);
+            --epr-category-icon-active-color: var(--icon-color);
+            --epr-category-navigation-button-size: 24px;
+
+            --epr-hover-bg-color: var(--hover-sidebar);
+            --epr-focus-bg-color: var(--hover-sidebar);
+            --epr-highlight-color: var(--color-chat);
+
+            --epr-search-input-bg-color: var(--input-color);
+            --epr-search-input-bg-color-active: var(--bg-neutral);
+            --epr-search-input-text-color: var(--font-input);
+            --epr-search-input-placeholder-color: var(--font-placeholder);
+            --epr-search-border-color: var(--border-color);
+            --epr-search-border-color-active: var(--color-chat);
+            --epr-search-input-border-radius: 10px;
+
+            --epr-emoji-size: 22px;
+            --epr-emoji-padding: 4px;
+
+            font-family: "Be Vietnam Pro", sans-serif;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+            /* La barre de catégories est dans l'en-tête, sous la recherche.
+               display: contents sort l'en-tête du flux : la recherche et la
+               barre deviennent des enfants directs du panneau, et order les
+               replace — recherche, emojis, catégories. */
+            .epr-header {
+              display: contents;
+            }
+
+            .epr-body {
+              order: 1;
+              /* Le défilement reste actif, seule la barre est masquée. */
+              scrollbar-width: none;
+
+              &::-webkit-scrollbar {
+                display: none;
+              }
+            }
+
+            .epr-category-nav {
+              order: 2;
+              border-top: 1px solid var(--border-color);
+            }
           }
         }
-        button {
+        /* Nos boutons uniquement. Appliquée à tous les descendants, cette
+           règle effaçait aussi l'image de fond des boutons de catégorie du
+           sélecteur d'emoji, qui devenaient invisibles. */
+        > button,
+        .emoji-wrapper > button {
           border-style: none;
           font-size: 20px;
           background: none;
@@ -258,7 +315,7 @@
             position: static;
           }
 
-          input {
+          > input {
             width: 85%;
           }
         }
