@@ -1,11 +1,55 @@
 import "./Messagerie.css";
 import type { EmojiClickData } from "emoji-picker-react";
-import EmojiPicker from "emoji-picker-react";
+import EmojiPicker, { Categories, EmojiStyle } from "emoji-picker-react";
 import { motion } from "framer-motion";
-import { ContactRound, Send } from "lucide-react";
+import { ContactRound, Send, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { socket } from "../../socket/socket";
+
+// La bibliothèque n'est pas traduite : on redéfinit les catégories pour
+// imposer leur nom. L'ordre de ce tableau est celui du sélecteur.
+const EMOJI_CATEGORIES = [
+  { category: Categories.SUGGESTED, name: "Récemment utilisés" },
+  { category: Categories.SMILEYS_PEOPLE, name: "Émojis et personnes" },
+  { category: Categories.ANIMALS_NATURE, name: "Animaux et nature" },
+  { category: Categories.FOOD_DRINK, name: "Nourriture et boissons" },
+  { category: Categories.TRAVEL_PLACES, name: "Voyages et lieux" },
+  { category: Categories.ACTIVITIES, name: "Activités" },
+  { category: Categories.OBJECTS, name: "Objets" },
+  { category: Categories.SYMBOLS, name: "Symboles" },
+  { category: Categories.FLAGS, name: "Drapeaux" },
+];
+
+// Une suite emoji peut combiner plusieurs caractères : sélecteur de variante,
+// teinte de peau, ou liaison par ZWJ (👨‍👩‍👧). On les capture d'un bloc pour ne
+// pas couper une famille en trois bonshommes.
+const EMOJI_RUN =
+  /(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)/gu;
+const EMOJI_ONLY =
+  /^\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*$/u;
+
+type MessagePart = { key: string; value: string; isEmoji: boolean };
+
+// Découpe un message en fragments texte et emoji. La clé vient de la position
+// dans la chaîne, pour rester stable sans dépendre de l'index de la boucle.
+const splitMessageText = (text: string): MessagePart[] => {
+  const parts: MessagePart[] = [];
+  let offset = 0;
+
+  for (const chunk of text.split(EMOJI_RUN)) {
+    if (chunk) {
+      parts.push({
+        key: `${offset}-${chunk}`,
+        value: chunk,
+        isEmoji: EMOJI_ONLY.test(chunk),
+      });
+    }
+    offset += chunk.length;
+  }
+
+  return parts;
+};
 
 type ReceptionMessagesUser = {
   message_id: number;
@@ -29,9 +73,11 @@ function Messagerie() {
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
   const [usersByEvent, setUsersByEvent] = useState<UserByEvent[]>([]);
   const [showPicker, setShowPicker] = useState(false);
+  const [isContactsOpen, setIsContactsOpen] = useState(false);
   const { eventUuid } = useParams();
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const messageInputRef = useRef<HTMLInputElement | null>(null);
 
   const [userId, setUserId] = useState<number | null>(null);
 
@@ -54,6 +100,9 @@ function Messagerie() {
   }, [receptionMessagesUser]);
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setMessagesUser((prev) => prev + emojiData.emoji);
+    setShowPicker(false);
+    // Le focus revient au champ pour enchaîner la saisie sans cliquer.
+    messageInputRef.current?.focus();
   };
 
   const fetchUserEvent = useCallback(async () => {
@@ -228,6 +277,28 @@ function Messagerie() {
       handleSendMessage();
     }
   };
+  // Même rendu pour le panneau desktop et la modale mobile.
+  const contactList = usersByEvent.map((event, index) => (
+    <motion.div
+      key={event.user_username}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.06 }}
+    >
+      <img
+        src={`${import.meta.env.VITE_API_URL}${event.user_profile_picture}`}
+        alt="photo-profil"
+      />
+      <div>
+        <p>{event.user_username}</p>
+        <p className="membre-date">
+          Membre depuis {formatMonthYear(event.user_joining_date)}
+        </p>
+        <hr />
+      </div>
+    </motion.div>
+  ));
+
   return (
     <motion.div
       className="messagerie"
@@ -244,6 +315,16 @@ function Messagerie() {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1 }}
         >
+          <button
+            type="button"
+            className="contacts-button"
+            onClick={() => setIsContactsOpen(true)}
+          >
+            <ContactRound size={18} />
+            Contacts présents
+            <span className="contacts-count">{usersByEvent.length}</span>
+          </button>
+
           <div ref={messagesRef} className="messagerie-box-messages">
             {receptionMessagesUser.map((reception, index) => {
               const previousMessage = receptionMessagesUser[index - 1];
@@ -281,7 +362,17 @@ function Messagerie() {
                     )}
 
                     <section>
-                      <p className="message-text">{reception.message_text}</p>
+                      <p className="message-text">
+                        {splitMessageText(reception.message_text).map((part) =>
+                          part.isEmoji ? (
+                            <span key={part.key} className="message-emoji">
+                              {part.value}
+                            </span>
+                          ) : (
+                            part.value
+                          ),
+                        )}
+                      </p>
                       <p className="hour-text">
                         {formatHour(reception.message_date)}
                       </p>
@@ -294,21 +385,46 @@ function Messagerie() {
 
           <div className="massagerie-input">
             <input
+              ref={messageInputRef}
               type="text"
               value={messagesUser}
               onChange={(e) => setMessagesUser(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Écrire un message..."
             />
-            <button type="button" onClick={() => setShowPicker(!showPicker)}>
-              😊
-            </button>
+            {/* Le sélecteur est ancré à son bouton via ce conteneur en
+                position relative : il s'ouvre juste au-dessus, quelle que
+                soit la largeur d'écran. */}
+            <div className="emoji-wrapper">
+              <button
+                type="button"
+                aria-label="Ouvrir le sélecteur d'emoji"
+                aria-expanded={showPicker}
+                onClick={() => setShowPicker(!showPicker)}
+              >
+                😊
+              </button>
 
-            {showPicker && (
-              <div className="emoji-picker">
-                <EmojiPicker onEmojiClick={handleEmojiClick} />
-              </div>
-            )}
+              {showPicker && (
+                <div className="emoji-picker">
+                  {/* NATIVE : les emojis sont rendus avec la police du
+                      système. Par défaut la bibliothèque télécharge une image
+                      par emoji depuis un CDN, soit 128 requêtes à l'ouverture. */}
+                  {/* La taille passe par les props : la bibliothèque la pose
+                      en style en ligne, qu'aucune règle CSS ne peut battre. */}
+                  <EmojiPicker
+                    onEmojiClick={handleEmojiClick}
+                    emojiStyle={EmojiStyle.NATIVE}
+                    previewConfig={{ showPreview: false }}
+                    skinTonesDisabled
+                    width="min(320px, 80vw)"
+                    height="min(350px, 45vh)"
+                    searchPlaceHolder="Rechercher un emoji"
+                    categories={EMOJI_CATEGORIES}
+                  />
+                </div>
+              )}
+            </div>
             <button
               className="send-button"
               type="button"
@@ -333,27 +449,39 @@ function Messagerie() {
 
           <hr className="hr-h3" />
 
-          {usersByEvent.map((event, index) => (
-            <motion.div
-              key={event.user_username}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.06 }}
-            >
-              <img
-                src={`${import.meta.env.VITE_API_URL}${event.user_profile_picture}`}
-                alt="photo-profil"
-              />
-              <div>
-                <p>{event.user_username}</p>
-                <p className="membre-date">
-                  Membre depuis {formatMonthYear(event.user_joining_date)}
-                </p>
-                <hr />
-              </div>
-            </motion.div>
-          ))}
+          {contactList}
         </motion.section>
+
+        {/* Sur mobile, la même liste s'ouvre dans une modale : affichée en
+            ligne, elle occupait tout l'écran dès quelques participants. */}
+        {isContactsOpen && (
+          <div className="contacts-modal-overlay">
+            <motion.div
+              className="contacts-modal"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="contacts-modal-header">
+                <h3>
+                  <ContactRound size={20} />
+                  Contacts présents
+                </h3>
+                <button
+                  type="button"
+                  aria-label="Fermer la liste des contacts"
+                  onClick={() => setIsContactsOpen(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <hr className="hr-h3" />
+
+              <div className="contacts-modal-list">{contactList}</div>
+            </motion.div>
+          </div>
+        )}
       </section>
     </motion.div>
   );
