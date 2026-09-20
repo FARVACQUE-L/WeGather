@@ -28,6 +28,14 @@
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
+
+        /* Les emojis sont isolés dans un span au rendu, pour être agrandis
+           sans toucher à la taille du texte qui les entoure. */
+        .message-emoji {
+          font-size: 1.6em;
+          line-height: 1;
+          vertical-align: -0.15em;
+        }
         .message-date-separator {
           width: fit-content;
           margin: 1rem auto;
@@ -118,6 +126,7 @@
           width: 94%;
           border-style: none;
           background: none;
+          font-size: 1rem;
         }
         > input:focus-visible {
           outline: none;
@@ -148,7 +157,7 @@
             --epr-category-label-bg-color: var(--bg-color);
             --epr-category-label-text-color: var(--font-brown);
             --epr-category-icon-active-color: var(--icon-color);
-            --epr-category-navigation-button-size: 24px;
+            --epr-category-navigation-button-size: 20px;
 
             --epr-hover-bg-color: var(--hover-sidebar);
             --epr-focus-bg-color: var(--hover-sidebar);
@@ -200,6 +209,13 @@
           border-style: none;
           font-size: 20px;
           background: none;
+        }
+        /* Le bouton d'accès aux emojis, plus grand que le reste de la barre. */
+        .emoji-wrapper > button {
+          font-size: 26px;
+          line-height: 1;
+          padding: 0;
+          cursor: pointer;
         }
         .send-button {
           border-radius: 21px;

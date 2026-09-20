@@ -21,6 +21,36 @@ const EMOJI_CATEGORIES = [
   { category: Categories.FLAGS, name: "Drapeaux" },
 ];
 
+// Une suite emoji peut combiner plusieurs caractères : sélecteur de variante,
+// teinte de peau, ou liaison par ZWJ (👨‍👩‍👧). On les capture d'un bloc pour ne
+// pas couper une famille en trois bonshommes.
+const EMOJI_RUN =
+  /(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)/gu;
+const EMOJI_ONLY =
+  /^\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*$/u;
+
+type MessagePart = { key: string; value: string; isEmoji: boolean };
+
+// Découpe un message en fragments texte et emoji. La clé vient de la position
+// dans la chaîne, pour rester stable sans dépendre de l'index de la boucle.
+const splitMessageText = (text: string): MessagePart[] => {
+  const parts: MessagePart[] = [];
+  let offset = 0;
+
+  for (const chunk of text.split(EMOJI_RUN)) {
+    if (chunk) {
+      parts.push({
+        key: `${offset}-${chunk}`,
+        value: chunk,
+        isEmoji: EMOJI_ONLY.test(chunk),
+      });
+    }
+    offset += chunk.length;
+  }
+
+  return parts;
+};
+
 type ReceptionMessagesUser = {
   message_id: number;
   message_text: string;
@@ -299,7 +329,17 @@ function Messagerie() {
                     )}
 
                     <section>
-                      <p className="message-text">{reception.message_text}</p>
+                      <p className="message-text">
+                        {splitMessageText(reception.message_text).map((part) =>
+                          part.isEmoji ? (
+                            <span key={part.key} className="message-emoji">
+                              {part.value}
+                            </span>
+                          ) : (
+                            part.value
+                          ),
+                        )}
+                      </p>
                       <p className="hour-text">
                         {formatHour(reception.message_date)}
                       </p>
