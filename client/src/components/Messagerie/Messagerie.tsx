@@ -321,6 +321,8 @@ function Messagerie() {
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
                     emojiStyle={EmojiStyle.NATIVE}
+                    previewConfig={{ showPreview: false }}
+                    skinTonesDisabled
                   />
                 </div>
               )}
