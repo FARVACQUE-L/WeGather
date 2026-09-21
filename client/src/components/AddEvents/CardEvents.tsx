@@ -1,4 +1,4 @@
-import { MapPin, PencilLine, Trash2 } from "lucide-react";
+import { ExternalLink, MapPin, PencilLine, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import Swal from "sweetalert2";
@@ -85,6 +85,10 @@ function CardEvents({
   const isHost = user_id === event_id_host;
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentDescription, setCurrentDescription] = useState(description);
+
+  const descriptionParts = splitDescription(currentDescription ?? "");
+  // La première adresse trouvée alimente le lien « Voir le site ».
+  const firstUrl = descriptionParts.find((part) => part.url)?.url;
   const [currentImage, setCurrentImage] = useState(image);
   const [currentLocation, setCurrentLocation] = useState(location);
   const [currentDateStart, setCurrentDateStart] = useState(dateStart);
@@ -180,27 +184,14 @@ function CardEvents({
           <div className="CardEvents-Container">
             <h2 className="CardEvents-Title">{currentTitle}</h2>
             <p className="CardEvents-Description">
-              {splitDescription(currentDescription ?? "").map((part) =>
+              {descriptionParts.map((part) =>
                 part.url ? (
-                  // Un <a> ici serait imbriqué dans le lien de la carte, ce
-                  // qui n'est pas du HTML valide : on ouvre donc le site
-                  // depuis un bouton, en bloquant le clic de la carte.
-                  <button
-                    key={part.key}
-                    type="button"
-                    className="CardEvents-Link"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      window.open(
-                        part.url as string,
-                        "_blank",
-                        "noopener,noreferrer",
-                      );
-                    }}
-                  >
+                  // Simple span : un élément interactif ici serait un bloc,
+                  // que la troncature à 3 lignes ne sait pas compter. Le
+                  // lien cliquable est rendu hors de la carte, plus bas.
+                  <span key={part.key} className="CardEvents-Url">
                     {part.value}
-                  </button>
+                  </span>
                 ) : (
                   part.value
                 ),
@@ -211,6 +202,20 @@ function CardEvents({
             </span>
           </div>
         </Link>
+
+        {/* Hors du <Link> de la carte : un lien dans un lien n'est pas du
+            HTML valide. Reste visible même si la description est tronquée. */}
+        {firstUrl && (
+          <a
+            className="CardEvents-Site"
+            href={firstUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLink size={14} />
+            Voir le site
+          </a>
+        )}
 
         {isHost && (
           <button
