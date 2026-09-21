@@ -1,10 +1,42 @@
-import { MapPin, PencilLine, Trash2 } from "lucide-react";
+import { ExternalLink, MapPin, PencilLine, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import Swal from "sweetalert2";
 import type { CardEventsProps, EventData } from "../../types/Events";
 import ModalEditEvent from "./ModalEditEvent";
 import "./CardEvents.css";
+
+// Une adresse s'arrête au premier espace. La ponctuation finale est exclue,
+// sinon « voir http://site.fr. » emporterait le point dans le lien.
+// Insensible à la casse : la description capitalise sa première lettre, donc
+// une adresse écrite en début de champ devient « Http:// ».
+const URL_RUN = /(https?:\/\/[^\s]+[^\s.,;:!?)\]])/gi;
+const URL_ONLY = /^https?:\/\//i;
+
+type DescriptionPart = { key: string; value: string; url: string | null };
+
+// Découpe la description en fragments texte et adresses cliquables.
+const splitDescription = (text: string): DescriptionPart[] => {
+  const parts: DescriptionPart[] = [];
+  let offset = 0;
+
+  for (const chunk of text.split(URL_RUN)) {
+    if (chunk) {
+      parts.push({
+        key: `${offset}-${chunk}`,
+        value: chunk,
+        // Le schéma est remis en minuscules pour l'ouverture ; le texte
+        // affiché, lui, reste tel que l'utilisateur l'a saisi.
+        url: URL_ONLY.test(chunk)
+          ? chunk.replace(/^https?:/i, (scheme) => scheme.toLowerCase())
+          : null,
+      });
+    }
+    offset += chunk.length;
+  }
+
+  return parts;
+};
 
 const formatDay = (date: string): string => {
   return `${new Date(date).getDate()}`;
@@ -53,6 +85,10 @@ function CardEvents({
   const isHost = user_id === event_id_host;
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentDescription, setCurrentDescription] = useState(description);
+
+  const descriptionParts = splitDescription(currentDescription ?? "");
+  // La première adresse trouvée alimente le lien « Voir le site ».
+  const firstUrl = descriptionParts.find((part) => part.url)?.url;
   const [currentImage, setCurrentImage] = useState(image);
   const [currentLocation, setCurrentLocation] = useState(location);
   const [currentDateStart, setCurrentDateStart] = useState(dateStart);
@@ -147,12 +183,39 @@ function CardEvents({
           </div>
           <div className="CardEvents-Container">
             <h2 className="CardEvents-Title">{currentTitle}</h2>
-            <p className="CardEvents-Description">{currentDescription}</p>
+            <p className="CardEvents-Description">
+              {descriptionParts.map((part) =>
+                part.url ? (
+                  // Simple span : un élément interactif ici serait un bloc,
+                  // que la troncature à 3 lignes ne sait pas compter. Le
+                  // lien cliquable est rendu hors de la carte, plus bas.
+                  <span key={part.key} className="CardEvents-Url">
+                    {part.value}
+                  </span>
+                ) : (
+                  part.value
+                ),
+              )}
+            </p>
             <span className="CardEvents-Location">
               <MapPin size={14} /> {currentLocation}
             </span>
           </div>
         </Link>
+
+        {/* Hors du <Link> de la carte : un lien dans un lien n'est pas du
+            HTML valide. Reste visible même si la description est tronquée. */}
+        {firstUrl && (
+          <a
+            className="CardEvents-Site"
+            href={firstUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLink size={14} />
+            Voir le site
+          </a>
+        )}
 
         {isHost && (
           <button

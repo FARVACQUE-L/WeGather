@@ -56,7 +56,14 @@
     .CardEvents-Container {
       display: flex;
       flex-direction: column;
-      padding: 2rem 1rem 0 1rem;
+      /* Occupe la hauteur restante de la carte, pour que la localisation
+         puisse être poussée en bas quelle que soit la longueur du texte.
+         La marge basse réserve la place des boutons modifier et supprimer,
+         posés en absolu à 0.5rem du bas et hauts de 36px. La place est
+         réservée même sans bouton, pour que les cartes d'une même ligne
+         restent alignées, que la réservation soit la sienne ou non. */
+      flex: 1;
+      padding: 2rem 1rem 3rem 1rem;
       gap: 0.5rem;
       .CardEvents-Title {
         font-size: 1.5rem;
@@ -65,8 +72,28 @@
       .CardEvents-Description {
         color: var(--font-input);
         font-size: 0.8rem;
+
+        /* Tronquée à 3 lignes : une seule description longue allongeait
+           toutes les cartes de la ligne, qui ont la même hauteur. Le texte
+           entier reste lisible sur la page de détail. */
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        overflow: hidden;
+
+        /* L'adresse est mise en valeur mais reste du texte : un élément
+           interactif serait un bloc, que la troncature ne sait pas compter. */
+        .CardEvents-Url {
+          color: var(--font-brown);
+          text-decoration: underline;
+          word-break: break-all;
+        }
       }
       .CardEvents-Location {
+        /* Alignée en bas : toutes les cartes d'une ligne l'affichent à la
+           même hauteur, même avec des descriptions de longueurs différentes. */
+        margin-top: auto;
         font-size: 0.8rem;
         font-weight: bold;
       }
@@ -75,6 +102,26 @@
       .CardEvents-Location {
         text-align: left;
       }
+    }
+  }
+  /* En bas à gauche, dans la bande réservée sous la localisation, à côté des
+     boutons modifier et supprimer qui occupent le coin droit. */
+  .CardEvents-Site {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    bottom: 0.9rem;
+    left: 1rem;
+    z-index: 1;
+    color: var(--font-brown);
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-chat);
+      text-decoration: underline;
     }
   }
   .CardEvents-Edit {

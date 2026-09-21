@@ -20,7 +20,18 @@ type Reservation = {
   event_date_end: string;
 };
 
-const capitalize = (str = "") => str.charAt(0).toUpperCase() + str.slice(1);
+const STARTS_WITH_URL = /^https?:\/\//i;
+
+// La capitalisation s'applique à chaque frappe : au moment où l'on tape « h »,
+// le champ contient déjà « H ». Dès que le schéma est reconnaissable, on le
+// remet donc en minuscules au lieu de simplement s'abstenir.
+const capitalize = (str = "") => {
+  if (STARTS_WITH_URL.test(str)) {
+    return str.replace(/^https?/i, (scheme) => scheme.toLowerCase());
+  }
+
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 function Reservation() {
   const { eventUuid } = useParams();
