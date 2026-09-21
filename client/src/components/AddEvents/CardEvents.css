@@ -13,7 +13,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     background: var(--bg-neutral);
     overflow: hidden;
-    margin-bottom: 3rem;
     transition: transform linear 0.125s;
     text-decoration: none;
     color: inherit;
@@ -73,14 +72,17 @@
         color: var(--font-input);
         font-size: 0.8rem;
 
-        /* Tronquée à 3 lignes : une seule description longue allongeait
-           toutes les cartes de la ligne, qui ont la même hauteur. Le texte
-           entier reste lisible sur la page de détail. */
+        /* Exactement 3 lignes, ni plus ni moins : la troncature évite qu'une
+           description longue allonge toute la ligne de cartes, et la hauteur
+           minimale évite qu'une description courte laisse un vide entre elle
+           et la localisation. Le texte entier reste sur la page de détail. */
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
         line-clamp: 3;
         overflow: hidden;
+        line-height: 1.4;
+        min-height: calc(1.4em * 3);
 
         /* L'adresse est mise en valeur mais reste du texte : un élément
            interactif serait un bloc, que la troncature ne sait pas compter. */
