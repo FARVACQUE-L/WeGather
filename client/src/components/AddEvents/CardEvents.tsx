@@ -6,6 +6,32 @@ import type { CardEventsProps, EventData } from "../../types/Events";
 import ModalEditEvent from "./ModalEditEvent";
 import "./CardEvents.css";
 
+// Une adresse s'arrête au premier espace. La ponctuation finale est exclue,
+// sinon « voir http://site.fr. » emporterait le point dans le lien.
+const URL_RUN = /(https?:\/\/[^\s]+[^\s.,;:!?)\]])/g;
+const URL_ONLY = /^https?:\/\//;
+
+type DescriptionPart = { key: string; value: string; url: string | null };
+
+// Découpe la description en fragments texte et adresses cliquables.
+const splitDescription = (text: string): DescriptionPart[] => {
+  const parts: DescriptionPart[] = [];
+  let offset = 0;
+
+  for (const chunk of text.split(URL_RUN)) {
+    if (chunk) {
+      parts.push({
+        key: `${offset}-${chunk}`,
+        value: chunk,
+        url: URL_ONLY.test(chunk) ? chunk : null,
+      });
+    }
+    offset += chunk.length;
+  }
+
+  return parts;
+};
+
 const formatDay = (date: string): string => {
   return `${new Date(date).getDate()}`;
 };
@@ -147,7 +173,33 @@ function CardEvents({
           </div>
           <div className="CardEvents-Container">
             <h2 className="CardEvents-Title">{currentTitle}</h2>
-            <p className="CardEvents-Description">{currentDescription}</p>
+            <p className="CardEvents-Description">
+              {splitDescription(currentDescription ?? "").map((part) =>
+                part.url ? (
+                  // Un <a> ici serait imbriqué dans le lien de la carte, ce
+                  // qui n'est pas du HTML valide : on ouvre donc le site
+                  // depuis un bouton, en bloquant le clic de la carte.
+                  <button
+                    key={part.key}
+                    type="button"
+                    className="CardEvents-Link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(
+                        part.url as string,
+                        "_blank",
+                        "noopener,noreferrer",
+                      );
+                    }}
+                  >
+                    {part.value}
+                  </button>
+                ) : (
+                  part.value
+                ),
+              )}
+            </p>
             <span className="CardEvents-Location">
               <MapPin size={14} /> {currentLocation}
             </span>

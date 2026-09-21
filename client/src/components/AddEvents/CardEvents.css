@@ -65,6 +65,23 @@
       .CardEvents-Description {
         color: var(--font-input);
         font-size: 0.8rem;
+
+        /* Une adresse repérée dans la description : bouton pour rester du
+           HTML valide dans le lien de la carte, mais rendu comme un lien. */
+        .CardEvents-Link {
+          padding: 0;
+          border: none;
+          background: none;
+          font: inherit;
+          color: var(--font-brown);
+          text-decoration: underline;
+          word-break: break-all;
+          cursor: pointer;
+
+          &:hover {
+            color: var(--color-chat);
+          }
+        }
       }
       .CardEvents-Location {
         font-size: 0.8rem;
