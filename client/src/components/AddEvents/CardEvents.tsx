@@ -8,8 +8,10 @@ import "./CardEvents.css";
 
 // Une adresse s'arrête au premier espace. La ponctuation finale est exclue,
 // sinon « voir http://site.fr. » emporterait le point dans le lien.
-const URL_RUN = /(https?:\/\/[^\s]+[^\s.,;:!?)\]])/g;
-const URL_ONLY = /^https?:\/\//;
+// Insensible à la casse : la description capitalise sa première lettre, donc
+// une adresse écrite en début de champ devient « Http:// ».
+const URL_RUN = /(https?:\/\/[^\s]+[^\s.,;:!?)\]])/gi;
+const URL_ONLY = /^https?:\/\//i;
 
 type DescriptionPart = { key: string; value: string; url: string | null };
 
@@ -23,7 +25,11 @@ const splitDescription = (text: string): DescriptionPart[] => {
       parts.push({
         key: `${offset}-${chunk}`,
         value: chunk,
-        url: URL_ONLY.test(chunk) ? chunk : null,
+        // Le schéma est remis en minuscules pour l'ouverture ; le texte
+        // affiché, lui, reste tel que l'utilisateur l'a saisi.
+        url: URL_ONLY.test(chunk)
+          ? chunk.replace(/^https?:/i, (scheme) => scheme.toLowerCase())
+          : null,
       });
     }
     offset += chunk.length;
