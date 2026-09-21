@@ -14,6 +14,7 @@ type Reservation = {
   reservation_date: string;
   reservation_location: string;
   reservation_description: string;
+  reservation_link: string | null;
   reservation_picture: string;
   event_name: string;
   event_date_start: string;
@@ -42,6 +43,7 @@ function Reservation() {
   const [reservationDate, setReservationDate] = useState("");
   const [reservationLocation, setReservationLocation] = useState("");
   const [reservationDescription, setReservationDescription] = useState("");
+  const [reservationLink, setReservationLink] = useState("");
   const [reservationPicture, setReservationPicture] = useState<File | null>(
     null,
   );
@@ -139,6 +141,7 @@ function Reservation() {
     setReservationDate(resa.reservation_date.split("T")[0]);
     setReservationLocation(capitalize(resa.reservation_location));
     setReservationDescription(capitalize(resa.reservation_description));
+    setReservationLink(resa.reservation_link ?? "");
     setReservationPicture(null);
     setPreview(`${import.meta.env.VITE_API_URL}${resa.reservation_picture}`);
     setEditingReservationId(reservationId);
@@ -191,6 +194,7 @@ function Reservation() {
     formData.append("reservation_date", reservationDate);
     formData.append("reservation_location", reservationLocation);
     formData.append("reservation_description", reservationDescription);
+    formData.append("reservation_link", reservationLink.trim());
     if (reservationPicture) {
       formData.append("reservation_picture", reservationPicture);
     }
@@ -223,6 +227,7 @@ function Reservation() {
     setReservationDate("");
     setReservationLocation("");
     setReservationDescription("");
+    setReservationLink("");
     setReservationPicture(null);
     setPreview("");
     setEditingReservationId(null);
@@ -285,6 +290,7 @@ function Reservation() {
             setReservationDate("");
             setReservationLocation("");
             setReservationDescription("");
+            setReservationLink("");
             setReservationPicture(null);
             setPreview("");
             setIsModalOpen(true);
@@ -365,6 +371,15 @@ function Reservation() {
                   onChange={(e) =>
                     setReservationDescription(capitalize(e.target.value))
                   }
+                />
+
+                {/* Facultatif. Alimente le bouton « Voir le site » de la
+                    carte ; le serveur n'accepte que http et https. */}
+                <input
+                  type="url"
+                  placeholder="Lien vers la réservation (facultatif)"
+                  value={reservationLink}
+                  onChange={(e) => setReservationLink(e.target.value)}
                 />
 
                 <label htmlFor="photo-upload" className="custom-upload">
@@ -474,6 +489,7 @@ function Reservation() {
               title={event.reservation_name}
               description={event.reservation_description}
               location={event.reservation_location}
+              siteUrl={event.reservation_link}
             />
           </div>
         ))}
