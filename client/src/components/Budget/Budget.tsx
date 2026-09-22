@@ -284,6 +284,7 @@ function Budget() {
       title: "Modifier la dépense",
 
       customClass: {
+        container: "budget-backdrop",
         popup: "toast-edit-popup",
         confirmButton: "budget-confirm",
         cancelButton: "budget-cancel",
@@ -415,6 +416,7 @@ function Budget() {
       cancelButtonText: "Annuler",
 
       customClass: {
+        container: "budget-backdrop",
         popup: "budget-delete-popup",
         confirmButton: "budget-delete-confirm",
         cancelButton: "budget-delete-cancel",

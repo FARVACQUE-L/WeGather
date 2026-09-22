@@ -98,6 +98,11 @@ body {
     }
   }
 
+  /* Same blur as the add form overlay, dropped as soon as the modal closes */
+  .budget-backdrop.swal2-backdrop-show {
+    backdrop-filter: blur(6px);
+  }
+
   /* Mirrors .createForm so the edit and add modals share the same sizes */
   .toast-edit-popup {
     border-radius: 16px;
