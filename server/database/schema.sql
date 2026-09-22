@@ -275,6 +275,7 @@ CREATE TABLE `reservation` (
   `reservation_date` DATE NOT NULL,
   `reservation_location` VARCHAR(255) NOT NULL,
   `reservation_description` VARCHAR(255) NOT NULL,
+  `reservation_link` VARCHAR(255) NULL,
   `reservation_picture` VARCHAR(255) NOT NULL,
   `reservation_creation_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

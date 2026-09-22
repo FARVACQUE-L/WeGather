@@ -7,6 +7,7 @@ type Reservation = {
   reservation_date: string;
   reservation_location: string;
   reservation_description: string;
+  reservation_link: string | null;
   reservation_picture: string | null;
 };
 
@@ -61,9 +62,10 @@ ORDER BY r.reservation_id DESC;
       reservation_date,
       reservation_location,
       reservation_description,
+      reservation_link,
       reservation_picture
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         reservation.reservation_id_event,
@@ -72,6 +74,7 @@ ORDER BY r.reservation_id DESC;
         reservation.reservation_date,
         reservation.reservation_location,
         reservation.reservation_description,
+        reservation.reservation_link,
         reservation.reservation_picture,
       ],
     );
@@ -96,6 +99,7 @@ ORDER BY r.reservation_id DESC;
       reservation_date: string;
       reservation_location: string;
       reservation_description: string;
+      reservation_link: string | null;
       reservation_picture?: string | null;
     },
   ) {
@@ -107,6 +111,7 @@ ORDER BY r.reservation_id DESC;
       reservation_date = ?,
       reservation_location = ?,
       reservation_description = ?,
+      reservation_link = ?,
       reservation_picture = COALESCE(?, reservation_picture)
     WHERE reservation_id = ?
     `,
@@ -115,6 +120,7 @@ ORDER BY r.reservation_id DESC;
         reservation.reservation_date,
         reservation.reservation_location,
         reservation.reservation_description,
+        reservation.reservation_link,
         reservation.reservation_picture ?? null,
         reservationId,
       ],
