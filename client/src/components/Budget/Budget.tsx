@@ -12,7 +12,6 @@ import {
   Pen,
   Plus,
   Trash,
-  X,
 } from "lucide-react";
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -472,14 +471,16 @@ function Budget() {
           transition={{ duration: 0.4 }}
         >
           <h1>{budgetEvent?.event_name}</h1>
-          <button
+          <motion.button
             type="button"
             className="button-header"
             onClick={() => setShowCreateForm(!showCreateForm)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <FilePlusCorner size={20} />
             <span> Ajouter une dépense</span>
-          </button>
+          </motion.button>
         </motion.header>
       </div>
       <div className="budgetBody">
@@ -489,7 +490,6 @@ function Budget() {
             <form className="createForm" onSubmit={(e) => addBudget(e)}>
               <div className="mobileOnly">
                 <h5>Ajoute une dépense</h5>
-                <X className="icons" onClick={() => setShowCreateForm(false)} />
               </div>
 
               {/* Name */}
@@ -510,7 +510,18 @@ function Budget() {
                 required
               />
 
-              <button type="submit">Ajouter</button>
+              <div className="formActions">
+                <button type="submit" className="budget-confirm">
+                  Ajouter
+                </button>
+                <button
+                  type="button"
+                  className="budget-cancel"
+                  onClick={() => setShowCreateForm(false)}
+                >
+                  Annuler
+                </button>
+              </div>
             </form>
           </div>
         ) : (

@@ -14,6 +14,12 @@ body {
     gap: 2rem;
     .form {
       backdrop-filter: blur(6px);
+
+      .formActions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
     }
     .myBalance {
       .myBalanceBox {
@@ -92,27 +98,57 @@ body {
     }
   }
 
+  /* Mirrors .createForm so the edit and add modals share the same sizes */
   .toast-edit-popup {
-    border-radius: 24px;
-    padding: 2rem;
+    border-radius: 16px;
     background: #fffaf7;
 
     .swal2-title {
+      padding: 0;
       color: var(--font-brown);
-      font-size: 1.8rem;
       font-weight: 700;
-      .swal2-html-container {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-      }
+      text-align: left;
     }
+
+    .swal2-html-container {
+      padding: 0;
+      overflow: visible;
+    }
+
     .swal2-input {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0;
+      padding: 12px;
       border: 2px solid var(--beige-color);
-      border-radius: 14px;
+      border-radius: 10px;
+      font-size: revert;
 
       &:focus {
-        border-color: #ff8a6a;
-        box-shadow: 0 0 0 4px rgba(255, 138, 106, 0.15);
+        border-color: var(--font-brown);
+        box-shadow: 0 0 5px rgba(185, 68, 36, 0.3);
+      }
+    }
+
+    .swal2-actions {
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+
+      button {
+        margin: 0;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: revert;
+        font-weight: bold;
+        transition: transform 0.25s;
+      }
+
+      /* Drop sweetalert's hover darkening so it behaves like the add form */
+      .budget-cancel:hover,
+      .budget-cancel:active {
+        background-color: #f5f5f5;
       }
     }
   }
@@ -141,26 +177,28 @@ body {
 
   .budget-confirm {
     background: linear-gradient(135deg, #ff8a6a, #c24a2d);
-
-    border-radius: 12px;
-    font-weight: 700;
+    color: white;
   }
 
   .budget-cancel {
     background: #f5f5f5;
     color: #444;
-    border-radius: 12px;
   }
 }
 @media screen and (max-width: 429px) {
   body {
     .toast-edit-popup {
-      .swal2-input {
-        display: flex;
-        align-content: center;
-        width: 15.5rem;
-        margin-inline: 0;
-        margin-block: 0.25rem;
+      --swal2-width: 90%;
+      --swal2-padding: 20px;
+      max-width: 400px;
+      row-gap: 15px;
+
+      .swal2-title {
+        font-size: 1rem;
+      }
+
+      .swal2-input + .swal2-input {
+        margin-top: 15px;
       }
     }
     .budget {
@@ -225,11 +263,6 @@ body {
               font-size: 1rem;
               font-weight: 700;
             }
-
-            .icons {
-              width: 15px;
-              height: auto;
-            }
           }
 
           input {
@@ -248,14 +281,8 @@ body {
             padding: 12px 20px;
             border: none;
             border-radius: 10px;
-            background: var(--color-chat);
-            color: white;
             cursor: pointer;
             font-weight: bold;
-
-            &:hover {
-              background: var(--font-brown);
-            }
           }
         }
 
@@ -388,6 +415,29 @@ body {
 }
 @media screen and (min-width: 429px) {
   body {
+    .toast-edit-popup {
+      --swal2-width: 18vw;
+      --swal2-padding: 30px;
+      row-gap: 20px;
+
+      .swal2-title {
+        font-size: 1.5rem;
+      }
+
+      .swal2-input {
+        width: calc(100% - 20px);
+        margin-inline: 10px;
+      }
+
+      .swal2-input + .swal2-input {
+        margin-top: 20px;
+      }
+
+      .swal2-actions button:hover {
+        transform: scale(1.03);
+      }
+    }
+
     .budget {
       display: flex;
       flex-direction: column;
@@ -419,13 +469,12 @@ body {
           letter-spacing: 0.5px;
           transition:
             opacity 0.2s ease,
-            transform 0.25s ease;
+            transform 0.1s ease;
           width: auto;
           margin-right: 5.9vh;
 
-          .button-header:hover {
+          &:hover {
             opacity: 0.9;
-            transform: scale(1.05);
           }
 
           &:active {
@@ -456,7 +505,7 @@ body {
           border-radius: 16px;
 
           width: 100%;
-          max-width: 25vw;
+          max-width: 18vw;
 
           box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
           animation: pop 0.2s ease-out;
@@ -473,11 +522,6 @@ body {
             h5 {
               font-size: 1.5rem;
               font-weight: 700;
-            }
-
-            .icons {
-              width: 20px;
-              height: auto;
             }
           }
 
@@ -502,18 +546,11 @@ body {
             padding: 12px 20px;
             border: none;
             border-radius: 10px;
-            background: var(--color-chat);
-            color: white;
             cursor: pointer;
             font-weight: bold;
-            margin-left: 50px;
-            margin-right: 50px;
-            transition:
-              background 0.25s,
-              transform 0.25s;
+            transition: transform 0.25s;
 
             &:hover {
-              background: var(--font-brown);
               transform: scale(1.03);
             }
           }
