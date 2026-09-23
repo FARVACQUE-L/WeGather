@@ -8,6 +8,7 @@ import {
   ArrowDown,
   ArrowUp,
   FilePlusCorner,
+  HandCoins,
   History,
   Pen,
   Plus,
@@ -71,6 +72,60 @@ function getBalancePrice(array: BudgetByUser[]) {
   }
 
   return result;
+}
+
+type Settlement = {
+  from: BudgetByUser;
+  to: BudgetByUser;
+  amount: number;
+};
+
+// On rembourse le plus gros débiteur au plus gros créancier, puis on recommence
+// avec ce qu'il reste : ça équilibre tout le monde en un minimum de virements.
+function getSettlements(balances: BudgetByUser[]) {
+  const debtors = balances
+    .filter((user) => user.total_price < 0)
+    .map((user) => ({ ...user }))
+    .sort((a, b) => a.total_price - b.total_price);
+
+  const creditors = balances
+    .filter((user) => user.total_price > 0)
+    .map((user) => ({ ...user }))
+    .sort((a, b) => b.total_price - a.total_price);
+
+  const settlements: Settlement[] = [];
+
+  let debtorIndex = 0;
+  let creditorIndex = 0;
+
+  while (debtorIndex < debtors.length && creditorIndex < creditors.length) {
+    const debtor = debtors[debtorIndex];
+    const creditor = creditors[creditorIndex];
+
+    const amount = Math.min(-debtor.total_price, creditor.total_price);
+    const rounded = Math.round(amount * 100) / 100;
+
+    if (rounded > 0) {
+      settlements.push({ from: debtor, to: creditor, amount: rounded });
+    }
+
+    debtor.total_price += amount;
+    creditor.total_price -= amount;
+
+    // Les soldes sont arrondis au centime, donc on ignore les restes plus petits.
+    if (Math.abs(debtor.total_price) < 0.01) debtorIndex++;
+    if (Math.abs(creditor.total_price) < 0.01) creditorIndex++;
+  }
+
+  return settlements;
+}
+
+function escapeHtml(value: string) {
+  return value.replace(
+    /[&<>"]/g,
+    (char) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char] ?? char,
+  );
 }
 
 function getUserBudget(array: BudgetByUser[], id_user: number) {
@@ -456,6 +511,54 @@ function Budget() {
   const listBalance = getBalancePrice(listUserBudget);
   const userBalance = getUserBudget(listBalance, userID)?.total_price ?? 0;
 
+  function openSettlementModal() {
+    const settlements = getSettlements(listBalance);
+    const myRefunds = settlements.filter((row) => row.from.user_id === userID);
+    const myIncomes = settlements.filter((row) => row.to.user_id === userID);
+
+    const listHtml = (rows: Settlement[], toMe: boolean) =>
+      rows
+        .map(
+          (row) => `
+          <li>
+            <span>${escapeHtml(toMe ? row.from.user_name : row.to.user_name)}</span>
+            <strong class="${toMe ? "positif" : "negatif"}">${row.amount.toFixed(2)} €</strong>
+          </li>`,
+        )
+        .join("");
+
+    let html = "";
+
+    if (myRefunds.length > 0) {
+      html += `
+        <p class="settlementLabel">Tu rembourses</p>
+        <ul class="settlementList">${listHtml(myRefunds, false)}</ul>`;
+    }
+
+    if (myIncomes.length > 0) {
+      html += `
+        <p class="settlementLabel">On te rembourse</p>
+        <ul class="settlementList">${listHtml(myIncomes, true)}</ul>`;
+    }
+
+    if (html === "") {
+      html = `<p class="settlementLabel">Tes comptes sont déjà équilibrés.</p>`;
+    }
+
+    Swal.fire({
+      title: "Équilibrer les comptes",
+      html,
+
+      confirmButtonText: "Fermer",
+
+      customClass: {
+        container: "budget-backdrop",
+        popup: "toast-edit-popup settlement-popup",
+        confirmButton: "budget-confirm",
+      },
+    });
+  }
+
   if (userInEvent === null) {
     return <p>Chargement...</p>;
   }
@@ -547,6 +650,17 @@ function Budget() {
                 listBudget[listBudget.length - 1]?.budget_creation_date,
               )}
             </small>
+
+            <motion.button
+              type="button"
+              className="settlementButton"
+              onClick={openSettlementModal}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <HandCoins size={20} />
+              <span>Équilibrer les comptes</span>
+            </motion.button>
           </article>
 
           <article className="total">

@@ -35,6 +35,26 @@ body {
           flex-direction: row;
           gap: 5px;
         }
+
+        .settlementButton {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-top: 1.2rem;
+          padding: 0.6rem 1.2rem;
+          border: none;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.2);
+          color: var(--bg-neutral);
+          cursor: pointer;
+          font-weight: 700;
+          font-size: 0.85rem;
+          transition: background 0.2s ease;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.3);
+          }
+        }
       }
     }
 
@@ -103,37 +123,19 @@ body {
     backdrop-filter: blur(6px);
   }
 
-  /* Mirrors .createForm so the edit and add modals share the same sizes */
-  .toast-edit-popup {
+  /* Mirrors .createForm so the edit, delete and add modals share the same sizes */
+  .toast-edit-popup,
+  .budget-delete-popup {
     border-radius: 16px;
-    background: #fffaf7;
 
     .swal2-title {
       padding: 0;
-      color: var(--font-brown);
       font-weight: 700;
-      text-align: left;
     }
 
     .swal2-html-container {
       padding: 0;
       overflow: visible;
-    }
-
-    .swal2-input {
-      display: block;
-      width: 100%;
-      height: auto;
-      margin: 0;
-      padding: 12px;
-      border: 2px solid var(--beige-color);
-      border-radius: 10px;
-      font-size: revert;
-
-      &:focus {
-        border-color: var(--font-brown);
-        box-shadow: 0 0 5px rgba(185, 68, 36, 0.3);
-      }
     }
 
     .swal2-actions {
@@ -155,29 +157,99 @@ body {
       .budget-cancel:active {
         background-color: #f5f5f5;
       }
+
+      .budget-delete-cancel:hover,
+      .budget-delete-cancel:active {
+        background-color: #f3f4f6;
+      }
+    }
+  }
+
+  .toast-edit-popup {
+    background: #fffaf7;
+
+    .swal2-title {
+      color: var(--font-brown);
+      text-align: left;
+    }
+
+    .swal2-input {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0;
+      padding: 12px;
+      border: 2px solid var(--beige-color);
+      border-radius: 10px;
+      font-size: revert;
+
+      &:focus {
+        border-color: var(--font-brown);
+        box-shadow: 0 0 5px rgba(185, 68, 36, 0.3);
+      }
+    }
+  }
+
+  .settlement-popup {
+    .swal2-html-container {
+      font-size: 1rem;
+      text-align: left;
+    }
+
+    .settlementLabel {
+      color: var(--font-brown);
+      font-weight: 700;
+    }
+
+    .settlementList {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 10px 0 20px;
+      padding: 0;
+      list-style: none;
+
+      li {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 10px;
+        background: var(--bg-neutral);
+        font-weight: bold;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .positif {
+      color: var(--font-green);
+    }
+
+    .negatif {
+      color: var(--font-red);
     }
   }
 
   .budget-delete-popup {
-    border-radius: 24px;
-
     .swal2-title {
       color: #b91c1c;
-      font-weight: 700;
+    }
+
+    .swal2-icon {
+      margin: 0 auto;
     }
   }
 
   .budget-delete-confirm {
     background: linear-gradient(135deg, #ef4444, #b91c1c);
-
-    border-radius: 12px;
-    font-weight: 700;
   }
 
   .budget-delete-cancel {
     background: #f3f4f6;
     color: #374151;
-    border-radius: 12px;
   }
 
   .budget-confirm {
@@ -192,7 +264,8 @@ body {
 }
 @media screen and (max-width: 429px) {
   body {
-    .toast-edit-popup {
+    .toast-edit-popup,
+    .budget-delete-popup {
       --swal2-width: 90%;
       --swal2-padding: 20px;
       max-width: 400px;
@@ -201,7 +274,9 @@ body {
       .swal2-title {
         font-size: 1rem;
       }
+    }
 
+    .toast-edit-popup {
       .swal2-input + .swal2-input {
         margin-top: 15px;
       }
@@ -420,7 +495,8 @@ body {
 }
 @media screen and (min-width: 429px) {
   body {
-    .toast-edit-popup {
+    .toast-edit-popup,
+    .budget-delete-popup {
       --swal2-width: 18vw;
       --swal2-padding: 30px;
       row-gap: 20px;
@@ -429,6 +505,12 @@ body {
         font-size: 1.5rem;
       }
 
+      .swal2-actions button:hover {
+        transform: scale(1.03);
+      }
+    }
+
+    .toast-edit-popup {
       .swal2-input {
         width: calc(100% - 20px);
         margin-inline: 10px;
@@ -436,10 +518,6 @@ body {
 
       .swal2-input + .swal2-input {
         margin-top: 20px;
-      }
-
-      .swal2-actions button:hover {
-        transform: scale(1.03);
       }
     }
 
