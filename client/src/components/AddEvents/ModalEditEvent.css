@@ -106,8 +106,10 @@
           border: none;
           box-shadow: 1px 1px 5px black;
           transition: transform 0.2s;
-          &:hover {
-            transform: scale(0.95);
+          @media (hover: hover) and (min-width: 429px) {
+            &:hover {
+              transform: scale(0.95);
+            }
           }
         }
       }
@@ -125,8 +127,10 @@
         border: none;
         box-shadow: 1px 1px 5px black;
         transition: transform 0.2s;
-        &:hover {
-          transform: scale(0.95);
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: scale(0.95);
+          }
         }
       }
 
@@ -139,8 +143,10 @@
         border: none;
         box-shadow: 1px 1px 5px black;
         transition: transform 0.2s;
-        &:hover {
-          transform: scale(0.95);
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: scale(0.95);
+          }
         }
       }
     }

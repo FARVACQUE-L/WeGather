@@ -44,8 +44,10 @@
       font-style: normal;
       cursor: pointer;
     }
-    button:hover {
-      background: var(--font-title);
+    @media (hover: hover) and (min-width: 429px) {
+      button:hover {
+        background: var(--font-title);
+      }
     }
   }
   .text-presentation {
@@ -85,8 +87,10 @@
       font-style: normal;
       cursor: pointer;
     }
-    button:hover {
-      background: var(--font-title);
+    @media (hover: hover) and (min-width: 429px) {
+      button:hover {
+        background: var(--font-title);
+      }
     }
     p {
       color: white;
@@ -363,8 +367,10 @@
       text-decoration: none;
     }
 
-    a:hover {
-      text-decoration: underline;
+    @media (hover: hover) and (min-width: 429px) {
+      a:hover {
+        text-decoration: underline;
+      }
     }
   }
 }

@@ -72,10 +72,12 @@
       font-size: 14px;
       transition: 0.2s ease;
 
-      &:hover {
-        background: #111827;
-        color: white;
-        transform: translateY(-2px);
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          background: #111827;
+          color: white;
+          transform: translateY(-2px);
+        }
       }
     }
 
@@ -135,9 +137,11 @@
       background: #fee2e2;
       color: #dc2626;
 
-      &:hover {
-        background: #dc2626;
-        color: white;
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          background: #dc2626;
+          color: white;
+        }
       }
     }
 
@@ -145,9 +149,11 @@
       background: #fee2e2;
       color: #dc2626;
 
-      &:hover {
-        background: #dc2626;
-        color: white;
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          background: #dc2626;
+          color: white;
+        }
       }
     }
 
@@ -155,9 +161,11 @@
       background: transparent;
       color: #6b7280;
 
-      &:hover {
-        background: #e5e7eb;
-        color: black;
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          background: #e5e7eb;
+          color: black;
+        }
       }
     }
   }

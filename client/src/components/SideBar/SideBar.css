@@ -190,8 +190,10 @@
                 background: #f3f4f6;
                 color: #374151;
 
-                &:hover {
-                  background: #e5e7eb;
+                @media (hover: hover) and (min-width: 429px) {
+                  &:hover {
+                    background: #e5e7eb;
+                  }
                 }
               }
 
@@ -199,9 +201,11 @@
                 background: var(--button-color);
                 color: white;
 
-                &:hover {
-                  background: #dc2626;
-                  transform: translateY(-2px);
+                @media (hover: hover) and (min-width: 429px) {
+                  &:hover {
+                    background: #dc2626;
+                    transform: translateY(-2px);
+                  }
                 }
               }
             }
@@ -362,8 +366,10 @@
                 background: #f3f4f6;
                 color: #374151;
 
-                &:hover {
-                  background: #e5e7eb;
+                @media (hover: hover) and (min-width: 429px) {
+                  &:hover {
+                    background: #e5e7eb;
+                  }
                 }
               }
 
@@ -371,8 +377,10 @@
                 background: var(--button-color);
                 color: white;
 
-                &:hover {
-                  background: #dc2626;
+                @media (hover: hover) and (min-width: 429px) {
+                  &:hover {
+                    background: #dc2626;
+                  }
                 }
               }
             }

@@ -19,6 +19,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import useCanHover from "../../helper/useCanHover";
 
 type AllReports = {
   reported_user_id: number;
@@ -52,6 +53,7 @@ type GraphicAdmin = {
   reports: number;
 };
 function DashboardAdmin() {
+  const canHover = useCanHover();
   const [reportBug, setReportBug] = useState<AllReports[]>([]);
   const [reportUser, setReportUser] = useState<AllReports[]>([]);
   const [reportEvent, setReportEvent] = useState<AllReports[]>([]);
@@ -201,7 +203,7 @@ function DashboardAdmin() {
               hidden: { opacity: 0, y: 20 },
               visible: { opacity: 1, y: 0 },
             }}
-            whileHover={{ y: -6 }}
+            whileHover={canHover ? { y: -6 } : undefined}
             transition={{ duration: 0.25 }}
           >
             {stat.icon}
@@ -282,7 +284,7 @@ function DashboardAdmin() {
       >
         <motion.article
           className="reports-card"
-          whileHover={{ y: -4 }}
+          whileHover={canHover ? { y: -4 } : undefined}
           transition={{ duration: 0.2 }}
         >
           <div className="card-title">
@@ -320,7 +322,7 @@ function DashboardAdmin() {
 
         <motion.article
           className="users-card"
-          whileHover={{ y: -4 }}
+          whileHover={canHover ? { y: -4 } : undefined}
           transition={{ duration: 0.2 }}
         >
           <div className="card-title">
@@ -338,7 +340,7 @@ function DashboardAdmin() {
                 initial={{ opacity: 0, x: 15 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.25 }}
-                whileHover={{ x: 6 }}
+                whileHover={canHover ? { x: 6 } : undefined}
               >
                 <img
                   src={`${import.meta.env.VITE_API_URL}${user.user_profile_picture}`}

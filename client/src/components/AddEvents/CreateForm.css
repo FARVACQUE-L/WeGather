@@ -85,8 +85,10 @@
     color: var(--font-neutral);
     transition: transform 0.2s;
   }
-  .CreateForm-ButtonCancel:hover {
-    transform: scale(0.95);
+  @media (hover: hover) and (min-width: 429px) {
+    .CreateForm-ButtonCancel:hover {
+      transform: scale(0.95);
+    }
   }
   .CreateForm-ButtonSubmit {
     width: 20rem;
@@ -102,8 +104,10 @@
     background: var(--button-color-disable);
     color: var(--font-button-color-disable);
   }
-  .CreateForm-ButtonSubmit:hover {
-    transform: scale(0.95);
+  @media (hover: hover) and (min-width: 429px) {
+    .CreateForm-ButtonSubmit:hover {
+      transform: scale(0.95);
+    }
   }
 }
 @media screen and (max-width: 428px) {

@@ -28,8 +28,10 @@
       cursor: pointer;
       padding: 0;
 
-      &:hover {
-        transform: scale(0.95);
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: scale(0.95);
+        }
       }
     }
 
@@ -75,8 +77,10 @@
         font-size: 1rem;
         cursor: pointer;
 
-        &:hover {
-          transform: scale(0.95);
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: scale(0.95);
+          }
         }
       }
 
@@ -89,8 +93,10 @@
         font-size: 1rem;
         cursor: pointer;
 
-        &:hover {
-          transform: scale(0.95);
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: scale(0.95);
+          }
         }
       }
     }
@@ -107,8 +113,10 @@
     text-decoration: underline;
   }
 
-  a:hover {
-    color: var(--font-brown);
+  @media (hover: hover) and (min-width: 429px) {
+    a:hover {
+      color: var(--font-brown);
+    }
   }
 }
 
@@ -126,8 +134,10 @@
         top: 50%;
         transform: translateY(-50%);
 
-        &:hover {
-          transform: translateY(-50%) scale(1.1);
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: translateY(-50%) scale(1.1);
+          }
         }
       }
     }

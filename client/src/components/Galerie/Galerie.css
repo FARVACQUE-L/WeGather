@@ -52,8 +52,10 @@
       opacity 0.2s ease,
       transform 0.1s ease;
 
-    &:hover {
-      opacity: 0.9;
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover {
+        opacity: 0.9;
+      }
     }
 
     &:active {
@@ -93,16 +95,18 @@
     cursor: pointer;
     transition: transform 0.2s ease;
 
-    &:hover {
-      transform: translateY(-2px);
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover {
+        transform: translateY(-2px);
 
-      .photo {
-        transform: scale(1.03);
-      }
+        .photo {
+          transform: scale(1.03);
+        }
 
-      .photo-actions,
-      .photo-description {
-        opacity: 1;
+        .photo-actions,
+        .photo-description {
+          opacity: 1;
+        }
       }
     }
 
@@ -172,8 +176,10 @@
     color 0.2s ease,
     transform 0.2s ease;
 
-  &:hover {
-    transform: scale(1.1);
+  @media (hover: hover) and (min-width: 429px) {
+    &:hover {
+      transform: scale(1.1);
+    }
   }
 }
 
@@ -182,9 +188,11 @@
   background-color: var(--gallery-edit);
   color: #5d2f11;
 
-  &:hover {
-    background-color: var(--gallery-edit-dark);
-    color: white;
+  @media (hover: hover) and (min-width: 429px) {
+    &:hover {
+      background-color: var(--gallery-edit-dark);
+      color: white;
+    }
   }
 }
 
@@ -193,8 +201,10 @@
   background-color: var(--gallery-danger);
   color: white;
 
-  &:hover {
-    background-color: var(--gallery-danger-dark);
+  @media (hover: hover) and (min-width: 429px) {
+    &:hover {
+      background-color: var(--gallery-danger-dark);
+    }
   }
 }
 
@@ -224,9 +234,11 @@
     stroke: currentColor;
   }
 
-  &:hover {
-    background-color: #333;
-    color: white;
+  @media (hover: hover) and (min-width: 429px) {
+    &:hover {
+      background-color: #333;
+      color: white;
+    }
   }
 
   &.is-liked {
@@ -428,8 +440,10 @@
         height: 24px;
       }
 
-      &:hover {
-        opacity: 0.95;
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          opacity: 0.95;
+        }
       }
 
       &:active {

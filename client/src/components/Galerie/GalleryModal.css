@@ -40,8 +40,10 @@
 
     transition: color 0.2s ease;
 
-    &:hover {
-      color: #b2553d;
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover {
+        color: #b2553d;
+      }
     }
   }
 
@@ -86,10 +88,12 @@
       transform 0.15s ease;
     box-shadow: 0.2s ease;
 
-    &:hover {
-      background: #fff3ee;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgb(255 138 101 / 15%);
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover {
+        background: #fff3ee;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgb(255 138 101 / 15%);
+      }
     }
 
     &:active {
@@ -195,8 +199,10 @@
         background-color 0.2s ease,
         transform 0.2s ease;
 
-      &:hover {
-        transform: translateY(-1px);
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: translateY(-1px);
+        }
       }
 
       &:active {
@@ -207,8 +213,10 @@
         background-color: #f3e2d6;
         color: #b2553d;
 
-        &:hover {
-          background-color: #ead2c2;
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            background-color: #ead2c2;
+          }
         }
       }
 
@@ -216,8 +224,10 @@
         background: linear-gradient(90deg, #ff9b73, #ff8a65, #d86b47);
         color: #fff;
 
-        &:hover {
-          background-color: #ff7a4f;
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            background-color: #ff7a4f;
+          }
         }
       }
     }

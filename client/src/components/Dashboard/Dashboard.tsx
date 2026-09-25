@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import useCanHover from "../../helper/useCanHover";
 import GalerieDashboard from "../GalerieDashboard/GalerieDashboard";
 import TodoList from "../ToDoList/TodoList";
 
@@ -37,6 +38,7 @@ type UserAndBudget = {
 };
 
 function Dashboard() {
+  const canHover = useCanHover();
   const [eventData, setEventData] = useState<EventDashboard>();
   const [reservationData, setReservationData] = useState<
     ReservationDashboard[]
@@ -285,10 +287,14 @@ function Dashboard() {
               duration: 0.2,
               delay: index * 0,
             }}
-            whileHover={{
-              y: -5,
-              scale: 1.02,
-            }}
+            whileHover={
+              canHover
+                ? {
+                    y: -5,
+                    scale: 1.02,
+                  }
+                : undefined
+            }
           >
             <p>
               {stat.icon}

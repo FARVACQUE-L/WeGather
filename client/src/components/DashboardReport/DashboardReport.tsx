@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Bug, Calendar, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import useCanHover from "../../helper/useCanHover";
 import type {
   ReportBug,
   ReportEvent,
@@ -31,6 +32,7 @@ function getDefaultSort(filter: FilterType): {
 }
 
 function DashboardReport() {
+  const canHover = useCanHover();
   const [reportBug, setReportBug] = useState<ReportBug[]>([]);
   const [reportUser, setReportUser] = useState<ReportUser[]>([]);
   const [reportEvent, setReportEvent] = useState<ReportEvent[]>([]);
@@ -187,7 +189,7 @@ function DashboardReport() {
               hidden: { opacity: 0, y: 20 },
               visible: { opacity: 1, y: 0 },
             }}
-            whileHover={{ y: -6 }}
+            whileHover={canHover ? { y: -6 } : undefined}
             transition={{ duration: 0.25 }}
           >
             <ReportStatCard

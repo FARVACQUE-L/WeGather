@@ -29,8 +29,10 @@
         transform 0.1s ease;
       width: auto;
 
-      &:hover {
-        opacity: 0.9;
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          opacity: 0.9;
+        }
       }
 
       &:active {
@@ -74,8 +76,10 @@
         cursor: pointer;
         transition: transform 0.1s ease;
 
-        &:hover {
-          opacity: 0.9;
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            opacity: 0.9;
+          }
         }
 
         &:active {

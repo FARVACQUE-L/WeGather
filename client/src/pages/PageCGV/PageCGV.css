@@ -76,8 +76,10 @@
       color: var(--icon-color);
       text-decoration: underline;
 
-      &:hover {
-        color: var(--color-arrow);
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          color: var(--color-arrow);
+        }
       }
     }
   }
