@@ -217,10 +217,12 @@
       .reservation-button {
         justify-content: center;
         position: fixed;
-        right: 20px;
+        /* Tient dans la marge à droite des cartes (256px, centrées) : environ
+           52px au total, pour ne pas les chevaucher dès 360px de large. */
+        right: 16px;
         bottom: 100px;
         border-radius: 50%;
-        padding: 1rem;
+        padding: 0.7rem;
         .lucide.lucide-calendar-plus {
           width: 24px;
           height: 24px;
@@ -243,13 +245,19 @@
       }
     }
     .card-reservation {
-      height: 54vh;
       margin-bottom: 25px;
       display: flex;
       justify-content: center;
+      /* Annule le height: 90% mobile de CardEvents.css : la carte perdait
+         10 % de sa hauteur et le lien « Voir le site » chevauchait le texte. */
+      .CardEvents-Wrapper {
+        height: auto;
+      }
     }
     .reservation-card-global {
       grid-template-columns: 1fr;
+      /* Dégage la dernière carte de la barre de navigation fixée en bas. */
+      padding-bottom: 6rem;
       .reservation-empty {
         width: 90vw;
         .reservation-empty-text {
