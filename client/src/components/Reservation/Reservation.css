@@ -243,10 +243,14 @@
       }
     }
     .card-reservation {
-      height: 54vh;
       margin-bottom: 25px;
       display: flex;
       justify-content: center;
+      /* Annule le height: 90% mobile de CardEvents.css : la carte perdait
+         10 % de sa hauteur et le lien « Voir le site » chevauchait le texte. */
+      .CardEvents-Wrapper {
+        height: auto;
+      }
     }
     .reservation-card-global {
       grid-template-columns: 1fr;
