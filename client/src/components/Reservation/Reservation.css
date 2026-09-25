@@ -217,10 +217,12 @@
       .reservation-button {
         justify-content: center;
         position: fixed;
-        right: 20px;
+        /* Tient dans la marge à droite des cartes (256px, centrées) : environ
+           52px au total, pour ne pas les chevaucher dès 360px de large. */
+        right: 16px;
         bottom: 100px;
         border-radius: 50%;
-        padding: 1rem;
+        padding: 0.7rem;
         .lucide.lucide-calendar-plus {
           width: 24px;
           height: 24px;
