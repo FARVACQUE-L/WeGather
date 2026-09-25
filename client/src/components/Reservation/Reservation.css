@@ -254,6 +254,8 @@
     }
     .reservation-card-global {
       grid-template-columns: 1fr;
+      /* Dégage la dernière carte de la barre de navigation fixée en bas. */
+      padding-bottom: 6rem;
       .reservation-empty {
         width: 90vw;
         .reservation-empty-text {
