@@ -65,8 +65,10 @@
               cursor: pointer;
               text-transform: uppercase;
 
-              &:hover {
-                color: var(--font-black);
+              @media (hover: hover) and (min-width: 429px) {
+                &:hover {
+                  color: var(--font-black);
+                }
               }
             }
           }
@@ -151,8 +153,10 @@
                 background: none;
                 cursor: pointer;
 
-                &:hover {
-                  transform: scale(1.03);
+                @media (hover: hover) and (min-width: 429px) {
+                  &:hover {
+                    transform: scale(1.03);
+                  }
                 }
 
                 img {
@@ -262,8 +266,10 @@
             background: var(--bg-neutral);
             color: var(--font-black);
 
-            &:hover {
-              transform: scale(0.95);
+            @media (hover: hover) and (min-width: 429px) {
+              &:hover {
+                transform: scale(0.95);
+              }
             }
           }
 

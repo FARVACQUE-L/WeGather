@@ -5,6 +5,7 @@ import "./Reservation.css";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarPlus } from "lucide-react";
 import Swal from "sweetalert2";
+import useCanHover from "../../helper/useCanHover";
 
 type Reservation = {
   reservation_id: number;
@@ -35,6 +36,7 @@ const capitalize = (str = "") => {
 };
 
 function Reservation() {
+  const canHover = useCanHover();
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -298,7 +300,7 @@ function Reservation() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          whileHover={{ scale: 1.05 }}
+          whileHover={canHover ? { scale: 1.05 } : undefined}
           whileTap={{ scale: 0.95 }}
         >
           <CalendarPlus size={20} />
@@ -401,7 +403,7 @@ function Reservation() {
                 <motion.button
                   type="button"
                   onClick={handleSubmitReservation}
-                  whileHover={{ scale: 1.03 }}
+                  whileHover={canHover ? { scale: 1.03 } : undefined}
                   whileTap={{ scale: 0.95 }}
                 >
                   Enregistrer

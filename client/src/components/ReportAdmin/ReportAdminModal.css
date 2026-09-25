@@ -47,8 +47,10 @@
       cursor: pointer;
       padding: 0;
 
-      &:hover {
-        color: var(--font-black);
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          color: var(--font-black);
+        }
       }
     }
   }
@@ -71,8 +73,10 @@
       padding: 16px;
       cursor: pointer;
 
-      &:hover {
-        border-color: var(--border-color);
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          border-color: var(--border-color);
+        }
       }
 
       &[aria-pressed="true"] {
@@ -119,8 +123,10 @@
       font-weight: 600;
       cursor: pointer;
 
-      &:hover {
-        transform: scale(0.95);
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: scale(0.95);
+        }
       }
     }
 

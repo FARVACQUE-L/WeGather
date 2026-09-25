@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
+import useCanHover from "../../helper/useCanHover";
 import "./Budget.css";
 
 import {
@@ -160,6 +161,7 @@ function returnDateString(dateString: string) {
 }
 
 function Budget() {
+  const canHover = useCanHover();
   const { eventUuid } = useParams();
   const [userID, setUserID] = useState<number | null>(null);
   useEffect(() => {
@@ -580,7 +582,7 @@ function Budget() {
             type="button"
             className="button-header"
             onClick={() => setShowCreateForm(!showCreateForm)}
-            whileHover={{ scale: 1.05 }}
+            whileHover={canHover ? { scale: 1.05 } : undefined}
             whileTap={{ scale: 0.95 }}
           >
             <FilePlusCorner size={20} />
@@ -655,7 +657,7 @@ function Budget() {
               type="button"
               className="settlementButton"
               onClick={openSettlementModal}
-              whileHover={{ scale: 1.05 }}
+              whileHover={canHover ? { scale: 1.05 } : undefined}
               whileTap={{ scale: 0.95 }}
             >
               <HandCoins size={20} />

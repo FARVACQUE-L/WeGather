@@ -112,9 +112,11 @@
     font-weight: bold;
     text-decoration: none;
 
-    &:hover {
-      color: var(--color-chat);
-      text-decoration: underline;
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover {
+        color: var(--color-chat);
+        text-decoration: underline;
+      }
     }
   }
   .CardEvents-Edit {
@@ -128,9 +130,11 @@
     opacity: 0.5;
     transition: opacity linear 0.2s;
   }
-  .CardEvents-Edit:hover {
-    border: 1px;
-    opacity: 1;
+  @media (hover: hover) and (min-width: 429px) {
+    .CardEvents-Edit:hover {
+      border: 1px;
+      opacity: 1;
+    }
   }
   .CardEvents-Deleted {
     position: absolute;
@@ -143,9 +147,11 @@
     opacity: 0.5;
     transition: opacity linear 0.2s;
   }
-  .CardEvents-Deleted:hover {
-    border: 1px;
-    opacity: 1;
+  @media (hover: hover) and (min-width: 429px) {
+    .CardEvents-Deleted:hover {
+      border: 1px;
+      opacity: 1;
+    }
   }
   .delete-modal-overlay {
     position: fixed;
@@ -213,8 +219,10 @@
           background: #f3f4f6;
           color: #374151;
 
-          &:hover {
-            background: #e5e7eb;
+          @media (hover: hover) and (min-width: 429px) {
+            &:hover {
+              background: #e5e7eb;
+            }
           }
         }
 
@@ -222,9 +230,11 @@
           background: var(--button-color);
           color: white;
 
-          &:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
+          @media (hover: hover) and (min-width: 429px) {
+            &:hover {
+              background: #dc2626;
+              transform: translateY(-2px);
+            }
           }
         }
       }
@@ -243,8 +253,10 @@
     }
   }
 }
-.CardEvents-Global:hover {
-  transform: scale(1.025);
+@media (hover: hover) and (min-width: 429px) {
+  .CardEvents-Global:hover {
+    transform: scale(1.025);
+  }
 }
 @media screen and (max-width: 428px) {
   .CardEvents-Wrapper {

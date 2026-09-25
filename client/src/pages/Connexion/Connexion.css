@@ -131,8 +131,10 @@ body {
         font-weight: 600;
         text-decoration: none;
 
-        &:hover {
-          text-decoration: underline;
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            text-decoration: underline;
+          }
         }
       }
 
@@ -220,8 +222,10 @@ body {
         color: #b44708;
         font-weight: 700;
 
-        &:hover {
-          text-decoration: underline;
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            text-decoration: underline;
+          }
         }
       }
     }

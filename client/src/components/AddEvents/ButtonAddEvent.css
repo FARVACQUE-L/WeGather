@@ -8,6 +8,8 @@
   box-shadow: 1px 1px 5px black;
   transition: transform 0.2s;
 }
-.ButtonAddEvent:hover {
-  transform: scale(0.95);
+@media (hover: hover) and (min-width: 429px) {
+  .ButtonAddEvent:hover {
+    transform: scale(0.95);
+  }
 }

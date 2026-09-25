@@ -34,8 +34,10 @@
       line-height: 1;
       padding: 0;
 
-      &:hover {
-        color: var(--icon-color);
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          color: var(--icon-color);
+        }
       }
 
       &:focus {
@@ -94,8 +96,10 @@
         cursor: pointer;
         white-space: nowrap;
 
-        &:hover {
-          transform: scale(0.95);
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: scale(0.95);
+          }
         }
       }
     }

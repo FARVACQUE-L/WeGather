@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import Logo from "../../assets/images/logo-wegather.png";
 import notificationSound from "../../assets/sounds/notification.mp3";
+import useCanHover from "../../helper/useCanHover";
 import { socket } from "../../socket/socket";
 
 const containerVariants = {
@@ -55,6 +56,7 @@ type SideBarProps = {
   ) => void;
 };
 function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
+  const canHover = useCanHover();
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -196,7 +198,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
-        whileHover={{ scale: 1.03 }}
+        whileHover={canHover ? { scale: 1.03 } : undefined}
         whileTap={{ scale: 0.97 }}
       >
         <img src={Logo} alt="logo-wegather" className="logo-sidebar-image" />
@@ -218,7 +220,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
           <motion.button
             type="button"
             onClick={() => handleChangeComponent("tableau")}
-            whileHover={{ x: 6, scale: 1.02 }}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
           >
             <LayoutDashboard size={20} className="layout" />
@@ -236,7 +238,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
               handleChangeComponent("messagerie");
               setUnreadCount(0);
             }}
-            whileHover={{ x: 6, scale: 1.02 }}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
           >
             <MessageCircle size={20} className="message" />
@@ -254,7 +256,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
           <motion.button
             type="button"
             onClick={() => handleChangeComponent("reservation")}
-            whileHover={{ x: 6, scale: 1.02 }}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
           >
             <Book size={20} className="book" />
@@ -269,7 +271,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
           <motion.button
             type="button"
             onClick={() => handleChangeComponent("budget")}
-            whileHover={{ x: 6, scale: 1.02 }}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
           >
             <BadgeDollarSign size={20} className="dollar" />
@@ -284,7 +286,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
           <motion.button
             type="button"
             onClick={() => handleChangeComponent("galerie")}
-            whileHover={{ x: 6, scale: 1.02 }}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
           >
             <Images size={20} className="image" />
@@ -301,7 +303,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
       >
         <motion.li variants={itemVariants} className="sidebar-events">
           <MotionLink
-            whileHover={{ x: 6, scale: 1.02 }}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
             to="/homeevents"
             className="link"
@@ -313,7 +315,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
 
         <motion.li variants={itemVariants} className="sidebar-signal">
           <MotionLink
-            whileHover={{ x: 6, scale: 1.02 }}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
             to={`/events/${eventUuid}/report`}
             className="link"
@@ -329,7 +331,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
               <motion.button
                 type="button"
                 onClick={() => setIsDeleteModalOpen(true)}
-                whileHover={{ x: 6, scale: 1.02 }}
+                whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
                 whileTap={{ scale: 0.98 }}
               >
                 <Trash2 size={20} />
@@ -364,7 +366,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
               <motion.button
                 type="button"
                 onClick={() => setIsExitModalOpen(true)}
-                whileHover={{ x: 6, scale: 1.02 }}
+                whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
                 whileTap={{ scale: 0.98 }}
               >
                 <LogOut size={20} />

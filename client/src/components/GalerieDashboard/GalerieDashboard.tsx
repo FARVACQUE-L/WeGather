@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Images } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import useCanHover from "../../helper/useCanHover";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -16,6 +17,7 @@ type Gallery = {
 };
 
 function GalerieDashboard() {
+  const canHover = useCanHover();
   const [photos, setPhotos] = useState<Gallery[]>([]);
 
   const formatImageUrl = (link: string) => {
@@ -50,9 +52,13 @@ function GalerieDashboard() {
               src={formatImageUrl(photo.gallery_link)}
               alt={photo.gallery_description ?? "Galerie événement"}
               className="photo"
-              whileHover={{
-                scale: 1.05,
-              }}
+              whileHover={
+                canHover
+                  ? {
+                      scale: 1.05,
+                    }
+                  : undefined
+              }
               transition={{
                 duration: 0.1,
               }}

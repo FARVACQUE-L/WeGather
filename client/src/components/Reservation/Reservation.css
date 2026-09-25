@@ -32,8 +32,10 @@
         transform 0.1s ease;
       width: auto;
 
-      &:hover {
-        opacity: 0.9;
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          opacity: 0.9;
+        }
       }
 
       &:active {
@@ -129,9 +131,11 @@
           transition: 0.2s ease;
         }
 
-        button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(255, 126, 95, 0.35);
+        @media (hover: hover) and (min-width: 429px) {
+          button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 126, 95, 0.35);
+          }
         }
       }
     }

@@ -52,8 +52,10 @@
     color: var(--font-neutral);
     transition: transform 0.2s;
   }
-  .JoinForm-ButtonCancel:hover {
-    transform: scale(0.95);
+  @media (hover: hover) and (min-width: 429px) {
+    .JoinForm-ButtonCancel:hover {
+      transform: scale(0.95);
+    }
   }
   .JoinForm-ButtonSubmit {
     width: 20rem;
@@ -70,8 +72,10 @@
     border: 1px solid var(--border-color);
     color: var(--font-button-color-disable);
   }
-  .JoinForm-ButtonSubmit:hover {
-    transform: scale(0.95);
+  @media (hover: hover) and (min-width: 429px) {
+    .JoinForm-ButtonSubmit:hover {
+      transform: scale(0.95);
+    }
   }
 }
 @media screen and (max-width: 428px) {

@@ -32,8 +32,10 @@ fieldset {
       display: none;
     }
 
-    &:hover {
-      border-color: var(--icon-color);
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover {
+        border-color: var(--icon-color);
+      }
     }
 
     .reportEvidence-previews {
@@ -62,8 +64,10 @@ fieldset {
           cursor: pointer;
           z-index: 1;
 
-          &:hover {
-            transform: scale(1.1);
+          @media (hover: hover) and (min-width: 429px) {
+            &:hover {
+              transform: scale(1.1);
+            }
           }
         }
       }

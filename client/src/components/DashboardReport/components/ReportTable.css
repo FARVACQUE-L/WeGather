@@ -56,9 +56,11 @@
     color: var(--icon-eye-button-color);
     transition: transform linear 0.2s;
   }
-  .ReportTable-ButtonEye:hover {
-    transform: scale(1.2);
-    color: var(--icon-eye-button-color-hover);
+  @media (hover: hover) and (min-width: 429px) {
+    .ReportTable-ButtonEye:hover {
+      transform: scale(1.2);
+      color: var(--icon-eye-button-color-hover);
+    }
   }
 }
 @media (max-width: 768px) {
