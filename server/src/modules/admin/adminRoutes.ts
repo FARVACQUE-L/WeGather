@@ -90,6 +90,20 @@ adminRoutes.delete(
   isSuperAdmin,
   adminActions.revokeAdmin,
 );
+adminRoutes.patch(
+  "/api/admin/users/:id/superadmin",
+  authorization,
+  isAdmin,
+  isSuperAdmin,
+  adminActions.promoteSuperAdmin,
+);
+adminRoutes.delete(
+  "/api/admin/users/:id/superadmin",
+  authorization,
+  isAdmin,
+  isSuperAdmin,
+  adminActions.demoteSuperAdmin,
+);
 
 adminRoutes.get(
   "/api/admin/reportBug/:id",

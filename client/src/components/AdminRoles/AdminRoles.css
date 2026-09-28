@@ -176,6 +176,42 @@
     }
   }
 
+  /* Titre de la seconde catégorie, sous la liste des super administrateurs. */
+  .admin-roles-subtitle {
+    margin-top: 1.5rem;
+  }
+
+  .admin-roles-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  .admin-roles-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--bg-waiting-state);
+    color: var(--font-brown);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  @media (hover: hover) and (min-width: 429px) {
+    .admin-roles-arrow:not(:disabled):hover {
+      opacity: 0.8;
+    }
+  }
+
   .admin-roles-revoke {
     display: flex;
     align-items: center;
@@ -208,11 +244,6 @@
     font-size: 0.75rem;
     font-weight: 600;
     flex-shrink: 0;
-
-    &.is-super {
-      background: var(--bg-waiting-state);
-      color: var(--font-brown);
-    }
   }
 
   .admin-roles-submit {

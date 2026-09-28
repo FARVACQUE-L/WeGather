@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import {
-  Crown,
+  ArrowDown,
+  ArrowUp,
   Search,
   ShieldCheck,
   ShieldMinus,
@@ -46,12 +47,18 @@ function AdminRoles() {
   // admins voient la liste en lecture seule. Le serveur applique la même règle.
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
-  useEffect(() => {
+  // Relu après chaque changement de rôle : un superadmin qui se rétrograde
+  // perd aussitôt ses boutons de gestion.
+  const fetchCurrentUser = useCallback(() => {
     fetch(`${API_URL}/api/auth/authVerif`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setIsSuperAdmin(Boolean(data.isSuperAdmin)))
       .catch(() => setIsSuperAdmin(false));
   }, []);
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, [fetchCurrentUser]);
 
   const fetchAdmins = useCallback(async () => {
     const res = await fetch(`${API_URL}/api/admin/admins`, {
@@ -160,6 +167,103 @@ function AdminRoles() {
     fetchAdmins();
   }
 
+  async function handleChangeSuperAdmin(admin: Admin, promote: boolean) {
+    const { isConfirmed } = await Swal.fire({
+      title: promote ? "Passer en superadmin" : "Repasser en administrateur",
+      text: promote
+        ? `${admin.user_username} pourra ajouter et retirer des administrateurs.`
+        : `${admin.user_username} ne pourra plus gérer les rôles.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Confirmer",
+      cancelButtonText: "Annuler",
+      confirmButtonColor: "#a53b22",
+    });
+
+    if (!isConfirmed) return;
+
+    const res = await fetch(
+      `${API_URL}/api/admin/users/${admin.user_id}/superadmin`,
+      { method: promote ? "PATCH" : "DELETE", credentials: "include" },
+    );
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      toast.fire({
+        icon: "error",
+        text: data?.message ?? "Impossible de modifier le rôle",
+      });
+      return;
+    }
+
+    toast.fire({
+      icon: "success",
+      text: promote
+        ? `${admin.user_username} est maintenant superadmin`
+        : `${admin.user_username} est de nouveau administrateur`,
+    });
+
+    fetchAdmins();
+    fetchCurrentUser();
+  }
+
+  const superAdmins = admins.filter((admin) => admin.user_is_superadmin);
+  const regularAdmins = admins.filter((admin) => !admin.user_is_superadmin);
+
+  function renderAdmin(admin: Admin) {
+    const isSuper = Boolean(admin.user_is_superadmin);
+    // Le serveur refuse de rétrograder le dernier superadmin : la flèche est
+    // désactivée pour ne pas proposer une action vouée à l'échec.
+    const isLastSuperAdmin = isSuper && superAdmins.length <= 1;
+
+    return (
+      <li key={admin.user_id}>
+        <img
+          src={`${API_URL}${admin.user_profile_picture}`}
+          alt={admin.user_username}
+        />
+        <span className="admin-roles-identity">
+          <span className="admin-roles-username">{admin.user_username}</span>
+          <span className="admin-roles-mail">{admin.user_mail}</span>
+        </span>
+        {isSuperAdmin && (
+          <span className="admin-roles-actions">
+            <button
+              type="button"
+              className="admin-roles-arrow"
+              aria-label={
+                isSuper
+                  ? `Repasser ${admin.user_username} en administrateur`
+                  : `Passer ${admin.user_username} en superadmin`
+              }
+              title={
+                isLastSuperAdmin
+                  ? "Il doit rester au moins un superadmin"
+                  : isSuper
+                    ? "Repasser en administrateur"
+                    : "Passer en superadmin"
+              }
+              disabled={isLastSuperAdmin}
+              onClick={() => handleChangeSuperAdmin(admin, !isSuper)}
+            >
+              {isSuper ? <ArrowDown size={16} /> : <ArrowUp size={16} />}
+            </button>
+            {!isSuper && (
+              <button
+                type="button"
+                className="admin-roles-revoke"
+                onClick={() => handleRevokeAdmin(admin)}
+              >
+                <ShieldMinus size={16} />
+                <span>Retirer</span>
+              </button>
+            )}
+          </span>
+        )}
+      </li>
+    );
+  }
+
   return (
     <motion.div
       className="admin-roles"
@@ -255,41 +359,20 @@ function AdminRoles() {
 
         <section className="admin-roles-card">
           <h2>
-            Administrateurs <span>({admins.length})</span>
+            Super administrateurs <span>({superAdmins.length})</span>
           </h2>
-          <ul className="admin-roles-admins">
-            {admins.map((admin) => (
-              <li key={admin.user_id}>
-                <img
-                  src={`${API_URL}${admin.user_profile_picture}`}
-                  alt={admin.user_username}
-                />
-                <span className="admin-roles-identity">
-                  <span className="admin-roles-username">
-                    {admin.user_username}
-                  </span>
-                  <span className="admin-roles-mail">{admin.user_mail}</span>
-                </span>
-                {admin.user_is_superadmin ? (
-                  <span className="admin-roles-badge is-super">
-                    <Crown size={14} />
-                    Superadmin
-                  </span>
-                ) : (
-                  isSuperAdmin && (
-                    <button
-                      type="button"
-                      className="admin-roles-revoke"
-                      onClick={() => handleRevokeAdmin(admin)}
-                    >
-                      <ShieldMinus size={16} />
-                      <span>Retirer</span>
-                    </button>
-                  )
-                )}
-              </li>
-            ))}
-          </ul>
+          <ul className="admin-roles-admins">{superAdmins.map(renderAdmin)}</ul>
+
+          <h2 className="admin-roles-subtitle">
+            Administrateurs <span>({regularAdmins.length})</span>
+          </h2>
+          {regularAdmins.length > 0 ? (
+            <ul className="admin-roles-admins">
+              {regularAdmins.map(renderAdmin)}
+            </ul>
+          ) : (
+            <p className="admin-roles-empty">Aucun administrateur.</p>
+          )}
         </section>
       </div>
     </motion.div>

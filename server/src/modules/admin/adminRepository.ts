@@ -332,6 +332,20 @@ FROM user
     );
   }
 
+  async countSuperAdmins() {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT COUNT(*) AS total FROM user WHERE user_is_superadmin = TRUE",
+    );
+    return Number(rows[0].total);
+  }
+
+  async setSuperAdmin(id: number, isSuperAdmin: boolean) {
+    await databaseClient.query<Result>(
+      "UPDATE user SET user_is_superadmin = ? WHERE user_id = ?",
+      [isSuperAdmin, id],
+    );
+  }
+
   async banUser(id: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT user_mail, user_username FROM user WHERE user_id = ?",
