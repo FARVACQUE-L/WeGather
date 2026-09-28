@@ -299,6 +299,16 @@ FROM user
     return rows;
   }
 
+  async readAdmins() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT user_id, user_username, user_mail, user_profile_picture
+      FROM user
+      WHERE user_is_admin = TRUE
+      ORDER BY user_username`,
+    );
+    return rows;
+  }
+
   async grantAdmin(id: number) {
     const [result] = await databaseClient.query<Result>(
       "UPDATE user SET user_is_admin = TRUE WHERE user_id = ?",

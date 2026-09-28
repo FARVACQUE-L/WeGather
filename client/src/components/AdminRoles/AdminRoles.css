@@ -7,8 +7,16 @@
     margin-bottom: 1.5rem;
   }
 
+  /* Ajout à gauche, liste des administrateurs à droite. Les cartes gardent
+     chacune leur hauteur : la liste ne s'étire pas avec les résultats. */
+  .admin-roles-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    align-items: start;
+  }
+
   .admin-roles-card {
-    max-width: 640px;
     padding: 24px;
     background: white;
     border: 1px solid #f0e1dc;
@@ -19,6 +27,11 @@
       font-size: 1.1rem;
       font-weight: 600;
       margin-bottom: 0.3rem;
+
+      span {
+        color: var(--color-label);
+        font-weight: 400;
+      }
     }
 
     .admin-roles-hint {
@@ -131,6 +144,33 @@
     }
   }
 
+  .admin-roles-admins {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 12px;
+      background: #fdf8f6;
+    }
+
+    img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--bg-composant-dash);
+    }
+  }
+
   .admin-roles-badge {
     display: flex;
     align-items: center;
@@ -172,6 +212,11 @@
 
     h1 {
       font-size: 33px;
+    }
+
+    .admin-roles-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
     }
 
     .admin-roles-card {

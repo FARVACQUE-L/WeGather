@@ -244,6 +244,15 @@ const searchUsers: RequestHandler = async (req, res, next) => {
   }
 };
 
+const readAdmins: RequestHandler = async (_req, res, next) => {
+  try {
+    const admins = await adminRepository.readAdmins();
+    res.json(admins);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const grantAdmin: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -333,6 +342,7 @@ export default {
   markEventAsDone,
   markUserAsDone,
   searchUsers,
+  readAdmins,
   grantAdmin,
   banUser,
   banUserFromEvent,
