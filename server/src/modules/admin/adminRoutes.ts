@@ -1,6 +1,7 @@
 import express from "express";
 import authorization from "../../middleware/auth";
 import isAdmin from "../../middleware/isAdmin";
+import isSuperAdmin from "../../middleware/isSuperAdmin";
 import adminActions from "./adminActions";
 
 const adminRoutes = express.Router();
@@ -58,6 +59,50 @@ adminRoutes.get(
   authorization,
   isAdmin,
   adminActions.readAllUsers,
+);
+
+// Gestion des rôles : la liste des admins est visible par tous les admins,
+// la recherche, l'ajout et le retrait sont réservés aux superadmins.
+adminRoutes.get(
+  "/api/admin/users/search",
+  authorization,
+  isAdmin,
+  isSuperAdmin,
+  adminActions.searchUsers,
+);
+adminRoutes.get(
+  "/api/admin/admins",
+  authorization,
+  isAdmin,
+  adminActions.readAdmins,
+);
+adminRoutes.patch(
+  "/api/admin/users/:id/admin",
+  authorization,
+  isAdmin,
+  isSuperAdmin,
+  adminActions.grantAdmin,
+);
+adminRoutes.delete(
+  "/api/admin/users/:id/admin",
+  authorization,
+  isAdmin,
+  isSuperAdmin,
+  adminActions.revokeAdmin,
+);
+adminRoutes.patch(
+  "/api/admin/users/:id/superadmin",
+  authorization,
+  isAdmin,
+  isSuperAdmin,
+  adminActions.promoteSuperAdmin,
+);
+adminRoutes.delete(
+  "/api/admin/users/:id/superadmin",
+  authorization,
+  isAdmin,
+  isSuperAdmin,
+  adminActions.demoteSuperAdmin,
 );
 
 adminRoutes.get(

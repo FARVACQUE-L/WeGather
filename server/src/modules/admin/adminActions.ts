@@ -226,6 +226,131 @@ const banUser: RequestHandler = async (req, res, next) => {
   }
 };
 
+const searchUsers: RequestHandler = async (req, res, next) => {
+  try {
+    const query = String(req.query.q ?? "").trim();
+
+    // En dessous de 2 caractères, la recherche renverrait presque toute la
+    // base sans aider à trouver quelqu'un.
+    if (query.length < 2) {
+      res.json([]);
+      return;
+    }
+
+    const users = await adminRepository.searchUsers(query);
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const readAdmins: RequestHandler = async (_req, res, next) => {
+  try {
+    const admins = await adminRepository.readAdmins();
+    res.json(admins);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const grantAdmin: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const affectedRows = await adminRepository.grantAdmin(id);
+
+    if (affectedRows === 0) {
+      res.status(404).json({ message: "Utilisateur introuvable" });
+      return;
+    }
+
+    res.json({ message: "Rôle administrateur attribué" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const revokeAdmin: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const roles = await adminRepository.readRoles(id);
+
+    if (!roles) {
+      res.status(404).json({ message: "Utilisateur introuvable" });
+      return;
+    }
+
+    // Un superadmin garde toujours le rôle admin : sans lui, il n'aurait plus
+    // accès à l'espace admin. Ça évite aussi de se retirer soi-même.
+    if (roles.user_is_superadmin) {
+      res
+        .status(403)
+        .json({ message: "Le rôle d'un superadmin ne peut pas être retiré" });
+      return;
+    }
+
+    await adminRepository.revokeAdmin(id);
+    res.json({ message: "Rôle administrateur retiré" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const promoteSuperAdmin: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const roles = await adminRepository.readRoles(id);
+
+    if (!roles) {
+      res.status(404).json({ message: "Utilisateur introuvable" });
+      return;
+    }
+
+    // Seul un admin peut devenir superadmin : le rôle admin donne l'accès à
+    // l'espace admin, le rôle superadmin seulement la gestion des rôles.
+    if (!roles.user_is_admin) {
+      res
+        .status(400)
+        .json({ message: "L'utilisateur doit d'abord être administrateur" });
+      return;
+    }
+
+    await adminRepository.setSuperAdmin(id, true);
+    res.json({ message: "Rôle superadmin attribué" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const demoteSuperAdmin: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const roles = await adminRepository.readRoles(id);
+
+    if (!roles) {
+      res.status(404).json({ message: "Utilisateur introuvable" });
+      return;
+    }
+
+    if (!roles.user_is_superadmin) {
+      res.status(400).json({ message: "L'utilisateur n'est pas superadmin" });
+      return;
+    }
+
+    // Sans superadmin, plus personne ne pourrait gérer les rôles.
+    if ((await adminRepository.countSuperAdmins()) <= 1) {
+      res
+        .status(403)
+        .json({ message: "Le dernier superadmin ne peut pas être rétrogradé" });
+      return;
+    }
+
+    await adminRepository.setSuperAdmin(id, false);
+    res.json({ message: "Rôle superadmin retiré" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const banUserFromEvent: RequestHandler = async (req, res, next) => {
   try {
     const eventId = Number(req.params.eventId);
@@ -298,6 +423,12 @@ export default {
   markBugAsDone,
   markEventAsDone,
   markUserAsDone,
+  searchUsers,
+  readAdmins,
+  grantAdmin,
+  revokeAdmin,
+  promoteSuperAdmin,
+  demoteSuperAdmin,
   banUser,
   banUserFromEvent,
   banEvent,

@@ -21,6 +21,7 @@ CREATE TABLE `user` (
   `user_reset_expires` BIGINT NULL,
 
   `user_is_admin` TINYINT(1) NOT NULL DEFAULT 0,
+  `user_is_superadmin` TINYINT(1) NOT NULL DEFAULT 0,
   `user_is_ban` TINYINT(1) NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`user_id`),
