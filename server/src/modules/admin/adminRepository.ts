@@ -284,6 +284,29 @@ FROM user
     return result.affectedRows;
   }
 
+  // Recherche par pseudo ou par adresse mail. Les jokers LIKE (% et _) tapés
+  // par l'admin sont échappés pour être cherchés tels quels.
+  async searchUsers(query: string) {
+    const pattern = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT user_id, user_username, user_mail, user_profile_picture, user_is_admin
+      FROM user
+      WHERE user_username LIKE ? OR user_mail LIKE ?
+      ORDER BY user_username
+      LIMIT 10`,
+      [pattern, pattern],
+    );
+    return rows;
+  }
+
+  async grantAdmin(id: number) {
+    const [result] = await databaseClient.query<Result>(
+      "UPDATE user SET user_is_admin = TRUE WHERE user_id = ?",
+      [id],
+    );
+    return result.affectedRows;
+  }
+
   async banUser(id: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT user_mail, user_username FROM user WHERE user_id = ?",

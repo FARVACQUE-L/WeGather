@@ -1,9 +1,11 @@
 import "./SideBarAdmin.css";
-import { LayoutDashboard, TriangleAlert } from "lucide-react";
+import { LayoutDashboard, ShieldCheck, TriangleAlert } from "lucide-react";
 
 type SideBarAdminProps = {
-  activeComponent: "tableau" | "signalement";
-  handleChangeComponent: (componentName: "tableau" | "signalement") => void;
+  activeComponent: "tableau" | "signalement" | "roles";
+  handleChangeComponent: (
+    componentName: "tableau" | "signalement" | "roles",
+  ) => void;
 };
 
 import Logo from "../../assets/images/logo-wegather.png";
@@ -42,6 +44,12 @@ function SideBarAdmin({
           >
             <TriangleAlert size={20} className="signal" />
             <span>Signalement</span>
+          </button>
+        </li>
+        <li className={activeComponent === "roles" ? "active" : ""}>
+          <button type="button" onClick={() => handleChangeComponent("roles")}>
+            <ShieldCheck size={20} className="roles" />
+            <span>Rôles</span>
           </button>
         </li>
       </ul>

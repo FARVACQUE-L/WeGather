@@ -61,6 +61,19 @@ adminRoutes.get(
 );
 
 adminRoutes.get(
+  "/api/admin/users/search",
+  authorization,
+  isAdmin,
+  adminActions.searchUsers,
+);
+adminRoutes.patch(
+  "/api/admin/users/:id/admin",
+  authorization,
+  isAdmin,
+  adminActions.grantAdmin,
+);
+
+adminRoutes.get(
   "/api/admin/reportBug/:id",
   authorization,
   isAdmin,

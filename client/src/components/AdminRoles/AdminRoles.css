@@ -1,0 +1,181 @@
+.admin-roles {
+  width: 91%;
+  color: #2d2522;
+
+  h1 {
+    color: var(--font-title);
+    margin-bottom: 1.5rem;
+  }
+
+  .admin-roles-card {
+    max-width: 640px;
+    padding: 24px;
+    background: white;
+    border: 1px solid #f0e1dc;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(90, 50, 35, 0.05);
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .admin-roles-hint {
+      color: var(--color-label);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .admin-roles-search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #f9fafb;
+    color: var(--color-label);
+
+    &:focus-within {
+      border-color: #ff7e5f;
+      background: white;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 0;
+      border: none;
+      outline: none;
+      background: none;
+      font-size: 14px;
+    }
+  }
+
+  .admin-roles-empty {
+    margin-top: 1rem;
+    color: var(--color-label);
+    font-size: 0.85rem;
+  }
+
+  .admin-roles-results {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .admin-roles-result {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: #fdf8f6;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--bg-composant-dash);
+    }
+
+    &.is-selected {
+      border-color: #ff7e5f;
+      background: #fff1ed;
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+  }
+
+  @media (hover: hover) and (min-width: 429px) {
+    .admin-roles-result:not(:disabled):hover {
+      background: #fff1ed;
+    }
+  }
+
+  .admin-roles-identity {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+
+    .admin-roles-username,
+    .admin-roles-mail {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .admin-roles-username {
+      font-weight: 600;
+    }
+
+    .admin-roles-mail {
+      color: var(--color-mail);
+      font-size: 0.8rem;
+    }
+  }
+
+  .admin-roles-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--bg-confirm-state);
+    color: var(--font-comfirm-state);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .admin-roles-submit {
+    margin-top: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@media screen and (max-width: 428px) {
+  .admin-roles {
+    width: 100%;
+    padding: 16px 16px 6rem;
+
+    h1 {
+      font-size: 33px;
+    }
+
+    .admin-roles-card {
+      padding: 18px;
+    }
+  }
+}

@@ -226,6 +226,40 @@ const banUser: RequestHandler = async (req, res, next) => {
   }
 };
 
+const searchUsers: RequestHandler = async (req, res, next) => {
+  try {
+    const query = String(req.query.q ?? "").trim();
+
+    // En dessous de 2 caractères, la recherche renverrait presque toute la
+    // base sans aider à trouver quelqu'un.
+    if (query.length < 2) {
+      res.json([]);
+      return;
+    }
+
+    const users = await adminRepository.searchUsers(query);
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const grantAdmin: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const affectedRows = await adminRepository.grantAdmin(id);
+
+    if (affectedRows === 0) {
+      res.status(404).json({ message: "Utilisateur introuvable" });
+      return;
+    }
+
+    res.json({ message: "Rôle administrateur attribué" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const banUserFromEvent: RequestHandler = async (req, res, next) => {
   try {
     const eventId = Number(req.params.eventId);
@@ -298,6 +332,8 @@ export default {
   markBugAsDone,
   markEventAsDone,
   markUserAsDone,
+  searchUsers,
+  grantAdmin,
   banUser,
   banUserFromEvent,
   banEvent,
