@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Trash2,
   TriangleAlert,
+  Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
@@ -45,14 +46,16 @@ type SideBarProps = {
     | "messagerie"
     | "reservation"
     | "budget"
-    | "galerie";
+    | "galerie"
+    | "groupe";
   handleChangeComponent: (
     componentName:
       | "tableau"
       | "messagerie"
       | "reservation"
       | "budget"
-      | "galerie",
+      | "galerie"
+      | "groupe",
   ) => void;
 };
 function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
@@ -301,6 +304,22 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
         initial="hidden"
         animate="visible"
       >
+        <motion.li
+          variants={itemVariants}
+          className={`sidebar-group${activeComponent === "groupe" ? " active" : ""}`}
+        >
+          <motion.button
+            type="button"
+            className="link"
+            onClick={() => handleChangeComponent("groupe")}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Users size={20} />
+            <span>Info du groupe</span>
+          </motion.button>
+        </motion.li>
+
         <motion.li variants={itemVariants} className="sidebar-events">
           <MotionLink
             whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}

@@ -1,4 +1,4 @@
-import type { Rows } from "../../../database/client";
+import type { Result, Rows } from "../../../database/client";
 import databaseClient from "../../../database/client";
 import type EventUserJoin from "../../types/eventUserJoining";
 
@@ -37,6 +37,48 @@ class eventUserJoiningRepository {
     );
 
     return rows as UserJoinEvent[];
+  }
+
+  async readBanned(eub_id_event: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT
+        eub_id_user AS euj_id_user,
+        eub_id_event AS euj_id_event,
+        user_username,
+        user_profile_picture
+      FROM event_user_ban
+      JOIN user
+        ON event_user_ban.eub_id_user = user.user_id
+      WHERE eub_id_event = ?`,
+      [eub_id_event],
+    );
+
+    return rows as EventUserJoin[];
+  }
+
+  // Même effet qu'un bannissement par l'admin : retiré de l'événement et
+  // bloqué à la jonction par code tant que le bannissement existe.
+  async ban(id_event: number, id_user: number) {
+    await databaseClient.query<Result>(
+      "INSERT IGNORE INTO event_user_ban (eub_id_event, eub_id_user) VALUES (?, ?)",
+      [id_event, id_user],
+    );
+
+    await databaseClient.query<Result>(
+      "DELETE FROM event_user_joining WHERE euj_id_event = ? AND euj_id_user = ?",
+      [id_event, id_user],
+    );
+  }
+
+  // Lève seulement le blocage : l'utilisateur doit rejoindre à nouveau avec
+  // le code de l'événement.
+  async unban(id_event: number, id_user: number) {
+    const [result] = await databaseClient.query<Result>(
+      "DELETE FROM event_user_ban WHERE eub_id_event = ? AND eub_id_user = ?",
+      [id_event, id_user],
+    );
+
+    return result.affectedRows;
   }
 
   async deleteAll(euj_id_user: number) {

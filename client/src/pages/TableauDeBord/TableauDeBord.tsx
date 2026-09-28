@@ -8,6 +8,7 @@ import SideBar from "../../components/SideBar/SideBar";
 import "./TableauDeBord.css";
 
 import Budget from "../../components/Budget/Budget.tsx";
+import GroupInfo from "../../components/GroupInfo/GroupInfo.tsx";
 import Profil from "../../components/Profil/Profil.tsx";
 import Reservation from "../../components/Reservation/Reservation.tsx";
 
@@ -16,7 +17,8 @@ type ActiveComponent =
   | "messagerie"
   | "reservation"
   | "budget"
-  | "galerie";
+  | "galerie"
+  | "groupe";
 
 function TableauDeBord() {
   // Volontairement non persisté : on entre toujours dans un événement par son
@@ -43,6 +45,7 @@ function TableauDeBord() {
           {activeComponent === "reservation" && <Reservation />}
           {activeComponent === "budget" && <Budget />}
           {activeComponent === "galerie" && <Galerie />}
+          {activeComponent === "groupe" && <GroupInfo />}
         </main>
       </div>
     </>

@@ -85,6 +85,7 @@
       padding: 0;
       position: absolute;
       bottom: 0;
+      .sidebar-group,
       .sidebar-events,
       .sidebar-signal {
         margin: 0 0 0 20px;
@@ -106,6 +107,14 @@
           border: none;
           cursor: pointer;
         }
+      }
+      /* Même surlignage que les onglets du menu principal, en gardant l'icône
+         alignée sur celles des liens du dessous (8px + 12px = 20px). */
+      .sidebar-group.active {
+        margin-left: 8px;
+        padding: 0 12px;
+        background-color: #fa985f6b;
+        border-radius: 20px;
       }
       .sidebar-delete-event {
         margin: 0 0 0 20px;
@@ -231,7 +240,8 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    /* Espacements resserrés pour que les 8 icônes tiennent dès 360px. */
+    gap: 8px;
 
     z-index: 1000;
 
@@ -253,7 +263,7 @@
       margin: 0;
       padding: 0;
 
-      gap: 15px;
+      gap: 8px;
 
       position: static;
 
@@ -278,7 +288,7 @@
         button {
           background: none;
           border: none;
-          padding: 10px;
+          padding: 8px;
         }
 
         span {

@@ -14,6 +14,21 @@ eventUserJoiningRoutes.get(
   authorization,
   eventUserJoiningActions.browseUserEvent,
 );
+eventUserJoiningRoutes.get(
+  "/api/events/:eventUuid/group",
+  authorization,
+  eventUserJoiningActions.browseGroup,
+);
+eventUserJoiningRoutes.post(
+  "/api/events/:eventUuid/ban/:userId",
+  authorization,
+  eventUserJoiningActions.ban,
+);
+eventUserJoiningRoutes.delete(
+  "/api/events/:eventUuid/ban/:userId",
+  authorization,
+  eventUserJoiningActions.unban,
+);
 eventUserJoiningRoutes.delete(
   "/api/euj/delete/:id",
   authorization,
