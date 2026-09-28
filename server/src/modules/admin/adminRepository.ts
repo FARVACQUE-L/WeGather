@@ -301,7 +301,7 @@ FROM user
 
   async readAdmins() {
     const [rows] = await databaseClient.query<Rows>(
-      `SELECT user_id, user_username, user_mail, user_profile_picture
+      `SELECT user_id, user_username, user_mail, user_profile_picture, user_is_superadmin
       FROM user
       WHERE user_is_admin = TRUE
       ORDER BY user_username`,
@@ -315,6 +315,21 @@ FROM user
       [id],
     );
     return result.affectedRows;
+  }
+
+  async readRoles(id: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT user_is_admin, user_is_superadmin FROM user WHERE user_id = ?",
+      [id],
+    );
+    return rows[0];
+  }
+
+  async revokeAdmin(id: number) {
+    await databaseClient.query<Result>(
+      "UPDATE user SET user_is_admin = FALSE WHERE user_id = ?",
+      [id],
+    );
   }
 
   async banUser(id: number) {

@@ -216,7 +216,7 @@ class UserRepository {
   async readUserAdmin(userId: number) {
     const [rows] = await databaseClient.query<Rows>(
       `
-    SELECT user_is_admin
+    SELECT user_is_admin, user_is_superadmin
     FROM user
     WHERE user_id = ?
     `,

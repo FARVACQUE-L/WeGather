@@ -20,6 +20,7 @@ const authVerif: RequestHandler = async (req, res, next) => {
     res.status(200).json({
       ...req.user,
       isAdmin: Boolean(user?.user_is_admin),
+      isSuperAdmin: Boolean(user?.user_is_superadmin),
     });
   } catch (error) {
     next(error);

@@ -14,6 +14,11 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 22px;
     align-items: start;
+
+    /* Admin simple : seule la liste est affichée, sur toute la largeur. */
+    &.is-read-only {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .admin-roles-card {
@@ -171,6 +176,27 @@
     }
   }
 
+  .admin-roles-revoke {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--bg-negative);
+    color: var(--font-red);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  @media (hover: hover) and (min-width: 429px) {
+    .admin-roles-revoke:hover {
+      opacity: 0.8;
+    }
+  }
+
   .admin-roles-badge {
     display: flex;
     align-items: center;
@@ -181,6 +207,12 @@
     color: var(--font-comfirm-state);
     font-size: 0.75rem;
     font-weight: 600;
+    flex-shrink: 0;
+
+    &.is-super {
+      background: var(--bg-waiting-state);
+      color: var(--font-brown);
+    }
   }
 
   .admin-roles-submit {
@@ -221,6 +253,10 @@
 
     .admin-roles-card {
       padding: 18px;
+    }
+
+    .admin-roles-revoke span {
+      display: none;
     }
   }
 }

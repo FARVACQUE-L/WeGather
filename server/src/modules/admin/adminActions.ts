@@ -269,6 +269,32 @@ const grantAdmin: RequestHandler = async (req, res, next) => {
   }
 };
 
+const revokeAdmin: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const roles = await adminRepository.readRoles(id);
+
+    if (!roles) {
+      res.status(404).json({ message: "Utilisateur introuvable" });
+      return;
+    }
+
+    // Un superadmin garde toujours le rôle admin : sans lui, il n'aurait plus
+    // accès à l'espace admin. Ça évite aussi de se retirer soi-même.
+    if (roles.user_is_superadmin) {
+      res
+        .status(403)
+        .json({ message: "Le rôle d'un superadmin ne peut pas être retiré" });
+      return;
+    }
+
+    await adminRepository.revokeAdmin(id);
+    res.json({ message: "Rôle administrateur retiré" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const banUserFromEvent: RequestHandler = async (req, res, next) => {
   try {
     const eventId = Number(req.params.eventId);
@@ -344,6 +370,7 @@ export default {
   searchUsers,
   readAdmins,
   grantAdmin,
+  revokeAdmin,
   banUser,
   banUserFromEvent,
   banEvent,
