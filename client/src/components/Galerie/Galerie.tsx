@@ -374,20 +374,34 @@ function Galerie() {
       )}
 
       {photoToEdit !== null && (
-        <div className="modal-overlay">
-          <dialog className="modal" open>
-            <h2>Modifier la description</h2>
-            <input
-              type="text"
-              className="modal-input"
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-            />
-            <div className="modal-actions">
-              <button type="button" onClick={() => setPhotoToEdit(null)}>
+        <div className="GalleryForm-Overlay">
+          <dialog className="GalleryForm" open>
+            <h2 className="GalleryForm-Title">Modifier la description</h2>
+            <div className="GalleryForm-Field">
+              <label className="GalleryForm-Label" htmlFor="edit-description">
+                Description
+              </label>
+              <input
+                id="edit-description"
+                type="text"
+                className="GalleryForm-Input"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+              />
+            </div>
+            <div className="GalleryForm-Actions">
+              <button
+                type="button"
+                className="GalleryForm-ButtonCancel"
+                onClick={() => setPhotoToEdit(null)}
+              >
                 Annuler
               </button>
-              <button type="button" onClick={handleUpdateDescription}>
+              <button
+                type="button"
+                className="GalleryForm-ButtonSubmit"
+                onClick={handleUpdateDescription}
+              >
                 Enregistrer
               </button>
             </div>

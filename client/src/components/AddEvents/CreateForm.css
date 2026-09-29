@@ -66,6 +66,66 @@
   .CreateForm-TextArea:focus {
     outline: none;
   }
+  /* Aperçu au-dessus, bouton et retrait centrés en dessous. L'aperçu a la
+     taille de celui de la modale de modification (et des cartes). */
+  .CreateForm-Picture {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+
+    .CreateForm-PicturePreview {
+      width: 16rem;
+      height: 12rem;
+      border-radius: 1rem;
+      object-fit: cover;
+    }
+
+    .CreateForm-PictureActions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .CreateForm-PictureButton {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      /* Forme, ombre et survol de « Changer l'image » (modale de
+         modification) ; couleurs inversées avec le bouton Annuler. */
+      border: none;
+      border-radius: 5rem;
+      background: var(--button-color-disable);
+      color: var(--font-title);
+      box-shadow: 1px 1px 5px black;
+      cursor: pointer;
+      transition: transform 0.2s;
+
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    .CreateForm-PictureRemove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: 50%;
+      background: var(--bg-negative);
+      color: var(--font-red);
+      cursor: pointer;
+    }
+  }
+  /* Le vrai champ fichier reste caché derrière le bouton. */
+  .CreateForm-PictureInput {
+    display: none;
+  }
   .CreateForm-Counter {
     text-align: end;
     font-size: x-small;
@@ -76,13 +136,15 @@
   display: flex;
   justify-content: space-evenly;
   margin-bottom: 2rem;
+  /* Ombre et survol repris des boutons de la modale de modification
+     d'événement. Annuler garde le gris par défaut des boutons, couleurs
+     inversées avec « Choisir une photo ». */
   .CreateForm-ButtonCancel {
     width: 5rem;
     height: 2rem;
     border-radius: 1rem;
     border: none;
-    background: var(--button-color);
-    color: var(--font-neutral);
+    box-shadow: 1px 1px 5px black;
     transition: transform 0.2s;
   }
   @media (hover: hover) and (min-width: 429px) {
@@ -95,8 +157,9 @@
     height: 2rem;
     border-radius: 1rem;
     border: none;
-    background: var(--button-color);
+    background: linear-gradient(to right, #ff7e5f, #a53b22);
     color: var(--font-neutral);
+    box-shadow: 1px 1px 5px black;
     transition: transform 0.2s;
   }
   .CreateForm-ButtonSubmit:disabled {

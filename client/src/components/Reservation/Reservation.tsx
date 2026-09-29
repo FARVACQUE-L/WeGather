@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import CardEvents from "../AddEvents/CardEvents";
 import "./Reservation.css";
@@ -56,6 +56,7 @@ function Reservation() {
     number | null
   >(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -310,13 +311,10 @@ function Reservation() {
         <AnimatePresence>
           {isModalOpen && (
             <motion.div
-              className="modal-overlay"
+              className="ReservationModal-Overlay"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => {
-                setIsModalOpen(false);
-              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleSubmitReservation(e);
@@ -324,90 +322,169 @@ function Reservation() {
               }}
             >
               <motion.div
-                className="modal"
+                className="ReservationModal"
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 40, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                onClick={(e) => e.stopPropagation()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                  }
-                }}
               >
-                <h2>
+                <h2 className="ReservationModal-Title">
                   {editingReservationId
                     ? "Modifier la réservation"
                     : "Nouvelle réservation"}
                 </h2>
 
-                <input
-                  type="text"
-                  placeholder="Nom"
-                  value={reservationName}
-                  onChange={(e) =>
-                    setReservationName(capitalize(e.target.value))
-                  }
-                />
+                {/* Titres, champs et boutons calqués sur la modale de
+                    modification d'événement. Classes préfixées : les règles
+                    globales .modal de GalleryModal.css s'appliquaient ici. */}
+                <div className="ReservationModal-Field">
+                  <label
+                    className="ReservationModal-Label"
+                    htmlFor="reservation-name"
+                  >
+                    Nom de la réservation
+                  </label>
+                  <input
+                    id="reservation-name"
+                    className="ReservationModal-Input"
+                    type="text"
+                    placeholder="Ex : Hôtel du Parc"
+                    value={reservationName}
+                    onChange={(e) =>
+                      setReservationName(capitalize(e.target.value))
+                    }
+                  />
+                </div>
 
-                <input
-                  type="date"
-                  value={reservationDate}
-                  min={eventName?.event_date_start}
-                  max={eventName?.event_date_end}
-                  onChange={(e) => setReservationDate(e.target.value)}
-                />
+                <div className="ReservationModal-Field">
+                  <label
+                    className="ReservationModal-Label"
+                    htmlFor="reservation-date"
+                  >
+                    Date
+                  </label>
+                  <input
+                    id="reservation-date"
+                    className="ReservationModal-Input"
+                    type="date"
+                    value={reservationDate}
+                    min={eventName?.event_date_start}
+                    max={eventName?.event_date_end}
+                    onChange={(e) => setReservationDate(e.target.value)}
+                  />
+                </div>
 
-                <input
-                  type="text"
-                  placeholder="Lieu"
-                  value={reservationLocation}
-                  onChange={(e) =>
-                    setReservationLocation(capitalize(e.target.value))
-                  }
-                />
+                <div className="ReservationModal-Field">
+                  <label
+                    className="ReservationModal-Label"
+                    htmlFor="reservation-location"
+                  >
+                    Lieu
+                  </label>
+                  <input
+                    id="reservation-location"
+                    className="ReservationModal-Input"
+                    type="text"
+                    placeholder="Ex : Paris"
+                    value={reservationLocation}
+                    onChange={(e) =>
+                      setReservationLocation(capitalize(e.target.value))
+                    }
+                  />
+                </div>
 
-                <textarea
-                  placeholder="Description"
-                  value={reservationDescription}
-                  onChange={(e) =>
-                    setReservationDescription(capitalize(e.target.value))
-                  }
-                />
+                <div className="ReservationModal-Field">
+                  <label
+                    className="ReservationModal-Label"
+                    htmlFor="reservation-description"
+                  >
+                    Description
+                  </label>
+                  <textarea
+                    id="reservation-description"
+                    className="ReservationModal-TextArea"
+                    rows={3}
+                    placeholder="Décrivez votre réservation..."
+                    value={reservationDescription}
+                    onChange={(e) =>
+                      setReservationDescription(capitalize(e.target.value))
+                    }
+                    maxLength={255}
+                  />
+                  {/* 255 : taille de la colonne reservation_description. */}
+                  <span className="ReservationModal-Counter">
+                    {reservationDescription.length}/255
+                  </span>
+                </div>
 
                 {/* Facultatif. Alimente le bouton « Voir le site » de la
                     carte ; le serveur n'accepte que http et https. */}
-                <input
-                  type="url"
-                  placeholder="Lien vers la réservation (facultatif)"
-                  value={reservationLink}
-                  onChange={(e) => setReservationLink(e.target.value)}
-                />
+                <div className="ReservationModal-Field">
+                  <label
+                    className="ReservationModal-Label"
+                    htmlFor="reservation-link"
+                  >
+                    Lien vers la réservation (facultatif)
+                  </label>
+                  <input
+                    id="reservation-link"
+                    className="ReservationModal-Input"
+                    type="url"
+                    placeholder="https://..."
+                    value={reservationLink}
+                    onChange={(e) => setReservationLink(e.target.value)}
+                  />
+                </div>
 
-                <label htmlFor="photo-upload" className="custom-upload">
-                  Choisir une image
-                </label>
+                <div className="ReservationModal-Field">
+                  <label
+                    className="ReservationModal-Label"
+                    htmlFor="photo-upload"
+                  >
+                    Image
+                  </label>
+                  <div className="ReservationModal-Image">
+                    {preview && (
+                      <img
+                        src={preview}
+                        alt="Aperçu de la réservation"
+                        className="ReservationModal-Preview"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      className="ReservationModal-ImageButton"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {preview ? "Changer l'image" : "Choisir une image"}
+                    </button>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleReservationPictureChange}
+                    className="ReservationModal-FileInput"
+                  />
+                </div>
 
-                <input
-                  id="photo-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleReservationPictureChange}
-                  className="hidden-input"
-                />
-
-                {preview && (
-                  <img src={preview} alt="preview" className="photo-preview" />
-                )}
-
-                <motion.button
-                  type="button"
-                  onClick={handleSubmitReservation}
-                  whileHover={canHover ? { scale: 1.03 } : undefined}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Enregistrer
-                </motion.button>
+                <div className="ReservationModal-Actions">
+                  <button
+                    type="button"
+                    className="ReservationModal-ButtonCancel"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    className="ReservationModal-ButtonSubmit"
+                    onClick={handleSubmitReservation}
+                  >
+                    Enregistrer
+                  </button>
+                </div>
               </motion.div>
             </motion.div>
           )}

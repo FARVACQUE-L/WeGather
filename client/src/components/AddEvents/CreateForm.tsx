@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { ImagePlus, X } from "lucide-react";
+import { useRef, useState } from "react";
 
 import type { CreateFormProps, EventData } from "../../types/Events";
 
@@ -16,6 +17,24 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
   const today = new Date().toISOString().split("T")[0];
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Photo facultative : sans photo, le serveur utilise le logo WeGather.
+  const [picture, setPicture] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPicture(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
+  const handleRemovePicture = () => {
+    setPicture(null);
+    setPreview(null);
+    // Permet de rechoisir le même fichier juste après l'avoir retiré.
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -33,20 +52,20 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
     setIsLoading(true);
     setError(null);
     try {
+      const formData = new FormData();
+      formData.append("event_name", form.title);
+      formData.append("event_date_start", form.dateStart);
+      formData.append("event_date_end", form.dateEnd);
+      formData.append("event_description", form.description);
+      formData.append("event_location", form.location);
+      if (picture) {
+        formData.append("picture", picture);
+      }
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events`, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          event_name: form.title,
-          event_date_start: form.dateStart,
-          event_date_end: form.dateEnd,
-          event_description: form.description,
-          event_location: form.location,
-          event_picture: `${import.meta.env.VITE_API_URL}/assets/images/logo-wegather.png`,
-        }),
+        body: formData,
       });
 
       if (!res.ok) throw new Error("Erreur lors de la création");
@@ -60,6 +79,7 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
         description: "",
         location: "",
       });
+      handleRemovePicture();
       onClose();
     } catch {
       setError("Une erreur est survenue, veuillez réessayer.");
@@ -153,6 +173,49 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
           <span className="CreateForm-Counter">
             {form.description.length}/255
           </span>
+        </div>
+
+        <div className="CreateForm-Field">
+          <label className="CreateForm-Label" htmlFor="picture">
+            Photo (facultatif)
+          </label>
+          <div className="CreateForm-Picture">
+            {preview && (
+              <img
+                src={preview}
+                alt="Aperçu de l'événement"
+                className="CreateForm-PicturePreview"
+              />
+            )}
+            <div className="CreateForm-PictureActions">
+              <button
+                type="button"
+                className="CreateForm-PictureButton"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImagePlus size={16} />
+                {picture ? "Changer la photo" : "Choisir une photo"}
+              </button>
+              {picture && (
+                <button
+                  type="button"
+                  className="CreateForm-PictureRemove"
+                  aria-label="Retirer la photo"
+                  onClick={handleRemovePicture}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+          <input
+            ref={fileInputRef}
+            id="picture"
+            type="file"
+            accept="image/*"
+            className="CreateForm-PictureInput"
+            onChange={handleFileChange}
+          />
         </div>
 
         <div className="CreateForm-Field">

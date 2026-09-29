@@ -43,13 +43,15 @@
   display: flex;
   justify-content: space-evenly;
   margin-bottom: 2rem;
+  /* Mêmes boutons que le formulaire de création d'événement : Annuler garde
+     le gris par défaut des boutons, ombre et survol de la modale de
+     modification. */
   .JoinForm-ButtonCancel {
     width: 5rem;
     height: 2rem;
     border-radius: 1rem;
     border: none;
-    background: var(--button-color);
-    color: var(--font-neutral);
+    box-shadow: 1px 1px 5px black;
     transition: transform 0.2s;
   }
   @media (hover: hover) and (min-width: 429px) {
@@ -62,14 +64,14 @@
     height: 2rem;
     border-radius: 1rem;
     border: none;
-    background: var(--button-color);
+    background: linear-gradient(to right, #ff7e5f, #a53b22);
     color: var(--font-neutral);
+    box-shadow: 1px 1px 5px black;
     transition: transform 0.2s;
   }
   .JoinForm-ButtonSubmit:disabled {
     opacity: 0.5;
     background: var(--button-color-disable);
-    border: 1px solid var(--border-color);
     color: var(--font-button-color-disable);
   }
   @media (hover: hover) and (min-width: 429px) {
@@ -82,6 +84,7 @@
   .JoinForm-Footer {
     .JoinForm-ButtonSubmit {
       width: 10rem;
+      border: 1px solid var(--border-color);
     }
   }
 }

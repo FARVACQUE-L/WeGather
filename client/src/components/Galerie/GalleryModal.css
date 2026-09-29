@@ -1,3 +1,6 @@
+/* Règles .modal restantes : confirmation de suppression d'une photo
+   (Galerie.tsx). Elles sont globales, d'où les classes GalleryForm-* des
+   formulaires ci-dessous. */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -58,122 +61,6 @@
     color: #666;
     font-size: 0.95rem;
   }
-}
-
-.modal {
-  .file-label {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 160px;
-    height: 40px;
-
-    margin-bottom: 0.5rem;
-    padding: 0 1rem;
-
-    border: 1px dashed #ff8a65;
-    border-radius: 999px;
-
-    background: #fff8f5;
-    color: #ff8a65;
-
-    font-size: 0.9rem;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-      background-color 0.2s ease,
-      transform 0.15s ease;
-    box-shadow: 0.2s ease;
-
-    @media (hover: hover) and (min-width: 429px) {
-      &:hover {
-        background: #fff3ee;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgb(255 138 101 / 15%);
-      }
-    }
-
-    &:active {
-      transform: scale(0.98);
-      box-shadow: 0 2px 6px rgb(255 138 101 / 10%);
-    }
-  }
-
-  .file-input {
-    display: none;
-  }
-
-  .file-help {
-    margin-bottom: 1rem;
-
-    color: #888;
-    font-size: 0.75rem;
-  }
-
-  .modal-input {
-    width: 100%;
-    margin: 0.5rem 0 1rem;
-    padding: 0.75rem;
-    box-sizing: border-box;
-
-    border: 1px solid #ddd;
-    border-radius: 10px;
-
-    font-size: 0.95rem;
-
-    &:focus {
-      border-color: #ff8a65;
-      outline: none;
-    }
-  }
-
-  .description-input {
-    width: 100%;
-    height: 44px;
-
-    margin-top: 0.75rem;
-    padding: 0 1rem;
-
-    box-sizing: border-box;
-
-    border: 1px solid #ff8a65;
-    border-radius: 10px;
-
-    background: white;
-    color: #333;
-
-    font-size: 0.9rem;
-
-    &::placeholder {
-      color: #999;
-    }
-
-    &:focus {
-      border-color: #b2553d;
-      outline: none;
-    }
-  }
-
-  .error-message {
-    margin-top: 0.5rem;
-
-    color: #e53935;
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-}
-
-.preview-image {
-  width: 100%;
-  max-height: 200px;
-  margin-bottom: 1rem;
-
-  border-radius: 12px;
-  object-fit: cover;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
 }
 
 .modal {
@@ -246,5 +133,158 @@
         width: 100%;
       }
     }
+  }
+}
+
+/* Formulaires « Ajouter une photo » et « Modifier la description » : champs
+   et boutons calqués sur la modale de modification d'événement. */
+.GalleryForm-Overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+
+  .GalleryForm {
+    /* Réinitialise le style par défaut de <dialog> (modale de description). */
+    position: static;
+    margin: 0;
+    border: none;
+    color: inherit;
+
+    width: min(90vw, 420px);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    background: var(--bg-color);
+    border-radius: 2rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .GalleryForm-Title {
+    font-size: x-large;
+    color: var(--font-title);
+  }
+
+  .GalleryForm-Field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .GalleryForm-Label {
+    font-size: 0.8rem;
+  }
+
+  .GalleryForm-Input {
+    height: 2rem;
+    border: 1px solid var(--border-color);
+    padding-left: 0.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    background: var(--input-color);
+    color: var(--font-input);
+
+    &::placeholder {
+      color: var(--font-placeholder);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .GalleryForm-FileInput {
+    display: none;
+  }
+
+  /* Aperçu au-dessus du bouton, à la taille des cartes. */
+  .GalleryForm-Image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+
+    .GalleryForm-Preview {
+      width: 16rem;
+      height: 12rem;
+      border-radius: 1rem;
+      object-fit: cover;
+    }
+
+    .GalleryForm-Help {
+      margin-top: -0.5rem;
+      color: #888;
+      font-size: 0.75rem;
+    }
+  }
+
+  .GalleryForm-Error {
+    color: var(--input-error);
+    font-size: 0.85rem;
+  }
+
+  .GalleryForm-ImageButton,
+  .GalleryForm-ButtonCancel,
+  .GalleryForm-ButtonSubmit {
+    height: 2rem;
+    border: none;
+    border-radius: 5rem;
+    box-shadow: 1px 1px 5px black;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  @media (hover: hover) and (min-width: 429px) {
+    .GalleryForm-ImageButton:hover,
+    .GalleryForm-ButtonCancel:hover,
+    .GalleryForm-ButtonSubmit:not(:disabled):hover {
+      transform: scale(0.95);
+    }
+  }
+
+  .GalleryForm-ImageButton {
+    width: 15rem;
+    background: var(--button-color-disable);
+    color: var(--font-title);
+  }
+
+  .GalleryForm-Actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  /* 12rem comme dans la modale de modification, partagés ici entre les deux
+     boutons car la modale est plus étroite. Annuler garde le gris par
+     défaut des boutons, comme là-bas. */
+  .GalleryForm-ButtonCancel,
+  .GalleryForm-ButtonSubmit {
+    flex: 1;
+    max-width: 12rem;
+  }
+
+  .GalleryForm-ButtonSubmit {
+    background: linear-gradient(to right, #ff7e5f, #a53b22);
+    color: var(--font-neutral);
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@media screen and (max-width: 428px) {
+  .GalleryForm-Overlay .GalleryForm {
+    width: 100%;
+    padding: 1.5rem;
   }
 }

@@ -12,15 +12,6 @@ body {
     background: var(--bg-color);
     cursor: default;
     gap: 2rem;
-    .form {
-      backdrop-filter: blur(6px);
-
-      .formActions {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-      }
-    }
     .myBalance {
       .myBalanceBox {
         background: linear-gradient(135deg, #ff8a6a, #c24a2d);
@@ -127,7 +118,7 @@ body {
     backdrop-filter: blur(6px);
   }
 
-  /* Mirrors .createForm so the edit, delete and add modals share the same sizes */
+  /* Shared sizes for the sweetalert delete and settlement modals */
   .toast-edit-popup,
   .budget-delete-popup {
     border-radius: 16px;
@@ -304,81 +295,6 @@ body {
 
         button {
           display: none;
-        }
-      }
-
-      .form {
-        position: fixed;
-        inset: 0;
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        background: rgba(0, 0, 0, 0.4);
-
-        z-index: 999;
-
-        .createForm {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-
-          background: white;
-          padding: 20px;
-          border-radius: 16px;
-
-          width: 90%;
-          max-width: 400px;
-
-          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-          animation: pop 0.2s ease-out;
-
-          .mobileOnly {
-            display: flex;
-            justify-content: space-between;
-            justify-self: center;
-
-            width: 100%;
-
-            color: var(--font-brown);
-
-            h5 {
-              font-size: 1rem;
-              font-weight: 700;
-            }
-          }
-
-          input {
-            padding: 12px;
-            border: 2px solid var(--beige-color);
-            border-radius: 10px;
-            outline: none;
-            transition: border-color 0.2s;
-
-            &:focus {
-              border-color: var(--font-brown);
-            }
-          }
-
-          button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-          }
-        }
-
-        @keyframes pop {
-          from {
-            transform: scale(0.95);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1);
-            opacity: 1;
-          }
         }
       }
 
@@ -570,93 +486,6 @@ body {
 
           &:active {
             transform: scale(0.98);
-          }
-        }
-      }
-
-      .form {
-        position: fixed;
-        inset: 0;
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        background: rgba(0, 0, 0, 0.4);
-
-        z-index: 999;
-
-        .createForm {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-
-          background: white;
-          padding: 30px;
-          border-radius: 16px;
-
-          width: 100%;
-          max-width: 18vw;
-
-          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-          animation: pop 0.2s ease-out;
-
-          .mobileOnly {
-            display: flex;
-            justify-content: space-between;
-            justify-self: center;
-
-            width: 100%;
-
-            color: var(--font-brown);
-
-            h5 {
-              font-size: 1.5rem;
-              font-weight: 700;
-            }
-          }
-
-          input {
-            padding: 12px;
-            border: 2px solid var(--beige-color);
-            border-radius: 10px;
-            margin-left: 10px;
-            margin-right: 10px;
-            outline: none;
-            transition:
-              border-color 0.2s,
-              box-shadow 0.2s;
-
-            &:focus {
-              border-color: var(--font-brown);
-              box-shadow: 0 0 5px rgba(185, 68, 36, 0.3);
-            }
-          }
-
-          button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.25s;
-
-            @media (hover: hover) and (min-width: 429px) {
-              &:hover {
-                transform: scale(1.03);
-              }
-            }
-          }
-        }
-
-        @keyframes pop {
-          from {
-            transform: scale(0.95);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1);
-            opacity: 1;
           }
         }
       }

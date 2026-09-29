@@ -15,6 +15,7 @@ import {
   Plus,
   Trash,
 } from "lucide-react";
+import BudgetFormModal from "./BudgetFormModal";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -183,9 +184,10 @@ function Budget() {
   const [budgetEvent, setBudgetEvent] = useState<BudgetTotalEvent>();
   const [listUserBudget, setListUserBudget] = useState<BudgetByUser[]>([]);
   const [listBudget, setListBudget] = useState<Budget[]>([]);
-  const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
-  const [nameCreateForm, setNameCreateForm] = useState<string>("");
-  const [priceCreateForm, setPriceCreateForm] = useState<number>();
+  // Modale ouverte : ajout, ou modification de la dépense indiquée.
+  const [budgetForm, setBudgetForm] = useState<
+    { mode: "add" } | { mode: "edit"; budget: Budget } | null
+  >(null);
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
 
   const fetchBudgetLists = useCallback(() => {
@@ -239,9 +241,7 @@ function Budget() {
     fetchUserInEvent();
     fetchBudgetLists();
   }, [eventUuid, userID, fetchUserInEvent, fetchBudgetLists]);
-  async function addBudget(e: React.FormEvent) {
-    e.preventDefault();
-
+  async function addBudget(name: string, price: number) {
     if (!eventUuid) return;
 
     const addAlert = Swal.mixin({
@@ -256,46 +256,6 @@ function Budget() {
       },
     });
 
-    if (!nameCreateForm.trim()) {
-      addAlert.fire({
-        icon: "error",
-        text: "Nom obligatoire",
-
-        customClass: {
-          popup: "toast-error-popup",
-        },
-      });
-      return;
-    }
-
-    if (
-      priceCreateForm === undefined ||
-      Number.isNaN(priceCreateForm) ||
-      priceCreateForm === 0
-    ) {
-      addAlert.fire({
-        icon: "error",
-        text: "Prix invalide",
-
-        customClass: {
-          popup: "toast-error-popup",
-        },
-      });
-      return;
-    }
-
-    if (priceCreateForm < 0) {
-      addAlert.fire({
-        icon: "error",
-        text: "Prix ne peux pas être négatif",
-
-        customClass: {
-          popup: "toast-error-popup",
-        },
-      });
-      return;
-    }
-
     const answer = await fetch(`${apiUrl}/api/budget/add`, {
       method: "POST",
       credentials: "include",
@@ -303,16 +263,14 @@ function Budget() {
       body: JSON.stringify({
         event_uuid: eventUuid,
         id_user: userID,
-        name: String(nameCreateForm),
-        price: Number(priceCreateForm),
+        name,
+        price,
       }),
     });
 
     await fetchBudgetLists();
 
-    setNameCreateForm("");
-    setPriceCreateForm(undefined);
-    setShowCreateForm(false);
+    setBudgetForm(null);
 
     const data = await answer.json();
 
@@ -336,83 +294,9 @@ function Budget() {
         });
   }
 
-  async function openUpdateModal(budget: Budget) {
-    const { value: formValues } = await Swal.fire({
-      title: "Modifier la dépense",
-
-      customClass: {
-        container: "budget-backdrop",
-        popup: "toast-edit-popup",
-        confirmButton: "budget-confirm",
-        cancelButton: "budget-cancel",
-      },
-
-      html: `
-      <input
-        id="swal-budget-name"
-        class="swal2-input"
-        placeholder="Nom"
-        value="${budget.budget_name}"
-      />
-
-      <input
-        id="swal-budget-price"
-        class="swal2-input"
-        type="number"
-        step="0.01"
-        min="0"
-        placeholder="Prix"
-        value="${budget.budget_price}"
-      />
-    `,
-      focusConfirm: false,
-      showCancelButton: true,
-      confirmButtonText: "Enregistrer",
-      cancelButtonText: "Annuler",
-
-      preConfirm: () => {
-        const name = (
-          document.getElementById("swal-budget-name") as HTMLInputElement
-        ).value;
-
-        const priceInput = document.getElementById(
-          "swal-budget-price",
-        ) as HTMLInputElement;
-
-        const price = Number(priceInput.value);
-
-        if (!name.trim()) {
-          Swal.showValidationMessage("Nom obligatoire");
-          return;
-        }
-
-        // Sweetalert ne soumet pas de formulaire, donc la validation HTML de
-        // step="0.01" et min="0" n'est jamais déclenchée. On l'appelle à la
-        // main pour réutiliser le message natif du formulaire d'ajout.
-        if (!priceInput.checkValidity()) {
-          Swal.showValidationMessage(priceInput.validationMessage);
-          return;
-        }
-
-        if (!price || price <= 0) {
-          Swal.showValidationMessage("Prix invalide");
-          return;
-        }
-
-        if (
-          name === budget.budget_name &&
-          price === Number(budget.budget_price)
-        ) {
-          Swal.showValidationMessage("Aucune modification n’a été détectée");
-          return;
-        }
-
-        return { name, price };
-      },
-    });
-
-    if (!formValues) return;
-
+  // Remplace l'ancienne modale SweetAlert, qui insérait le nom de la dépense
+  // tel quel dans son HTML.
+  async function updateBudget(budget: Budget, name: string, price: number) {
     const answer = await fetch(`${apiUrl}/api/budget/update`, {
       method: "PUT",
       credentials: "include",
@@ -421,12 +305,13 @@ function Budget() {
       },
       body: JSON.stringify({
         id_budget: budget.budget_id,
-        name: formValues.name,
-        price: formValues.price,
+        name,
+        price,
       }),
     });
 
     if (answer.ok) {
+      setBudgetForm(null);
       await fetchBudgetLists();
 
       Swal.fire({
@@ -581,7 +466,7 @@ function Budget() {
           <motion.button
             type="button"
             className="button-header"
-            onClick={() => setShowCreateForm(!showCreateForm)}
+            onClick={() => setBudgetForm({ mode: "add" })}
             whileHover={canHover ? { scale: 1.05 } : undefined}
             whileTap={{ scale: 0.95 }}
           >
@@ -591,48 +476,26 @@ function Budget() {
         </motion.header>
       </div>
       <div className="budgetBody">
-        {showCreateForm ? (
-          /* -- Create Form -- */
-          <div className="form">
-            <form className="createForm" onSubmit={(e) => addBudget(e)}>
-              <div className="mobileOnly">
-                <h5>Ajoute une dépense</h5>
-              </div>
+        {budgetForm?.mode === "add" && (
+          <BudgetFormModal
+            title="Ajouter une dépense"
+            submitLabel="Ajouter"
+            onCancel={() => setBudgetForm(null)}
+            onSubmit={addBudget}
+          />
+        )}
 
-              {/* Name */}
-              <input
-                type="text"
-                placeholder="Le nom de la dépense"
-                onChange={(e) => setNameCreateForm(e.target.value)}
-                required
-              />
-
-              {/* Price */}
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Le prix de la dépense"
-                onChange={(e) => setPriceCreateForm(Number(e.target.value))}
-                required
-              />
-
-              <div className="formActions">
-                <button type="submit" className="budget-confirm">
-                  Ajouter
-                </button>
-                <button
-                  type="button"
-                  className="budget-cancel"
-                  onClick={() => setShowCreateForm(false)}
-                >
-                  Annuler
-                </button>
-              </div>
-            </form>
-          </div>
-        ) : (
-          ""
+        {budgetForm?.mode === "edit" && (
+          <BudgetFormModal
+            title="Modifier la dépense"
+            submitLabel="Enregistrer"
+            initialName={budgetForm.budget.budget_name}
+            initialPrice={Number(budgetForm.budget.budget_price)}
+            onCancel={() => setBudgetForm(null)}
+            onSubmit={(name, price) =>
+              updateBudget(budgetForm.budget, name, price)
+            }
+          />
         )}
 
         <motion.section
@@ -692,7 +555,7 @@ function Budget() {
               <button
                 type="button"
                 className="addButton"
-                onClick={() => setShowCreateForm(!showCreateForm)}
+                onClick={() => setBudgetForm({ mode: "add" })}
               >
                 <Plus size={20} />
               </button>
@@ -718,7 +581,11 @@ function Budget() {
                           row.budget_id_user === userID ? "icons" : "Noicons"
                         }
                       >
-                        <Pen onClick={() => openUpdateModal(row)} />
+                        <Pen
+                          onClick={() =>
+                            setBudgetForm({ mode: "edit", budget: row })
+                          }
+                        />
                         <Trash
                           onClick={(e) => confirmDelete(e, row.budget_id)}
                         />
