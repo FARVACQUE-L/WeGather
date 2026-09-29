@@ -417,7 +417,7 @@ body {
   body {
     .toast-edit-popup,
     .budget-delete-popup {
-      --swal2-width: 18vw;
+      --swal2-width: 25vw;
       --swal2-padding: 30px;
       row-gap: 20px;
 
