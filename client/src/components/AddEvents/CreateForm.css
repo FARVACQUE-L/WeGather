@@ -66,7 +66,6 @@
   .CreateForm-TextArea:focus {
     outline: none;
   }
-  /* Le vrai champ fichier reste caché derrière le bouton. */
   /* Aperçu au-dessus, bouton et retrait centrés en dessous. L'aperçu a la
      taille de celui de la modale de modification (et des cartes). */
   .CreateForm-Picture {
@@ -93,13 +92,18 @@
       align-items: center;
       gap: 0.4rem;
       padding: 0.5rem 1rem;
-      /* Mêmes couleurs et arrondi que le bouton d'ajout de la galerie. */
-      border: 1px dashed #ff8a65;
-      border-radius: 999px;
-      background: #fff8f5;
-      color: #ff8a65;
-      font-weight: 600;
+      /* Même rendu que « Changer l'image » de la modale de modification. */
+      border: none;
+      border-radius: 5rem;
+      box-shadow: 1px 1px 5px black;
       cursor: pointer;
+      transition: transform 0.2s;
+
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: scale(0.95);
+        }
+      }
     }
 
     .CreateForm-PictureRemove {
@@ -115,6 +119,7 @@
       cursor: pointer;
     }
   }
+  /* Le vrai champ fichier reste caché derrière le bouton. */
   .CreateForm-PictureInput {
     display: none;
   }
@@ -128,13 +133,16 @@
   display: flex;
   justify-content: space-evenly;
   margin-bottom: 2rem;
+  /* Couleurs, ombre et survol repris des boutons de la modale de
+     modification d'événement. */
   .CreateForm-ButtonCancel {
     width: 5rem;
     height: 2rem;
     border-radius: 1rem;
     border: none;
-    background: var(--button-color);
-    color: var(--font-neutral);
+    background: var(--button-color-disable);
+    color: var(--font-title);
+    box-shadow: 1px 1px 5px black;
     transition: transform 0.2s;
   }
   @media (hover: hover) and (min-width: 429px) {
@@ -147,8 +155,9 @@
     height: 2rem;
     border-radius: 1rem;
     border: none;
-    background: var(--button-color);
+    background: linear-gradient(to right, #ff7e5f, #a53b22);
     color: var(--font-neutral);
+    box-shadow: 1px 1px 5px black;
     transition: transform 0.2s;
   }
   .CreateForm-ButtonSubmit:disabled {
