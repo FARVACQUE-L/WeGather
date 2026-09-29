@@ -513,7 +513,8 @@ function Budget() {
             {userBalance > 0 && <span>on te doit</span>}
             {userBalance < 0 && <span>tu dois</span>}
             {userBalance === 0 && <span>comptes équilibrés</span>}
-            <h2>{userBalance}€</h2>
+            {/* Sans signe : « on te doit » / « tu dois » donne déjà le sens. */}
+            <h2>{Math.abs(userBalance)}€</h2>
             <small>
               <History /> last update :{" "}
               {returnDateString(
@@ -535,14 +536,18 @@ function Budget() {
 
           <article className="total">
             <div className="positif">
-              <ArrowDown size={20} className="lucid" /> <br />
-              <span> dépense globales </span>
+              <p className="total-label">
+                <ArrowDown size={20} className="lucid" />
+                <span>dépense globales</span>
+              </p>
               <h3> {budgetEvent?.total_price} € </h3>
             </div>
 
             <div className="negatif">
-              <ArrowUp size={20} className="lucid" /> <br />
-              <span> mes dépenses</span>
+              <p className="total-label">
+                <ArrowUp size={20} className="lucid" />
+                <span>mes dépenses</span>
+              </p>
               <h3>{userBudget} €</h3>
             </div>
           </article>
