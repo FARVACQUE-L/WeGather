@@ -535,14 +535,18 @@ function Budget() {
 
           <article className="total">
             <div className="positif">
-              <ArrowDown size={20} className="lucid" /> <br />
-              <span> dépense globales </span>
+              <p className="total-label">
+                <ArrowDown size={20} className="lucid" />
+                <span>dépense globales</span>
+              </p>
               <h3> {budgetEvent?.total_price} € </h3>
             </div>
 
             <div className="negatif">
-              <ArrowUp size={20} className="lucid" /> <br />
-              <span> mes dépenses</span>
+              <p className="total-label">
+                <ArrowUp size={20} className="lucid" />
+                <span>mes dépenses</span>
+              </p>
               <h3>{userBudget} €</h3>
             </div>
           </article>

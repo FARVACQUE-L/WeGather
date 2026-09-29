@@ -515,7 +515,9 @@ body {
         .total {
           display: flex;
           flex-direction: column;
-          gap: 2.5rem;
+          /* Les deux blocs se partagent la hauteur de la carte du solde,
+             voisine dans la même rangée de la grille. */
+          gap: 1rem;
           font-size: 1.2rem;
 
           h3 {
@@ -523,10 +525,18 @@ body {
             margin: 5px;
           }
 
+          /* Icône et libellé sur une même ligne : les blocs restent assez
+             bas pour tenir à deux dans la hauteur de la carte du solde. */
+          .total-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+          }
+
           div {
-            height: 10rem;
+            flex: 1;
             border-radius: 10px;
-            padding: 20px;
+            padding: 16px 20px;
             transition: 0.25s;
 
             @media (hover: hover) and (min-width: 429px) {
