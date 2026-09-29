@@ -582,7 +582,7 @@ body {
         margin-left: 3vw;
 
         .titleExpenses {
-          font-size: 2rem;
+          font-size: 1.5rem;
         }
 
         .expenses {
@@ -634,6 +634,11 @@ body {
 
         .balance {
           width: 25vw;
+
+          /* Même taille que le titre Dépenses (.titleExpenses). */
+          h5 {
+            font-size: 1.5rem;
+          }
 
           section {
             height: 25vh;
