@@ -66,20 +66,26 @@
   .CreateForm-TextArea:focus {
     outline: none;
   }
-  /* Ligne compacte (aperçu, bouton, retrait) pour ne pas trop allonger la
-     modale ; le vrai champ fichier reste caché derrière le bouton. */
+  /* Le vrai champ fichier reste caché derrière le bouton. */
+  /* Aperçu au-dessus, bouton et retrait centrés en dessous. L'aperçu garde
+     le format 4:3 des cartes d'événement, à la moitié de leur taille. */
   .CreateForm-Picture {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 0.8rem;
 
     .CreateForm-PicturePreview {
-      width: 4rem;
-      height: 3rem;
+      width: 8rem;
+      height: 6rem;
       border-radius: 0.5rem;
       object-fit: cover;
-      flex-shrink: 0;
+    }
+
+    .CreateForm-PictureActions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
     }
 
     .CreateForm-PictureButton {
