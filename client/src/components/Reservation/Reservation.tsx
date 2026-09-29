@@ -301,7 +301,12 @@ function Reservation() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          whileHover={canHover ? { scale: 1.05 } : undefined}
+          // Même survol que Créer / Rejoindre un événement.
+          whileHover={
+            canHover
+              ? { scale: 0.95, transition: { duration: 0.2 } }
+              : undefined
+          }
           whileTap={{ scale: 0.95 }}
         >
           <CalendarPlus size={20} />

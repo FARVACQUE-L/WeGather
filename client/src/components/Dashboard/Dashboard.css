@@ -19,6 +19,8 @@
       border: none;
       border-radius: 999px;
       background: linear-gradient(90deg, #ff8a65 0%, #b2553d 100%);
+      /* Même ombre que le bouton Créer / Rejoindre un événement. */
+      box-shadow: 1px 1px 5px black;
       color: white;
       cursor: pointer;
       font-weight: 700;

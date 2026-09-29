@@ -467,7 +467,12 @@ function Budget() {
             type="button"
             className="button-header"
             onClick={() => setBudgetForm({ mode: "add" })}
-            whileHover={canHover ? { scale: 1.05 } : undefined}
+            // Même survol que Créer / Rejoindre un événement.
+            whileHover={
+              canHover
+                ? { scale: 0.95, transition: { duration: 0.2 } }
+                : undefined
+            }
             whileTap={{ scale: 0.95 }}
           >
             <FilePlusCorner size={20} />
