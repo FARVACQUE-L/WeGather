@@ -449,8 +449,21 @@ body {
     .budget {
       display: flex;
       flex-direction: column;
-      padding: 2rem 3rem 2rem 0;
-      height: auto;
+      padding: 2rem 3rem 0 0;
+      /* La zone de contenu commence à 3vh du haut, comme la sidebar
+         (margin-top 3vh, hauteur 95vh) : avec 95vh et sans marge basse, les
+         listes Dépenses et Equilibres s'arrêtent au niveau du bas de la
+         sidebar. La marge négative annule les 3vh de marge basse de la zone
+         de contenu, qui feraient défiler la page de 1vh. */
+      height: 95vh;
+      margin-bottom: -3vh;
+
+      .budgetBody {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
 
       header {
         width: 63vw;
@@ -492,8 +505,6 @@ body {
         gap: 2rem;
         font-size: 1.5rem;
         align-items: stretch;
-
-        margin-top: 2rem;
 
         .myBalanceBox {
           max-height: 18rem;
@@ -575,10 +586,17 @@ body {
       .expensesAndBalance {
         display: grid;
         grid-template-columns: 1fr 1fr;
+        /* Rangée limitée à la hauteur disponible : une rangée automatique
+           grandirait jusqu'à contenir toutes les lignes des listes et
+           déborderait sous la sidebar. */
+        grid-template-rows: minmax(0, 1fr);
         gap: 3rem;
         margin-top: 3rem;
 
-        align-self: start;
+        /* Occupe la hauteur restante sous la carte du solde. */
+        flex: 1;
+        min-height: 0;
+        align-self: stretch;
         margin-left: 3vw;
 
         .titleExpenses {
@@ -587,13 +605,15 @@ body {
 
         .expenses {
           width: 30vw;
+          min-height: 0;
 
           button {
             display: none;
           }
 
           section {
-            height: 30vh;
+            flex: 1;
+            min-height: 0;
             overflow-y: auto;
 
             input {
@@ -634,6 +654,7 @@ body {
 
         .balance {
           width: 25vw;
+          min-height: 0;
 
           /* Même taille que le titre Dépenses (.titleExpenses). */
           h5 {
@@ -641,7 +662,8 @@ body {
           }
 
           section {
-            height: 25vh;
+            flex: 1;
+            min-height: 0;
             overflow-y: auto;
           }
           section::-webkit-scrollbar {
