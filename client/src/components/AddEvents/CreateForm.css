@@ -92,9 +92,12 @@
       align-items: center;
       gap: 0.4rem;
       padding: 0.5rem 1rem;
-      /* Même rendu que « Changer l'image » de la modale de modification. */
+      /* Forme, ombre et survol de « Changer l'image » (modale de
+         modification) ; couleurs inversées avec le bouton Annuler. */
       border: none;
       border-radius: 5rem;
+      background: var(--button-color-disable);
+      color: var(--font-title);
       box-shadow: 1px 1px 5px black;
       cursor: pointer;
       transition: transform 0.2s;
@@ -133,15 +136,14 @@
   display: flex;
   justify-content: space-evenly;
   margin-bottom: 2rem;
-  /* Couleurs, ombre et survol repris des boutons de la modale de
-     modification d'événement. */
+  /* Ombre et survol repris des boutons de la modale de modification
+     d'événement. Annuler garde le gris par défaut des boutons, couleurs
+     inversées avec « Choisir une photo ». */
   .CreateForm-ButtonCancel {
     width: 5rem;
     height: 2rem;
     border-radius: 1rem;
     border: none;
-    background: var(--button-color-disable);
-    color: var(--font-title);
     box-shadow: 1px 1px 5px black;
     transition: transform 0.2s;
   }
