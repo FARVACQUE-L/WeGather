@@ -25,7 +25,6 @@ const add: RequestHandler = async (req, res, next) => {
     event_name,
     event_date_start,
     event_date_end,
-    event_picture,
     event_description,
     event_location,
   } = req.body;
@@ -37,9 +36,18 @@ const add: RequestHandler = async (req, res, next) => {
     !event_description ||
     !event_location
   ) {
+    // multer a déjà écrit la photo sur disque : on ne la garde pas pour un
+    // événement qui ne sera pas créé.
+    if (req.file) fs.rmSync(req.file.path, { force: true });
     res.status(400).json({ message: "Veuillez remplir tous les champs." });
     return;
   }
+
+  // Photo facultative : sans fichier, l'événement prend le logo WeGather.
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
+  const event_picture = req.file
+    ? `${baseUrl}/uploads/${req.file.filename}`
+    : `${baseUrl}/assets/images/logo-wegather.png`;
 
   try {
     const insertId = await eventRepository.create({

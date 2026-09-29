@@ -20,7 +20,13 @@ eventRoutes.get(
 eventRoutes.get("/events/uuid/:uuid", authorization, eventActions.readByUuid);
 eventRoutes.get("/api/events/:eventUuid", authorization, eventActions.read);
 eventRoutes.post("/api/events/join", authorization, eventActions.join);
-eventRoutes.post("/api/events", authorization, eventActions.add);
+eventRoutes.post(
+  "/api/events",
+  authorization,
+  upload.single("picture"),
+  verifyFileSignatures,
+  eventActions.add,
+);
 eventRoutes.put(
   "/api/events/:eventUuid/",
   authorization,
