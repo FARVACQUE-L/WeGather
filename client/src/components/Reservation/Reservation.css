@@ -115,9 +115,16 @@
         height: 2rem;
       }
 
+      /* Barre de défilement masquée : un texte plus long que la zone reste
+         lisible en faisant défiler, ou en agrandissant la zone par son coin. */
       .ReservationModal-TextArea {
         padding-top: 0.2rem;
         resize: vertical;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
       }
 
       .ReservationModal-Counter {

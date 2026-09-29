@@ -403,7 +403,7 @@ function Reservation() {
                   <textarea
                     id="reservation-description"
                     className="ReservationModal-TextArea"
-                    rows={4}
+                    rows={3}
                     placeholder="Décrivez votre réservation..."
                     value={reservationDescription}
                     onChange={(e) =>
