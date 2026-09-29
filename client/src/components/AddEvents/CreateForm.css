@@ -67,8 +67,8 @@
     outline: none;
   }
   /* Le vrai champ fichier reste caché derrière le bouton. */
-  /* Aperçu au-dessus, bouton et retrait centrés en dessous. L'aperçu garde
-     le format 4:3 des cartes d'événement, à la moitié de leur taille. */
+  /* Aperçu au-dessus, bouton et retrait centrés en dessous. L'aperçu a la
+     taille de celui de la modale de modification (et des cartes). */
   .CreateForm-Picture {
     display: flex;
     flex-direction: column;
@@ -76,9 +76,9 @@
     gap: 0.8rem;
 
     .CreateForm-PicturePreview {
-      width: 8rem;
-      height: 6rem;
-      border-radius: 0.5rem;
+      width: 16rem;
+      height: 12rem;
+      border-radius: 1rem;
       object-fit: cover;
     }
 
