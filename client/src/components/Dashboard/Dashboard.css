@@ -241,6 +241,13 @@
           border-style: none;
           background: none;
           color: var(--font-brown);
+          cursor: pointer;
+
+          @media (hover: hover) and (min-width: 429px) {
+            &:hover {
+              text-decoration: underline;
+            }
+          }
         }
       }
 
