@@ -443,14 +443,18 @@ body {
       }
     }
 
+    /* Marge haute, largeur et hauteur de l'en-tête alignées sur la page
+       Réservation : le bouton Ajouter une dépense tombe au même endroit que
+       Ajouter une réservation. */
     .budget {
       display: flex;
       flex-direction: column;
-      padding: 3rem 3rem 2rem 0;
+      padding: 2rem 3rem 2rem 0;
       height: auto;
 
       header {
-        width: 100%;
+        width: 63vw;
+        height: 70px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -461,9 +465,9 @@ body {
 
         button {
           display: flex;
-          gap: 0.5rem;
+          gap: 0.4rem;
           align-items: center;
-          padding: 0.65rem 1.6rem;
+          padding: 0.65rem 1.5rem;
           border: none;
           border-radius: 999px;
           background: linear-gradient(90deg, #ff8a65 0%, #b2553d 100%);
@@ -472,13 +476,12 @@ body {
           color: white;
           cursor: pointer;
           font-weight: 700;
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           letter-spacing: 0.5px;
           transition:
             opacity 0.2s ease,
             transform 0.1s ease;
           width: auto;
-          margin-right: 5.9vh;
 
           @media (hover: hover) and (min-width: 429px) {
             &:hover {
