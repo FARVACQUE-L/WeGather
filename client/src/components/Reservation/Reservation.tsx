@@ -409,7 +409,12 @@ function Reservation() {
                     onChange={(e) =>
                       setReservationDescription(capitalize(e.target.value))
                     }
+                    maxLength={255}
                   />
+                  {/* 255 : taille de la colonne reservation_description. */}
+                  <span className="ReservationModal-Counter">
+                    {reservationDescription.length}/255
+                  </span>
                 </div>
 
                 {/* Facultatif. Alimente le bouton « Voir le site » de la
