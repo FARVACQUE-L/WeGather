@@ -66,6 +66,52 @@
   .CreateForm-TextArea:focus {
     outline: none;
   }
+  /* Ligne compacte (aperçu, bouton, retrait) pour ne pas trop allonger la
+     modale ; le vrai champ fichier reste caché derrière le bouton. */
+  .CreateForm-Picture {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+
+    .CreateForm-PicturePreview {
+      width: 4rem;
+      height: 3rem;
+      border-radius: 0.5rem;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .CreateForm-PictureButton {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      /* Mêmes couleurs et arrondi que le bouton d'ajout de la galerie. */
+      border: 1px dashed #ff8a65;
+      border-radius: 999px;
+      background: #fff8f5;
+      color: #ff8a65;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .CreateForm-PictureRemove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: 50%;
+      background: var(--bg-negative);
+      color: var(--font-red);
+      cursor: pointer;
+    }
+  }
+  .CreateForm-PictureInput {
+    display: none;
+  }
   .CreateForm-Counter {
     text-align: end;
     font-size: x-small;
