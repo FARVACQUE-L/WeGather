@@ -40,7 +40,11 @@ function TableauDeBord() {
           handleChangeComponent={handleChangeComponent}
         />
         <main className="content">
-          {activeComponent === "tableau" && <Dashboard />}
+          {activeComponent === "tableau" && (
+            <Dashboard
+              onSeeAllReservations={() => handleChangeComponent("reservation")}
+            />
+          )}
           {activeComponent === "messagerie" && <Messagerie />}
           {activeComponent === "reservation" && <Reservation />}
           {activeComponent === "budget" && <Budget />}

@@ -37,7 +37,12 @@ type UserAndBudget = {
   total_price: number | null;
 };
 
-function Dashboard() {
+type DashboardProps = {
+  // Ouvre l'onglet Réservation (bouton « Voir tout »).
+  onSeeAllReservations: () => void;
+};
+
+function Dashboard({ onSeeAllReservations }: DashboardProps) {
   const canHover = useCanHover();
   const [eventData, setEventData] = useState<EventDashboard>();
   const [reservationData, setReservationData] = useState<
@@ -317,7 +322,9 @@ function Dashboard() {
               <CalendarClock size={20} />
               Réservations récentes
             </h3>
-            <button type="button">Voir tout</button>
+            <button type="button" onClick={onSeeAllReservations}>
+              Voir tout
+            </button>
           </div>
 
           <div className="component-array">
