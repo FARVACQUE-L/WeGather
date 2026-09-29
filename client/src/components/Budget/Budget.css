@@ -482,16 +482,6 @@ body {
             opacity 0.2s ease,
             transform 0.1s ease;
           width: auto;
-
-          @media (hover: hover) and (min-width: 429px) {
-            &:hover {
-              opacity: 0.9;
-            }
-          }
-
-          &:active {
-            transform: scale(0.98);
-          }
         }
       }
 

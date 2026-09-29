@@ -51,18 +51,13 @@
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.5px;
-    transition:
-      opacity 0.2s ease,
-      transform 0.1s ease;
+    /* Même survol que Créer / Rejoindre un événement. */
+    transition: transform 0.2s;
 
     @media (hover: hover) and (min-width: 429px) {
       &:hover {
-        opacity: 0.9;
+        transform: scale(0.95);
       }
-    }
-
-    &:active {
-      transform: scale(0.98);
     }
   }
 
