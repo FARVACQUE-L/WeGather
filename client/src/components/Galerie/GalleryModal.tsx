@@ -1,6 +1,6 @@
 import "./GalleryModal.css";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type GalleryModalProps = {
   onClose: () => void;
@@ -19,6 +19,7 @@ function GalleryModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -80,50 +81,78 @@ function GalleryModal({
     }
   };
 
+  // Classes GalleryForm-* : champs et boutons calqués sur la modale de
+  // modification d'événement, à l'écart des règles globales .modal.
   return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <h2>Ajouter une photo</h2>
+    <div className="GalleryForm-Overlay">
+      <div className="GalleryForm">
+        <h2 className="GalleryForm-Title">Ajouter une photo</h2>
 
-        {preview && (
-          <img src={preview} alt="Prévisualisation" className="preview-image" />
-        )}
-        <label className="file-label">
-          <span>Choisir un fichier</span>
-
+        <div className="GalleryForm-Field">
+          <label className="GalleryForm-Label" htmlFor="gallery-photo">
+            Photo
+          </label>
+          <div className="GalleryForm-Image">
+            {preview && (
+              <img
+                src={preview}
+                alt="Prévisualisation"
+                className="GalleryForm-Preview"
+              />
+            )}
+            <button
+              type="button"
+              className="GalleryForm-ImageButton"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {preview ? "Changer la photo" : "Choisir une photo"}
+            </button>
+            <p className="GalleryForm-Help">JPG, PNG, WEBP - Max. 5 Mo</p>
+          </div>
           <input
-            className="file-input"
+            ref={fileInputRef}
+            id="gallery-photo"
+            className="GalleryForm-FileInput"
             type="file"
             accept=".jpg,.jpeg,.png,.webp"
             onChange={handleFileChange}
           />
-        </label>
+        </div>
 
-        <p className="file-help">JPG, PNG, WEBP - Max. 5 Mo</p>
-
-        <input
-          className="description-input"
-          type="text"
-          placeholder="Ajouter une description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+        <div className="GalleryForm-Field">
+          <label className="GalleryForm-Label" htmlFor="gallery-description">
+            Description (facultatif)
+          </label>
+          <input
+            id="gallery-description"
+            className="GalleryForm-Input"
+            type="text"
+            placeholder="Ex : Soirée au bord du lac"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
 
         {error && (
-          <p
-            className="error-message"
-            style={{ color: "red", marginTop: "0.5rem" }}
-          >
+          <p className="GalleryForm-Error" role="alert">
             {error}
           </p>
         )}
 
-        <div className="modal-actions">
-          <button type="button" onClick={onClose}>
-            Fermer
+        <div className="GalleryForm-Actions">
+          <button
+            type="button"
+            className="GalleryForm-ButtonCancel"
+            onClick={onClose}
+          >
+            Annuler
           </button>
-
-          <button type="button" onClick={handleAddClick} disabled={!preview}>
+          <button
+            type="button"
+            className="GalleryForm-ButtonSubmit"
+            onClick={handleAddClick}
+            disabled={!preview}
+          >
             Ajouter
           </button>
         </div>
