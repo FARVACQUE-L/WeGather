@@ -513,7 +513,8 @@ function Budget() {
             {userBalance > 0 && <span>on te doit</span>}
             {userBalance < 0 && <span>tu dois</span>}
             {userBalance === 0 && <span>comptes équilibrés</span>}
-            <h2>{userBalance}€</h2>
+            {/* Sans signe : « on te doit » / « tu dois » donne déjà le sens. */}
+            <h2>{Math.abs(userBalance)}€</h2>
             <small>
               <History /> last update :{" "}
               {returnDateString(
