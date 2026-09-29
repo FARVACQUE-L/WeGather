@@ -161,6 +161,20 @@ function returnDateString(dateString: string) {
   return date.toLocaleDateString("fr-FR");
 }
 
+// Notification en haut de l'écran après l'ajout ou la modification d'une
+// dépense.
+const budgetToast = Swal.mixin({
+  toast: true,
+  position: "top",
+  showConfirmButton: false,
+  timer: 2500,
+  timerProgressBar: true,
+
+  customClass: {
+    popup: "toast",
+  },
+});
+
 function Budget() {
   const canHover = useCanHover();
   const { eventUuid } = useParams();
@@ -244,18 +258,6 @@ function Budget() {
   async function addBudget(name: string, price: number) {
     if (!eventUuid) return;
 
-    const addAlert = Swal.mixin({
-      toast: true,
-      position: "top",
-      showConfirmButton: false,
-      timer: 2500,
-      timerProgressBar: true,
-
-      customClass: {
-        popup: "toast",
-      },
-    });
-
     const answer = await fetch(`${apiUrl}/api/budget/add`, {
       method: "POST",
       credentials: "include",
@@ -275,7 +277,7 @@ function Budget() {
     const data = await answer.json();
 
     answer.ok
-      ? addAlert.fire({
+      ? budgetToast.fire({
           icon: "success",
           title: "Dépense ajoutée",
 
@@ -283,7 +285,7 @@ function Budget() {
             popup: "toast-success-popup",
           },
         })
-      : addAlert.fire({
+      : budgetToast.fire({
           icon: "error",
           title: answer.status,
           text: JSON.stringify(data),
@@ -314,18 +316,16 @@ function Budget() {
       setBudgetForm(null);
       await fetchBudgetLists();
 
-      Swal.fire({
+      budgetToast.fire({
         icon: "success",
         title: "Dépense modifiée",
-        timer: 1500,
-        showConfirmButton: false,
 
         customClass: {
           popup: "toast-success-popup",
         },
       });
     } else {
-      Swal.fire({
+      budgetToast.fire({
         icon: "error",
         title: "Erreur",
         text: "Impossible de modifier la dépense",
