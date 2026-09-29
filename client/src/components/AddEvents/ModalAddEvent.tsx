@@ -28,24 +28,12 @@ function ModalAddEvent({
     }
   }, [isOpen]);
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    const rect = dialogRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    if (
-      e.clientX < rect.left ||
-      e.clientX > rect.right ||
-      e.clientY < rect.top ||
-      e.clientY > rect.bottom
-    ) {
-      onClose();
-    }
-  };
+  // Pas de fermeture au clic sur le fond : un clic à côté ferait perdre le
+  // formulaire en cours. On ferme avec Annuler ou la touche Échap.
   return (
     <dialog
       ref={dialogRef}
       className="ModalAddEvent-Backdrop"
-      onClick={handleBackdropClick}
-      onKeyUp={() => {}}
       onCancel={onClose}
       aria-labelledby="modal-title"
     >

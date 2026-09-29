@@ -137,6 +137,28 @@
             box-shadow: 0 10px 25px rgba(255, 126, 95, 0.35);
           }
         }
+
+        .modal-actions {
+          display: flex;
+          gap: 10px;
+
+          button {
+            flex: 1;
+          }
+        }
+
+        /* Même gris que les boutons Annuler des autres modales du site. */
+        .modal-cancel {
+          background: #f3f4f6;
+          color: #374151;
+        }
+
+        @media (hover: hover) and (min-width: 429px) {
+          .modal-cancel:hover {
+            background: #e5e7eb;
+            box-shadow: none;
+          }
+        }
       }
     }
   }

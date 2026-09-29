@@ -314,9 +314,6 @@ function Reservation() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => {
-                setIsModalOpen(false);
-              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleSubmitReservation(e);
@@ -329,11 +326,6 @@ function Reservation() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 40, scale: 0.95 }}
                 transition={{ duration: 0.25 }}
-                onClick={(e) => e.stopPropagation()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                  }
-                }}
               >
                 <h2>
                   {editingReservationId
@@ -400,14 +392,25 @@ function Reservation() {
                   <img src={preview} alt="preview" className="photo-preview" />
                 )}
 
-                <motion.button
-                  type="button"
-                  onClick={handleSubmitReservation}
-                  whileHover={canHover ? { scale: 1.03 } : undefined}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Enregistrer
-                </motion.button>
+                <div className="modal-actions">
+                  <motion.button
+                    type="button"
+                    className="modal-cancel"
+                    onClick={() => setIsModalOpen(false)}
+                    whileHover={canHover ? { scale: 1.03 } : undefined}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Annuler
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    onClick={handleSubmitReservation}
+                    whileHover={canHover ? { scale: 1.03 } : undefined}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Enregistrer
+                  </motion.button>
+                </div>
               </motion.div>
             </motion.div>
           )}
