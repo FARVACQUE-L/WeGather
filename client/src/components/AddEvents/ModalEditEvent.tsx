@@ -45,19 +45,6 @@ function ModalEditEvent({
     }
   }, [isOpen, event]);
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    const rect = dialogRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    if (
-      e.clientX < rect.left ||
-      e.clientX > rect.right ||
-      e.clientY < rect.top ||
-      e.clientY > rect.bottom
-    ) {
-      onClose();
-    }
-  };
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -117,12 +104,12 @@ function ModalEditEvent({
     }
   };
 
+  // Pas de fermeture au clic sur le fond : un clic à côté ferait perdre les
+  // modifications en cours. On ferme avec Annuler ou la touche Échap.
   return (
     <dialog
       ref={dialogRef}
       className="ModalEditEvent-Backdrop"
-      onClick={handleBackdropClick}
-      onKeyUp={() => {}}
       onCancel={onClose}
       aria-labelledby="modal-edit-title"
     >
