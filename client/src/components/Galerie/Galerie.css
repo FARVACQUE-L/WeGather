@@ -43,6 +43,8 @@
       var(--gallery-primary),
       var(--gallery-secondary)
     );
+    /* Même ombre que le bouton Créer / Rejoindre un événement. */
+    box-shadow: 1px 1px 5px black;
     color: white;
     cursor: pointer;
     font-size: 0.9rem;
