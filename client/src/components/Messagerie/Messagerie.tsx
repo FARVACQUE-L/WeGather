@@ -306,7 +306,19 @@ function Messagerie() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      <h1>{receptionMessagesUser[0]?.event_name}</h1>
+      <div className="messagerie-header">
+        <h1>{receptionMessagesUser[0]?.event_name}</h1>
+
+        <button
+          type="button"
+          className="contacts-button"
+          onClick={() => setIsContactsOpen(true)}
+        >
+          <ContactRound size={18} />
+          Contacts présents
+          <span className="contacts-count">{usersByEvent.length}</span>
+        </button>
+      </div>
 
       <section className="global-messagerie">
         <motion.div
@@ -315,16 +327,6 @@ function Messagerie() {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1 }}
         >
-          <button
-            type="button"
-            className="contacts-button"
-            onClick={() => setIsContactsOpen(true)}
-          >
-            <ContactRound size={18} />
-            Contacts présents
-            <span className="contacts-count">{usersByEvent.length}</span>
-          </button>
-
           <div ref={messagesRef} className="messagerie-box-messages">
             {receptionMessagesUser.map((reception, index) => {
               const previousMessage = receptionMessagesUser[index - 1];
@@ -383,7 +385,7 @@ function Messagerie() {
             })}
           </div>
 
-          <div className="massagerie-input">
+          <div className="messagerie-input">
             <input
               ref={messageInputRef}
               type="text"
