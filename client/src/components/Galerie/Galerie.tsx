@@ -1,7 +1,7 @@
 import "./Galerie.css";
 import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import GalleryModal from "./GalleryModal";
 import { PhotoItem } from "./PhotoItem";
@@ -215,26 +215,23 @@ function Galerie() {
     }
   };
 
-  const photoKey = photos.map((p) => p.gallery_id).join(",");
-
-  const largePhotoIds = useMemo(() => {
-    const ids = photoKey ? photoKey.split(",").map(Number) : [];
-    const large = new Set<number>();
-    let prevWasLarge = false;
-
-    for (const id of ids) {
-      const pseudo = (id * 2654435761) % 100;
-
-      if (!prevWasLarge && pseudo < 30) {
-        large.add(id);
-        prevWasLarge = true;
-      } else {
-        prevWasLarge = false;
-      }
+  // Motif répété tous les 10 photos, sur quatre lignes : la 5e en grand à
+  // droite des lignes 1-2, la 6e en grand à gauche des lignes 3-4. Seules
+  // ces deux-là sont placées : la grille (grid-auto-flow: dense) range les
+  // autres dans l'ordre dans les cases libres. Jusqu'à 4 photos, elles
+  // tiennent donc sur une ligne ; à la 5e, la 3e et la 4e passent dessous.
+  function getCellLayout(index: number) {
+    const position = index % 10;
+    if (position !== 4 && position !== 5) {
+      return {};
     }
-
-    return large;
-  }, [photoKey]);
+    const firstRow = Math.floor(index / 10) * 4 + (position === 4 ? 1 : 3);
+    return {
+      className:
+        position === 4 ? "galerie-cell-large-right" : "galerie-cell-large-left",
+      style: { "--row": firstRow } as CSSProperties,
+    };
+  }
 
   if (userId === null) {
     return <p>Chargement utilisateur...</p>;
@@ -333,12 +330,10 @@ function Galerie() {
             },
           }}
         >
-          {photos.map((photo) => (
+          {photos.map((photo, index) => (
             <motion.div
               key={photo.gallery_id}
-              className={
-                largePhotoIds.has(photo.gallery_id) ? "galerie-cell-large" : ""
-              }
+              {...getCellLayout(index)}
               variants={{
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0 },
