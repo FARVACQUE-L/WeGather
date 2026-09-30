@@ -629,21 +629,32 @@ body {
               flex-direction: row;
               gap: 10px;
 
+              /* Largeur de leur contenu, sans rétrécir : en 3vw, les icônes
+                 modifier / supprimer s'écrasaient dès 1600px de large. */
               :where(.icons) {
                 display: flex;
                 flex-direction: row;
+                flex-shrink: 0;
                 color: black;
-                width: 3vw;
                 height: auto;
+
+                svg {
+                  flex-shrink: 0;
+                }
               }
 
+              /* Même largeur que .icons, pour garder les prix alignés. */
               :where(.Noicons) {
                 display: flex;
                 flex-direction: row;
+                flex-shrink: 0;
                 color: black;
                 visibility: hidden;
-                width: 3vw;
                 height: auto;
+
+                svg {
+                  flex-shrink: 0;
+                }
               }
             }
           }
