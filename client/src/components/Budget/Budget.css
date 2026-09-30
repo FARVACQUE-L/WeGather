@@ -685,3 +685,19 @@ body {
     }
   }
 }
+/* Sous 1210px, les deux totaux n'ont plus la place à côté de la carte du
+   solde : ils sont masqués, comme sur mobile, et la carte prend toute la
+   largeur. Placé après le bloc desktop pour l'emporter à spécificité égale. */
+@media screen and (min-width: 429px) and (max-width: 1210px) {
+  body .budget .myBalance {
+    grid-template-columns: 1fr;
+
+    .myBalanceBox {
+      width: 97%;
+    }
+
+    .total {
+      display: none;
+    }
+  }
+}
