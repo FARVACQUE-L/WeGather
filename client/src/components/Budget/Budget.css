@@ -727,3 +727,24 @@ body {
     }
   }
 }
+/* Même comportement que la page Réservation : entre 876px et 1300px, le
+   bouton Ajouter une dépense garde son écart avec le bouton du profil (à 30px
+   du bord droit). Son bord droit reste à 155px du bord de la fenêtre, sa
+   position à 1300px ; l'en-tête part de 2vw + 300px (marge de la page et
+   décalage de la sidebar). */
+@media screen and (min-width: 876px) and (max-width: 1300px) {
+  body .budget header {
+    width: calc(98vw - 455px);
+  }
+}
+/* Sidebar en barre du bas : mêmes marges que la page Réservation, et le
+   bouton reste collé à droite. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  body .budget {
+    padding: 14vh 4vw 10vh;
+
+    header {
+      width: 98%;
+    }
+  }
+}
