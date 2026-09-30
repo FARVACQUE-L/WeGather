@@ -60,9 +60,6 @@
       position: absolute;
       right: -1px;
       bottom: -1px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       width: 14px;
       height: 14px;
       border: 2px solid var(--bg-neutral);
@@ -72,15 +69,12 @@
         background: var(--presence-online);
       }
 
-      &.is-offline,
       &.is-idle {
-        background: var(--presence-offline);
+        background: var(--presence-idle);
       }
 
-      /* Croissant de lune jaune sur le rond gris. */
-      &.is-idle svg {
-        color: var(--presence-idle-moon);
-        fill: var(--presence-idle-moon);
+      &.is-offline {
+        background: var(--presence-offline);
       }
     }
 
