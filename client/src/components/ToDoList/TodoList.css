@@ -26,6 +26,7 @@
     border: 0.5px solid var(--icon-color);
     border-radius: 8px;
     width: 9vw;
+    min-width: 0;
     outline: none;
   }
 
@@ -37,6 +38,7 @@
     color: var(--font-neutral);
     border: none;
     border-radius: 50%;
+    flex-shrink: 0;
     width: 2.2rem;
     height: 2.2rem;
     font-size: 1.2rem;
@@ -118,6 +120,15 @@
 
   button:focus {
     outline: none;
+  }
+}
+@media screen and (max-width: 1500px) {
+  .todolist-global {
+    margin-left: 0;
+    width: 100%;
+    .task-text {
+      flex: 1;
+    }
   }
 }
 @media screen and (max-width: 428px) {
