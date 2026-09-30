@@ -563,5 +563,10 @@
     .galerie-header {
       width: 98%;
     }
+
+    /* Toute la largeur entre les marges de 4vw de la page. */
+    .galerie-grid {
+      width: 100%;
+    }
   }
 }
