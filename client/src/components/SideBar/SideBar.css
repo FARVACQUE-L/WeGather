@@ -229,6 +229,12 @@
     }
   }
 }
+/* Sous 1500px, la sidebar garde la largeur qu'elle a à 1500px (14vw). */
+@media screen and (min-width: 429px) and (max-width: 1500px) {
+  .sidebar {
+    width: 210px;
+  }
+}
 @media screen and (max-width: 428px) {
   .sidebar {
     position: fixed;

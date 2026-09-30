@@ -353,6 +353,9 @@
 @media screen and (max-width: 1500px) {
   .dashboard {
     height: auto;
+    /* Le contenu est décalé de 300px fixes (sidebar figée) : la largeur
+       restante vaut 74vw à 1500px, sans saut au passage du seuil. */
+    width: calc(94vw - 300px);
     /* Les cartes passent sur deux lignes de deux : les budgets sous les
        participants et les réservations. */
     .dashboard-stats {

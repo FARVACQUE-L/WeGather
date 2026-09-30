@@ -10,6 +10,14 @@
   }
 }
 
+/* La sidebar ne rétrécit plus sous 1500px : le décalage du contenu reste
+   celui qu'il a à 1500px (20vw) pour ne pas passer dessous. */
+@media screen and (min-width: 429px) and (max-width: 1500px) {
+  .dashboard-page .content {
+    padding-left: 300px;
+  }
+}
+
 @media screen and (max-width: 428px) {
   .dashboard-page {
     width: 100%;
