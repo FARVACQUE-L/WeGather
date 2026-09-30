@@ -5,6 +5,7 @@ import connexionImg from "../../assets/images/Connexion-img.png";
 import eye from "../../assets/images/eye.png";
 import hide from "../../assets/images/hide.png";
 import logo from "../../assets/images/logo-wegather.png";
+import { reconnectSocket } from "../../socket/socket";
 
 function Connexion() {
   // Le premier champ reçoit le focus à l'ouverture : on peut taper
@@ -56,6 +57,7 @@ function Connexion() {
         return;
       }
 
+      reconnectSocket();
       navigate("/homeevents");
     } catch {
       setErrorMessage("Erreur serveur");

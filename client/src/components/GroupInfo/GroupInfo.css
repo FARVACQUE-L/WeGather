@@ -49,6 +49,35 @@
       background: var(--bg-composant-dash);
     }
 
+    /* Porte la pastille de présence, en bas à droite de la photo. */
+    .group-info-avatar {
+      position: relative;
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    .group-info-presence {
+      position: absolute;
+      right: -1px;
+      bottom: -1px;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--bg-neutral);
+      border-radius: 50%;
+
+      &.is-online {
+        background: var(--presence-online);
+      }
+
+      &.is-idle {
+        background: var(--presence-idle);
+      }
+
+      &.is-offline {
+        background: var(--presence-offline);
+      }
+    }
+
     .group-info-name {
       flex: 1;
       min-width: 0;
@@ -179,6 +208,15 @@
   }
 }
 
+/* Sidebar en barre du bas : mêmes marges que les pages Réservation et
+   Galerie. La marge basse dégage les derniers membres de la barre de
+   navigation fixée en bas (70px), avec 5vh en plus. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  .group-info {
+    width: 100%;
+    padding: 14vh 4vw calc(70px + 5vh);
+  }
+}
 @media screen and (max-width: 428px) {
   .group-info {
     width: 100%;

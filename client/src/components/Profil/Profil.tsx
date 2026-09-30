@@ -11,6 +11,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import Swal from "sweetalert2";
+import { reconnectSocket } from "../../socket/socket";
 
 function Profil() {
   const navigate = useNavigate();
@@ -159,6 +160,7 @@ function Profil() {
           credentials: "include",
         });
 
+        reconnectSocket();
         navigate("/connexion");
       } else {
         navigate("/homeevents");

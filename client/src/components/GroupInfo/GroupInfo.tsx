@@ -3,12 +3,23 @@ import { Crown, UserCheck, UserX } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
+import { socket } from "../../socket/socket";
 import "./GroupInfo.css";
+
+type PresenceStatus = "online" | "idle" | "offline";
 
 type Member = {
   euj_id_user: number;
   user_username: string;
   user_profile_picture: string | null;
+  // Absent pour les bannis : leur présence n'est pas affichée.
+  status?: PresenceStatus;
+};
+
+const PRESENCE_LABELS: Record<PresenceStatus, string> = {
+  online: "En ligne",
+  idle: "Inactif",
+  offline: "Hors ligne",
 };
 
 type Group = {
@@ -60,6 +71,16 @@ function GroupInfo() {
 
   useEffect(() => {
     fetchGroup();
+  }, [fetchGroup]);
+
+  // Le serveur signale chaque changement de présence (connexion,
+  // déconnexion, passage en inactif) : on recharge les statuts des membres.
+  useEffect(() => {
+    socket.on("presence-changed", fetchGroup);
+
+    return () => {
+      socket.off("presence-changed", fetchGroup);
+    };
   }, [fetchGroup]);
 
   const isHost = group !== null && userId === group.host_id;
@@ -132,39 +153,56 @@ function GroupInfo() {
           Membres <span>({group.members.length})</span>
         </h2>
         <ul className="group-info-list">
-          {group.members.map((member, index) => (
-            <motion.li
-              key={member.euj_id_user}
-              className="group-info-member"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.04 }}
-            >
-              <img
-                src={`${API_URL}${member.user_profile_picture}`}
-                alt={member.user_username}
-              />
-              <span className="group-info-name">{member.user_username}</span>
-
-              {member.euj_id_user === group.host_id && (
-                <span className="group-info-host">
-                  <Crown size={14} />
-                  Hôte
+          {/* L'hôte en tête de liste, les autres dans l'ordre reçu. */}
+          {[...group.members]
+            .sort(
+              (a, b) =>
+                Number(b.euj_id_user === group.host_id) -
+                Number(a.euj_id_user === group.host_id),
+            )
+            .map((member, index) => (
+              <motion.li
+                key={member.euj_id_user}
+                className="group-info-member"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.04 }}
+              >
+                <span className="group-info-avatar">
+                  <img
+                    src={`${API_URL}${member.user_profile_picture}`}
+                    alt={member.user_username}
+                  />
+                  {member.status && (
+                    <span
+                      className={`group-info-presence is-${member.status}`}
+                      role="img"
+                      aria-label={PRESENCE_LABELS[member.status]}
+                      title={PRESENCE_LABELS[member.status]}
+                    />
+                  )}
                 </span>
-              )}
+                <span className="group-info-name">{member.user_username}</span>
 
-              {isHost && member.euj_id_user !== group.host_id && (
-                <button
-                  type="button"
-                  className="group-info-ban"
-                  onClick={() => setMemberToBan(member)}
-                >
-                  <UserX size={16} />
-                  <span>Bannir</span>
-                </button>
-              )}
-            </motion.li>
-          ))}
+                {member.euj_id_user === group.host_id && (
+                  <span className="group-info-host">
+                    <Crown size={14} />
+                    Hôte
+                  </span>
+                )}
+
+                {isHost && member.euj_id_user !== group.host_id && (
+                  <button
+                    type="button"
+                    className="group-info-ban"
+                    onClick={() => setMemberToBan(member)}
+                  >
+                    <UserX size={16} />
+                    <span>Bannir</span>
+                  </button>
+                )}
+              </motion.li>
+            ))}
         </ul>
       </section>
 
