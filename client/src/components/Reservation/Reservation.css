@@ -252,6 +252,22 @@
     opacity: 1;
   }
 }
+/* Sidebar en barre du bas : même largeur et mêmes marges que le dashboard. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  .reservation {
+    width: 100%;
+    padding: 10vh 4vw 10vh;
+    .reservation-title {
+      width: 100%;
+    }
+    .reservation-card-global .reservation-empty {
+      width: 100%;
+      .reservation-empty-arrow {
+        width: min(22rem, 40vw);
+      }
+    }
+  }
+}
 @media screen and (max-width: 428px) {
   .reservation {
     width: 100%;
