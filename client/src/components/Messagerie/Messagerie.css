@@ -114,7 +114,7 @@
         display: none;
       }
 
-      .massagerie-input {
+      .messagerie-input {
         flex-shrink: 0;
         width: 100%;
         display: flex;
@@ -318,38 +318,6 @@
         padding: 0 15px 15px 15px;
         margin-top: 0;
 
-        /* Imbriqué comme la règle desktop qui le masque : une media query
-           n'ajoute aucune spécificité, il faut donc l'égaler pour l'emporter. */
-        .contacts-button {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          align-self: flex-start;
-          margin: 10px 0;
-          padding: 0.4rem 0.9rem;
-          border: 1px solid var(--border-color);
-          border-radius: 999px;
-          background: var(--bg-color);
-          color: var(--font-brown);
-          font-family: "Be Vietnam Pro", sans-serif;
-          font-size: 0.85rem;
-          font-weight: 500;
-          cursor: pointer;
-
-          .contacts-count {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 1.3rem;
-            height: 1.3rem;
-            padding: 0 0.3rem;
-            border-radius: 999px;
-            background: var(--color-chat);
-            color: white;
-            font-size: 0.75rem;
-          }
-        }
-
         .messagerie-box-messages {
           .messagerie-box-messages-friends,
           .messagerie-box-messages-user {
@@ -379,9 +347,45 @@
         }
       }
     }
+  }
+}
+/* Sous 1475px, le panneau des contacts laisse trop peu de place à la
+   conversation : la liste passe dans une modale, ouverte par un bouton qui
+   affiche le nombre de participants. */
+@media screen and (max-width: 1475px) {
+  .messagerie {
+    /* Imbriqué comme la règle desktop qui le masque : une media query
+       n'ajoute aucune spécificité, il faut donc l'égaler pour l'emporter. */
+    .global-messagerie .messagerie-box .contacts-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      margin: 10px 0;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: var(--bg-color);
+      color: var(--font-brown);
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
 
-    /* La liste passe dans une modale : affichée en ligne, elle poussait la
-       conversation hors de l'écran dès quelques participants. */
+      .contacts-count {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.3rem;
+        height: 1.3rem;
+        padding: 0 0.3rem;
+        border-radius: 999px;
+        background: var(--color-chat);
+        color: white;
+        font-size: 0.75rem;
+      }
+    }
+
     .messagerie-contact {
       display: none;
     }
@@ -453,7 +457,7 @@
     }
 
     /* Les contacts affichés dans la modale gardent la mise en forme du
-       panneau desktop, adaptée à la largeur d'un téléphone. */
+       panneau desktop, adaptée à la largeur de la modale. */
     .contacts-modal-list {
       div {
         display: flex;
