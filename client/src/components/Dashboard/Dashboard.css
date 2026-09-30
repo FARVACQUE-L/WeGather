@@ -383,6 +383,17 @@
     }
   }
 }
+/* Sous 875px, les cartes de stats s'empilent une par une. */
+@media screen and (max-width: 875px) {
+  .dashboard .dashboard-stats {
+    .stat-1,
+    .stat-2,
+    .stat-3,
+    .stat-4 {
+      width: 100%;
+    }
+  }
+}
 @media screen and (max-width: 428px) {
   .dashboard {
     width: 100vw;
