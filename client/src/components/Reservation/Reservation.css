@@ -260,6 +260,10 @@
     .reservation-title {
       width: 100%;
     }
+    /* Les colonnes de 16rem sont centrées dans la largeur disponible. */
+    .reservation-card-global {
+      justify-content: center;
+    }
     .reservation-card-global .reservation-empty {
       width: 100%;
       .reservation-empty-arrow {
