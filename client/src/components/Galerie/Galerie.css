@@ -70,28 +70,16 @@
     height: 80vh;
     margin-bottom: 5rem;
     overflow: auto;
-    /* Groupes de 5 photos sur deux lignes (voir getCellLayout) : 1 et 2 en
-       haut à gauche, 3 et 4 en dessous, la 5e en grand à droite. Les lignes
-       du groupe arrivent en variables --row-1 et --row-2. */
-    .galerie-cell-pos-0 {
-      grid-row: var(--row-1);
-      grid-column: 1;
-    }
-    .galerie-cell-pos-1 {
-      grid-row: var(--row-1);
-      grid-column: 2;
-    }
-    .galerie-cell-pos-2 {
-      grid-row: var(--row-2);
-      grid-column: 1;
-    }
-    .galerie-cell-pos-3 {
-      grid-row: var(--row-2);
-      grid-column: 2;
-    }
-    .galerie-cell-pos-4 {
-      grid-row: var(--row-1) / span 2;
+    /* Grandes photos du motif (voir getCellLayout) : 2 colonnes sur 2
+       lignes, à partir de la ligne passée en variable --row. Les autres
+       photos remplissent les cases libres. */
+    .galerie-cell-large-right {
+      grid-row: var(--row) / span 2;
       grid-column: 3 / span 2;
+    }
+    .galerie-cell-large-left {
+      grid-row: var(--row) / span 2;
+      grid-column: 1 / span 2;
     }
     &::-webkit-scrollbar {
       display: none;
@@ -473,11 +461,8 @@
       gap: 0.75rem;
       width: 100%;
       padding-bottom: 6rem;
-      .galerie-cell-pos-0,
-      .galerie-cell-pos-1,
-      .galerie-cell-pos-2,
-      .galerie-cell-pos-3,
-      .galerie-cell-pos-4 {
+      .galerie-cell-large-right,
+      .galerie-cell-large-left {
         grid-column: auto;
         grid-row: auto;
       }

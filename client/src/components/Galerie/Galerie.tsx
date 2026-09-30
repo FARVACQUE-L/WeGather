@@ -215,22 +215,21 @@ function Galerie() {
     }
   };
 
-  // Les photos vont par groupes de 5, sur deux lignes : 1 et 2 en haut à
-  // gauche, 3 et 4 en dessous, la 5e en grand à droite sur les deux lignes.
-  // Un groupe incomplet reste en placement automatique : jusqu'à 4 photos,
-  // elles tiennent sur une seule ligne.
+  // Motif répété tous les 10 photos, sur quatre lignes : la 5e en grand à
+  // droite des lignes 1-2, la 6e en grand à gauche des lignes 3-4. Seules
+  // ces deux-là sont placées : la grille (grid-auto-flow: dense) range les
+  // autres dans l'ordre dans les cases libres. Jusqu'à 4 photos, elles
+  // tiennent donc sur une ligne ; à la 5e, la 3e et la 4e passent dessous.
   function getCellLayout(index: number) {
-    const group = Math.floor(index / 5);
-    if ((group + 1) * 5 > photos.length) {
-      return { className: "", style: undefined };
+    const position = index % 10;
+    if (position !== 4 && position !== 5) {
+      return {};
     }
-    const firstRow = group * 2 + 1;
+    const firstRow = Math.floor(index / 10) * 4 + (position === 4 ? 1 : 3);
     return {
-      className: `galerie-cell-pos-${index % 5}`,
-      style: {
-        "--row-1": firstRow,
-        "--row-2": firstRow + 1,
-      } as CSSProperties,
+      className:
+        position === 4 ? "galerie-cell-large-right" : "galerie-cell-large-left",
+      style: { "--row": firstRow } as CSSProperties,
     };
   }
 
