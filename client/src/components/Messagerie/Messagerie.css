@@ -493,3 +493,18 @@
     }
   }
 }
+/* Même largeur que les composants du dashboard, qui font 91 % de sa largeur
+   (calc(94vw - 300px)). La conversation, en flex: 1, remplit ce qui reste
+   sans le panneau des contacts. */
+@media screen and (min-width: 876px) and (max-width: 1475px) {
+  .messagerie {
+    width: calc((94vw - 300px) * 0.91);
+  }
+}
+/* Sidebar en barre du bas : même largeur et mêmes marges que le dashboard. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  .messagerie {
+    width: 100%;
+    padding: 10vh 4vw 10vh;
+  }
+}
