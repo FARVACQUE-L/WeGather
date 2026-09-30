@@ -1,4 +1,4 @@
-@media screen and (min-width: 429px) {
+@media screen and (min-width: 876px) {
   .dashboard-page {
     display: flex;
     flex-direction: row;
@@ -10,7 +10,15 @@
   }
 }
 
-@media screen and (max-width: 428px) {
+/* La sidebar ne rétrécit plus sous 1500px : le décalage du contenu reste
+   celui qu'il a à 1500px (20vw) pour ne pas passer dessous. */
+@media screen and (min-width: 876px) and (max-width: 1500px) {
+  .dashboard-page .content {
+    padding-left: 300px;
+  }
+}
+
+@media screen and (max-width: 875px) {
   .dashboard-page {
     width: 100%;
   }

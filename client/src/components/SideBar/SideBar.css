@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Carter+One&family=Inter:ital,opsz,wght@0,14..32,800;1,14..32,800&family=Lexend:wght@100..900&family=Limelight&family=Manrope:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif+Display:ital,wght@0,100..900;1,100..900&family=Oi&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Playfair:ital,opsz,wght@1,5..1200,300..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&family=Space+Grotesk:wght@300..700&family=Ultra&display=swap");
-@media screen and (min-width: 429px) {
+@media screen and (min-width: 876px) {
   .sidebar {
     font-family: "Be Vietnam Pro", sans-serif;
     font-weight: 300;
@@ -229,7 +229,23 @@
     }
   }
 }
-@media screen and (max-width: 428px) {
+/* Sous 1500px, la sidebar garde la largeur qu'elle a à 1500px (14vw). */
+@media screen and (min-width: 876px) and (max-width: 1500px) {
+  .sidebar {
+    width: 210px;
+  }
+}
+/* Sous 540px de haut, la sidebar garde la hauteur qu'elle a à 540px (95vh)
+   et défile avec la page : en position fixe, le bas du menu serait hors
+   d'atteinte. */
+@media screen and (min-width: 876px) and (max-height: 539px) {
+  .sidebar {
+    position: absolute;
+    min-height: 513px;
+    margin-top: 16px;
+  }
+}
+@media screen and (max-width: 875px) {
   .sidebar {
     position: fixed;
     bottom: 0;

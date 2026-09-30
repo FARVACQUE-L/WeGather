@@ -30,8 +30,28 @@
   }
 }
 
-@media screen and (min-width: 429px) {
+/* Visible tant que la sidebar est en barre du bas (875px et moins). */
+@media screen and (min-width: 876px) {
   .mobile {
     display: none;
+  }
+}
+
+/* Entre 429px et 875px, la sidebar passe en barre du bas et son logo
+   disparaît : le logo de la navbar prend le relais, en plus grand. Sur
+   mobile, il garde sa taille d'origine. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  .desktop,
+  .mobile {
+    .logo-sidebar-container {
+      .logo-sidebar-image {
+        width: 80px;
+        height: 80px;
+      }
+
+      .logo-sidebar-h2 {
+        font-size: 2.5rem;
+      }
+    }
   }
 }
