@@ -252,6 +252,48 @@
     opacity: 1;
   }
 }
+/* Sous 1300px, le bouton d'ajout garde son écart avec le bouton du profil
+   (à 30px du bord droit) : son bord droit reste à 155px du bord de la
+   fenêtre, sa position à 1300px. Le titre part de 2vw + 300px (marge de la
+   page et décalage de la sidebar). */
+@media screen and (min-width: 876px) and (max-width: 1300px) {
+  .reservation .reservation-title {
+    width: calc(98vw - 455px);
+  }
+}
+/* Sidebar en barre du bas : même largeur et mêmes marges que le dashboard. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  .reservation {
+    width: 100%;
+    padding: 14vh 4vw 10vh;
+    .reservation-title {
+      width: 98%;
+    }
+    /* Les colonnes de 16rem sont centrées dans la largeur disponible. */
+    .reservation-card-global {
+      justify-content: center;
+    }
+    .reservation-card-global .reservation-empty {
+      width: 100%;
+      .reservation-empty-arrow {
+        width: min(22rem, 40vw);
+      }
+    }
+  }
+}
+/* Sous 625px, deux cartes ne tiennent plus côte à côte : une seule colonne,
+   cartes centrées, comme sur mobile. */
+@media screen and (min-width: 429px) and (max-width: 625px) {
+  .reservation {
+    .reservation-card-global {
+      grid-template-columns: 1fr;
+    }
+    .card-reservation {
+      display: flex;
+      justify-content: center;
+    }
+  }
+}
 @media screen and (max-width: 428px) {
   .reservation {
     width: 100%;
