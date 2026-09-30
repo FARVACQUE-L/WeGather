@@ -693,7 +693,7 @@ body {
     grid-template-columns: 1fr;
 
     .myBalanceBox {
-      width: 97%;
+      width: 100%;
     }
 
     .total {
@@ -713,7 +713,7 @@ body {
       grid-template-rows: auto;
       flex: none;
       /* Mêmes bords que la carte du solde (97 % de large, sans marge). */
-      width: 97%;
+      width: 100%;
       margin-left: 0;
 
       .expenses,
