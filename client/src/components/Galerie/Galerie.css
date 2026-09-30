@@ -548,6 +548,11 @@
   .galerie .galerie-header {
     width: calc(98vw - 455px);
   }
+  /* En 65vw, la grille dépassait de la fenêtre vers 875px : elle garde au
+     moins 3vw de marge à droite (2vw + 300px à gauche, 3vw à droite). */
+  .galerie .galerie-grid {
+    width: min(65vw, calc(95vw - 300px));
+  }
 }
 /* Sidebar en barre du bas : mêmes marges que la page Réservation, et le
    bouton reste collé à droite. */
