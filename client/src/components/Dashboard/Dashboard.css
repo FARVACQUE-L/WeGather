@@ -383,14 +383,20 @@
     }
   }
 }
-/* Sous 875px, les cartes de stats s'empilent une par une. */
+/* Sous 875px, la sidebar passe en barre du bas : le dashboard reprend toute
+   la largeur, laisse de la place à la barre, et les cartes de stats
+   s'empilent une par une. */
 @media screen and (max-width: 875px) {
-  .dashboard .dashboard-stats {
-    .stat-1,
-    .stat-2,
-    .stat-3,
-    .stat-4 {
-      width: 100%;
+  .dashboard {
+    width: 100%;
+    padding: 10vh 4vw 10vh;
+    .dashboard-stats {
+      .stat-1,
+      .stat-2,
+      .stat-3,
+      .stat-4 {
+        width: 100%;
+      }
     }
   }
 }
