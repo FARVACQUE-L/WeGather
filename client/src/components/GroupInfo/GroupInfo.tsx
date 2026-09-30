@@ -1,14 +1,25 @@
 import { motion } from "framer-motion";
-import { Crown, UserCheck, UserX } from "lucide-react";
+import { Crown, Moon, UserCheck, UserX } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
+import { socket } from "../../socket/socket";
 import "./GroupInfo.css";
+
+type PresenceStatus = "online" | "idle" | "offline";
 
 type Member = {
   euj_id_user: number;
   user_username: string;
   user_profile_picture: string | null;
+  // Absent pour les bannis : leur présence n'est pas affichée.
+  status?: PresenceStatus;
+};
+
+const PRESENCE_LABELS: Record<PresenceStatus, string> = {
+  online: "En ligne",
+  idle: "Inactif",
+  offline: "Hors ligne",
 };
 
 type Group = {
@@ -60,6 +71,16 @@ function GroupInfo() {
 
   useEffect(() => {
     fetchGroup();
+  }, [fetchGroup]);
+
+  // Le serveur signale chaque changement de présence (connexion,
+  // déconnexion, passage en inactif) : on recharge les statuts des membres.
+  useEffect(() => {
+    socket.on("presence-changed", fetchGroup);
+
+    return () => {
+      socket.off("presence-changed", fetchGroup);
+    };
   }, [fetchGroup]);
 
   const isHost = group !== null && userId === group.host_id;
@@ -140,10 +161,22 @@ function GroupInfo() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.04 }}
             >
-              <img
-                src={`${API_URL}${member.user_profile_picture}`}
-                alt={member.user_username}
-              />
+              <span className="group-info-avatar">
+                <img
+                  src={`${API_URL}${member.user_profile_picture}`}
+                  alt={member.user_username}
+                />
+                {member.status && (
+                  <span
+                    className={`group-info-presence is-${member.status}`}
+                    role="img"
+                    aria-label={PRESENCE_LABELS[member.status]}
+                    title={PRESENCE_LABELS[member.status]}
+                  >
+                    {member.status === "idle" && <Moon size={8} />}
+                  </span>
+                )}
+              </span>
               <span className="group-info-name">{member.user_username}</span>
 
               {member.euj_id_user === group.host_id && (

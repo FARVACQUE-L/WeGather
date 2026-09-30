@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { getStatus } from "../../presence";
 import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "./eventUserJoiningRepository";
 
@@ -74,7 +75,17 @@ const browseGroup: RequestHandler = async (req, res, next) => {
       ? await eventUserJoiningRepository.readBanned(event.event_id)
       : [];
 
-    res.json({ host_id: event.event_id_host, members, banned });
+    // Statut de présence de chaque membre (en ligne, inactif, hors ligne).
+    const membersWithStatus = members.map((member) => ({
+      ...member,
+      status: getStatus(member.euj_id_user),
+    }));
+
+    res.json({
+      host_id: event.event_id_host,
+      members: membersWithStatus,
+      banned,
+    });
   } catch (err) {
     next(err);
   }

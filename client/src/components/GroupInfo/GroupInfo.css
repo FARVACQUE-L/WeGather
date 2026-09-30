@@ -49,6 +49,41 @@
       background: var(--bg-composant-dash);
     }
 
+    /* Porte la pastille de présence, en bas à droite de la photo. */
+    .group-info-avatar {
+      position: relative;
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    .group-info-presence {
+      position: absolute;
+      right: -1px;
+      bottom: -1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--bg-neutral);
+      border-radius: 50%;
+
+      &.is-online {
+        background: var(--presence-online);
+      }
+
+      &.is-offline,
+      &.is-idle {
+        background: var(--presence-offline);
+      }
+
+      /* Croissant de lune jaune sur le rond gris. */
+      &.is-idle svg {
+        color: var(--presence-idle-moon);
+        fill: var(--presence-idle-moon);
+      }
+    }
+
     .group-info-name {
       flex: 1;
       min-width: 0;
