@@ -122,6 +122,15 @@
     outline: none;
   }
 }
+@media screen and (max-width: 1500px) {
+  .todolist-global {
+    margin-left: 0;
+    width: 100%;
+    .task-text {
+      flex: 1;
+    }
+  }
+}
 @media screen and (max-width: 428px) {
   .todolist-global {
     margin-left: 0;

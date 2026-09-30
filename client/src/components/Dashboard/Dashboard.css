@@ -348,6 +348,26 @@
     }
   }
 }
+/* En dessous de 1500px, la colonne de droite devient trop étroite pour la
+   todo list : tout passe sur une seule colonne, dans l'ordre du document. */
+@media screen and (max-width: 1500px) {
+  .dashboard {
+    height: auto;
+    .dashboard-components {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      gap: 16px;
+      height: auto;
+      /* Même largeur que .dashboard-stats : les blocs s'arrêtent au bord
+         droit de la carte « Budget propre ». */
+      width: 91%;
+      .component-todo {
+        grid-column: auto;
+        grid-row: auto;
+      }
+    }
+  }
+}
 @media screen and (max-width: 428px) {
   .dashboard {
     width: 100vw;
