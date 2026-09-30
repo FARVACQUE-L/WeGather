@@ -513,5 +513,8 @@
   .messagerie {
     width: 100%;
     padding: 10vh 4vw 10vh;
+    .global-messagerie .messagerie-box {
+      height: 68vh;
+    }
   }
 }
