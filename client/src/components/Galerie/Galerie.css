@@ -70,9 +70,28 @@
     height: 80vh;
     margin-bottom: 5rem;
     overflow: auto;
-    .galerie-cell-large {
-      grid-column: span 2;
-      grid-row: span 2;
+    /* Groupes de 5 photos sur deux lignes (voir getCellLayout) : 1 et 2 en
+       haut à gauche, 3 et 4 en dessous, la 5e en grand à droite. Les lignes
+       du groupe arrivent en variables --row-1 et --row-2. */
+    .galerie-cell-pos-0 {
+      grid-row: var(--row-1);
+      grid-column: 1;
+    }
+    .galerie-cell-pos-1 {
+      grid-row: var(--row-1);
+      grid-column: 2;
+    }
+    .galerie-cell-pos-2 {
+      grid-row: var(--row-2);
+      grid-column: 1;
+    }
+    .galerie-cell-pos-3 {
+      grid-row: var(--row-2);
+      grid-column: 2;
+    }
+    .galerie-cell-pos-4 {
+      grid-row: var(--row-1) / span 2;
+      grid-column: 3 / span 2;
     }
     &::-webkit-scrollbar {
       display: none;
@@ -454,7 +473,11 @@
       gap: 0.75rem;
       width: 100%;
       padding-bottom: 6rem;
-      .galerie-cell-large {
+      .galerie-cell-pos-0,
+      .galerie-cell-pos-1,
+      .galerie-cell-pos-2,
+      .galerie-cell-pos-3,
+      .galerie-cell-pos-4 {
         grid-column: auto;
         grid-row: auto;
       }

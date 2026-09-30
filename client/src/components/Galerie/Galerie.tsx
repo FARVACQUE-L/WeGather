@@ -1,7 +1,7 @@
 import "./Galerie.css";
 import { motion } from "framer-motion";
 import { ImagePlus, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import GalleryModal from "./GalleryModal";
 import { PhotoItem } from "./PhotoItem";
@@ -215,26 +215,24 @@ function Galerie() {
     }
   };
 
-  const photoKey = photos.map((p) => p.gallery_id).join(",");
-
-  const largePhotoIds = useMemo(() => {
-    const ids = photoKey ? photoKey.split(",").map(Number) : [];
-    const large = new Set<number>();
-    let prevWasLarge = false;
-
-    for (const id of ids) {
-      const pseudo = (id * 2654435761) % 100;
-
-      if (!prevWasLarge && pseudo < 30) {
-        large.add(id);
-        prevWasLarge = true;
-      } else {
-        prevWasLarge = false;
-      }
+  // Les photos vont par groupes de 5, sur deux lignes : 1 et 2 en haut à
+  // gauche, 3 et 4 en dessous, la 5e en grand à droite sur les deux lignes.
+  // Un groupe incomplet reste en placement automatique : jusqu'à 4 photos,
+  // elles tiennent sur une seule ligne.
+  function getCellLayout(index: number) {
+    const group = Math.floor(index / 5);
+    if ((group + 1) * 5 > photos.length) {
+      return { className: "", style: undefined };
     }
-
-    return large;
-  }, [photoKey]);
+    const firstRow = group * 2 + 1;
+    return {
+      className: `galerie-cell-pos-${index % 5}`,
+      style: {
+        "--row-1": firstRow,
+        "--row-2": firstRow + 1,
+      } as CSSProperties,
+    };
+  }
 
   if (userId === null) {
     return <p>Chargement utilisateur...</p>;
@@ -333,12 +331,10 @@ function Galerie() {
             },
           }}
         >
-          {photos.map((photo) => (
+          {photos.map((photo, index) => (
             <motion.div
               key={photo.gallery_id}
-              className={
-                largePhotoIds.has(photo.gallery_id) ? "galerie-cell-large" : ""
-              }
+              {...getCellLayout(index)}
               variants={{
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0 },
