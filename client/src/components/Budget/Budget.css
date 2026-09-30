@@ -629,21 +629,32 @@ body {
               flex-direction: row;
               gap: 10px;
 
+              /* Largeur de leur contenu, sans rétrécir : en 3vw, les icônes
+                 modifier / supprimer s'écrasaient dès 1600px de large. */
               :where(.icons) {
                 display: flex;
                 flex-direction: row;
+                flex-shrink: 0;
                 color: black;
-                width: 3vw;
                 height: auto;
+
+                svg {
+                  flex-shrink: 0;
+                }
               }
 
+              /* Même largeur que .icons, pour garder les prix alignés. */
               :where(.Noicons) {
                 display: flex;
                 flex-direction: row;
+                flex-shrink: 0;
                 color: black;
                 visibility: hidden;
-                width: 3vw;
                 height: auto;
+
+                svg {
+                  flex-shrink: 0;
+                }
               }
             }
           }
@@ -671,6 +682,69 @@ body {
           }
         }
       }
+    }
+  }
+}
+/* Sous 1210px, les deux totaux n'ont plus la place à côté de la carte du
+   solde : ils sont masqués, comme sur mobile, et la carte prend toute la
+   largeur. Placé après le bloc desktop pour l'emporter à spécificité égale. */
+@media screen and (min-width: 429px) and (max-width: 1210px) {
+  body .budget .myBalance {
+    grid-template-columns: 1fr;
+
+    .myBalanceBox {
+      width: 100%;
+    }
+
+    .total {
+      display: none;
+    }
+  }
+
+  /* Equilibres passe sous Dépenses. Les deux listes ne tiennent plus dans la
+     hauteur de l'écran : la page reprend sa hauteur naturelle et défile, et
+     chaque liste défile dans une hauteur limitée. */
+  body .budget {
+    height: auto;
+    margin-bottom: 0;
+
+    .expensesAndBalance {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      flex: none;
+      /* Mêmes bords que la carte du solde (97 % de large, sans marge). */
+      width: 100%;
+      margin-left: 0;
+
+      .expenses,
+      .balance {
+        width: auto;
+
+        section {
+          max-height: 35vh;
+        }
+      }
+    }
+  }
+}
+/* Même comportement que la page Réservation : entre 876px et 1300px, le
+   bouton Ajouter une dépense garde son écart avec le bouton du profil (à 30px
+   du bord droit). Son bord droit reste à 155px du bord de la fenêtre, sa
+   position à 1300px ; l'en-tête part de 2vw + 300px (marge de la page et
+   décalage de la sidebar). */
+@media screen and (min-width: 876px) and (max-width: 1300px) {
+  body .budget header {
+    width: calc(98vw - 455px);
+  }
+}
+/* Sidebar en barre du bas : mêmes marges que la page Réservation, et le
+   bouton reste collé à droite. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  body .budget {
+    padding: 14vh 4vw 10vh;
+
+    header {
+      width: 98%;
     }
   }
 }
