@@ -6,7 +6,7 @@
   border-radius: 5px;
   padding: 1.5rem;
   width: 15.3vw;
-  min-height: 32vh;
+  min-height: max(32vh, 320px);
   border: 1px solid var(--border-color);
   gap: 1rem;
   margin-left: 1.6vw;
@@ -135,7 +135,7 @@
   .todolist-global {
     margin-left: 0;
     width: 100%;
-    min-height: 40vh;
+    min-height: max(40vh, 400px);
     .task-text {
       width: 65vw;
       padding-left: 0.5rem;
