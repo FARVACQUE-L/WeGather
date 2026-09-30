@@ -700,4 +700,30 @@ body {
       display: none;
     }
   }
+
+  /* Equilibres passe sous Dépenses. Les deux listes ne tiennent plus dans la
+     hauteur de l'écran : la page reprend sa hauteur naturelle et défile, et
+     chaque liste défile dans une hauteur limitée. */
+  body .budget {
+    height: auto;
+    margin-bottom: 0;
+
+    .expensesAndBalance {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      flex: none;
+      /* Mêmes bords que la carte du solde (97 % de large, sans marge). */
+      width: 97%;
+      margin-left: 0;
+
+      .expenses,
+      .balance {
+        width: auto;
+
+        section {
+          max-height: 35vh;
+        }
+      }
+    }
+  }
 }
