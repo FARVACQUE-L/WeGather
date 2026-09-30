@@ -6,6 +6,20 @@
     color: var(--font-brown);
     padding: 3rem 3rem 0 0;
   }
+  /* Le titre à gauche, le bouton des contacts au-dessus à droite de la
+     conversation. */
+  .messagerie-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+
+    /* Réservé aux écrans étroits : en desktop, la liste est affichée en
+       permanence dans le panneau de droite. */
+    .contacts-button {
+      display: none;
+    }
+  }
   .global-messagerie {
     display: flex;
     flex-direction: row;
@@ -106,12 +120,6 @@
             }
           }
         }
-      }
-
-      /* Réservés au mobile : en desktop, la liste est affichée en permanence
-         dans le panneau de droite. */
-      .contacts-button {
-        display: none;
       }
 
       .messagerie-input {
@@ -356,12 +364,11 @@
   .messagerie {
     /* Imbriqué comme la règle desktop qui le masque : une media query
        n'ajoute aucune spécificité, il faut donc l'égaler pour l'emporter. */
-    .global-messagerie .messagerie-box .contacts-button {
+    .messagerie-header .contacts-button {
       display: flex;
       align-items: center;
       gap: 8px;
-      align-self: flex-start;
-      margin: 10px 0;
+      flex-shrink: 0;
       padding: 0.4rem 0.9rem;
       border: 1px solid var(--border-color);
       border-radius: 999px;
