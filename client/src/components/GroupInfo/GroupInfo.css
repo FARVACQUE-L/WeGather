@@ -69,10 +69,6 @@
         background: var(--presence-online);
       }
 
-      &.is-idle {
-        background: var(--presence-idle);
-      }
-
       &.is-offline {
         background: var(--presence-offline);
       }

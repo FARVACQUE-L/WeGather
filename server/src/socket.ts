@@ -1,35 +1,21 @@
 import type { Server as HttpServer } from "node:http";
 import { Server as SocketServer } from "socket.io";
 import { decodeJWT } from "./helper/jwtHelper";
-import {
-  addSocket,
-  getConnectedUserIds,
-  getStatus,
-  markActivity,
-  type PresenceStatus,
-  removeSocket,
-} from "./presence";
+import { addSocket, getStatus, removeSocket } from "./presence";
 
 let io: SocketServer | null = null;
 
-// Dernier statut annoncé par utilisateur, pour ne signaler que les
-// changements. Un utilisateur absent de la table est hors ligne.
-const lastStatuses = new Map<number, PresenceStatus>();
+// Applique l'ajout ou le retrait d'un socket, et signale le changement de
+// statut s'il y en a un (premier onglet ouvert, dernier onglet fermé). Signal
+// sans données : les clients rechargent la liste des membres par l'API, qui
+// ne renvoie que les membres de leurs propres événements.
+const updatePresence = (userId: number, update: () => void): void => {
+  const previousStatus = getStatus(userId);
+  update();
 
-// Signal sans données : les clients rechargent la liste des membres par
-// l'API, qui ne renvoie que les membres de leurs propres événements.
-const notifyIfChanged = (userId: number): void => {
-  const status = getStatus(userId);
-
-  if (status === (lastStatuses.get(userId) ?? "offline")) return;
-
-  if (status === "offline") {
-    lastStatuses.delete(userId);
-  } else {
-    lastStatuses.set(userId, status);
+  if (getStatus(userId) !== previousStatus) {
+    io?.emit("presence-changed");
   }
-
-  io?.emit("presence-changed");
 };
 
 // Le socket s'identifie par le cookie de session, envoyé avec la poignée de
@@ -68,13 +54,7 @@ export const initSocket = (server: HttpServer): SocketServer => {
     const userId = readUserId(socket.handshake.headers.cookie);
 
     if (userId !== null) {
-      addSocket(userId, socket.id);
-      notifyIfChanged(userId);
-
-      socket.on("activity", () => {
-        markActivity(userId);
-        notifyIfChanged(userId);
-      });
+      updatePresence(userId, () => addSocket(userId, socket.id));
     }
 
     socket.on("join-event", (eventUuid: string) => {
@@ -91,19 +71,10 @@ export const initSocket = (server: HttpServer): SocketServer => {
       console.log("Utilisateur déconnecté :", socket.id);
 
       if (userId !== null) {
-        removeSocket(userId, socket.id);
-        notifyIfChanged(userId);
+        updatePresence(userId, () => removeSocket(userId, socket.id));
       }
     });
   });
-
-  // Le passage en inactif ne dépend d'aucun événement : on vérifie
-  // régulièrement qui a dépassé les 5 minutes sans action.
-  setInterval(() => {
-    for (const userId of getConnectedUserIds()) {
-      notifyIfChanged(userId);
-    }
-  }, 30 * 1000).unref();
 
   return io;
 };

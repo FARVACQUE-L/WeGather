@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import { socket } from "../../socket/socket";
 import "./GroupInfo.css";
 
-type PresenceStatus = "online" | "idle" | "offline";
+type PresenceStatus = "online" | "offline";
 
 type Member = {
   euj_id_user: number;
@@ -18,7 +18,6 @@ type Member = {
 
 const PRESENCE_LABELS: Record<PresenceStatus, string> = {
   online: "En ligne",
-  idle: "Inactif",
   offline: "Hors ligne",
 };
 
@@ -73,8 +72,8 @@ function GroupInfo() {
     fetchGroup();
   }, [fetchGroup]);
 
-  // Le serveur signale chaque changement de présence (connexion,
-  // déconnexion, passage en inactif) : on recharge les statuts des membres.
+  // Le serveur signale chaque changement de présence (premier onglet ouvert,
+  // dernier onglet fermé) : on recharge les statuts des membres.
   useEffect(() => {
     socket.on("presence-changed", fetchGroup);
 
