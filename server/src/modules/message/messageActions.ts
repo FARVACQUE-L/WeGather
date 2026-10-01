@@ -1,15 +1,38 @@
 import type { RequestHandler } from "express";
 import { getIo } from "../../socket";
 import eventRepository from "../event/eventRepository";
+import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import messageRepository from "./messageRepository";
 
+// L'auteur est l'utilisateur du cookie de session, jamais un id envoyé par
+// le client : sans ça, n'importe qui pouvait écrire au nom d'un autre. Seuls
+// les membres de l'événement peuvent y écrire.
 const addMessage: RequestHandler = async (req, res, next) => {
   try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const userId = req.user.id;
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    const { userId, messagesUser, replyTo } = req.body;
+    const { messagesUser, replyTo } = req.body;
 
     if (!eventId) {
       res.sendStatus(404);
+      return;
+    }
+
+    const membership = await eventUserJoiningRepository.readBy(eventId, userId);
+    if (membership.length === 0) {
+      res
+        .status(403)
+        .json({ message: "Vous ne participez pas à cet événement." });
+      return;
+    }
+
+    if (!String(messagesUser ?? "").trim()) {
+      res.status(400).json({ message: "Le message est vide." });
       return;
     }
 
@@ -58,17 +81,23 @@ const browseMessagesByEventId: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+// Marque comme lus les messages de l'utilisateur du cookie de session, et
+// non d'un id envoyé par le client.
 const notificationMessage: RequestHandler = async (req, res, next) => {
   try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    const { userId } = req.body;
 
     if (!eventId) {
       res.sendStatus(404);
       return;
     }
 
-    await messageRepository.notificationMessage(eventId, userId);
+    await messageRepository.notificationMessage(eventId, req.user.id);
 
     const message = await messageRepository.getMessagesByEventId(eventId);
 

@@ -149,16 +149,8 @@ function Messagerie() {
     if (!eventUuid || !userId) return;
     fetch(
       `${import.meta.env.VITE_API_URL}/api/messages/notification/${eventUuid}`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId,
-        }),
-      },
+      // L'utilisateur est lu dans le cookie de session par le serveur.
+      { method: "POST", credentials: "include" },
     ).catch((error) => {
       console.error("Erreur lecture messages :", error);
     });
@@ -369,7 +361,6 @@ function Messagerie() {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                userId: userId,
                 messagesUser: messagesUser,
                 replyTo: replyTo?.message_id ?? null,
               }),
