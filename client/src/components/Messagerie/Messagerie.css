@@ -6,20 +6,6 @@
     color: var(--font-brown);
     padding: 3rem 3rem 0 0;
   }
-  /* Le titre à gauche, le bouton des contacts au-dessus à droite de la
-     conversation. */
-  .messagerie-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1rem;
-
-    /* Réservé aux écrans étroits : en desktop, la liste est affichée en
-       permanence dans le panneau de droite. */
-    .contacts-button {
-      display: none;
-    }
-  }
   .global-messagerie {
     display: flex;
     flex-direction: row;
@@ -250,62 +236,6 @@
       }
     }
   }
-  .contacts-modal-overlay {
-    display: none;
-  }
-
-  .messagerie-contact {
-    height: 78vh;
-    width: 20vw;
-    background: var(--bg-composant-dash);
-    padding: 30px;
-    border-radius: 5px;
-    border: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    margin-top: 2.5vh;
-    color: var(--font-brown);
-    gap: 25px;
-    h3 {
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .hr-h3 {
-      border: none;
-      width: 16.5vw;
-      height: 1px;
-      background-color: var(--border-color);
-    }
-    div {
-      display: flex;
-      gap: 30px;
-      align-items: center;
-      img {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-      div {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        align-items: flex-start;
-        .membre-date {
-          font-size: 10px;
-          color: var(--font-darkBrown);
-        }
-      }
-      hr {
-        border: none;
-        width: 8vw;
-        height: 1px;
-        background-color: var(--border-color);
-      }
-    }
-  }
 }
 @media screen and (max-width: 428px) {
   .messagerie {
@@ -357,152 +287,15 @@
     }
   }
 }
-/* Sous 1475px, le panneau des contacts laisse trop peu de place à la
-   conversation : la liste passe dans une modale, ouverte par un bouton qui
-   affiche le nombre de participants. */
-@media screen and (max-width: 1475px) {
+/* Au-dessus de 1475px, la conversation occupe la largeur qu'elle partageait
+   avec l'ancien panneau des contacts, comme les autres onglets (70.5vw). */
+@media screen and (min-width: 1476px) {
   .messagerie {
-    /* Imbriqué comme la règle desktop qui le masque : une media query
-       n'ajoute aucune spécificité, il faut donc l'égaler pour l'emporter. */
-    .messagerie-header .contacts-button {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-      padding: 0.4rem 0.9rem;
-      border: 1px solid var(--border-color);
-      border-radius: 999px;
-      background: var(--bg-color);
-      color: var(--font-brown);
-      font-family: "Be Vietnam Pro", sans-serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-
-      .contacts-count {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 1.3rem;
-        height: 1.3rem;
-        padding: 0 0.3rem;
-        border-radius: 999px;
-        background: var(--color-chat);
-        color: white;
-        font-size: 0.75rem;
-      }
-    }
-
-    .messagerie-contact {
-      display: none;
-    }
-
-    .contacts-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 2000;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(4px);
-
-      .contacts-modal {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-
-        width: 100%;
-        max-width: 360px;
-        max-height: 70vh;
-        padding: 1.25rem;
-
-        background: var(--bg-composant-dash);
-        border: 1px solid var(--border-color);
-        border-radius: 18px;
-
-        .contacts-modal-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          color: var(--font-brown);
-
-          h3 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 0;
-            font-weight: 500;
-          }
-
-          button {
-            display: flex;
-            padding: 0;
-            border: none;
-            background: none;
-            color: var(--font-brown);
-            cursor: pointer;
-          }
-        }
-
-        .hr-h3 {
-          width: 100%;
-          margin: 0;
-        }
-
-        /* Seule la liste défile : l'en-tête reste visible. */
-        .contacts-modal-list {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          overflow-y: auto;
-        }
-      }
-    }
-
-    /* Les contacts affichés dans la modale gardent la mise en forme du
-       panneau desktop, adaptée à la largeur de la modale. */
-    .contacts-modal-list {
-      div {
-        display: flex;
-        gap: 15px;
-        align-items: center;
-
-        img {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          object-fit: cover;
-        }
-
-        div {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-          align-items: flex-start;
-
-          .membre-date {
-            font-size: 10px;
-            color: var(--font-darkBrown);
-          }
-        }
-
-        hr {
-          width: 100%;
-          border: none;
-          height: 1px;
-          background-color: var(--border-color);
-        }
-      }
-    }
+    width: 70.5vw;
   }
 }
 /* Même largeur que les composants du dashboard, qui font 91 % de sa largeur
-   (calc(94vw - 300px)). La conversation, en flex: 1, remplit ce qui reste
-   sans le panneau des contacts. */
+   (calc(94vw - 300px)). La conversation, en flex: 1, remplit cette largeur. */
 @media screen and (min-width: 876px) and (max-width: 1475px) {
   .messagerie {
     width: calc((94vw - 300px) * 0.91);

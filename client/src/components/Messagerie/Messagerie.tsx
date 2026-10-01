@@ -2,7 +2,7 @@ import "./Messagerie.css";
 import type { EmojiClickData } from "emoji-picker-react";
 import EmojiPicker, { Categories, EmojiStyle } from "emoji-picker-react";
 import { motion } from "framer-motion";
-import { ContactRound, Send, X } from "lucide-react";
+import { Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { socket } from "../../socket/socket";
@@ -60,20 +60,13 @@ type ReceptionMessagesUser = {
   user_profile_picture: string;
   event_name: string;
 };
-type UserByEvent = {
-  user_username: string;
-  user_profile_picture: string;
-  user_joining_date: string;
-};
 function Messagerie() {
   const [messagesUser, setMessagesUser] = useState("");
   const [receptionMessagesUser, setReceptionMessagesUser] = useState<
     ReceptionMessagesUser[]
   >([]);
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
-  const [usersByEvent, setUsersByEvent] = useState<UserByEvent[]>([]);
   const [showPicker, setShowPicker] = useState(false);
-  const [isContactsOpen, setIsContactsOpen] = useState(false);
   const { eventUuid } = useParams();
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
@@ -164,15 +157,6 @@ function Messagerie() {
   }, [eventUuid]);
 
   useEffect(() => {
-    if (!eventUuid) return;
-    fetch(`${import.meta.env.VITE_API_URL}/api/user/event/${eventUuid}`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setUsersByEvent(data));
-  }, [eventUuid]);
-
-  useEffect(() => {
     socket.on("connect", () => {
       console.log("✅ Connecté :", socket.id);
     });
@@ -230,14 +214,6 @@ function Messagerie() {
     }
   }
 
-  function formatMonthYear(dateString: string): string {
-    const date = new Date(dateString);
-
-    return date.toLocaleDateString("fr-FR", {
-      month: "long",
-      year: "numeric",
-    });
-  }
   function formatHour(dateString: string): string {
     return new Date(dateString).toLocaleTimeString("fr-FR", {
       hour: "2-digit",
@@ -277,28 +253,6 @@ function Messagerie() {
       handleSendMessage();
     }
   };
-  // Même rendu pour le panneau desktop et la modale mobile.
-  const contactList = usersByEvent.map((event, index) => (
-    <motion.div
-      key={event.user_username}
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.06 }}
-    >
-      <img
-        src={`${import.meta.env.VITE_API_URL}${event.user_profile_picture}`}
-        alt="photo-profil"
-      />
-      <div>
-        <p>{event.user_username}</p>
-        <p className="membre-date">
-          Membre depuis {formatMonthYear(event.user_joining_date)}
-        </p>
-        <hr />
-      </div>
-    </motion.div>
-  ));
-
   return (
     <motion.div
       className="messagerie"
@@ -306,19 +260,7 @@ function Messagerie() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="messagerie-header">
-        <h1>{receptionMessagesUser[0]?.event_name}</h1>
-
-        <button
-          type="button"
-          className="contacts-button"
-          onClick={() => setIsContactsOpen(true)}
-        >
-          <ContactRound size={18} />
-          Contacts présents
-          <span className="contacts-count">{usersByEvent.length}</span>
-        </button>
-      </div>
+      <h1>{receptionMessagesUser[0]?.event_name}</h1>
 
       <section className="global-messagerie">
         <motion.div
@@ -437,53 +379,6 @@ function Messagerie() {
             </button>
           </div>
         </motion.div>
-
-        <motion.section
-          className="messagerie-contact"
-          initial={{ x: 40, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-        >
-          <h3>
-            <ContactRound size={20} />
-            Contacts présents
-          </h3>
-
-          <hr className="hr-h3" />
-
-          {contactList}
-        </motion.section>
-
-        {/* Sur mobile, la même liste s'ouvre dans une modale : affichée en
-            ligne, elle occupait tout l'écran dès quelques participants. */}
-        {isContactsOpen && (
-          <div className="contacts-modal-overlay">
-            <motion.div
-              className="contacts-modal"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="contacts-modal-header">
-                <h3>
-                  <ContactRound size={20} />
-                  Contacts présents
-                </h3>
-                <button
-                  type="button"
-                  aria-label="Fermer la liste des contacts"
-                  onClick={() => setIsContactsOpen(false)}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <hr className="hr-h3" />
-
-              <div className="contacts-modal-list">{contactList}</div>
-            </motion.div>
-          </div>
-        )}
       </section>
     </motion.div>
   );
