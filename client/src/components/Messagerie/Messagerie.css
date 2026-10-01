@@ -90,9 +90,12 @@
           margin-bottom: 4px;
         }
 
+        /* Largeur limitée en px/vw et non en % : la bulle prend la largeur
+           de son contenu, et une image en max-width: 100% n'y compte pas.
+           Chez le contact, elle rétrécissait à la largeur du pseudo. */
         .message-image {
           display: block;
-          max-width: 100%;
+          max-width: min(280px, 40vw);
           max-height: 260px;
           border-radius: 8px;
           object-fit: cover;
@@ -201,7 +204,10 @@
           justify-content: flex-start;
           gap: 5px;
           padding: 2px 0 2px 0;
-          img {
+          /* Photo de profil seulement (enfant direct) : appliquée à toutes
+             les img, cette règle réduisait aussi l'image jointe à un rond de
+             30px. */
+          > img {
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -534,6 +540,11 @@
                 font-size: 14px;
               }
             }
+          }
+
+          /* Sur mobile, l'image peut occuper presque toute la bulle. */
+          .message-image {
+            max-width: min(280px, 60vw);
           }
         }
 
