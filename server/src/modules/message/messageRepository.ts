@@ -9,6 +9,7 @@ type MessageOwnerRow = RowDataPacket & {
   message_id: number;
   message_id_event: number;
   message_id_user: number;
+  message_image: string | null;
 };
 
 // Emojis proposés pour réagir à un message, dans leur ordre d'affichage.
@@ -37,12 +38,14 @@ const MESSAGE_SELECT = `SELECT
   m.message_date,
   m.message_edited_at,
   m.message_reply_to,
+  m.message_image,
   u.user_name,
   u.user_username,
   u.user_id,
   u.user_profile_picture,
   e.event_name,
   r.message_text AS reply_text,
+  r.message_image AS reply_image,
   ru.user_username AS reply_username
 FROM message AS m
 JOIN user AS u
@@ -60,16 +63,18 @@ class MessageRepository {
     userId: number,
     messageText: string,
     replyTo: number | null,
+    image: string | null,
   ) {
     const [result] = await mysql.query<ResultSetHeader>(
       `INSERT INTO message (
       message_id_event,
       message_id_user,
       message_text,
-      message_reply_to
+      message_reply_to,
+      message_image
     )
-    VALUES (?, ?, ?, ?)`,
-      [eventId, userId, messageText, replyTo],
+    VALUES (?, ?, ?, ?, ?)`,
+      [eventId, userId, messageText, replyTo, image],
     );
 
     return this.readById(result.insertId);
@@ -174,7 +179,7 @@ class MessageRepository {
   // réponse, une modification ou une suppression.
   async readOwner(messageId: number) {
     const [rows] = await mysql.query<MessageOwnerRow[]>(
-      `SELECT message_id, message_id_event, message_id_user
+      `SELECT message_id, message_id_event, message_id_user, message_image
     FROM message
     WHERE message_id = ?`,
       [messageId],

@@ -170,6 +170,7 @@ const detectMimeType = async (filePath: string) => {
 };
 
 export {
+  DESTINATION as UPLOADS_DIRECTORY,
   detectMimeType,
   MAX_FILE_SIZE,
   MAX_FILES,

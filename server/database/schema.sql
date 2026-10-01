@@ -190,6 +190,9 @@ CREATE TABLE `message` (
   `message_reply_to` INT NULL DEFAULT NULL,
   -- Date de la dernière modification, NULL si le message n'a jamais changé.
   `message_edited_at` DATETIME NULL DEFAULT NULL,
+  -- Image jointe (chemin sous /uploads), NULL sans image. Un message avec
+  -- image peut avoir un texte vide.
+  `message_image` VARCHAR(255) NULL DEFAULT NULL,
 
   PRIMARY KEY (`message_id`),
 

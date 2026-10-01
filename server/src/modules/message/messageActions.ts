@@ -1,13 +1,31 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import type { RequestHandler } from "express";
+import { UPLOADS_DIRECTORY } from "../../middleware/upload";
 import { getIo } from "../../socket";
 import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import messageRepository, { REACTION_EMOJIS } from "./messageRepository";
 
+// Supprime du disque l'image d'un message (chemin « /uploads/<fichier> »).
+// path.basename garde le fichier dans le dossier des envois, quel que soit
+// le chemin enregistré.
+const removeImageFile = async (image: string | null) => {
+  if (!image) return;
+  await fs
+    .unlink(path.join(UPLOADS_DIRECTORY, path.basename(image)))
+    .catch(() => {});
+};
+
 // L'auteur est l'utilisateur du cookie de session, jamais un id envoyé par
 // le client : sans ça, n'importe qui pouvait écrire au nom d'un autre. Seuls
-// les membres de l'événement peuvent y écrire.
+// les membres de l'événement peuvent y écrire. Le message peut porter une
+// image (champ « image »), et n'a alors pas besoin de texte.
 const addMessage: RequestHandler = async (req, res, next) => {
+  // L'image est déjà écrite sur le disque par multer : elle est supprimée si
+  // le message est refusé, pour ne pas laisser de fichier orphelin.
+  let imageKept = false;
+
   try {
     if (!req.user) {
       res.status(401).json({ message: "Unauthorized" });
@@ -16,7 +34,9 @@ const addMessage: RequestHandler = async (req, res, next) => {
 
     const userId = req.user.id;
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    const { messagesUser, replyTo } = req.body;
+    const { replyTo } = req.body;
+    const messageText = String(req.body.messagesUser ?? "").trim();
+    const image = req.file ? `/uploads/${req.file.filename}` : null;
 
     if (!eventId) {
       res.sendStatus(404);
@@ -31,14 +51,15 @@ const addMessage: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    if (!String(messagesUser ?? "").trim()) {
+    if (!messageText && !image) {
       res.status(400).json({ message: "Le message est vide." });
       return;
     }
 
-    // Une réponse ne peut citer qu'un message du même événement.
+    // Une réponse ne peut citer qu'un message du même événement. En
+    // multipart, l'absence de réponse arrive en chaîne vide.
     let replyToId: number | null = null;
-    if (replyTo !== undefined && replyTo !== null) {
+    if (replyTo !== undefined && replyTo !== null && replyTo !== "") {
       const repliedMessage = await messageRepository.readOwner(Number(replyTo));
 
       if (!repliedMessage || repliedMessage.message_id_event !== eventId) {
@@ -52,9 +73,11 @@ const addMessage: RequestHandler = async (req, res, next) => {
     const result = await messageRepository.sendMessage(
       eventId,
       userId,
-      messagesUser,
+      messageText,
       replyToId,
+      image,
     );
+    imageKept = true;
 
     const io = getIo();
     io.to(`event-${req.params.eventUuid}`).emit("new-message", result);
@@ -62,6 +85,10 @@ const addMessage: RequestHandler = async (req, res, next) => {
   } catch (error) {
     console.error("messageActions.addMessage erreur", error);
     next(error);
+  } finally {
+    if (!imageKept && req.file) {
+      await fs.unlink(req.file.path).catch(() => {});
+    }
   }
 };
 const browseMessagesByEventId: RequestHandler = async (req, res, next) => {
@@ -160,10 +187,6 @@ const editMessage: RequestHandler = async (req, res, next) => {
     }
 
     const messageText = String(req.body.messagesUser ?? "").trim();
-    if (!messageText) {
-      res.status(400).json({ message: "Le message est vide." });
-      return;
-    }
 
     const found = await findEventMessage(
       req.params.eventUuid,
@@ -176,6 +199,12 @@ const editMessage: RequestHandler = async (req, res, next) => {
       res
         .status(403)
         .json({ message: "Vous ne pouvez modifier que vos messages." });
+      return;
+    }
+
+    // Seul le texte se modifie. Il peut être vidé si le message a une image.
+    if (!messageText && !found.message.message_image) {
+      res.status(400).json({ message: "Le message est vide." });
       return;
     }
 
@@ -220,6 +249,7 @@ const deleteMessage: RequestHandler = async (req, res, next) => {
     }
 
     await messageRepository.delete(found.message.message_id);
+    await removeImageFile(found.message.message_image);
 
     getIo()
       .to(`event-${req.params.eventUuid}`)

@@ -2,7 +2,7 @@ import "./Messagerie.css";
 import type { EmojiClickData } from "emoji-picker-react";
 import EmojiPicker, { Categories, EmojiStyle } from "emoji-picker-react";
 import { motion } from "framer-motion";
-import { Ellipsis, Pencil, Reply, Send, Trash2, X } from "lucide-react";
+import { Ellipsis, Pencil, Plus, Reply, Send, Trash2, X } from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -103,7 +103,10 @@ type ReceptionMessagesUser = {
   // Message cité par une réponse, avec son texte et le pseudo de son auteur.
   message_reply_to: number | null;
   reply_text: string | null;
+  reply_image: string | null;
   reply_username: string | null;
+  // Image jointe (chemin sous /uploads), null sans image.
+  message_image: string | null;
   user_name: string;
   user_username: string;
   user_id: number;
@@ -134,6 +137,21 @@ type OpenMenu = {
 // Écart entre le bouton « ... » et le menu.
 const MENU_GAP = 4;
 
+// Images acceptées en pièce jointe, comme côté serveur.
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+];
+const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
+
+// Texte affiché pour un message cité : son texte, ou « Photo » s'il n'a
+// qu'une image.
+const quoteText = (text: string | null, image: string | null) =>
+  text || (image ? "📷 Photo" : "");
+
 function Messagerie() {
   const [messagesUser, setMessagesUser] = useState("");
   const [receptionMessagesUser, setReceptionMessagesUser] = useState<
@@ -144,6 +162,12 @@ function Messagerie() {
   const [openMenu, setOpenMenu] = useState<OpenMenu | null>(null);
   const [replyTo, setReplyTo] = useState<ReceptionMessagesUser | null>(null);
   const [editing, setEditing] = useState<ReceptionMessagesUser | null>(null);
+  // Image en attente d'envoi, choisie avec le + ou collée, et son aperçu.
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(
+    null,
+  );
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [hostId, setHostId] = useState<number | null>(null);
   const { eventUuid } = useParams();
 
@@ -330,6 +354,18 @@ function Messagerie() {
     if (openMenu && !exists(openMenu.message)) setOpenMenu(null);
   }, [receptionMessagesUser, replyTo, editing, openMenu]);
 
+  // Aperçu de l'image en attente, libéré quand elle change ou est retirée.
+  useEffect(() => {
+    if (!attachment) {
+      setAttachmentPreview(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(attachment);
+    setAttachmentPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [attachment]);
+
   // L'hôte peut supprimer tous les messages de son événement.
   useEffect(() => {
     if (!eventUuid) return;
@@ -441,6 +477,8 @@ function Messagerie() {
   function startEdit(message: ReceptionMessagesUser) {
     setOpenMenu(null);
     setReplyTo(null);
+    // Seul le texte se modifie : une image en attente est retirée.
+    setAttachment(null);
     setEditing(message);
     setMessagesUser(message.message_text);
     messageInputRef.current?.focus();
@@ -475,10 +513,61 @@ function Messagerie() {
     }
   }
 
-  async function handleSendMessage() {
-    if (!messagesUser.trim() || !eventUuid) {
+  // Vérifie et met en attente l'image choisie ou collée. Mêmes limites que le
+  // serveur : 8 Mo, formats image courants.
+  function attachImage(file: File) {
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      Swal.fire({
+        icon: "error",
+        text: "Format non supporté : JPEG, PNG, WebP, GIF ou AVIF.",
+      });
       return;
     }
+    if (file.size > MAX_IMAGE_SIZE) {
+      Swal.fire({ icon: "error", text: "Image trop lourde (8 Mo maximum)." });
+      return;
+    }
+
+    // Une modification ne porte que sur le texte : joindre une image
+    // l'annule et repart sur un nouveau message.
+    if (editing) {
+      setEditing(null);
+      setMessagesUser("");
+    }
+    setAttachment(file);
+    messageInputRef.current?.focus();
+  }
+
+  // Une image copiée (capture d'écran, image d'une page) est jointe au
+  // message ; un texte collé garde son comportement normal.
+  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const image = Array.from(e.clipboardData.files).find((file) =>
+      file.type.startsWith("image/"),
+    );
+    if (!image) return;
+
+    e.preventDefault();
+    attachImage(image);
+  }
+
+  // Envoi possible avec du texte, une image, ou un texte vidé lors de la
+  // modification d'un message qui a une image.
+  const canSend = editing
+    ? Boolean(messagesUser.trim() || editing.message_image)
+    : Boolean(messagesUser.trim() || attachment);
+
+  async function handleSendMessage() {
+    if (!canSend || !eventUuid) {
+      return;
+    }
+
+    // Multipart pour porter l'image : le navigateur pose lui-même le
+    // Content-Type avec sa délimitation.
+    const formData = new FormData();
+    formData.append("messagesUser", messagesUser);
+    formData.append("replyTo", replyTo ? String(replyTo.message_id) : "");
+    if (attachment) formData.append("image", attachment);
+
     try {
       // En modification, le texte remplace celui du message ; sinon c'est
       // un nouveau message, éventuellement en réponse à un autre.
@@ -494,23 +583,21 @@ function Messagerie() {
           )
         : await fetch(
             `${import.meta.env.VITE_API_URL}/api/messages/${eventUuid}`,
-            {
-              method: "POST",
-              credentials: "include",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                messagesUser: messagesUser,
-                replyTo: replyTo?.message_id ?? null,
-              }),
-            },
+            { method: "POST", credentials: "include", body: formData },
           );
 
       if (response.ok) {
         setMessagesUser("");
         setReplyTo(null);
         setEditing(null);
+        setAttachment(null);
+      } else {
+        const data = await response.json().catch(() => null);
+        Swal.fire({
+          icon: "error",
+          text:
+            data?.error ?? data?.message ?? "Le message n'a pas été envoyé.",
+        });
       }
     } catch (error) {
       console.error("Messagerie: erreur envoi message", error);
@@ -666,9 +753,29 @@ function Messagerie() {
                                 {reception.reply_username}
                               </span>
                               <span className="message-reply-text">
-                                {reception.reply_text}
+                                {quoteText(
+                                  reception.reply_text,
+                                  reception.reply_image,
+                                )}
                               </span>
                             </span>
+                          )}
+                          {/* Image jointe : un clic l'ouvre en grand dans
+                              un nouvel onglet. */}
+                          {reception.message_image && (
+                            <a
+                              className="message-image-link"
+                              href={`${import.meta.env.VITE_API_URL}${reception.message_image}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                className="message-image"
+                                src={`${import.meta.env.VITE_API_URL}${reception.message_image}`}
+                                alt={`Envoyée par ${reception.user_username}`}
+                                loading="lazy"
+                              />
+                            </a>
                           )}
                           {splitMessageText(reception.message_text).map(
                             (part) => {
@@ -766,7 +873,10 @@ function Messagerie() {
                     : "Modification du message"}
                 </p>
                 <p className="compose-context-text">
-                  {(replyTo ?? editing)?.message_text}
+                  {quoteText(
+                    (replyTo ?? editing)?.message_text ?? null,
+                    (replyTo ?? editing)?.message_image ?? null,
+                  )}
                 </p>
               </div>
               <button
@@ -781,13 +891,54 @@ function Messagerie() {
             </div>
           )}
 
+          {/* Image en attente d'envoi, retirable avant l'envoi. */}
+          {attachmentPreview && (
+            <div className="messagerie-attachment">
+              <img src={attachmentPreview} alt="Pièce jointe à envoyer" />
+              <button
+                type="button"
+                aria-label="Retirer l'image"
+                onClick={() => setAttachment(null)}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+
           <div className="messagerie-input">
+            {/* Joindre une image. Masqué pendant une modification, qui ne
+                porte que sur le texte. */}
+            {!editing && (
+              <>
+                <button
+                  type="button"
+                  className="attach-button"
+                  aria-label="Joindre une image"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Plus size={20} />
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                  hidden
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) attachImage(file);
+                    // Permet de rechoisir le même fichier ensuite.
+                    e.target.value = "";
+                  }}
+                />
+              </>
+            )}
             <input
               ref={messageInputRef}
               type="text"
               value={messagesUser}
               onChange={(e) => setMessagesUser(e.target.value)}
               onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
               placeholder="Écrire un message..."
             />
             {/* Le sélecteur est ancré à son bouton via ce conteneur en
@@ -827,7 +978,7 @@ function Messagerie() {
               className="send-button"
               type="button"
               onClick={handleSendMessage}
-              disabled={!messagesUser.trim()}
+              disabled={!canSend}
             >
               <Send size={20} className="send" />
             </button>
