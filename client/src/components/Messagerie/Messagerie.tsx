@@ -37,23 +37,59 @@ const EMOJI_RUN =
 const EMOJI_ONLY =
   /^\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*$/u;
 
-type MessagePart = { key: string; value: string; isEmoji: boolean };
+// Liens commençant par http://, https:// ou www. Seuls ces schémas sont
+// rendus cliquables : un « javascript: » reste du texte.
+const URL_RUN = /((?:https?:\/\/|www\.)[^\s<]+)/gi;
+// Ponctuation collée à la fin d'un lien dans une phrase (« voir x.com. »),
+// laissée hors du lien.
+const URL_TRAILING_PUNCTUATION = /[.,;:!?)\]}'"»]+$/;
 
-// Découpe un message en fragments texte et emoji. La clé vient de la position
-// dans la chaîne, pour rester stable sans dépendre de l'index de la boucle.
+type MessagePart = {
+  key: string;
+  value: string;
+  kind: "text" | "emoji" | "link";
+  // Adresse du lien, avec https:// ajouté devant un « www. ».
+  href?: string;
+};
+
+// Découpe un message en fragments texte, emoji et lien. La clé vient de la
+// position dans la chaîne, pour rester stable sans dépendre de l'index de la
+// boucle.
 const splitMessageText = (text: string): MessagePart[] => {
   const parts: MessagePart[] = [];
   let offset = 0;
 
-  for (const chunk of text.split(EMOJI_RUN)) {
-    if (chunk) {
-      parts.push({
-        key: `${offset}-${chunk}`,
-        value: chunk,
-        isEmoji: EMOJI_ONLY.test(chunk),
-      });
+  const pushText = (chunk: string) => {
+    for (const piece of chunk.split(EMOJI_RUN)) {
+      if (piece) {
+        parts.push({
+          key: `${offset}-${piece}`,
+          value: piece,
+          kind: EMOJI_ONLY.test(piece) ? "emoji" : "text",
+        });
+      }
+      offset += piece.length;
     }
-    offset += chunk.length;
+  };
+
+  for (const [index, chunk] of text.split(URL_RUN).entries()) {
+    // split avec un groupe capturant : les liens sont aux index impairs.
+    if (index % 2 === 0) {
+      pushText(chunk);
+      continue;
+    }
+
+    const trailing = chunk.match(URL_TRAILING_PUNCTUATION)?.[0] ?? "";
+    const url = chunk.slice(0, chunk.length - trailing.length);
+
+    parts.push({
+      key: `${offset}-${url}`,
+      value: url,
+      kind: "link",
+      href: url.toLowerCase().startsWith("www.") ? `https://${url}` : url,
+    });
+    offset += url.length;
+    pushText(trailing);
   }
 
   return parts;
@@ -635,14 +671,33 @@ function Messagerie() {
                             </span>
                           )}
                           {splitMessageText(reception.message_text).map(
-                            (part) =>
-                              part.isEmoji ? (
-                                <span key={part.key} className="message-emoji">
-                                  {part.value}
-                                </span>
-                              ) : (
-                                part.value
-                              ),
+                            (part) => {
+                              if (part.kind === "emoji") {
+                                return (
+                                  <span
+                                    key={part.key}
+                                    className="message-emoji"
+                                  >
+                                    {part.value}
+                                  </span>
+                                );
+                              }
+                              // Nouvel onglet, sans accès à la page d'origine.
+                              if (part.kind === "link") {
+                                return (
+                                  <a
+                                    key={part.key}
+                                    className="message-link"
+                                    href={part.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {part.value}
+                                  </a>
+                                );
+                              }
+                              return part.value;
+                            },
                           )}
                           {/* Messages des autres : l'heure est dans la bulle,
                             à droite de la dernière ligne. */}

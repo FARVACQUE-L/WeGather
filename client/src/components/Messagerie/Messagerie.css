@@ -73,6 +73,16 @@
           }
         }
 
+        /* Liens dans les messages : couleur du texte de la bulle (blanc sur
+           les siens), soulignés. Une longue adresse sans espace est coupée
+           pour ne pas déborder de la bulle. */
+        .message-link {
+          color: inherit;
+          text-decoration: underline;
+          text-underline-offset: 2px;
+          overflow-wrap: anywhere;
+        }
+
         /* La bulle et son « ... », centré sur elle. */
         .message-bubble-row {
           display: flex;
