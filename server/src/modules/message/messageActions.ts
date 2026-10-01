@@ -17,6 +17,29 @@ const removeImageFile = async (image: string | null) => {
     .catch(() => {});
 };
 
+// Extension de chaque format accepté, déjà vérifié par sa signature.
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/avif": ".avif",
+};
+
+// multer enregistre le fichier sans extension : servi ainsi, il part sans
+// type d'image, et le navigateur le télécharge au lieu de l'afficher. On le
+// renomme avec l'extension de son format pour qu'express.static envoie le
+// bon Content-Type. req.file.path suit le nouveau nom, pour le nettoyage.
+const addImageExtension = async (file: Express.Multer.File) => {
+  const filename = `${file.filename}${IMAGE_EXTENSIONS[file.mimetype] ?? ""}`;
+  const newPath = path.join(UPLOADS_DIRECTORY, filename);
+
+  await fs.rename(file.path, newPath);
+  file.path = newPath;
+
+  return `/uploads/${filename}`;
+};
+
 // L'auteur est l'utilisateur du cookie de session, jamais un id envoyé par
 // le client : sans ça, n'importe qui pouvait écrire au nom d'un autre. Seuls
 // les membres de l'événement peuvent y écrire. Le message peut porter une
@@ -36,7 +59,7 @@ const addMessage: RequestHandler = async (req, res, next) => {
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
     const { replyTo } = req.body;
     const messageText = String(req.body.messagesUser ?? "").trim();
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    const image = req.file ? await addImageExtension(req.file) : null;
 
     if (!eventId) {
       res.sendStatus(404);
