@@ -237,12 +237,21 @@
               font-size: 15px;
               color: white;
             }
+            /* Hauteur de ligne fixe : le « ... » la compense pour rester
+               centré sur la bulle (voir .message-actions plus bas). */
             .hour-text {
               font-size: 10px;
+              line-height: 12px;
               display: flex;
               flex-direction: row;
               justify-content: flex-end;
             }
+          }
+
+          /* L'heure est sous la bulle : la marge basse (5px d'écart + 12px
+             de ligne) recentre le « ... » sur la bulle seule. */
+          .message-actions {
+            margin-bottom: 17px;
           }
         }
       }
