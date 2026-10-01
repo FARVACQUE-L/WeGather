@@ -145,12 +145,10 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
 
   useEffect(() => {
     if (!eventUuid || !userId) return;
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/messages/unread/${eventUuid}/${userId}`,
-      {
-        credentials: "include",
-      },
-    )
+    // L'utilisateur est lu dans le cookie de session par le serveur.
+    fetch(`${import.meta.env.VITE_API_URL}/api/messages/unread/${eventUuid}`, {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => setUnreadCount(data.count))
       .catch(console.error);

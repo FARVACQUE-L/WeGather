@@ -20,7 +20,7 @@ messageRoutes.post(
   messageActions.notificationMessage,
 );
 messageRoutes.get(
-  "/api/messages/unread/:eventUuid/:userId",
+  "/api/messages/unread/:eventUuid",
   authorization,
   messageActions.getUnreadMessages,
 );

@@ -107,17 +107,26 @@ const notificationMessage: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+// Nombre de messages non lus de l'utilisateur du cookie de session : l'id
+// n'est plus dans l'URL, où n'importe qui pouvait lire celui d'un autre.
 const getUnreadMessages: RequestHandler = async (req, res, next) => {
   try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    const userId = Number(req.params.userId);
 
     if (!eventId) {
       res.sendStatus(404);
       return;
     }
 
-    const count = await messageRepository.getUnreadMessages(eventId, userId);
+    const count = await messageRepository.getUnreadMessages(
+      eventId,
+      req.user.id,
+    );
 
     res.status(200).json({ count });
   } catch (error) {
