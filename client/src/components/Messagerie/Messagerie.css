@@ -6,20 +6,6 @@
     color: var(--font-brown);
     padding: 3rem 3rem 0 0;
   }
-  /* Le titre à gauche, le bouton des contacts au-dessus à droite de la
-     conversation. */
-  .messagerie-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1rem;
-
-    /* Réservé aux écrans étroits : en desktop, la liste est affichée en
-       permanence dans le panneau de droite. */
-    .contacts-button {
-      display: none;
-    }
-  }
   .global-messagerie {
     display: flex;
     flex-direction: row;
@@ -42,6 +28,162 @@
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
+
+        /* Les bulles des contacts portent l'heure à l'intérieur : sans
+           ligne d'heure dessous, le dernier message collait à la barre de
+           saisie. */
+        > :last-child .messagerie-box-messages-friends {
+          padding-bottom: 12px;
+        }
+
+        /* Bouton « ... » à côté de la bulle, visible au survol du message.
+           Sur écran tactile, sans survol, il reste affiché. */
+        .message-actions {
+          position: relative;
+          flex-shrink: 0;
+          align-self: center;
+          margin: 0 4px;
+        }
+
+        .message-menu-button {
+          display: flex;
+          padding: 2px 4px;
+          border: none;
+          border-radius: 999px;
+          background: none;
+          color: var(--font-darkBrown);
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.15s ease;
+
+          &:focus-visible,
+          &[aria-expanded="true"] {
+            opacity: 1;
+          }
+        }
+
+        .messagerie-box-messages-friends:hover .message-menu-button,
+        .messagerie-box-messages-user:hover .message-menu-button {
+          opacity: 1;
+        }
+
+        @media (hover: none) {
+          .message-menu-button {
+            opacity: 0.6;
+          }
+        }
+
+        /* Liens dans les messages : couleur du texte de la bulle (blanc sur
+           les siens), soulignés. Une longue adresse sans espace est coupée
+           pour ne pas déborder de la bulle. */
+        .message-link {
+          color: inherit;
+          text-decoration: underline;
+          text-underline-offset: 2px;
+          overflow-wrap: anywhere;
+        }
+
+        /* Image jointe, au-dessus du texte de la bulle. Hauteur limitée pour
+           ne pas occuper tout l'écran ; un clic l'ouvre en grand. */
+        .message-image-button {
+          display: block;
+          margin-bottom: 4px;
+          padding: 0;
+          border: none;
+          background: none;
+          cursor: zoom-in;
+        }
+
+        /* Largeur limitée en px/vw et non en % : la bulle prend la largeur
+           de son contenu, et une image en max-width: 100% n'y compte pas.
+           Chez le contact, elle rétrécissait à la largeur du pseudo. */
+        .message-image {
+          display: block;
+          max-width: min(280px, 40vw);
+          max-height: 260px;
+          border-radius: 8px;
+          object-fit: cover;
+        }
+
+        /* La bulle et son « ... », centré sur elle. */
+        .message-bubble-row {
+          display: flex;
+          align-items: center;
+          min-width: 0;
+
+          .message-text {
+            min-width: 0;
+          }
+        }
+
+        /* Pastilles de réactions sous la bulle, qui chevauchent légèrement
+           son bas, décalées du coin. Au-dessus de la bulle. */
+        .message-reactions {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          margin-top: -12px;
+          padding: 0 8px;
+        }
+
+        /* Mêmes fond et contour que la bulle du message (voir plus bas pour
+           ses propres messages). */
+        .reaction-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 1px 8px;
+          border: 1px solid #dec0b9;
+          border-radius: 999px;
+          background: #fff8f5;
+          color: var(--font-darkBrown);
+          font-family: "Be Vietnam Pro", sans-serif;
+          font-size: 12px;
+          cursor: pointer;
+
+          .reaction-emoji {
+            font-size: 14px;
+            line-height: 1;
+          }
+
+          /* Sa propre réaction, en gras : un clic la retire. */
+          &.is-mine {
+            font-weight: 700;
+          }
+        }
+
+        .messagerie-box-messages-user .reaction-chip {
+          background: #ff7e5f;
+          color: white;
+        }
+
+        /* Citation du message auquel on répond, en haut de la bulle. */
+        .message-reply {
+          display: block;
+          margin-bottom: 4px;
+          padding: 4px 8px;
+          border-left: 3px solid currentColor;
+          border-radius: 6px;
+          background: rgb(0 0 0 / 6%);
+          font-size: 12px;
+
+          .message-reply-author {
+            display: block;
+            font-weight: 600;
+          }
+
+          /* Une seule ligne : le message cité complet est plus haut. */
+          .message-reply-text {
+            display: block;
+            max-width: 40ch;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            opacity: 0.85;
+          }
+        }
 
         /* Les emojis sont isolés dans un span au rendu, pour être agrandis
            sans toucher à la taille du texte qui les entoure. */
@@ -66,15 +208,33 @@
           justify-content: flex-start;
           gap: 5px;
           padding: 2px 0 2px 0;
-          img {
+          /* Photo de profil seulement (enfant direct) : appliquée à toutes
+             les img, cette règle réduisait aussi l'image jointe à un rond de
+             30px. */
+          > img {
             width: 30px;
             height: 30px;
             border-radius: 50%;
+          }
+          .avatar-spacer {
+            flex-shrink: 0;
+            width: 30px;
           }
           section {
             display: flex;
             flex-direction: column;
             gap: 5px;
+            /* Retour à la ligne à la moitié de la boîte de messagerie. */
+            min-width: 0;
+            max-width: 50%;
+            /* Sur sa propre ligne, en haut de la bulle. */
+            .message-author {
+              display: block;
+              margin-bottom: 2px;
+              color: var(--font-brown);
+              font-size: 12px;
+              font-weight: 500;
+            }
             .message-text {
               background-color: #fff8f5;
               border: 1px solid #dec0b9;
@@ -84,11 +244,15 @@
               word-break: break-word;
               font-size: 15px;
             }
-            .hour-text {
+            /* Dans la bulle, à droite de la dernière ligne du message : le
+               flottant se place sur la ligne où il arrive, et passe à la
+               ligne suivante si le texte la remplit déjà. */
+            .message-hour {
+              float: right;
+              margin: 1em 0 0 8px;
               font-size: 10px;
-              display: flex;
-              flex-direction: row;
-              justify-content: flex-start;
+              line-height: 1;
+              color: var(--font-darkBrown);
             }
           }
         }
@@ -102,6 +266,9 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            /* Retour à la ligne à la moitié de la boîte de messagerie. */
+            min-width: 0;
+            max-width: 50%;
             .message-text {
               background-color: #ff7e5f;
               border: 1px solid #dec0b9;
@@ -112,13 +279,97 @@
               font-size: 15px;
               color: white;
             }
+            /* Hauteur de ligne fixe : le « ... » la compense pour rester
+               centré sur la bulle (voir .message-actions plus bas). */
             .hour-text {
               font-size: 10px;
+              line-height: 12px;
               display: flex;
               flex-direction: row;
               justify-content: flex-end;
             }
           }
+
+          /* Bulle et réactions calées à droite, comme le message. */
+          .message-bubble-row,
+          .message-reactions {
+            justify-content: flex-end;
+          }
+        }
+      }
+
+      /* Image en attente d'envoi, avec sa croix pour la retirer. */
+      .messagerie-attachment {
+        position: relative;
+        flex-shrink: 0;
+        align-self: flex-start;
+        margin-bottom: 8px;
+
+        img {
+          display: block;
+          height: 72px;
+          max-width: 140px;
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          object-fit: cover;
+        }
+
+        button {
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 20px;
+          height: 20px;
+          padding: 0;
+          border: none;
+          border-radius: 50%;
+          background: var(--font-darkBrown);
+          color: white;
+          cursor: pointer;
+        }
+      }
+
+      /* Réponse ou modification en cours, juste au-dessus de la barre. */
+      .messagerie-compose-context {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+        padding: 6px 10px;
+        border-left: 3px solid var(--color-chat);
+        border-radius: 8px;
+        background: var(--bg-neutral);
+        color: var(--font-darkBrown);
+
+        div {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .compose-context-title {
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--font-brown);
+        }
+
+        .compose-context-text {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: 13px;
+        }
+
+        button {
+          display: flex;
+          padding: 2px;
+          border: none;
+          background: none;
+          color: var(--font-darkBrown);
+          cursor: pointer;
         }
       }
 
@@ -231,6 +482,16 @@
           padding: 0;
           cursor: pointer;
         }
+        /* + pour joindre une image, au début de la barre. */
+        .attach-button {
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          margin-left: 10px;
+          padding: 0;
+          color: var(--font-brown);
+          cursor: pointer;
+        }
         .send-button {
           border-radius: 21px;
           border-style: none;
@@ -247,62 +508,6 @@
         button:disabled {
           display: none;
         }
-      }
-    }
-  }
-  .contacts-modal-overlay {
-    display: none;
-  }
-
-  .messagerie-contact {
-    height: 78vh;
-    width: 20vw;
-    background: var(--bg-composant-dash);
-    padding: 30px;
-    border-radius: 5px;
-    border: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    margin-top: 2.5vh;
-    color: var(--font-brown);
-    gap: 25px;
-    h3 {
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .hr-h3 {
-      border: none;
-      width: 16.5vw;
-      height: 1px;
-      background-color: var(--border-color);
-    }
-    div {
-      display: flex;
-      gap: 30px;
-      align-items: center;
-      img {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-      div {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        align-items: flex-start;
-        .membre-date {
-          font-size: 10px;
-          color: var(--font-darkBrown);
-        }
-      }
-      hr {
-        border: none;
-        width: 8vw;
-        height: 1px;
-        background-color: var(--border-color);
       }
     }
   }
@@ -329,12 +534,21 @@
         .messagerie-box-messages {
           .messagerie-box-messages-friends,
           .messagerie-box-messages-user {
+            /* Sur mobile, la moitié de l'écran serait trop étroite : la
+               bulle est limitée à 70vw à la place. */
             section {
+              max-width: none;
+
               .message-text {
                 max-width: 70vw;
                 font-size: 14px;
               }
             }
+          }
+
+          /* Sur mobile, l'image peut occuper presque toute la bulle. */
+          .message-image {
+            max-width: min(280px, 60vw);
           }
         }
 
@@ -357,152 +571,15 @@
     }
   }
 }
-/* Sous 1475px, le panneau des contacts laisse trop peu de place à la
-   conversation : la liste passe dans une modale, ouverte par un bouton qui
-   affiche le nombre de participants. */
-@media screen and (max-width: 1475px) {
+/* Au-dessus de 1475px, la conversation occupe la largeur qu'elle partageait
+   avec l'ancien panneau des contacts, comme les autres onglets (70.5vw). */
+@media screen and (min-width: 1476px) {
   .messagerie {
-    /* Imbriqué comme la règle desktop qui le masque : une media query
-       n'ajoute aucune spécificité, il faut donc l'égaler pour l'emporter. */
-    .messagerie-header .contacts-button {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-      padding: 0.4rem 0.9rem;
-      border: 1px solid var(--border-color);
-      border-radius: 999px;
-      background: var(--bg-color);
-      color: var(--font-brown);
-      font-family: "Be Vietnam Pro", sans-serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-
-      .contacts-count {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 1.3rem;
-        height: 1.3rem;
-        padding: 0 0.3rem;
-        border-radius: 999px;
-        background: var(--color-chat);
-        color: white;
-        font-size: 0.75rem;
-      }
-    }
-
-    .messagerie-contact {
-      display: none;
-    }
-
-    .contacts-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 2000;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(4px);
-
-      .contacts-modal {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-
-        width: 100%;
-        max-width: 360px;
-        max-height: 70vh;
-        padding: 1.25rem;
-
-        background: var(--bg-composant-dash);
-        border: 1px solid var(--border-color);
-        border-radius: 18px;
-
-        .contacts-modal-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          color: var(--font-brown);
-
-          h3 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 0;
-            font-weight: 500;
-          }
-
-          button {
-            display: flex;
-            padding: 0;
-            border: none;
-            background: none;
-            color: var(--font-brown);
-            cursor: pointer;
-          }
-        }
-
-        .hr-h3 {
-          width: 100%;
-          margin: 0;
-        }
-
-        /* Seule la liste défile : l'en-tête reste visible. */
-        .contacts-modal-list {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          overflow-y: auto;
-        }
-      }
-    }
-
-    /* Les contacts affichés dans la modale gardent la mise en forme du
-       panneau desktop, adaptée à la largeur de la modale. */
-    .contacts-modal-list {
-      div {
-        display: flex;
-        gap: 15px;
-        align-items: center;
-
-        img {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          object-fit: cover;
-        }
-
-        div {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-          align-items: flex-start;
-
-          .membre-date {
-            font-size: 10px;
-            color: var(--font-darkBrown);
-          }
-        }
-
-        hr {
-          width: 100%;
-          border: none;
-          height: 1px;
-          background-color: var(--border-color);
-        }
-      }
-    }
+    width: 70.5vw;
   }
 }
 /* Même largeur que les composants du dashboard, qui font 91 % de sa largeur
-   (calc(94vw - 300px)). La conversation, en flex: 1, remplit ce qui reste
-   sans le panneau des contacts. */
+   (calc(94vw - 300px)). La conversation, en flex: 1, remplit cette largeur. */
 @media screen and (min-width: 876px) and (max-width: 1475px) {
   .messagerie {
     width: calc((94vw - 300px) * 0.91);
@@ -516,5 +593,99 @@
     .global-messagerie .messagerie-box {
       height: 68vh;
     }
+  }
+}
+/* Menu « ... » d'un message. Rendu dans body en position fixe, hors de la
+   liste qui défile, et placé par le composant à côté du bouton : il ne
+   recouvre plus les messages et n'est plus coupé par les bords de la liste.
+   Au-dessus de la barre de navigation fixée en bas. */
+.message-menu {
+  position: fixed;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-neutral);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  font-family: "Be Vietnam Pro", sans-serif;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--font-darkBrown);
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--hover-sidebar);
+    }
+  }
+
+  .is-danger {
+    color: var(--font-red);
+  }
+
+  /* Rangée d'emojis en haut du menu, séparée des actions. */
+  .message-menu-reactions {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-color);
+
+    button {
+      padding: 4px 5px;
+      font-size: 18px;
+      line-height: 1;
+
+      &.is-mine {
+        background: var(--hover-sidebar);
+      }
+    }
+  }
+}
+
+/* Visionneuse d'une image de message : plein écran sur fond sombre, au-dessus
+   de tout (barre du bas, menus). Rendue dans body, hors de .messagerie. */
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgb(0 0 0 / 85%);
+  cursor: zoom-out;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+    cursor: default;
+  }
+
+  .image-viewer-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    padding: 6px;
+    border: none;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 15%);
+    color: white;
+    cursor: pointer;
   }
 }
