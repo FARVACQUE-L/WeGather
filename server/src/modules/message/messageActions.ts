@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import { getIo } from "../../socket";
 import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
-import messageRepository from "./messageRepository";
+import messageRepository, { REACTION_EMOJIS } from "./messageRepository";
 
 // L'auteur est l'utilisateur du cookie de session, jamais un id envoyé par
 // le client : sans ça, n'importe qui pouvait écrire au nom d'un autre. Seuls
@@ -230,7 +230,57 @@ const deleteMessage: RequestHandler = async (req, res, next) => {
   }
 };
 
+// Ajoute ou retire la réaction de l'utilisateur sur un message. Seuls les
+// emojis prédéfinis sont acceptés, et seuls les membres peuvent réagir.
+const toggleReaction: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const emoji = String(req.body.emoji ?? "");
+    if (!REACTION_EMOJIS.includes(emoji)) {
+      res.status(400).json({ message: "Réaction non autorisée." });
+      return;
+    }
+
+    const found = await findEventMessage(
+      req.params.eventUuid,
+      Number(req.params.messageId),
+      res,
+    );
+    if (!found) return;
+
+    const membership = await eventUserJoiningRepository.readBy(
+      found.event.event_id,
+      req.user.id,
+    );
+    if (membership.length === 0) {
+      res
+        .status(403)
+        .json({ message: "Vous ne participez pas à cet événement." });
+      return;
+    }
+
+    const reactions = await messageRepository.toggleReaction(
+      found.message.message_id,
+      req.user.id,
+      emoji,
+    );
+
+    const payload = { message_id: found.message.message_id, reactions };
+    getIo()
+      .to(`event-${req.params.eventUuid}`)
+      .emit("message-reactions", payload);
+    res.json(payload);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
+  toggleReaction,
   addMessage,
   browseMessagesByEventId,
   notificationMessage,

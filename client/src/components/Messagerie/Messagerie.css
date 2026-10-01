@@ -73,6 +73,49 @@
           }
         }
 
+        /* La bulle et son « ... », centré sur elle. */
+        .message-bubble-row {
+          display: flex;
+          align-items: center;
+          min-width: 0;
+
+          .message-text {
+            min-width: 0;
+          }
+        }
+
+        /* Pastilles de réactions sous la bulle. */
+        .message-reactions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+
+        .reaction-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 1px 8px;
+          border: 1px solid var(--border-color);
+          border-radius: 999px;
+          background: var(--bg-neutral);
+          color: var(--font-darkBrown);
+          font-family: "Be Vietnam Pro", sans-serif;
+          font-size: 12px;
+          cursor: pointer;
+
+          .reaction-emoji {
+            font-size: 14px;
+            line-height: 1;
+          }
+
+          /* Sa propre réaction : un clic la retire. */
+          &.is-mine {
+            border-color: var(--color-chat);
+            background: rgb(255 126 95 / 15%);
+          }
+        }
+
         /* Citation du message auquel on répond, en haut de la bulle. */
         .message-reply {
           display: block;
@@ -135,6 +178,9 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            /* Retour à la ligne à la moitié de la boîte de messagerie. */
+            min-width: 0;
+            max-width: 50%;
             /* Sur sa propre ligne, en haut de la bulle. */
             .message-author {
               display: block;
@@ -174,6 +220,9 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            /* Retour à la ligne à la moitié de la boîte de messagerie. */
+            min-width: 0;
+            max-width: 50%;
             .message-text {
               background-color: #ff7e5f;
               border: 1px solid #dec0b9;
@@ -195,10 +244,10 @@
             }
           }
 
-          /* L'heure est sous la bulle : la marge basse (5px d'écart + 12px
-             de ligne) recentre le « ... » sur la bulle seule. */
-          .message-actions {
-            margin-bottom: 17px;
+          /* Bulle et réactions calées à droite, comme le message. */
+          .message-bubble-row,
+          .message-reactions {
+            justify-content: flex-end;
           }
         }
       }
@@ -395,7 +444,11 @@
         .messagerie-box-messages {
           .messagerie-box-messages-friends,
           .messagerie-box-messages-user {
+            /* Sur mobile, la moitié de l'écran serait trop étroite : la
+               bulle est limitée à 70vw à la place. */
             section {
+              max-width: none;
+
               .message-text {
                 max-width: 70vw;
                 font-size: 14px;
@@ -485,5 +538,24 @@
 
   .is-danger {
     color: var(--font-red);
+  }
+
+  /* Rangée d'emojis en haut du menu, séparée des actions. */
+  .message-menu-reactions {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-color);
+
+    button {
+      padding: 4px 5px;
+      font-size: 18px;
+      line-height: 1;
+
+      &.is-mine {
+        background: var(--hover-sidebar);
+      }
+    }
   }
 }

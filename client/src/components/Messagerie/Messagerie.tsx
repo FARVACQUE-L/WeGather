@@ -73,7 +73,18 @@ type ReceptionMessagesUser = {
   user_id: number;
   user_profile_picture: string;
   event_name: string;
+  reactions: Reaction[];
 };
+
+// Réactions d'un message, regroupées par emoji avec les personnes qui l'ont
+// mis.
+type Reaction = {
+  emoji: string;
+  users: { user_id: number; user_username: string }[];
+};
+
+// Emojis proposés pour réagir, les mêmes que ceux acceptés par le serveur.
+const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
 // Menu « ... » ouvert : le message visé, la position du bouton, et le côté
 // où ouvrir le menu, dans l'espace libre à côté du bouton (à droite pour les
@@ -237,14 +248,32 @@ function Messagerie() {
       );
     };
 
+    const handleMessageReactions = ({
+      message_id,
+      reactions,
+    }: {
+      message_id: number;
+      reactions: Reaction[];
+    }) => {
+      setReceptionMessagesUser((prev) =>
+        prev.map((message) =>
+          message.message_id === message_id
+            ? { ...message, reactions }
+            : message,
+        ),
+      );
+    };
+
     socket.on("new-message", handleNewMessage);
     socket.on("message-updated", handleMessageUpdated);
     socket.on("message-deleted", handleMessageDeleted);
+    socket.on("message-reactions", handleMessageReactions);
 
     return () => {
       socket.off("new-message", handleNewMessage);
       socket.off("message-updated", handleMessageUpdated);
       socket.off("message-deleted", handleMessageDeleted);
+      socket.off("message-reactions", handleMessageReactions);
     };
   }, [eventUuid]);
 
@@ -343,6 +372,26 @@ function Messagerie() {
       anchor: button.getBoundingClientRect(),
       side: message.user_id === userId ? "left" : "right",
     });
+  }
+
+  // Ajoute la réaction, ou la retire si on l'avait déjà mise. Tous les
+  // participants, soi compris, reçoivent le résultat par le socket.
+  async function toggleReaction(messageId: number, emoji: string) {
+    setOpenMenu(null);
+
+    try {
+      await fetch(
+        `${import.meta.env.VITE_API_URL}/api/messages/${eventUuid}/${messageId}/reactions`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ emoji }),
+        },
+      );
+    } catch (error) {
+      console.error("Messagerie: erreur réaction", error);
+    }
   }
 
   function startReply(message: ReceptionMessagesUser) {
@@ -547,7 +596,6 @@ function Messagerie() {
                         : "messagerie-box-messages-friends"
                     }
                   >
-                    {isOwn && actions}
                     {showAuthor && (
                       <img
                         src={`${import.meta.env.VITE_API_URL}${reception.user_profile_picture}`}
@@ -561,42 +609,90 @@ function Messagerie() {
                     )}
 
                     <section>
-                      <p className="message-text">
-                        {/* Pseudo en haut de la bulle, pour les messages des
+                      {/* Le « ... » est dans la même ligne que la bulle :
+                          il reste centré sur elle, quoi qu'il y ait dessous
+                          (heure, réactions). */}
+                      <div className="message-bubble-row">
+                        {isOwn && actions}
+                        <p className="message-text">
+                          {/* Pseudo en haut de la bulle, pour les messages des
                             autres seulement : les siens n'ont pas besoin
                             d'être signés. */}
-                        {showAuthor && (
-                          <span className="message-author">
-                            {reception.user_username}
-                          </span>
-                        )}
-                        {/* Citation du message auquel celui-ci répond. */}
-                        {reception.message_reply_to !== null && (
-                          <span className="message-reply">
-                            <span className="message-reply-author">
-                              {reception.reply_username}
+                          {showAuthor && (
+                            <span className="message-author">
+                              {reception.user_username}
                             </span>
-                            <span className="message-reply-text">
-                              {reception.reply_text}
+                          )}
+                          {/* Citation du message auquel celui-ci répond. */}
+                          {reception.message_reply_to !== null && (
+                            <span className="message-reply">
+                              <span className="message-reply-author">
+                                {reception.reply_username}
+                              </span>
+                              <span className="message-reply-text">
+                                {reception.reply_text}
+                              </span>
                             </span>
-                          </span>
-                        )}
-                        {splitMessageText(reception.message_text).map((part) =>
-                          part.isEmoji ? (
-                            <span key={part.key} className="message-emoji">
-                              {part.value}
-                            </span>
-                          ) : (
-                            part.value
-                          ),
-                        )}
-                        {/* Messages des autres : l'heure est dans la bulle,
+                          )}
+                          {splitMessageText(reception.message_text).map(
+                            (part) =>
+                              part.isEmoji ? (
+                                <span key={part.key} className="message-emoji">
+                                  {part.value}
+                                </span>
+                              ) : (
+                                part.value
+                              ),
+                          )}
+                          {/* Messages des autres : l'heure est dans la bulle,
                             à droite de la dernière ligne. */}
-                        {!isOwn && <span className="message-hour">{hour}</span>}
-                      </p>
+                          {!isOwn && (
+                            <span className="message-hour">{hour}</span>
+                          )}
+                        </p>
+                        {!isOwn && actions}
+                      </div>
+
+                      {/* Une pastille par emoji, avec le nombre de réactions.
+                          Un clic ajoute ou retire la sienne ; le survol donne
+                          les pseudos. */}
+                      {reception.reactions.length > 0 && (
+                        <div className="message-reactions">
+                          {reception.reactions.map((reaction) => {
+                            const isMine = reaction.users.some(
+                              (user) => user.user_id === userId,
+                            );
+                            const names = reaction.users
+                              .map((user) => user.user_username)
+                              .join(", ");
+
+                            return (
+                              <button
+                                key={reaction.emoji}
+                                type="button"
+                                className={`reaction-chip${isMine ? " is-mine" : ""}`}
+                                title={names}
+                                aria-label={`${reaction.emoji} ${reaction.users.length} : ${names}`}
+                                aria-pressed={isMine}
+                                onClick={() =>
+                                  toggleReaction(
+                                    reception.message_id,
+                                    reaction.emoji,
+                                  )
+                                }
+                              >
+                                <span className="reaction-emoji">
+                                  {reaction.emoji}
+                                </span>
+                                {reaction.users.length}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
                       {isOwn && <p className="hour-text">{hour}</p>}
                     </section>
-                    {!isOwn && actions}
                   </div>
                 </motion.div>
               );
@@ -694,6 +790,32 @@ function Messagerie() {
             role="menu"
             style={{ visibility: "hidden" }}
           >
+            {/* Réactions rapides, en haut du menu. Celles déjà mises sont
+                mises en évidence ; un clic les retire. */}
+            <div className="message-menu-reactions">
+              {REACTION_EMOJIS.map((emoji) => {
+                const isMine = openMenu.message.reactions.some(
+                  (reaction) =>
+                    reaction.emoji === emoji &&
+                    reaction.users.some((user) => user.user_id === userId),
+                );
+
+                return (
+                  <button
+                    key={emoji}
+                    type="button"
+                    className={isMine ? "is-mine" : undefined}
+                    aria-label={`Réagir avec ${emoji}`}
+                    aria-pressed={isMine}
+                    onClick={() =>
+                      toggleReaction(openMenu.message.message_id, emoji)
+                    }
+                  >
+                    {emoji}
+                  </button>
+                );
+              })}
+            </div>
             <button
               type="button"
               role="menuitem"

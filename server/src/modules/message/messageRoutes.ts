@@ -34,5 +34,10 @@ messageRoutes.delete(
   authorization,
   messageActions.deleteMessage,
 );
+messageRoutes.post(
+  "/api/messages/:eventUuid/:messageId/reactions",
+  authorization,
+  messageActions.toggleReaction,
+);
 
 export default messageRoutes;

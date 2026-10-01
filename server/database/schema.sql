@@ -225,6 +225,40 @@ CREATE TABLE message_read (
         ON DELETE CASCADE
 )ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `message_reaction`
+-- -----------------------------------------------------
+-- Un utilisateur peut mettre plusieurs emojis sur un message, mais chaque
+-- emoji une seule fois. Collation binaire : en utf8mb4_unicode_ci, des emojis
+-- différents sont considérés égaux et heurteraient la contrainte d'unicité.
+CREATE TABLE `message_reaction` (
+  `message_reaction_id` INT NOT NULL AUTO_INCREMENT,
+  `message_reaction_id_message` INT NOT NULL,
+  `message_reaction_id_user` INT NOT NULL,
+  `message_reaction_emoji` VARCHAR(16)
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_bin
+    NOT NULL,
+
+  PRIMARY KEY (`message_reaction_id`),
+
+  UNIQUE KEY `uq_message_reaction` (
+    `message_reaction_id_message`,
+    `message_reaction_id_user`,
+    `message_reaction_emoji`
+  ),
+
+  CONSTRAINT `fk_message_reaction_message`
+    FOREIGN KEY (`message_reaction_id_message`)
+    REFERENCES `message` (`message_id`)
+    ON DELETE CASCADE,
+
+  CONSTRAINT `fk_message_reaction_user`
+    FOREIGN KEY (`message_reaction_id_user`)
+    REFERENCES `user` (`user_id`)
+    ON DELETE CASCADE)
+ENGINE = InnoDB;
+
 
 -- -----------------------------------------------------
 -- Table `budget`
