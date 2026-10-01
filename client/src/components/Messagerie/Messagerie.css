@@ -84,21 +84,28 @@
           }
         }
 
-        /* Pastilles de réactions sous la bulle. */
+        /* Pastilles de réactions sous la bulle, qui chevauchent légèrement
+           son bas, décalées du coin. Au-dessus de la bulle. */
         .message-reactions {
+          position: relative;
+          z-index: 1;
           display: flex;
           flex-wrap: wrap;
           gap: 4px;
+          margin-top: -12px;
+          padding: 0 8px;
         }
 
+        /* Mêmes fond et contour que la bulle du message (voir plus bas pour
+           ses propres messages). */
         .reaction-chip {
           display: inline-flex;
           align-items: center;
           gap: 4px;
           padding: 1px 8px;
-          border: 1px solid var(--border-color);
+          border: 1px solid #dec0b9;
           border-radius: 999px;
-          background: var(--bg-neutral);
+          background: #fff8f5;
           color: var(--font-darkBrown);
           font-family: "Be Vietnam Pro", sans-serif;
           font-size: 12px;
@@ -109,11 +116,15 @@
             line-height: 1;
           }
 
-          /* Sa propre réaction : un clic la retire. */
+          /* Sa propre réaction, en gras : un clic la retire. */
           &.is-mine {
-            border-color: var(--color-chat);
-            background: rgb(255 126 95 / 15%);
+            font-weight: 700;
           }
+        }
+
+        .messagerie-box-messages-user .reaction-chip {
+          background: #ff7e5f;
+          color: white;
         }
 
         /* Citation du message auquel on répond, en haut de la bulle. */
