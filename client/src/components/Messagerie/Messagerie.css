@@ -29,6 +29,129 @@
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
 
+        /* Les bulles des contacts portent l'heure à l'intérieur : sans
+           ligne d'heure dessous, le dernier message collait à la barre de
+           saisie. */
+        > :last-child .messagerie-box-messages-friends {
+          padding-bottom: 12px;
+        }
+
+        /* Bouton « ... » à côté de la bulle, visible au survol du message.
+           Sur écran tactile, sans survol, il reste affiché. */
+        .message-actions {
+          position: relative;
+          flex-shrink: 0;
+          align-self: center;
+          margin: 0 4px;
+        }
+
+        .message-menu-button {
+          display: flex;
+          padding: 2px 4px;
+          border: none;
+          border-radius: 999px;
+          background: none;
+          color: var(--font-darkBrown);
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.15s ease;
+
+          &:focus-visible,
+          &[aria-expanded="true"] {
+            opacity: 1;
+          }
+        }
+
+        .messagerie-box-messages-friends:hover .message-menu-button,
+        .messagerie-box-messages-user:hover .message-menu-button {
+          opacity: 1;
+        }
+
+        @media (hover: none) {
+          .message-menu-button {
+            opacity: 0.6;
+          }
+        }
+
+        /* Le menu s'étend au-dessus de la bulle plutôt que vers le bord de
+           la liste, où il serait coupé : vers la gauche pour les messages
+           des autres, vers la droite pour les siens. */
+        .message-menu {
+          position: absolute;
+          top: calc(100% + 4px);
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+          min-width: 150px;
+          padding: 4px;
+          border: 1px solid var(--border-color);
+          border-radius: 10px;
+          background: var(--bg-neutral);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+
+          &.is-up {
+            top: auto;
+            bottom: calc(100% + 4px);
+          }
+
+          button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border: none;
+            border-radius: 6px;
+            background: none;
+            color: var(--font-darkBrown);
+            font-family: "Be Vietnam Pro", sans-serif;
+            font-size: 13px;
+            text-align: left;
+            cursor: pointer;
+
+            &:hover {
+              background: var(--hover-sidebar);
+            }
+          }
+
+          .is-danger {
+            color: var(--font-red);
+          }
+        }
+
+        .messagerie-box-messages-friends .message-menu {
+          right: 0;
+        }
+
+        .messagerie-box-messages-user .message-menu {
+          left: 0;
+        }
+
+        /* Citation du message auquel on répond, en haut de la bulle. */
+        .message-reply {
+          display: block;
+          margin-bottom: 4px;
+          padding: 4px 8px;
+          border-left: 3px solid currentColor;
+          border-radius: 6px;
+          background: rgb(0 0 0 / 6%);
+          font-size: 12px;
+
+          .message-reply-author {
+            display: block;
+            font-weight: 600;
+          }
+
+          /* Une seule ligne : le message cité complet est plus haut. */
+          .message-reply-text {
+            display: block;
+            max-width: 40ch;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            opacity: 0.85;
+          }
+        }
+
         /* Les emojis sont isolés dans un span au rendu, pour être agrandis
            sans toucher à la taille du texte qui les entoure. */
         .message-emoji {
@@ -57,10 +180,22 @@
             height: 30px;
             border-radius: 50%;
           }
+          .avatar-spacer {
+            flex-shrink: 0;
+            width: 30px;
+          }
           section {
             display: flex;
             flex-direction: column;
             gap: 5px;
+            /* Sur sa propre ligne, en haut de la bulle. */
+            .message-author {
+              display: block;
+              margin-bottom: 2px;
+              color: var(--font-brown);
+              font-size: 12px;
+              font-weight: 500;
+            }
             .message-text {
               background-color: #fff8f5;
               border: 1px solid #dec0b9;
@@ -70,11 +205,15 @@
               word-break: break-word;
               font-size: 15px;
             }
-            .hour-text {
+            /* Dans la bulle, à droite de la dernière ligne du message : le
+               flottant se place sur la ligne où il arrive, et passe à la
+               ligne suivante si le texte la remplit déjà. */
+            .message-hour {
+              float: right;
+              margin: 1em 0 0 8px;
               font-size: 10px;
-              display: flex;
-              flex-direction: row;
-              justify-content: flex-start;
+              line-height: 1;
+              color: var(--font-darkBrown);
             }
           }
         }
@@ -105,6 +244,47 @@
               justify-content: flex-end;
             }
           }
+        }
+      }
+
+      /* Réponse ou modification en cours, juste au-dessus de la barre. */
+      .messagerie-compose-context {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+        padding: 6px 10px;
+        border-left: 3px solid var(--color-chat);
+        border-radius: 8px;
+        background: var(--bg-neutral);
+        color: var(--font-darkBrown);
+
+        div {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .compose-context-title {
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--font-brown);
+        }
+
+        .compose-context-text {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: 13px;
+        }
+
+        button {
+          display: flex;
+          padding: 2px;
+          border: none;
+          background: none;
+          color: var(--font-darkBrown);
+          cursor: pointer;
         }
       }
 

@@ -186,6 +186,10 @@ CREATE TABLE `message` (
     COLLATE utf8mb4_unicode_ci
     NOT NULL,
   `message_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  -- Message cité par une réponse. Remis à NULL si ce message est supprimé.
+  `message_reply_to` INT NULL DEFAULT NULL,
+  -- Date de la dernière modification, NULL si le message n'a jamais changé.
+  `message_edited_at` DATETIME NULL DEFAULT NULL,
 
   PRIMARY KEY (`message_id`),
 
@@ -195,7 +199,12 @@ CREATE TABLE `message` (
 
   CONSTRAINT `fk_message_event`
     FOREIGN KEY (`message_id_event`)
-    REFERENCES `event` (`event_id`))
+    REFERENCES `event` (`event_id`),
+
+  CONSTRAINT `fk_message_reply_to`
+    FOREIGN KEY (`message_reply_to`)
+    REFERENCES `message` (`message_id`)
+    ON DELETE SET NULL)
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------

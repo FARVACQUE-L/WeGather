@@ -24,5 +24,15 @@ messageRoutes.get(
   authorization,
   messageActions.getUnreadMessages,
 );
+messageRoutes.put(
+  "/api/messages/:eventUuid/:messageId",
+  authorization,
+  messageActions.editMessage,
+);
+messageRoutes.delete(
+  "/api/messages/:eventUuid/:messageId",
+  authorization,
+  messageActions.deleteMessage,
+);
 
 export default messageRoutes;
