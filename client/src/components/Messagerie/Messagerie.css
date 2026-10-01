@@ -85,9 +85,13 @@
 
         /* Image jointe, au-dessus du texte de la bulle. Hauteur limitée pour
            ne pas occuper tout l'écran ; un clic l'ouvre en grand. */
-        .message-image-link {
+        .message-image-button {
           display: block;
           margin-bottom: 4px;
+          padding: 0;
+          border: none;
+          background: none;
+          cursor: zoom-in;
         }
 
         /* Largeur limitée en px/vw et non en % : la bulle prend la largeur
@@ -648,5 +652,40 @@
         background: var(--hover-sidebar);
       }
     }
+  }
+}
+
+/* Visionneuse d'une image de message : plein écran sur fond sombre, au-dessus
+   de tout (barre du bas, menus). Rendue dans body, hors de .messagerie. */
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgb(0 0 0 / 85%);
+  cursor: zoom-out;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+    cursor: default;
+  }
+
+  .image-viewer-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    padding: 6px;
+    border: none;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 15%);
+    color: white;
+    cursor: pointer;
   }
 }

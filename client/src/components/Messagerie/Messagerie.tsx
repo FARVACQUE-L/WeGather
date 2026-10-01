@@ -168,6 +168,8 @@ function Messagerie() {
     null,
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // Image affichée en grand dans la visionneuse, null si elle est fermée.
+  const [viewerImage, setViewerImage] = useState<string | null>(null);
   const [hostId, setHostId] = useState<number | null>(null);
   const { eventUuid } = useParams();
 
@@ -365,6 +367,18 @@ function Messagerie() {
     setAttachmentPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [attachment]);
+
+  // Échap ferme la visionneuse.
+  useEffect(() => {
+    if (!viewerImage) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setViewerImage(null);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [viewerImage]);
 
   // L'hôte peut supprimer tous les messages de son événement.
   useEffect(() => {
@@ -760,14 +774,18 @@ function Messagerie() {
                               </span>
                             </span>
                           )}
-                          {/* Image jointe : un clic l'ouvre en grand dans
-                              un nouvel onglet. */}
+                          {/* Image jointe : un clic l'ouvre en grand dans la
+                              visionneuse, sans quitter la page. */}
                           {reception.message_image && (
-                            <a
-                              className="message-image-link"
-                              href={`${import.meta.env.VITE_API_URL}${reception.message_image}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              type="button"
+                              className="message-image-button"
+                              aria-label="Agrandir"
+                              onClick={() =>
+                                setViewerImage(
+                                  `${import.meta.env.VITE_API_URL}${reception.message_image}`,
+                                )
+                              }
                             >
                               <img
                                 className="message-image"
@@ -775,7 +793,7 @@ function Messagerie() {
                                 alt={`Envoyée par ${reception.user_username}`}
                                 loading="lazy"
                               />
-                            </a>
+                            </button>
                           )}
                           {splitMessageText(reception.message_text).map(
                             (part) => {
@@ -985,6 +1003,35 @@ function Messagerie() {
           </div>
         </motion.div>
       </section>
+
+      {/* Visionneuse : l'image en grand sur un fond sombre, dans la page.
+          Un clic à côté de l'image, la croix ou Échap la ferme. */}
+      {viewerImage &&
+        createPortal(
+          <div
+            className="image-viewer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Image en grand"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setViewerImage(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setViewerImage(null);
+            }}
+          >
+            <button
+              type="button"
+              className="image-viewer-close"
+              aria-label="Fermer"
+              onClick={() => setViewerImage(null)}
+            >
+              <X size={24} />
+            </button>
+            <img src={viewerImage} alt="" />
+          </div>,
+          document.body,
+        )}
 
       {/* Rendu dans body, en position fixe : dans la liste qui défile, il
           était coupé par ses bords. Invisible jusqu'à son placement. */}
