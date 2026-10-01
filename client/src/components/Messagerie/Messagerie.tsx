@@ -3,7 +3,14 @@ import type { EmojiClickData } from "emoji-picker-react";
 import EmojiPicker, { Categories, EmojiStyle } from "emoji-picker-react";
 import { motion } from "framer-motion";
 import { Ellipsis, Pencil, Reply, Send, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
 import { socket } from "../../socket/socket";
@@ -68,12 +75,17 @@ type ReceptionMessagesUser = {
   event_name: string;
 };
 
-// Menu « ... » ouvert : le message visé, et le sens d'ouverture. Près du bas
-// de la liste, le menu s'ouvre vers le haut pour ne pas être coupé.
-type OpenMenu = { messageId: number; openUp: boolean };
+// Menu « ... » ouvert : le message visé, la position du bouton, et le côté
+// où ouvrir le menu, dans l'espace libre à côté du bouton (à droite pour les
+// messages des autres, à gauche pour les siens).
+type OpenMenu = {
+  message: ReceptionMessagesUser;
+  anchor: DOMRect;
+  side: "left" | "right";
+};
 
-// Hauteur approximative du menu, pour décider de son sens d'ouverture.
-const MENU_HEIGHT = 130;
+// Écart entre le bouton « ... » et le menu.
+const MENU_GAP = 4;
 
 function Messagerie() {
   const [messagesUser, setMessagesUser] = useState("");
@@ -90,6 +102,7 @@ function Messagerie() {
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const messageInputRef = useRef<HTMLInputElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const [userId, setUserId] = useState<number | null>(null);
 
@@ -249,7 +262,8 @@ function Messagerie() {
       setEditing(null);
       setMessagesUser("");
     }
-  }, [receptionMessagesUser, replyTo, editing]);
+    if (openMenu && !exists(openMenu.message)) setOpenMenu(null);
+  }, [receptionMessagesUser, replyTo, editing, openMenu]);
 
   // L'hôte peut supprimer tous les messages de son événement.
   useEffect(() => {
@@ -262,32 +276,73 @@ function Messagerie() {
       .catch(console.error);
   }, [eventUuid]);
 
-  // Un clic en dehors du menu « ... » le referme.
+  // Un clic en dehors du menu « ... » le referme, comme le défilement de la
+  // liste ou un redimensionnement : le menu, fixé à l'écran, ne suivrait
+  // plus son message.
   useEffect(() => {
     if (!openMenu) return;
 
+    const close = () => setOpenMenu(null);
     const handlePointerDown = (event: PointerEvent) => {
-      if (!(event.target as Element).closest(".message-actions")) {
-        setOpenMenu(null);
+      if (
+        !(event.target as Element).closest(".message-menu, .message-actions")
+      ) {
+        close();
       }
     };
+    const list = messagesRef.current;
 
     document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
+    list?.addEventListener("scroll", close);
+    window.addEventListener("resize", close);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      list?.removeEventListener("scroll", close);
+      window.removeEventListener("resize", close);
+    };
   }, [openMenu]);
 
-  function toggleMenu(messageId: number, button: HTMLButtonElement) {
-    if (openMenu?.messageId === messageId) {
+  // Place le menu à côté du bouton, centré sur lui en hauteur, sans sortir
+  // de la boîte de messagerie : décalé vers l'intérieur s'il touche un bord.
+  useLayoutEffect(() => {
+    const menu = menuRef.current;
+    const box = messagesRef.current?.getBoundingClientRect();
+    if (!openMenu || !menu || !box) return;
+
+    const { anchor, side } = openMenu;
+    const { width, height } = menu.getBoundingClientRect();
+    const clamp = (value: number, min: number, max: number) =>
+      Math.min(Math.max(value, min), Math.max(min, max));
+
+    const left =
+      side === "right"
+        ? clamp(anchor.right + MENU_GAP, box.left, box.right - width)
+        : clamp(anchor.left - MENU_GAP - width, box.left, box.right - width);
+    const top = clamp(
+      anchor.top + anchor.height / 2 - height / 2,
+      box.top,
+      box.bottom - height,
+    );
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    menu.style.visibility = "visible";
+  }, [openMenu]);
+
+  function toggleMenu(
+    message: ReceptionMessagesUser,
+    button: HTMLButtonElement,
+  ) {
+    if (openMenu?.message.message_id === message.message_id) {
       setOpenMenu(null);
       return;
     }
 
-    const listBottom = messagesRef.current?.getBoundingClientRect().bottom;
-    const buttonBottom = button.getBoundingClientRect().bottom;
-    const openUp =
-      listBottom !== undefined && buttonBottom + MENU_HEIGHT > listBottom;
-
-    setOpenMenu({ messageId, openUp });
+    setOpenMenu({
+      message,
+      anchor: button.getBoundingClientRect(),
+      side: message.user_id === userId ? "left" : "right",
+    });
   }
 
   function startReply(message: ReceptionMessagesUser) {
@@ -453,11 +508,12 @@ function Messagerie() {
               const showAuthor =
                 !isOwn &&
                 (isNewDay || previousMessage?.user_id !== reception.user_id);
-              const isMenuOpen = openMenu?.messageId === reception.message_id;
+              const isMenuOpen =
+                openMenu?.message.message_id === reception.message_id;
               const hour = `${reception.message_edited_at ? "modifié · " : ""}${formatHour(reception.message_date)}`;
 
-              // Bouton « ... » et son menu : à droite de la bulle pour les
-              // messages des autres, à gauche pour les siens.
+              // Bouton « ... » : à droite de la bulle pour les messages des
+              // autres, à gauche pour les siens. Le menu est rendu à part.
               const actions = (
                 <div className="message-actions">
                   <button
@@ -466,48 +522,10 @@ function Messagerie() {
                     aria-label="Actions sur le message"
                     aria-haspopup="menu"
                     aria-expanded={isMenuOpen}
-                    onClick={(e) =>
-                      toggleMenu(reception.message_id, e.currentTarget)
-                    }
+                    onClick={(e) => toggleMenu(reception, e.currentTarget)}
                   >
                     <Ellipsis size={18} />
                   </button>
-                  {isMenuOpen && (
-                    <div
-                      className={`message-menu${openMenu?.openUp ? " is-up" : ""}`}
-                      role="menu"
-                    >
-                      <button
-                        type="button"
-                        role="menuitem"
-                        onClick={() => startReply(reception)}
-                      >
-                        <Reply size={15} />
-                        Répondre
-                      </button>
-                      {isOwn && (
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => startEdit(reception)}
-                        >
-                          <Pencil size={15} />
-                          Modifier
-                        </button>
-                      )}
-                      {(isOwn || userId === hostId) && (
-                        <button
-                          type="button"
-                          role="menuitem"
-                          className="is-danger"
-                          onClick={() => handleDeleteMessage(reception)}
-                        >
-                          <Trash2 size={15} />
-                          Supprimer
-                        </button>
-                      )}
-                    </div>
-                  )}
                 </div>
               );
 
@@ -665,6 +683,49 @@ function Messagerie() {
           </div>
         </motion.div>
       </section>
+
+      {/* Rendu dans body, en position fixe : dans la liste qui défile, il
+          était coupé par ses bords. Invisible jusqu'à son placement. */}
+      {openMenu &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className="message-menu"
+            role="menu"
+            style={{ visibility: "hidden" }}
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => startReply(openMenu.message)}
+            >
+              <Reply size={15} />
+              Répondre
+            </button>
+            {openMenu.message.user_id === userId && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => startEdit(openMenu.message)}
+              >
+                <Pencil size={15} />
+                Modifier
+              </button>
+            )}
+            {(openMenu.message.user_id === userId || userId === hostId) && (
+              <button
+                type="button"
+                role="menuitem"
+                className="is-danger"
+                onClick={() => handleDeleteMessage(openMenu.message)}
+              >
+                <Trash2 size={15} />
+                Supprimer
+              </button>
+            )}
+          </div>,
+          document.body,
+        )}
     </motion.div>
   );
 }

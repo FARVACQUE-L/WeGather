@@ -73,59 +73,6 @@
           }
         }
 
-        /* Le menu s'étend au-dessus de la bulle plutôt que vers le bord de
-           la liste, où il serait coupé : vers la gauche pour les messages
-           des autres, vers la droite pour les siens. */
-        .message-menu {
-          position: absolute;
-          top: calc(100% + 4px);
-          z-index: 10;
-          display: flex;
-          flex-direction: column;
-          min-width: 150px;
-          padding: 4px;
-          border: 1px solid var(--border-color);
-          border-radius: 10px;
-          background: var(--bg-neutral);
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-
-          &.is-up {
-            top: auto;
-            bottom: calc(100% + 4px);
-          }
-
-          button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 10px;
-            border: none;
-            border-radius: 6px;
-            background: none;
-            color: var(--font-darkBrown);
-            font-family: "Be Vietnam Pro", sans-serif;
-            font-size: 13px;
-            text-align: left;
-            cursor: pointer;
-
-            &:hover {
-              background: var(--hover-sidebar);
-            }
-          }
-
-          .is-danger {
-            color: var(--font-red);
-          }
-        }
-
-        .messagerie-box-messages-friends .message-menu {
-          right: 0;
-        }
-
-        .messagerie-box-messages-user .message-menu {
-          left: 0;
-        }
-
         /* Citation du message auquel on répond, en haut de la bulle. */
         .message-reply {
           display: block;
@@ -498,5 +445,45 @@
     .global-messagerie .messagerie-box {
       height: 68vh;
     }
+  }
+}
+/* Menu « ... » d'un message. Rendu dans body en position fixe, hors de la
+   liste qui défile, et placé par le composant à côté du bouton : il ne
+   recouvre plus les messages et n'est plus coupé par les bords de la liste.
+   Au-dessus de la barre de navigation fixée en bas. */
+.message-menu {
+  position: fixed;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-neutral);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  font-family: "Be Vietnam Pro", sans-serif;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--font-darkBrown);
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--hover-sidebar);
+    }
+  }
+
+  .is-danger {
+    color: var(--font-red);
   }
 }
