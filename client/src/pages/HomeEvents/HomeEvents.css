@@ -28,6 +28,9 @@
     .HomeEvents-Title {
       text-align: center;
     }
+    .HomeEvents-CardGlobal {
+      justify-content: center;
+    }
     .HomeEvents-FilterAdd {
       flex-direction: column-reverse;
       align-items: center;
