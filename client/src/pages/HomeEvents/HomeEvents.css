@@ -3,7 +3,7 @@
   min-height: 100vh;
   padding: 7rem 9rem 0 7rem;
   margin: 0;
-  box-sizing: 0;
+  box-sizing: border-box;
   .HomeEvents-Title {
     color: var(--font-title);
   }
@@ -14,7 +14,7 @@
   }
   .HomeEvents-CardGlobal {
     display: grid;
-    grid-template-columns: repeat(5, 16rem);
+    grid-template-columns: repeat(auto-fill, 16rem);
     align-items: stretch;
     gap: 3rem;
     .HomeEvents-Card {

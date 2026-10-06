@@ -1,21 +1,28 @@
 .EventEmpty-Global {
-  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 2rem;
   width: 100%;
   min-height: 60vh;
   .EventEmpty-TextGlobal {
+    flex: 1 1 0;
+    min-width: 0;
     transform: translateY(-6rem);
-    font-size: 2rem;
+    font-size: clamp(1.25rem, 2vw, 2rem);
     font-weight: 500;
     .EventEmpty-Text-Clic {
       color: var(--font-title);
     }
   }
   .EventEmpty-Arrow {
-    width: 22rem;
+    --arrow-width: clamp(10rem, 25vw, 22rem);
+    flex-shrink: 0;
+    width: var(--arrow-width);
     height: auto;
+    /* Centre la pointe (x=500 sur 600 dans le viewBox) sur le bouton
+       "Créer / Rejoindre" : 17rem de large, 2rem de padding à droite. */
+    margin-right: calc(2rem + 17rem / 2 - var(--arrow-width) / 6);
     color: var(--color-arrow);
     transform: translateY(-8rem);
     .EventEmpty-Path {
