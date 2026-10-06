@@ -108,11 +108,11 @@ function HomeEvents() {
           />
           <ButtonAddEvent onClick={() => setIsModalOpen(true)} />
         </div>
-        <ul className="HomeEvents-CardGlobal">
-          {filteredEvents.length === 0 ? (
-            <EventEmpty />
-          ) : (
-            filteredEvents.map((event) => (
+        {filteredEvents.length === 0 ? (
+          <EventEmpty />
+        ) : (
+          <ul className="HomeEvents-CardGlobal">
+            {filteredEvents.map((event) => (
               <li key={event.event_id} className="HomeEvents-Card">
                 <CardEvents
                   key={event.event_id}
@@ -131,9 +131,9 @@ function HomeEvents() {
                   onEventUpdated={handleEventUpdated}
                 />
               </li>
-            ))
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
         <ModalAddEvent
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

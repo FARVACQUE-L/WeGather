@@ -1,9 +1,9 @@
 .HomeEvents-Global {
   background-color: var(--bg-color);
   min-height: 100vh;
-  padding: 8% 10% 0 8%;
+  padding: 7rem 9rem 2rem 7rem;
   margin: 0;
-  box-sizing: 0;
+  box-sizing: border-box;
   .HomeEvents-Title {
     color: var(--font-title);
   }
@@ -14,11 +14,30 @@
   }
   .HomeEvents-CardGlobal {
     display: grid;
-    grid-template-columns: repeat(5, 16rem);
+    grid-template-columns: repeat(auto-fill, 16rem);
     align-items: stretch;
     gap: 3rem;
     .HomeEvents-Card {
       list-style: none;
+    }
+  }
+}
+
+@media screen and (max-width: 875px) {
+  .HomeEvents-Global {
+    .HomeEvents-Title {
+      text-align: center;
+    }
+    .HomeEvents-CardGlobal {
+      /* auto-fit replie les colonnes vides : une carte seule est centrée. */
+      grid-template-columns: repeat(auto-fit, 16rem);
+      justify-content: center;
+    }
+    .HomeEvents-FilterAdd {
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem 0 4rem 0;
     }
   }
 }
@@ -31,15 +50,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 2rem 2rem 0;
     .HomeEvents-CardGlobal {
       grid-template-columns: 1fr;
       gap: 0;
-    }
-    .HomeEvents-FilterAdd {
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 2rem;
-      padding: 2rem 0 4rem 0;
     }
   }
 }
