@@ -29,6 +29,8 @@
       text-align: center;
     }
     .HomeEvents-CardGlobal {
+      /* auto-fit replie les colonnes vides : une carte seule est centrée. */
+      grid-template-columns: repeat(auto-fit, 16rem);
       justify-content: center;
     }
     .HomeEvents-FilterAdd {
