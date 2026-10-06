@@ -58,6 +58,13 @@
     opacity: 1;
   }
 }
+@media screen and (max-width: 875px) {
+  .EventEmpty-Global {
+    .EventEmpty-Arrow {
+      display: none;
+    }
+  }
+}
 @media screen and (max-width: 428px) {
   .EventEmpty-Global {
     width: 100%;
@@ -66,9 +73,6 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-    }
-    .EventEmpty-Arrow {
-      display: none;
     }
   }
 }

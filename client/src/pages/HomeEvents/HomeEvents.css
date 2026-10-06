@@ -1,7 +1,7 @@
 .HomeEvents-Global {
   background-color: var(--bg-color);
   min-height: 100vh;
-  padding: 7rem 9rem 0 7rem;
+  padding: 7rem 9rem 2rem 7rem;
   margin: 0;
   box-sizing: border-box;
   .HomeEvents-Title {
@@ -23,6 +23,16 @@
   }
 }
 
+@media screen and (max-width: 875px) {
+  .HomeEvents-Global {
+    .HomeEvents-FilterAdd {
+      flex-direction: column-reverse;
+      gap: 2rem;
+      padding: 2rem 0 4rem 0;
+    }
+  }
+}
+
 @media screen and (max-width: 428px) {
   .HomeEvents-NavBar {
     height: 5rem;
@@ -35,12 +45,6 @@
     .HomeEvents-CardGlobal {
       grid-template-columns: 1fr;
       gap: 0;
-    }
-    .HomeEvents-FilterAdd {
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 2rem;
-      padding: 2rem 0 4rem 0;
     }
   }
 }
