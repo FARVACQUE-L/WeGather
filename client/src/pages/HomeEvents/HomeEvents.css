@@ -1,7 +1,7 @@
 .HomeEvents-Global {
   background-color: var(--bg-color);
   min-height: 100vh;
-  padding: 8% 10% 0 8%;
+  padding: 7rem 9rem 0 7rem;
   margin: 0;
   box-sizing: 0;
   .HomeEvents-Title {
@@ -31,6 +31,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 2rem 2rem 0;
     .HomeEvents-CardGlobal {
       grid-template-columns: 1fr;
       gap: 0;
