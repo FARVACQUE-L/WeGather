@@ -60,6 +60,7 @@
 }
 @media screen and (max-width: 875px) {
   .EventEmpty-Global {
+    text-align: center;
     .EventEmpty-Arrow {
       display: none;
     }

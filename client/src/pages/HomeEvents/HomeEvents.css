@@ -25,8 +25,12 @@
 
 @media screen and (max-width: 875px) {
   .HomeEvents-Global {
+    .HomeEvents-Title {
+      text-align: center;
+    }
     .HomeEvents-FilterAdd {
       flex-direction: column-reverse;
+      align-items: center;
       gap: 2rem;
       padding: 2rem 0 4rem 0;
     }
