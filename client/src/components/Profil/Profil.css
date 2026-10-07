@@ -2,19 +2,31 @@
   position: absolute;
   z-index: 3;
   right: 30px;
-  top: 30px;
+  /* Garde le centre de l'avatar à la hauteur du logo de la navbar. */
+  top: 45px;
 
+  /* Avatar compact façon Gmail : 32px dans un bouton rond de 40px qui se
+     grise au survol. */
   .button {
+    display: flex;
+    padding: 4px;
     cursor: pointer;
     border: none;
+    border-radius: 50%;
     background: none;
+    transition: background 0.2s;
+
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover {
+        background: rgba(0, 0, 0, 0.08);
+      }
+    }
 
     img {
-      width: 64px;
-      height: 64px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid white;
     }
   }
 
@@ -185,12 +197,7 @@
 @media screen and (max-width: 428px) {
   .profil {
     right: 16px;
-    top: 16px;
-
-    .button img {
-      width: 52px;
-      height: 52px;
-    }
+    top: 25px;
 
     .modal-overlay {
       display: flex;
