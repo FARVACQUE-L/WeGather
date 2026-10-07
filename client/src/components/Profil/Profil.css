@@ -2,14 +2,29 @@
   position: absolute;
   z-index: 3;
   right: 30px;
-  /* Garde le centre de l'avatar à la hauteur du logo de la navbar. */
-  top: 45px;
+  /* S'aligne sur le logo de la navbar : même top, et le ::before reprend
+     la hauteur de ligne du h2 "WeGather" (1.5em, sans marge via le reset
+     global), dans laquelle l'avatar est centré. */
+  top: 26px;
+  display: flex;
+  align-items: center;
+
+  &::before {
+    content: "\200b";
+    display: block;
+    width: 0;
+    font-size: 1.5em;
+    font-weight: bold;
+  }
 
   /* Avatar compact façon Gmail : 32px dans un bouton rond de 40px qui se
      grise au survol. */
   .button {
     display: flex;
     padding: 4px;
+    /* Marges négatives : le bouton ne grandit pas la boîte du ::before,
+       il reste centré dessus. */
+    margin: -20px 0;
     cursor: pointer;
     border: none;
     border-radius: 50%;
@@ -197,7 +212,6 @@
 @media screen and (max-width: 428px) {
   .profil {
     right: 16px;
-    top: 25px;
 
     .modal-overlay {
       display: flex;

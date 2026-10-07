@@ -36,22 +36,3 @@
     display: none;
   }
 }
-
-/* Entre 429px et 875px, la sidebar passe en barre du bas et son logo
-   disparaît : le logo de la navbar prend le relais, en plus grand. Sur
-   mobile et sur les pages sans sidebar (.desktop), il garde sa taille
-   d'origine. */
-@media screen and (min-width: 429px) and (max-width: 875px) {
-  .mobile {
-    .logo-sidebar-container {
-      .logo-sidebar-image {
-        width: 80px;
-        height: 80px;
-      }
-
-      .logo-sidebar-h2 {
-        font-size: 2.5rem;
-      }
-    }
-  }
-}
