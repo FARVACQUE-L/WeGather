@@ -59,7 +59,8 @@
     border: 1.5px solid var(--border-color);
     border-radius: 25px;
     padding: 40px;
-    width: 100%;
+    /* Centré par .userReport-Main : 1.5rem de marge de chaque côté. */
+    width: calc(100% - 3rem);
     max-width: 700px;
 
     .userReport-Btn {
@@ -140,9 +141,6 @@
           }
         }
       }
-    }
-    .userReport-Form {
-      width: calc(100% - 16px);
     }
   }
 }
