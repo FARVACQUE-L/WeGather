@@ -16,7 +16,8 @@
   .userReport-Header {
     display: flex;
     align-items: flex-start;
-    width: 100%;
+    /* Même marge que le formulaire : 1.5rem de chaque côté. */
+    width: calc(100% - 3rem);
     max-width: 700px;
     gap: 24px;
     margin-bottom: 24px;
@@ -126,12 +127,13 @@
     .userReport-Header {
       position: relative;
       justify-content: center;
-      width: 100%;
-      padding: 0 60px;
+      /* La flèche est alignée sur le bord gauche du formulaire (left: 0) ;
+         44px gardent le titre à la même distance d'elle qu'avant. */
+      padding: 0 44px;
 
       .userReport-Back {
         position: absolute;
-        left: 16px;
+        left: 0;
         top: 50%;
         transform: translateY(-50%);
 
