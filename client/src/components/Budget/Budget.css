@@ -279,7 +279,9 @@ body {
     .budget {
       display: flex;
       flex-direction: column;
-      padding: 10vh 1rem 0 1rem;
+      /* Avec les 2vh du titre, il commence à 4vh + 3rem comme sur le
+         dashboard. */
+      padding: calc(2vh + 3rem) 1rem 0 1rem;
 
       header {
         display: flex;

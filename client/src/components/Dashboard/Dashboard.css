@@ -411,7 +411,9 @@
   .dashboard {
     width: 100vw;
     height: auto;
-    padding: 10vh 4vw 10vh;
+    /* Avec les 2vh du titre, il commence à 4vh + 3rem comme au-dessus de
+       428px. */
+    padding: calc(2vh + 3rem) 4vw 10vh;
     :where(h1) {
       padding: 1.5rem 0 1rem 0;
       font-size: 1.5rem;
