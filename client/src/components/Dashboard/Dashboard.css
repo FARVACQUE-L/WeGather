@@ -389,8 +389,8 @@
 @media screen and (max-width: 875px) {
   .dashboard {
     width: 100%;
-    /* Même hauteur qu'au-dessus de 875px (3vh de .content) ; le titre et
-       ses 3rem passent quand même sous la navbar. */
+    /* Proche des 3vh de .content au-dessus de 875px ; le titre et ses 3rem
+       passent quand même sous la navbar. */
     padding: 4vh 4vw 10vh;
     .section-nameCode,
     .dashboard-components {

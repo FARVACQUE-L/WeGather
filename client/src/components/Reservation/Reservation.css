@@ -265,7 +265,8 @@
 @media screen and (min-width: 429px) and (max-width: 875px) {
   .reservation {
     width: 100%;
-    padding: 14vh 4vw 10vh;
+    /* Les 4vh du dashboard, plus les 2rem de padding haut du bureau. */
+    padding: calc(4vh + 2rem) 4vw 10vh;
     .reservation-title {
       width: 98%;
     }

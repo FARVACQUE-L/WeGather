@@ -562,7 +562,8 @@
      marge basse la dégage, avec 5vh en plus. */
   .galerie {
     height: auto;
-    padding: 14vh 4vw calc(70px + 5vh);
+    /* Les 4vh du dashboard, plus les 2rem de padding haut du bureau. */
+    padding: calc(4vh + 2rem) 4vw calc(70px + 5vh);
 
     .galerie-header {
       width: 98%;

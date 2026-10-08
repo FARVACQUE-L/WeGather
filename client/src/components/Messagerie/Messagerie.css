@@ -589,9 +589,10 @@
 @media screen and (min-width: 429px) and (max-width: 875px) {
   .messagerie {
     width: 100%;
-    padding: 10vh 4vw 10vh;
+    /* Même hauteur que le dashboard (4vh, le h1 garde ses 3rem). */
+    padding: 4vh 4vw 10vh;
     .global-messagerie .messagerie-box {
-      height: 68vh;
+      height: 74vh;
     }
   }
 }
