@@ -186,7 +186,7 @@ function Profil() {
       <AnimatePresence>
         {isMainModalOpen && (
           <motion.div
-            className="modal-overlay"
+            className="Profil-Overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -197,7 +197,7 @@ function Profil() {
             }}
           >
             <motion.div
-              className="modal"
+              className="Profil-Modal"
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
@@ -206,14 +206,16 @@ function Profil() {
                 e.stopPropagation()
               }
             >
-              <h2>Parametre du profil</h2>
+              <h2 className="Profil-Title">Paramètres du profil</h2>
 
               <img
+                className="Profil-Avatar"
                 src={`${import.meta.env.VITE_API_URL}${profilePicture}`}
                 alt="photo-profil"
               />
 
               <button
+                className="Profil-Action"
                 type="button"
                 onClick={() =>
                   setActiveModal((prev) =>
@@ -228,13 +230,14 @@ function Profil() {
               <AnimatePresence>
                 {activeModal === "Changer le pseudo" && (
                   <motion.div
-                    className="change-pseudo"
+                    className="Profil-Panel"
                     initial={{ opacity: 0, height: 0, y: -10 }}
                     animate={{ opacity: 1, height: "auto", y: 0 }}
                     exit={{ opacity: 0, height: 0, y: -10 }}
                     transition={{ duration: 0.25 }}
                   >
                     <input
+                      className="Profil-Input"
                       ref={fileInputRef}
                       type="text"
                       value={userName}
@@ -242,9 +245,10 @@ function Profil() {
                       placeholder="Changer le nom"
                     />
                     {errorMessage && (
-                      <p className="error-message">{errorMessage}</p>
+                      <p className="Profil-Error">{errorMessage}</p>
                     )}
                     <button
+                      className="Profil-Submit"
                       type="button"
                       onClick={() => {
                         if (userId !== null) {
@@ -258,12 +262,17 @@ function Profil() {
                 )}
               </AnimatePresence>
 
-              <button type="button" onClick={() => navigate("/changepassword")}>
+              <button
+                className="Profil-Action"
+                type="button"
+                onClick={() => navigate("/changepassword")}
+              >
                 <LockKeyhole size={15} />
                 Changer le mot de passe
               </button>
 
               <button
+                className="Profil-Action"
                 type="button"
                 onClick={() =>
                   setActiveModal((prev) =>
@@ -280,13 +289,13 @@ function Profil() {
               <AnimatePresence>
                 {activeModal === "Changer la photo de profil" && (
                   <motion.div
-                    className="sub-modal"
+                    className="Profil-Panel"
                     initial={{ opacity: 0, height: 0, y: -10 }}
                     animate={{ opacity: 1, height: "auto", y: 0 }}
                     exit={{ opacity: 0, height: 0, y: -10 }}
                     transition={{ duration: 0.25 }}
                   >
-                    <label htmlFor="photo-upload" className="custom-upload">
+                    <label htmlFor="photo-upload" className="Profil-Upload">
                       Choisir une image
                     </label>
                     <input
@@ -294,16 +303,20 @@ function Profil() {
                       type="file"
                       accept="image/*"
                       onChange={handlePhotoChange}
-                      className="hidden-input"
+                      className="Profil-FileInput"
                     />
                     {preview && (
                       <img
                         src={preview}
                         alt="preview"
-                        className="photo-preview"
+                        className="Profil-Preview"
                       />
                     )}
-                    <button type="button" onClick={handleUploadPhoto}>
+                    <button
+                      className="Profil-Submit"
+                      type="button"
+                      onClick={handleUploadPhoto}
+                    >
                       Enregistrer la photo
                     </button>
                   </motion.div>
@@ -312,6 +325,7 @@ function Profil() {
 
               {isAdmin && (
                 <button
+                  className="Profil-Action"
                   type="button"
                   onClick={() =>
                     navigate(isAdminPage ? "/homeevents" : "/admin")
@@ -332,9 +346,7 @@ function Profil() {
               )}
 
               <button
-                className={
-                  isOnEventPage ? "deconnexion-profil" : "deconnexion-event"
-                }
+                className="Profil-Action Profil-Danger"
                 type="button"
                 onClick={handleDeconnexion}
               >
@@ -343,7 +355,7 @@ function Profil() {
               </button>
 
               <button
-                className="fermer"
+                className="Profil-Close"
                 type="button"
                 onClick={() => {
                   setIsMainModalOpen(false);

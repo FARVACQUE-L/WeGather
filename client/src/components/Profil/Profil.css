@@ -45,191 +45,158 @@
     }
   }
 
-  .modal-overlay {
+  /* Classes préfixées : GalleryModal.css déclare des règles globales
+     .modal et .modal-overlay qui s'appliquaient aussi à cette modale. Mêmes
+     styles que la modale d'ajout de réservation : voile, fond, arrondis,
+     champs et boutons en pilule qui rétrécissent au survol. */
+  .Profil-Overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.35);
+    z-index: 999;
+    background: rgba(15, 23, 42, 0.55);
     backdrop-filter: blur(6px);
     display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding: 110px 30px 0 0;
-    z-index: 999;
+    align-items: center;
+    justify-content: center;
   }
 
-  .modal {
-    position: absolute;
-    right: 40vw;
-    width: 320px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 22px;
-    padding: 22px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  .Profil-Modal {
+    /* Juste assez pour les panneaux de 17rem, avec les 2rem de padding. */
+    width: min(90vw, 340px);
+    max-height: 90vh;
+    overflow-y: auto;
+    /* Barre de défilement masquée : la modale reste défilable quand un
+       panneau ouvert la rend plus haute que l'écran. */
+    scrollbar-width: none;
+    padding: 2rem;
+    background: var(--bg-color);
+    border-radius: 2rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    animation: modalPop 0.25s ease;
+    gap: 1rem;
 
-    img {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid white;
-    }
-
-    h2 {
-      margin: 0 0 10px;
-      font-size: 22px;
-      text-align: center;
-    }
-
-    button {
-      width: 100%;
-      min-height: 44px;
-      border: none;
-      border-radius: 14px;
-      background: #f4f4f5;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 14px;
-      transition: 0.2s ease;
-
-      @media (hover: hover) and (min-width: 429px) {
-        &:hover {
-          background: #111827;
-          color: white;
-          transform: translateY(-2px);
-        }
-      }
-    }
-
-    .change-pseudo,
-    .sub-modal {
-      background: #fafafa;
-      border-radius: 16px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    input {
-      width: 100%;
-      height: 38px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      padding: 0 10px;
-      outline: none;
-
-      &:focus {
-        border-color: orangered;
-      }
-    }
-
-    .custom-upload {
-      cursor: pointer;
-      background: #111827;
-      color: var(--bg-neutral);
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 14px;
-    }
-
-    .hidden-input {
+    &::-webkit-scrollbar {
       display: none;
     }
+  }
 
-    .photo-preview {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid white;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
+  .Profil-Title {
+    font-size: x-large;
+    color: var(--font-title);
+    text-align: center;
+  }
 
-    .error-message {
-      color: red;
-      font-size: 12px;
-      margin: 0;
-    }
+  .Profil-Avatar,
+  .Profil-Preview {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+  }
 
-    .deconnexion-event {
-      background: #fee2e2;
-      color: #dc2626;
+  .Profil-Action,
+  .Profil-Upload,
+  .Profil-Submit,
+  .Profil-Close {
+    /* 15rem comme le bouton d'image de la modale de réservation. */
+    width: 15rem;
+    max-width: 100%;
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+    border-radius: 5rem;
+    box-shadow: 1px 1px 5px black;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s;
 
-      @media (hover: hover) and (min-width: 429px) {
-        &:hover {
-          background: #dc2626;
-          color: white;
-        }
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover {
+        transform: scale(0.95);
       }
     }
+  }
 
-    .deconnexion-profil {
-      background: #fee2e2;
-      color: #dc2626;
+  .Profil-Action,
+  .Profil-Upload {
+    background: var(--button-color-disable);
+    color: var(--font-title);
+  }
 
-      @media (hover: hover) and (min-width: 429px) {
-        &:hover {
-          background: #dc2626;
-          color: white;
-        }
-      }
+  .Profil-Submit {
+    background: var(--button-color);
+    color: var(--font-neutral);
+  }
+
+  .Profil-Action.Profil-Danger {
+    background: var(--bg-negative);
+    color: var(--font-red);
+  }
+
+  /* Fermer garde le gris par défaut des boutons, comme Annuler dans la
+     modale de réservation. */
+
+  /* overflow: hidden : le contenu ne déborde pas pendant l'animation de
+     hauteur à l'ouverture et à la fermeture. */
+  .Profil-Panel {
+    /* Les boutons de 15rem plus 1rem de padding de chaque côté. */
+    width: 17rem;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-composant-dash);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .Profil-Input {
+    width: 100%;
+    height: 2rem;
+    border: 1px solid var(--border-color);
+    padding-left: 0.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    background: var(--input-color);
+    color: var(--font-input);
+
+    &::placeholder {
+      color: var(--font-placeholder);
     }
 
-    .fermer {
-      background: transparent;
-      color: #6b7280;
-
-      @media (hover: hover) and (min-width: 429px) {
-        &:hover {
-          background: #e5e7eb;
-          color: black;
-        }
-      }
+    &:focus {
+      outline: none;
     }
+  }
+
+  .Profil-FileInput {
+    display: none;
+  }
+
+  .Profil-Error {
+    color: var(--input-error);
+    font-size: 0.75rem;
   }
 }
 
-@keyframes modalPop {
-  from {
-    opacity: 0;
-    transform: translateY(-15px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+/* Barre de navigation fixée en bas (70px) : la modale, centrée, s'arrête
+   au-dessus d'elle. */
+@media screen and (max-width: 875px) {
+  .profil .Profil-Modal {
+    max-height: calc(100vh - 140px);
   }
 }
 
 @media screen and (max-width: 428px) {
   .profil {
     right: 16px;
-
-    .modal-overlay {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0;
-    }
-
-    .modal {
-      right: 6vw;
-      width: 88vw;
-      max-height: 82vh;
-      overflow-y: auto;
-      scrollbar-width: none;
-
-      &::-webkit-scrollbar {
-        display: none;
-      }
-    }
   }
 }
