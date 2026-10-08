@@ -356,6 +356,11 @@
     /* Le contenu est décalé de 300px fixes (sidebar figée) : la largeur
        restante vaut 74vw à 1500px, sans saut au passage du seuil. */
     width: calc(94vw - 300px);
+    /* La main garde la taille qu'elle a à 1500px (2vw). Sous 875px, la
+       règle plus bas la remplace. */
+    .section-nameCode .user-name .lucide.lucide-hand {
+      width: 30px;
+    }
     /* Les cartes passent sur deux lignes de deux : les budgets sous les
        participants et les réservations. */
     .dashboard-stats {
@@ -396,6 +401,11 @@
     .dashboard-components {
       width: 100%;
     }
+    /* La main garde la taille qu'elle a à 875px (2vw) au lieu de
+       rétrécir avec la fenêtre, jusqu'en mobile. */
+    .section-nameCode .user-name .lucide.lucide-hand {
+      width: 17.5px;
+    }
     .dashboard-stats {
       width: 100%;
       .stat-1,
@@ -424,9 +434,6 @@
         font-size: 1rem;
         display: flex;
         align-items: center;
-        .lucide.lucide-hand {
-          width: 2rem;
-        }
       }
     }
 
