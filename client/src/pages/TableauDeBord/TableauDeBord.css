@@ -18,6 +18,18 @@
   }
 }
 
+/* La sidebar ne grandit plus au-delà de 1920px : le décalage du contenu
+   garde lui aussi sa valeur à 1920px (2vw et 20vw), pour que l'écart avec
+   la sidebar ne s'élargisse pas. */
+@media screen and (min-width: 1921px) {
+  .dashboard-page {
+    padding-left: 38.4px;
+    .content {
+      padding-left: 384px;
+    }
+  }
+}
+
 @media screen and (max-width: 875px) {
   .dashboard-page {
     width: 100%;

@@ -47,11 +47,17 @@ fieldset {
   color: var(--icon-color);
 }
 
+/* Sous 725px, les trois cartes côte à côte deviennent trop étroites : elles
+   s'empilent. */
+@media (max-width: 725px) {
+  .reportType-global .reportType-cards {
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 428px) {
   .reportType-global {
     .reportType-cards {
-      flex-direction: column;
-
       .reportType-card {
         padding: 16px;
       }

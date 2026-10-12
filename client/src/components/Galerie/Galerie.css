@@ -407,9 +407,14 @@
 
 @media (max-width: 428px) {
   .galerie {
-    padding: 10vh 1rem 0 1rem;
+    /* Avec les 2vh du titre, il commence à 4vh + 3rem comme sur le
+       dashboard. */
+    padding: calc(2vh + 3rem) 1rem 0 1rem;
 
+    /* Hauteur naturelle : centré dans 70px, le titre ne tombait pas à la
+       même hauteur que sur les autres pages. */
     .galerie-header {
+      height: auto;
       align-items: flex-end;
       gap: 0.75rem;
       margin-bottom: 1.5rem;
@@ -562,7 +567,8 @@
      marge basse la dégage, avec 5vh en plus. */
   .galerie {
     height: auto;
-    padding: 14vh 4vw calc(70px + 5vh);
+    /* Les 4vh du dashboard, plus les 2rem de padding haut du bureau. */
+    padding: calc(4vh + 2rem) 4vw calc(70px + 5vh);
 
     .galerie-header {
       width: 98%;

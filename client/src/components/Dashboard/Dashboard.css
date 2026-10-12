@@ -356,6 +356,11 @@
     /* Le contenu est décalé de 300px fixes (sidebar figée) : la largeur
        restante vaut 74vw à 1500px, sans saut au passage du seuil. */
     width: calc(94vw - 300px);
+    /* La main garde la taille qu'elle a à 1500px (2vw). Sous 875px, la
+       règle plus bas la remplace. */
+    .section-nameCode .user-name .lucide.lucide-hand {
+      width: 30px;
+    }
     /* Les cartes passent sur deux lignes de deux : les budgets sous les
        participants et les réservations. */
     .dashboard-stats {
@@ -389,10 +394,17 @@
 @media screen and (max-width: 875px) {
   .dashboard {
     width: 100%;
-    padding: 10vh 4vw 10vh;
+    /* Proche des 3vh de .content au-dessus de 875px ; le titre et ses 3rem
+       passent quand même sous la navbar. */
+    padding: 4vh 4vw 10vh;
     .section-nameCode,
     .dashboard-components {
       width: 100%;
+    }
+    /* La main garde la taille qu'elle a à 875px (2vw) au lieu de
+       rétrécir avec la fenêtre, jusqu'en mobile. */
+    .section-nameCode .user-name .lucide.lucide-hand {
+      width: 17.5px;
     }
     .dashboard-stats {
       width: 100%;
@@ -409,7 +421,9 @@
   .dashboard {
     width: 100vw;
     height: auto;
-    padding: 10vh 4vw 10vh;
+    /* Avec les 2vh du titre, il commence à 4vh + 3rem comme au-dessus de
+       428px. */
+    padding: calc(2vh + 3rem) 4vw 10vh;
     :where(h1) {
       padding: 1.5rem 0 1rem 0;
       font-size: 1.5rem;
@@ -420,9 +434,6 @@
         font-size: 1rem;
         display: flex;
         align-items: center;
-        .lucide.lucide-hand {
-          width: 2rem;
-        }
       }
     }
 
