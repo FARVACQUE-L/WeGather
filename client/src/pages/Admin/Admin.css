@@ -10,6 +10,13 @@
     }
   }
 }
+/* La sidebar ne rétrécit plus sous 1750px : le décalage du contenu reste
+   celui qu'il a à 1750px (20vw) pour ne pas passer dessous. */
+@media screen and (min-width: 429px) and (max-width: 1750px) {
+  .dashboard-page-admin .content {
+    padding-left: 350px;
+  }
+}
 @media screen and (max-width: 428px) {
   .dashboard-page-admin {
     width: 100%;
