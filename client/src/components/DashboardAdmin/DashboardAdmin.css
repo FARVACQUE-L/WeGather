@@ -208,6 +208,14 @@
   }
 }
 
+/* Sous 1150px, les trois cartes de stats côte à côte deviennent trop
+   étroites : elles s'empilent. */
+@media screen and (max-width: 1150px) {
+  .admin-dashboard .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media screen and (max-width: 428px) {
   .admin-dashboard {
     width: 100%;
