@@ -142,6 +142,7 @@
 
             ul {
               display: flex;
+              flex-wrap: wrap;
               gap: 12px;
               list-style: none;
               padding: 0;
