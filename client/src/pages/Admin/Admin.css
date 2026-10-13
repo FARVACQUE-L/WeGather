@@ -5,7 +5,12 @@
     gap: 3vw;
     padding-left: 2vw;
     padding-top: 3vh;
+    /* Seul élément flex (la sidebar est fixe) : sans flex: 1, il prendrait
+       la largeur de son contenu au lieu de toute la place disponible.
+       min-width: 0 le laisse rétrécir sous la largeur de son contenu. */
     .content {
+      flex: 1;
+      min-width: 0;
       padding: 6vh 3vw 3vh 20vw;
     }
   }
