@@ -67,9 +67,12 @@
   }
 
   .chart-card {
-    padding: 28px 32px;
+    /* Le graphique se rapproche du bord à mesure que la fenêtre rétrécit :
+       32px sur grand écran, jusqu'à 12px en mobile. */
+    padding: 28px clamp(12px, 2.5vw, 32px);
     margin-bottom: 28px;
     .chart-container {
+      height: 320px;
       .recharts-wrapper,
       .recharts-surface {
         position: relative;
@@ -299,8 +302,12 @@
     }
 
     .chart-card {
-      padding: 20px 12px;
+      padding-block: 20px;
       margin-bottom: 20px;
+
+      .chart-container {
+        height: 240px;
+      }
 
       .chart-header {
         flex-direction: column;

@@ -240,7 +240,9 @@ function DashboardAdmin() {
         </div>
 
         <div className="chart-container">
-          <ResponsiveContainer width="100%" height={320}>
+          {/* La hauteur vient de .chart-container (DashboardAdmin.css), plus
+              basse sous 428px. */}
+          <ResponsiveContainer width="100%" height="100%">
             {/* Pas de marge à gauche : l'axe y colle au bord de la carte. */}
             <LineChart
               data={graphic}
