@@ -22,24 +22,29 @@
     box-shadow: 0 6px 18px rgba(90, 50, 35, 0.05);
   }
 
+  /* Icônes aux couleurs de celles des stats de la page Signalements ;
+     l'alerte reprend celles des bugs. */
   .stat-card {
     padding: 22px;
     .lucide.lucide-users {
-      background-color: var(--bg-confirm-state);
+      stroke: var(--icon-color-user);
+      background-color: var(--icon-bg-user);
       border-radius: 5px;
       height: 35px;
       width: 35px;
       padding: 4px;
     }
     .lucide.lucide-calendar {
-      background-color: var(--bg-valid-state);
+      stroke: var(--icon-color-event);
+      background-color: var(--icon-bg-event);
       border-radius: 5px;
       height: 35px;
       width: 35px;
       padding: 4px;
     }
     .lucide.lucide-triangle-alert {
-      background-color: var(--font-red);
+      stroke: var(--icon-color-bug);
+      background-color: var(--icon-bg-bug);
       border-radius: 5px;
       height: 35px;
       width: 35px;
@@ -222,10 +227,51 @@
 }
 
 /* Sous 1150px, les trois cartes de stats côte à côte deviennent trop
-   étroites : elles s'empilent. */
+   étroites : elles s'empilent, dans la version compacte des stats de la
+   page Signalements (ReportStatCard.css). */
 @media screen and (max-width: 1150px) {
-  .admin-dashboard .stats-grid {
-    grid-template-columns: 1fr;
+  .admin-dashboard {
+    .stats-grid {
+      grid-template-columns: 1fr;
+      margin-left: 0.5rem;
+    }
+
+    .stat-card {
+      width: 98%;
+      padding: 0.75rem;
+      background: var(--bg-admin-report-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+      .lucide.lucide-users,
+      .lucide.lucide-calendar,
+      .lucide.lucide-triangle-alert {
+        stroke: transparent;
+        width: 1rem;
+        height: 1rem;
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+      }
+      .lucide.lucide-users {
+        background-color: var(--icon-color-user);
+      }
+      .lucide.lucide-calendar {
+        background-color: var(--icon-color-event);
+      }
+      .lucide.lucide-triangle-alert {
+        background-color: var(--icon-color-bug);
+      }
+
+      p {
+        margin: 1rem 0;
+        font-size: 0.75rem;
+      }
+
+      h2 {
+        font-size: 1.75rem;
+      }
+    }
   }
 }
 
@@ -236,30 +282,10 @@
     padding: 16px;
     overflow-x: hidden;
 
+    /* Les cartes gardent la version compacte de 1150px. */
     .stats-grid {
-      grid-template-columns: 1fr;
       gap: 14px;
       margin-bottom: 20px;
-    }
-
-    .stat-card {
-      padding: 18px;
-
-      .lucide.lucide-users,
-      .lucide.lucide-calendar,
-      .lucide.lucide-triangle-alert {
-        padding: 4px;
-        width: 35px;
-        height: 35px;
-      }
-
-      p {
-        font-size: 11px;
-      }
-
-      h2 {
-        font-size: 26px;
-      }
     }
 
     .chart-card {
