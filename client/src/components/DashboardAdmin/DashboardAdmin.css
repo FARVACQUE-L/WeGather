@@ -164,6 +164,16 @@
             font-size: 13px;
             padding-left: 20px;
           }
+          /* La description s'arrête à trois lignes, avec des points de
+             suspension, quelle que soit la largeur. */
+          p:nth-child(3) {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+          }
         }
       }
     }
