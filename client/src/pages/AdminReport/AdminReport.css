@@ -334,7 +334,21 @@
   }
 }
 
+/* La barre du bas de l'admin n'apparaît que sous 428px. */
+.adminReport-SideBar {
+  display: none;
+}
+
 @media (max-width: 428px) {
+  .adminReport-SideBar {
+    display: contents;
+  }
+
+  /* Dégage la barre du bas (70px). */
+  .adminReport-Layout main {
+    padding-bottom: 90px;
+  }
+
   .adminReport-Layout
     main
     .adminReport-Global
