@@ -1,39 +1,37 @@
+/* Mêmes styles que la modale des paramètres du profil (Profil.css) : voile
+   flouté, fond, arrondis, panneaux et boutons en pilule. */
 .banModal {
   margin: auto;
   width: 380px;
   max-width: 90vw;
   border: none;
-  border-radius: 20px;
-  padding: 24px;
-  background: var(--bg-neutral);
+  border-radius: 2rem;
+  padding: 2rem;
+  background: var(--bg-color);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
 
   &::backdrop {
-    background: rgba(31, 27, 24, 0.5);
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
   }
 
   @media (max-width: 420px) {
     width: 100%;
     max-width: 100%;
     margin: auto auto 0;
-    border-radius: 20px 20px 0 0;
-
-    .banModal-Footer {
-      button {
-        flex: 1;
-      }
-    }
+    border-radius: 2rem 2rem 0 0;
   }
 
   .banModal-Header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 
     h2 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--font-black);
+      font-size: x-large;
+      color: var(--font-title);
       margin: 0;
     }
 
@@ -58,8 +56,8 @@
   .banModal-Options {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
 
     .banModal-Option {
       display: flex;
@@ -68,14 +66,14 @@
       text-align: left;
       width: 100%;
       background: var(--bg-composant-dash);
-      border: 1.5px solid transparent;
-      border-radius: 12px;
-      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1rem;
       cursor: pointer;
 
       @media (hover: hover) and (min-width: 429px) {
         &:hover {
-          border-color: var(--border-color);
+          border-color: var(--icon-color);
         }
       }
 
@@ -114,38 +112,38 @@
   .banModal-Footer {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 0.75rem;
 
+    /* Les deux pilules se partagent la largeur : deux boutons de 15rem ne
+       tiennent pas côte à côte. */
     button {
-      padding: 10px 22px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
+      flex: 1;
+      min-height: 2.5rem;
+      border: none;
+      border-radius: 5rem;
+      box-shadow: 1px 1px 5px black;
+      font-size: 0.9rem;
       cursor: pointer;
+      transition: transform 0.2s;
 
       @media (hover: hover) and (min-width: 429px) {
-        &:hover {
+        &:hover:not(:disabled) {
           transform: scale(0.95);
         }
       }
     }
 
-    .banModal-Cancel {
-      background: var(--bg-neutral);
-      border: 1.5px solid var(--border-color);
-      color: var(--font-black);
-    }
+    /* Annuler garde le gris par défaut des boutons, comme Fermer dans la
+       modale du profil. */
 
     .banModal-Confirm {
       background: var(--button-color);
-      border: none;
       color: var(--font-neutral);
 
       &:disabled {
         background: var(--button-color-disable);
         color: var(--font-button-color-disable);
         cursor: not-allowed;
-        transform: none;
       }
     }
   }
