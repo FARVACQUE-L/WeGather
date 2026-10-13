@@ -244,7 +244,9 @@ function DashboardAdmin() {
             <LineChart data={graphic}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="month" axisLine={false} tickLine={false} />
-              <YAxis axisLine={false} tickLine={false} />
+              {/* Largeur ajustée aux chiffres au lieu des 60px par défaut :
+                  la courbe se rapproche du bord gauche de la carte. */}
+              <YAxis axisLine={false} tickLine={false} width="auto" />
               <Tooltip wrapperStyle={{ zIndex: 100 }} />
               <Legend />
 
