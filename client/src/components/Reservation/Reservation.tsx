@@ -6,6 +6,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CalendarPlus } from "lucide-react";
 import Swal from "sweetalert2";
 import useCanHover from "../../helper/useCanHover";
+import ImageCropper, {
+  type Crop,
+  cropImage,
+  DEFAULT_CROP,
+} from "../ImageCropper/ImageCropper";
 
 type Reservation = {
   reservation_id: number;
@@ -51,6 +56,7 @@ function Reservation() {
   );
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
   const [preview, setPreview] = useState("");
+  const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
   const [eventName, setEventName] = useState<Reservation>();
   const [editingReservationId, setEditingReservationId] = useState<
     number | null
@@ -199,7 +205,10 @@ function Reservation() {
     formData.append("reservation_description", reservationDescription);
     formData.append("reservation_link", reservationLink.trim());
     if (reservationPicture) {
-      formData.append("reservation_picture", reservationPicture);
+      formData.append(
+        "reservation_picture",
+        await cropImage(preview, crop, reservationPicture.name),
+      );
     }
 
     const url = isEditing
@@ -252,6 +261,7 @@ function Reservation() {
     if (file) {
       setReservationPicture(file);
       setPreview(URL.createObjectURL(file));
+      setCrop(DEFAULT_CROP);
     }
   }
   if (authLoading) {
@@ -449,12 +459,23 @@ function Reservation() {
                     Image
                   </label>
                   <div className="ReservationModal-Image">
-                    {preview && (
-                      <img
+                    {/* Recadrage seulement pour une nouvelle image : l'image
+                        actuelle d'une réservation modifiée est déjà
+                        enregistrée telle quelle. */}
+                    {reservationPicture ? (
+                      <ImageCropper
                         src={preview}
-                        alt="Aperçu de la réservation"
-                        className="ReservationModal-Preview"
+                        crop={crop}
+                        onCropChange={setCrop}
                       />
+                    ) : (
+                      preview && (
+                        <img
+                          src={preview}
+                          alt="Aperçu de la réservation"
+                          className="ReservationModal-Preview"
+                        />
+                      )
                     )}
                     <button
                       type="button"

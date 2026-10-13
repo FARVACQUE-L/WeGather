@@ -24,6 +24,9 @@
       .CardEvents-Image {
         width: 100%;
         height: 100%;
+        /* Les images recadrées dans les modales sont déjà au format de la
+           carte ; cover évite que les anciennes soient aplaties. */
+        object-fit: cover;
         object-position: top;
         display: block;
         background: var(--bg-composant-dash);

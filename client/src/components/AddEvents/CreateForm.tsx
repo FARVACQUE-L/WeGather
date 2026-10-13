@@ -2,6 +2,11 @@ import { ImagePlus, X } from "lucide-react";
 import { useRef, useState } from "react";
 
 import type { CreateFormProps, EventData } from "../../types/Events";
+import ImageCropper, {
+  type Crop,
+  cropImage,
+  DEFAULT_CROP,
+} from "../ImageCropper/ImageCropper";
 
 import "./CreateForm.css";
 
@@ -20,6 +25,7 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
   // Photo facultative : sans photo, le serveur utilise le logo WeGather.
   const [picture, setPicture] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +33,7 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
     if (!file) return;
     setPicture(file);
     setPreview(URL.createObjectURL(file));
+    setCrop(DEFAULT_CROP);
   };
 
   const handleRemovePicture = () => {
@@ -58,8 +65,11 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
       formData.append("event_date_end", form.dateEnd);
       formData.append("event_description", form.description);
       formData.append("event_location", form.location);
-      if (picture) {
-        formData.append("picture", picture);
+      if (picture && preview) {
+        formData.append(
+          "picture",
+          await cropImage(preview, crop, picture.name),
+        );
       }
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events`, {
@@ -181,11 +191,7 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
           </label>
           <div className="CreateForm-Picture">
             {preview && (
-              <img
-                src={preview}
-                alt="Aperçu de l'événement"
-                className="CreateForm-PicturePreview"
-              />
+              <ImageCropper src={preview} crop={crop} onCropChange={setCrop} />
             )}
             <div className="CreateForm-PictureActions">
               <button

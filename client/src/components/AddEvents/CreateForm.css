@@ -74,13 +74,6 @@
     align-items: center;
     gap: 0.8rem;
 
-    .CreateForm-PicturePreview {
-      width: 16rem;
-      height: 12rem;
-      border-radius: 1rem;
-      object-fit: cover;
-    }
-
     .CreateForm-PictureActions {
       display: flex;
       align-items: center;

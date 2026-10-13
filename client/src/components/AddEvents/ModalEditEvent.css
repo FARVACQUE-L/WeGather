@@ -98,6 +98,7 @@
           width: 16rem;
           height: 12rem;
           border-radius: 1rem;
+          object-fit: cover;
         }
         /* Couleurs inversées avec le bouton Annuler, comme dans le
            formulaire de création d'événement. */
