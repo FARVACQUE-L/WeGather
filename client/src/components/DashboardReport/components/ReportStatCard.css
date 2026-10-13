@@ -46,7 +46,9 @@
     border-radius: 0.5rem;
   }
 }
-@media (max-width: 768px) {
+/* Version compacte dès que les cartes s'empilent (1230px, voir
+   DashboardReport.css). */
+@media (max-width: 1230px) {
   .ReportStatCard-Global {
     padding: 0.75rem;
     width: 98%;

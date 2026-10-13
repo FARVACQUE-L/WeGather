@@ -14,16 +14,15 @@
     flex-direction: column;
     gap: 2rem;
   }
-  /* Sous 1230px, les cartes de stats s'empilent. */
+  /* Sous 1230px, les cartes de stats s'empilent, en version compacte
+     (voir ReportStatCard.css). */
   @media (max-width: 1230px) {
     .DashboardReport-Grid {
       grid-template-columns: 1fr;
+      margin-left: 0.5rem;
     }
   }
   @media (max-width: 768px) {
-    .DashboardReport-Grid {
-      margin-left: 0.5rem;
-    }
     .DashboardReport-TableSection {
       align-items: center;
       margin-bottom: 5rem;
