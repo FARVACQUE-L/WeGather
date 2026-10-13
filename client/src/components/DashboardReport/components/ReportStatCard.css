@@ -1,7 +1,9 @@
 .ReportStatCard-Global {
   display: flex;
   flex-direction: column;
-  width: 25rem;
+  /* Suit la largeur de sa colonne de grille : en 25rem fixes, les cartes
+     ne rétrécissaient pas avec la fenêtre. */
+  width: 100%;
   gap: 0.1rem;
   padding: 1.5rem;
   background: var(--bg-admin-report-card);
