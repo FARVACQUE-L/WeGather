@@ -247,25 +247,31 @@
         .adminReport-Action {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          align-items: center;
+          gap: 0.75rem;
           background: var(--bg-composant-dash);
           border: 1px solid var(--border-color);
           border-radius: 16px;
           padding: 24px;
 
+          /* Même forme que les boutons du site (voir Profil.css) : pilule
+             de 15rem avec ombre. */
           button {
+            width: 15rem;
+            max-width: 100%;
+            min-height: 2.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 14px 16px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            gap: 16px;
+            gap: 0.5rem;
+            border: none;
+            border-radius: 5rem;
+            box-shadow: 1px 1px 5px black;
+            font-size: 0.9rem;
             cursor: pointer;
-            border: 2px solid var(--border-color);
-            background: var(--bg-neutral);
-            color: var(--font-black);
+            transition: transform 0.2s;
+            background: var(--button-color);
+            color: var(--font-neutral);
 
             @media (hover: hover) and (min-width: 429px) {
               &:hover {
@@ -274,15 +280,10 @@
             }
           }
 
-          button:nth-of-type(1) {
-            background: var(--button-color);
-            border: none;
-            color: var(--font-neutral);
-          }
-
-          button:nth-of-type(2) {
-            background: var(--bg-composant-dash);
-            border: 2px solid var(--border-color);
+          /* Rejeter, toujours en dernier (seul bouton pour un bug), en rouge
+             comme les actions dangereuses du profil. */
+          button:last-of-type {
+            background: var(--bg-negative);
             color: var(--font-red);
           }
         }
