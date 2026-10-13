@@ -36,3 +36,9 @@
     display: none;
   }
 }
+/* En admin, la sidebar reste en barre du bas jusqu'à 999px. */
+@media screen and (min-width: 876px) and (max-width: 999px) {
+  .mobile.navbar-admin {
+    display: flex;
+  }
+}

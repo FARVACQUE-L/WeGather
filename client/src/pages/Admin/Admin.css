@@ -1,4 +1,4 @@
-@media screen and (min-width: 429px) {
+@media screen and (min-width: 1000px) {
   .dashboard-page-admin {
     display: flex;
     flex-direction: row;
@@ -17,14 +17,28 @@
 }
 /* La sidebar ne rétrécit plus sous 1750px : le décalage du contenu reste
    celui qu'il a à 1750px (20vw) pour ne pas passer dessous. */
-@media screen and (min-width: 429px) and (max-width: 1750px) {
+@media screen and (min-width: 1000px) and (max-width: 1750px) {
   .dashboard-page-admin .content {
     padding-left: 350px;
   }
 }
-@media screen and (max-width: 428px) {
+/* Sous 1000px, la sidebar est en barre du bas : le contenu reprend toute la
+   largeur. */
+@media screen and (max-width: 999px) {
   .dashboard-page-admin {
     width: 100%;
     padding-top: 11vh;
+  }
+}
+/* 4vw de marge sur les côtés, et une marge basse qui dégage la barre du bas
+   (70px) avec 5vh en plus. Les onglets prennent toute la largeur entre ces
+   marges. */
+@media screen and (min-width: 429px) and (max-width: 999px) {
+  .dashboard-page-admin .content {
+    padding: 0 4vw calc(70px + 5vh);
+
+    > * {
+      width: 100%;
+    }
   }
 }
