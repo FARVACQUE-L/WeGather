@@ -316,17 +316,10 @@
       order: 2;
     }
 
-    /* La photo et le mail tiennent dans une demi-largeur. */
-    .adminReport-Rightside .adminReport-User {
-      .adminReport-User-PP-Wrap {
-        width: min(160px, 100%);
-        height: auto;
-        aspect-ratio: 1;
-      }
-
-      p {
-        overflow-wrap: anywhere;
-      }
+    /* La carte de l'auteur garde son aspect du dessus de 800px ; seul un
+       mail trop long passe à la ligne au lieu de déborder. */
+    .adminReport-Rightside .adminReport-User p {
+      overflow-wrap: anywhere;
     }
   }
 }
