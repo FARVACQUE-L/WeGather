@@ -142,6 +142,7 @@
 
             ul {
               display: flex;
+              flex-wrap: wrap;
               gap: 12px;
               list-style: none;
               padding: 0;
@@ -246,25 +247,31 @@
         .adminReport-Action {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          align-items: center;
+          gap: 0.75rem;
           background: var(--bg-composant-dash);
           border: 1px solid var(--border-color);
           border-radius: 16px;
           padding: 24px;
 
+          /* Même forme que les boutons du site (voir Profil.css) : pilule
+             de 15rem avec ombre. */
           button {
+            width: 15rem;
+            max-width: 100%;
+            min-height: 2.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 14px 16px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            gap: 16px;
+            gap: 0.5rem;
+            border: none;
+            border-radius: 5rem;
+            box-shadow: 1px 1px 5px black;
+            font-size: 0.9rem;
             cursor: pointer;
-            border: 2px solid var(--border-color);
-            background: var(--bg-neutral);
-            color: var(--font-black);
+            transition: transform 0.2s;
+            background: var(--button-color);
+            color: var(--font-neutral);
 
             @media (hover: hover) and (min-width: 429px) {
               &:hover {
@@ -273,15 +280,10 @@
             }
           }
 
-          button:nth-of-type(1) {
-            background: var(--button-color);
-            border: none;
-            color: var(--font-neutral);
-          }
-
-          button:nth-of-type(2) {
-            background: var(--bg-composant-dash);
-            border: 2px solid var(--border-color);
+          /* Rejeter, toujours en dernier (seul bouton pour un bug), en rouge
+             comme les actions dangereuses du profil. */
+          button:last-of-type {
+            background: var(--bg-negative);
             color: var(--font-red);
           }
         }
@@ -289,9 +291,62 @@
     }
   }
 }
-@media (max-width: 428px) {
+/* Sous 800px, une seule colonne : le titre, puis l'auteur et les actions
+   côte à côte, puis la nature du signalement et la suite. Les deux colonnes
+   s'effacent (display: contents) pour que leurs sections se placent
+   directement dans la grille. */
+@media (max-width: 800px) {
   .adminReport-Layout main .adminReport-Global {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px 20px;
+
+    .adminReport-Leftside,
+    .adminReport-Rightside {
+      display: contents;
+    }
+
+    .adminReport-Leftside > section {
+      grid-column: 1 / -1;
+      order: 3;
+    }
+
+    .adminReport-Leftside > .adminReport-Title {
+      order: 1;
+    }
+
+    .adminReport-Rightside > section {
+      order: 2;
+    }
+
+    /* La carte de l'auteur garde son aspect du dessus de 800px ; seul un
+       mail trop long passe à la ligne au lieu de déborder. */
+    .adminReport-Rightside .adminReport-User p {
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+/* Sous 470px, une demi-largeur est plus étroite que la carte de l'auteur
+   (photo de 160px et son padding) : les actions passent sous l'auteur. */
+@media (max-width: 470px) {
+  .adminReport-Layout main .adminReport-Global {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* La barre du bas de l'admin n'apparaît que sous 428px. */
+.adminReport-SideBar {
+  display: none;
+}
+
+@media (max-width: 428px) {
+  .adminReport-SideBar {
+    display: contents;
+  }
+
+  /* Dégage la barre du bas (70px). */
+  .adminReport-Layout main {
+    padding-bottom: 90px;
   }
 
   .adminReport-Layout
@@ -302,11 +357,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-  }
-
-  .adminReport-Layout main .adminReport-Leftside,
-  .adminReport-Layout main .adminReport-Rightside {
-    min-width: 0;
   }
 }
 

@@ -14,7 +14,9 @@ function NavBar() {
   const isAdmin = pathname.startsWith("/admin");
 
   return (
-    <nav className={navbarDesktop ? "desktop" : "mobile"}>
+    <nav
+      className={`${navbarDesktop ? "desktop" : "mobile"}${isAdmin ? " navbar-admin" : ""}`}
+    >
       <Link to="/homeevents" className="logo-sidebar-container">
         <img src={Logo} alt="logo-wegather" className="logo-sidebar-image" />
         <h2 className="logo-sidebar-h2">

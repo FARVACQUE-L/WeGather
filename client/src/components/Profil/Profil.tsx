@@ -27,7 +27,7 @@ function Profil() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const isAdminPage = location.pathname === "/admin";
+  const isAdminPage = location.pathname.startsWith("/admin");
   const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {

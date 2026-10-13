@@ -240,11 +240,20 @@ function DashboardAdmin() {
         </div>
 
         <div className="chart-container">
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={graphic}>
+          {/* La hauteur vient de .chart-container (DashboardAdmin.css), plus
+              basse sous 428px. */}
+          <ResponsiveContainer width="100%" height="100%">
+            {/* Pas de marge à gauche : l'axe y colle au bord de la carte. */}
+            <LineChart
+              data={graphic}
+              margin={{ top: 5, right: 5, bottom: 5, left: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="month" axisLine={false} tickLine={false} />
-              <YAxis axisLine={false} tickLine={false} />
+              {/* 30px au lieu des 60px par défaut : la courbe se rapproche
+                  du bord gauche de la carte. Pas de width="auto", qui
+                  faisait disparaître les chiffres sous 428px. */}
+              <YAxis axisLine={false} tickLine={false} width={30} />
               <Tooltip wrapperStyle={{ zIndex: 100 }} />
               <Legend />
 

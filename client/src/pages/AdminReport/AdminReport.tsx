@@ -5,6 +5,7 @@ import Profil from "../../components/Profil/Profil";
 import ReportAdminModal, {
   type BanAction,
 } from "../../components/ReportAdmin/ReportAdminModal";
+import SideBarAdmin from "../../components/SideBarAdmin/SideBarAdmin";
 import type { ReportData } from "../../types/reportData";
 import "./AdminReport.css";
 import {
@@ -239,6 +240,16 @@ function AdminReport() {
         <NavBar />
         <Profil />
       </header>
+      {/* Barre du bas de l'admin, affichée seulement sous 428px
+          (AdminReport.css). Un onglet ramène à la page admin sur cet onglet. */}
+      <div className="adminReport-SideBar">
+        <SideBarAdmin
+          activeComponent="signalement"
+          handleChangeComponent={(tab) =>
+            navigate("/admin", { state: { tab } })
+          }
+        />
+      </div>
       <main>
         <article className="adminReport-Global">
           <div className="adminReport-Leftside">

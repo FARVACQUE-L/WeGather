@@ -1,5 +1,6 @@
 import "./Admin.css";
 import { useState } from "react";
+import { useLocation } from "react-router";
 import AdminRoles from "../../components/AdminRoles/AdminRoles";
 import DashboardAdmin from "../../components/DashboardAdmin/DashboardAdmin";
 import DashboardReport from "../../components/DashboardReport/DashboardReport";
@@ -10,10 +11,13 @@ import SideBarAdmin from "../../components/SideBarAdmin/SideBarAdmin";
 type ActiveComponent = "tableau" | "signalement" | "roles";
 
 function Admin() {
+  const location = useLocation();
   // Volontairement non persisté : on entre toujours par le tableau de bord,
-  // quel que soit l'onglet quitté la fois précédente.
-  const [activeComponent, setActiveComponent] =
-    useState<ActiveComponent>("tableau");
+  // sauf depuis la barre du bas du détail d'un signalement, qui transmet
+  // l'onglet cliqué.
+  const [activeComponent, setActiveComponent] = useState<ActiveComponent>(
+    (location.state as { tab?: ActiveComponent } | null)?.tab ?? "tableau",
+  );
 
   const handleChangeComponent = (componentName: ActiveComponent) => {
     setActiveComponent(componentName);
