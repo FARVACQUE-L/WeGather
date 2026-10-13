@@ -289,11 +289,49 @@
     }
   }
 }
-@media (max-width: 428px) {
+/* Sous 800px, une seule colonne : le titre, puis l'auteur et les actions
+   côte à côte, puis la nature du signalement et la suite. Les deux colonnes
+   s'effacent (display: contents) pour que leurs sections se placent
+   directement dans la grille. */
+@media (max-width: 800px) {
   .adminReport-Layout main .adminReport-Global {
-    grid-template-columns: 1fr;
-  }
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px 20px;
 
+    .adminReport-Leftside,
+    .adminReport-Rightside {
+      display: contents;
+    }
+
+    .adminReport-Leftside > section {
+      grid-column: 1 / -1;
+      order: 3;
+    }
+
+    .adminReport-Leftside > .adminReport-Title {
+      order: 1;
+    }
+
+    .adminReport-Rightside > section {
+      order: 2;
+    }
+
+    /* La photo et le mail tiennent dans une demi-largeur. */
+    .adminReport-Rightside .adminReport-User {
+      .adminReport-User-PP-Wrap {
+        width: min(160px, 100%);
+        height: auto;
+        aspect-ratio: 1;
+      }
+
+      p {
+        overflow-wrap: anywhere;
+      }
+    }
+  }
+}
+
+@media (max-width: 428px) {
   .adminReport-Layout
     main
     .adminReport-Global
@@ -302,11 +340,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-  }
-
-  .adminReport-Layout main .adminReport-Leftside,
-  .adminReport-Layout main .adminReport-Rightside {
-    min-width: 0;
   }
 }
 
