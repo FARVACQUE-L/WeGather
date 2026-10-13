@@ -208,6 +208,19 @@
   }
 }
 
+/* Sous 1600px, les nouveaux utilisateurs passent sous les rapports récents,
+   et les rapports prennent toute la largeur au lieu de 42vw. */
+@media screen and (max-width: 1600px) {
+  .admin-dashboard {
+    .bottom-grid {
+      grid-template-columns: 1fr;
+    }
+    .reports-card {
+      width: auto;
+    }
+  }
+}
+
 /* Sous 1150px, les trois cartes de stats côte à côte deviennent trop
    étroites : elles s'empilent. */
 @media screen and (max-width: 1150px) {
