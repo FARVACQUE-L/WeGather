@@ -11,6 +11,9 @@ export const PLAN_LIMITS: Record<
   premium_plus: { hostedEvents: 10, galleryPhotos: 50 },
 };
 
+// Réservations par événement : même limite pour toutes les formules.
+export const MAX_RESERVATIONS = 10;
+
 // Une valeur inconnue (ou un utilisateur introuvable) retombe sur la formule
 // gratuite plutôt que de lever les limites.
 export const getPlanLimits = (plan: string | null | undefined) =>

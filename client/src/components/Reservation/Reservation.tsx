@@ -28,6 +28,8 @@ type Reservation = {
 };
 
 const STARTS_WITH_URL = /^https?:\/\//i;
+// Même limite que le serveur (planLimits.ts), pour toutes les formules.
+const MAX_RESERVATIONS = 10;
 
 // La capitalisation s'applique à chaque frappe : au moment où l'on tape « h »,
 // le champ contient déjà « H ». Dès que le schéma est reconnaissable, on le
@@ -227,7 +229,10 @@ function Reservation() {
     if (!response.ok) {
       toast.fire({
         icon: "error",
-        text: `Marche pas : ${data?.error ?? data?.message ?? response.statusText ?? "erreur inconnue"}`,
+        text:
+          data?.error ??
+          data?.message ??
+          "Une erreur est survenue, veuillez réessayer.",
         customClass: {
           popup: "toast-error-popup",
         },
@@ -298,6 +303,16 @@ function Reservation() {
           type="button"
           className="reservation-button"
           onClick={() => {
+            // Limite atteinte : on le dit tout de suite au lieu d'ouvrir une
+            // modale dont l'envoi serait refusé.
+            if (reservations.length >= MAX_RESERVATIONS) {
+              toast.fire({
+                icon: "error",
+                text: `Un événement est limité à ${MAX_RESERVATIONS} réservations.`,
+                customClass: { popup: "toast-error-popup" },
+              });
+              return;
+            }
             setEditingReservationId(null);
             setReservationName("");
             setReservationDate("");

@@ -1,3 +1,4 @@
+import type { Rows } from "../../../database/client";
 import mysql from "../../../database/client";
 
 type Reservation = {
@@ -51,6 +52,14 @@ ORDER BY r.reservation_id DESC;
     );
 
     return rows;
+  }
+  async countByEvent(eventId: number) {
+    const [rows] = await mysql.query<Rows>(
+      "SELECT COUNT(*) AS total FROM reservation WHERE reservation_id_event = ?",
+      [eventId],
+    );
+
+    return Number(rows[0].total);
   }
   async addReservation(reservation: Reservation) {
     const [results] = await mysql.query(
