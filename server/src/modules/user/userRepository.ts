@@ -216,7 +216,7 @@ class UserRepository {
   async readUserAdmin(userId: number) {
     const [rows] = await databaseClient.query<Rows>(
       `
-    SELECT user_is_admin, user_is_superadmin
+    SELECT user_is_admin, user_is_superadmin, user_plan
     FROM user
     WHERE user_id = ?
     `,
@@ -224,6 +224,15 @@ class UserRepository {
     );
 
     return rows[0];
+  }
+
+  async readUserPlan(userId: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT user_plan FROM user WHERE user_id = ?",
+      [userId],
+    );
+
+    return rows[0]?.user_plan as string | undefined;
   }
   async readUserJoinEvent(eventId: number) {
     const [rows] = await databaseClient.query(

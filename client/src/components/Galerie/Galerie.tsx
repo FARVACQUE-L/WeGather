@@ -7,8 +7,6 @@ import GalleryModal from "./GalleryModal";
 import { PhotoItem } from "./PhotoItem";
 
 const API_URL = import.meta.env.VITE_API_URL;
-// Même limite que le serveur (galleryActions.ts).
-const MAX_GALLERY_PHOTOS = 15;
 
 type Gallery = {
   gallery_id: number;
@@ -33,6 +31,9 @@ function Galerie() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [likedPhotos, setLikedPhotos] = useState<number[]>([]);
+  // Limite de photos selon la formule de l'organisateur, donnée par le
+  // serveur. Tant qu'elle n'est pas connue, seul le serveur bloque l'envoi.
+  const [photoLimit, setPhotoLimit] = useState<number | null>(null);
 
   const formatImageUrl = (link: string): string => {
     if (!link) return "";
@@ -95,6 +96,14 @@ function Galerie() {
         });
         if (evRes.ok) {
           setEventName((await evRes.json()).event_name || "Mon Événement");
+        }
+
+        const limitRes = await fetch(
+          `${API_URL}/api/gallery/${eventUuid}/limit`,
+          { signal: controller.signal, credentials: "include" },
+        );
+        if (limitRes.ok) {
+          setPhotoLimit((await limitRes.json()).limit);
         }
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
@@ -254,9 +263,9 @@ function Galerie() {
           // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
           // une modale dont l'envoi serait refusé.
           onClick={() =>
-            photos.length >= MAX_GALLERY_PHOTOS
+            photoLimit !== null && photos.length >= photoLimit
               ? setError(
-                  `La galerie est limitée à ${MAX_GALLERY_PHOTOS} photos. Supprimez-en une pour en ajouter une autre.`,
+                  `La galerie est limitée à ${photoLimit} photos. Supprimez-en une pour en ajouter une autre.`,
                 )
               : setIsModalOpen(true)
           }
