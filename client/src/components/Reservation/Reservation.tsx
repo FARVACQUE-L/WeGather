@@ -451,7 +451,7 @@ function Reservation() {
                   />
                 </div>
 
-                <div className="ReservationModal-Field">
+                <div className="ReservationModal-Field ReservationModal-ImageField">
                   <label
                     className="ReservationModal-Label"
                     htmlFor="photo-upload"
