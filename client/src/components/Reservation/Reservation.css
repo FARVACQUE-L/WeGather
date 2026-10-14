@@ -271,6 +271,13 @@
       grid-column: 1 / -1;
     }
 
+    /* Boutons regroupés au centre plutôt qu'aux deux bords de la modale
+       élargie. */
+    .ReservationModal-Actions {
+      justify-content: center;
+      gap: 7rem;
+    }
+
     .ReservationModal-ImageField {
       grid-column: 2;
       grid-row: 2 / span 5;
