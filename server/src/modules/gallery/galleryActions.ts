@@ -1,7 +1,12 @@
+import fs from "node:fs";
 import type { RequestHandler } from "express";
 
 import eventRepository from "../event/eventRepository";
 import galleryRepository from "./galleryRepository";
+
+// Nombre de photos dans la galerie d'un événement, tous participants
+// confondus. Supprimer une photo libère sa place.
+const MAX_GALLERY_PHOTOS = 15;
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
@@ -78,6 +83,16 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
     if (!permissions.isParticipant) {
       res.status(403).json({
         message: "Action interdite : vous devez participer à l'événement.",
+      });
+      return;
+    }
+
+    const photoCount = await galleryRepository.countByEvent(eventId);
+    if (photoCount >= MAX_GALLERY_PHOTOS) {
+      // multer a déjà écrit la photo sur disque : on ne la garde pas.
+      fs.rmSync(req.file.path, { force: true });
+      res.status(403).json({
+        message: `La galerie est limitée à ${MAX_GALLERY_PHOTOS} photos.`,
       });
       return;
     }

@@ -3,6 +3,11 @@ import path from "node:path";
 import type { RequestHandler } from "express";
 import eventRepository from "./eventRepository";
 
+// Nombre d'événements qu'un compte peut créer. Rejoindre ceux des autres
+// reste illimité. Un événement supprimé libère sa place ; un événement banni
+// la garde, pour que le bannissement ne rende pas un créneau.
+const MAX_HOSTED_EVENTS = 2;
+
 const browse: RequestHandler = async (req, res, next) => {
   try {
     const userId = Number(req.query.userId);
@@ -50,6 +55,15 @@ const add: RequestHandler = async (req, res, next) => {
     : `${baseUrl}/assets/images/logo-wegather.png`;
 
   try {
+    const hostedEvents = await eventRepository.countHostedEvents(event_id_host);
+    if (hostedEvents >= MAX_HOSTED_EVENTS) {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      res.status(403).json({
+        message: `Vous ne pouvez pas créer plus de ${MAX_HOSTED_EVENTS} événements.`,
+      });
+      return;
+    }
+
     const insertId = await eventRepository.create({
       event_name,
       event_date_start,

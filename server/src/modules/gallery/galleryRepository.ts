@@ -27,6 +27,14 @@ class GalleryRepository {
     return rows;
   }
 
+  async countByEvent(gallery_id_event: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT COUNT(*) AS total FROM gallery WHERE gallery_id_event = ?",
+      [gallery_id_event],
+    );
+    return Number(rows[0].total);
+  }
+
   async read(gallery_id: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT * FROM gallery WHERE gallery_id = ?",

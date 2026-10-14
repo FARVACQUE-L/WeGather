@@ -78,7 +78,15 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Erreur lors de la création");
+      if (!res.ok) {
+        // Message du serveur quand il y en a un, par exemple la limite
+        // d'événements créés atteinte.
+        const data = await res.json().catch(() => null);
+        setError(
+          data?.message ?? "Une erreur est survenue, veuillez réessayer.",
+        );
+        return;
+      }
 
       const newEvent: EventData = await res.json();
       onEventCreated(newEvent);

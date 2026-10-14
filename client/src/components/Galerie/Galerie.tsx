@@ -7,6 +7,8 @@ import GalleryModal from "./GalleryModal";
 import { PhotoItem } from "./PhotoItem";
 
 const API_URL = import.meta.env.VITE_API_URL;
+// Même limite que le serveur (galleryActions.ts).
+const MAX_GALLERY_PHOTOS = 15;
 
 type Gallery = {
   gallery_id: number;
@@ -249,7 +251,15 @@ function Galerie() {
         <button
           type="button"
           className="galerie-button"
-          onClick={() => setIsModalOpen(true)}
+          // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
+          // une modale dont l'envoi serait refusé.
+          onClick={() =>
+            photos.length >= MAX_GALLERY_PHOTOS
+              ? setError(
+                  `La galerie est limitée à ${MAX_GALLERY_PHOTOS} photos. Supprimez-en une pour en ajouter une autre.`,
+                )
+              : setIsModalOpen(true)
+          }
         >
           <ImagePlus size={20} />
           <p>Ajouter une photo</p>
