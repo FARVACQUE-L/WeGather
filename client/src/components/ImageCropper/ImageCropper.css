@@ -1,0 +1,51 @@
+.ImageCropper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+
+  /* Même taille que l'image des cartes d'événement et de réservation. */
+  .ImageCropper-Frame {
+    position: relative;
+    width: 16rem;
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: var(--bg-composant-dash);
+    cursor: grab;
+    /* Le glisser au doigt déplace l'image au lieu de faire défiler la
+       modale. */
+    touch-action: none;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    img {
+      position: absolute;
+      max-width: none;
+      user-select: none;
+      pointer-events: none;
+    }
+  }
+
+  .ImageCropper-Zoom {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 16rem;
+    max-width: 100%;
+    color: var(--font-input);
+
+    input {
+      flex: 1;
+      accent-color: var(--font-title);
+    }
+  }
+
+  .ImageCropper-Hint {
+    font-size: 0.75rem;
+    color: var(--font-input);
+  }
+}

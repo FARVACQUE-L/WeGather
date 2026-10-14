@@ -252,6 +252,38 @@
     opacity: 1;
   }
 }
+/* Au-dessus de 875px, l'image passe à droite des champs : avec le
+   recadreur, la modale sur une colonne devenait plus haute que l'écran et
+   les boutons n'apparaissaient qu'en faisant défiler. */
+@media screen and (min-width: 876px) {
+  .reservation .reservation-title .ReservationModal-Overlay {
+    .ReservationModal {
+      width: min(90vw, 760px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 16rem;
+      column-gap: 2rem;
+      row-gap: 1rem;
+      align-content: start;
+    }
+
+    .ReservationModal-Title,
+    .ReservationModal-Actions {
+      grid-column: 1 / -1;
+    }
+
+    /* Boutons regroupés au centre plutôt qu'aux deux bords de la modale
+       élargie. */
+    .ReservationModal-Actions {
+      justify-content: center;
+      gap: 7rem;
+    }
+
+    .ReservationModal-ImageField {
+      grid-column: 2;
+      grid-row: 2 / span 5;
+    }
+  }
+}
 /* Sous 1300px, le bouton d'ajout garde son écart avec le bouton du profil
    (à 30px du bord droit) : son bord droit reste à 155px du bord de la
    fenêtre, sa position à 1300px. Le titre part de 2vw + 300px (marge de la

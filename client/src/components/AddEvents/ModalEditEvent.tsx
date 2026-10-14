@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { EventData, ModalEditEventProps } from "../../types/Events";
+import ImageCropper, {
+  type Crop,
+  cropImage,
+  DEFAULT_CROP,
+} from "../ImageCropper/ImageCropper";
 import "./ModalEditEvent.css";
 
 const formatDate = (date: string): string => {
@@ -18,6 +23,7 @@ function ModalEditEvent({
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string>(event.event_picture);
+  const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
   const [form, setForm] = useState({
     event_name: event.event_name,
     event_date_start: formatDate(event.event_date_start),
@@ -69,6 +75,7 @@ function ModalEditEvent({
     if (!file) return;
     setSelectedFile(file);
     setPreviewImage(URL.createObjectURL(file));
+    setCrop(DEFAULT_CROP);
   };
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -84,7 +91,10 @@ function ModalEditEvent({
       formData.append("event_description", form.event_description);
       formData.append("event_location", form.event_location);
       if (selectedFile) {
-        formData.append("picture", selectedFile);
+        formData.append(
+          "picture",
+          await cropImage(previewImage, crop, selectedFile.name),
+        );
       }
 
       const res = await fetch(
@@ -221,11 +231,21 @@ function ModalEditEvent({
               Image
             </label>
             <div className="ModalEditEvent-ImageGlobal">
-              <img
-                src={previewImage}
-                alt="prévisualisation"
-                className="ModalEditEvent-Preview"
-              />
+              {/* Le recadrage ne s'applique qu'à une nouvelle image : l'image
+                  actuelle est déjà enregistrée telle quelle. */}
+              {selectedFile ? (
+                <ImageCropper
+                  src={previewImage}
+                  crop={crop}
+                  onCropChange={setCrop}
+                />
+              ) : (
+                <img
+                  src={previewImage}
+                  alt="prévisualisation"
+                  className="ModalEditEvent-Preview"
+                />
+              )}
 
               <button
                 type="button"
