@@ -36,16 +36,14 @@ const FEATURES: {
 }[] = [
   { label: "Événements organisés", value: (plan) => plan.hostedEvents },
   { label: "Événements rejoints", value: () => "Illimité" },
-  { label: "Photos par galerie", value: (plan) => plan.galleryPhotos },
-  { label: "Réservations par événement", value: () => MAX_RESERVATIONS },
-  { label: "Rejoindre un événement par code", value: () => true },
-  { label: "Modification de l'événement", value: () => true },
-  { label: "Tableau de bord et to-do list", value: () => true },
+  { label: "To-do list", value: () => true },
   { label: "Messagerie en temps réel", value: () => true },
+  { label: "Réservations par événement", value: () => MAX_RESERVATIONS },
   { label: "Budget partagé", value: () => true },
-  { label: "Galerie photos partagée", value: () => true },
-  { label: "Membres et présence en ligne", value: () => true },
-  { label: "Bannissement de membres", value: () => true },
+  {
+    label: "Galerie partagée / photos par galerie",
+    value: (plan) => plan.galleryPhotos,
+  },
   { label: "Signalement", value: () => true },
 ];
 
