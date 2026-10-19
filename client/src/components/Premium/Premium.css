@@ -58,6 +58,11 @@
       color: var(--font-black);
     }
 
+    .premium-included {
+      color: var(--font-green);
+      vertical-align: middle;
+    }
+
     .premium-cta {
       border: none;
       border-radius: 12px;

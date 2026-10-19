@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Gem } from "lucide-react";
+import { Check, Gem } from "lucide-react";
 import "./Premium.css";
 
 type Plan = {
@@ -29,11 +29,24 @@ const PLANS: Plan[] = [
 
 const MAX_RESERVATIONS = 10;
 
-const FEATURES: { label: string; value: (plan: Plan) => string | number }[] = [
+// true : fonctionnalité incluse, affichée par une coche.
+const FEATURES: {
+  label: string;
+  value: (plan: Plan) => string | number | true;
+}[] = [
   { label: "Événements organisés", value: (plan) => plan.hostedEvents },
+  { label: "Événements rejoints", value: () => "Illimité" },
   { label: "Photos par galerie", value: (plan) => plan.galleryPhotos },
   { label: "Réservations par événement", value: () => MAX_RESERVATIONS },
-  { label: "Événements rejoints", value: () => "Illimité" },
+  { label: "Rejoindre un événement par code", value: () => true },
+  { label: "Modification de l'événement", value: () => true },
+  { label: "Tableau de bord et to-do list", value: () => true },
+  { label: "Messagerie en temps réel", value: () => true },
+  { label: "Budget partagé", value: () => true },
+  { label: "Galerie photos partagée", value: () => true },
+  { label: "Membres et présence en ligne", value: () => true },
+  { label: "Bannissement de membres", value: () => true },
+  { label: "Signalement", value: () => true },
 ];
 
 function Premium() {
@@ -73,9 +86,23 @@ function Premium() {
             {FEATURES.map((feature) => (
               <tr key={feature.label}>
                 <th scope="row">{feature.label}</th>
-                {PLANS.map((plan) => (
-                  <td key={plan.name}>{feature.value(plan)}</td>
-                ))}
+                {PLANS.map((plan) => {
+                  const value = feature.value(plan);
+
+                  return (
+                    <td key={plan.name}>
+                      {value === true ? (
+                        <Check
+                          size={20}
+                          className="premium-included"
+                          aria-label="Inclus"
+                        />
+                      ) : (
+                        value
+                      )}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
