@@ -4,6 +4,7 @@ import {
   BadgeDollarSign,
   Book,
   CalendarDays,
+  Gem,
   Images,
   LayoutDashboard,
   LogOut,
@@ -47,6 +48,7 @@ type SideBarProps = {
     | "reservation"
     | "budget"
     | "galerie"
+    | "premium"
     | "groupe";
   handleChangeComponent: (
     componentName:
@@ -55,6 +57,7 @@ type SideBarProps = {
       | "reservation"
       | "budget"
       | "galerie"
+      | "premium"
       | "groupe",
   ) => void;
 };
@@ -302,6 +305,22 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
         initial="hidden"
         animate="visible"
       >
+        <motion.li
+          variants={itemVariants}
+          className={`sidebar-premium${activeComponent === "premium" ? " active" : ""}`}
+        >
+          <motion.button
+            type="button"
+            className="link"
+            onClick={() => handleChangeComponent("premium")}
+            whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Gem size={20} />
+            <span>Premium</span>
+          </motion.button>
+        </motion.li>
+
         <motion.li
           variants={itemVariants}
           className={`sidebar-group${activeComponent === "groupe" ? " active" : ""}`}

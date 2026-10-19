@@ -1,0 +1,109 @@
+.premium {
+  /* Mêmes marges que la page Info du groupe. */
+  padding: 3rem 3rem 2rem 0;
+  width: 70.5vw;
+
+  h1 {
+    color: var(--font-title);
+    margin-bottom: 1.5rem;
+  }
+
+  /* Le tableau défile horizontalement plutôt que de déborder sur petit
+     écran. */
+  .premium-table-wrapper {
+    overflow-x: auto;
+    background: var(--bg-neutral);
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+
+    th,
+    td {
+      padding: 1rem;
+    }
+
+    thead th {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--font-darkBrown);
+      background: var(--bg-composant-dash);
+
+      &.is-paid {
+        color: var(--font-brown);
+
+        svg {
+          vertical-align: -2px;
+          margin-right: 0.4rem;
+        }
+      }
+    }
+
+    tbody tr {
+      border-top: 1px solid var(--border-inline);
+    }
+
+    tbody th {
+      text-align: left;
+      font-weight: 500;
+      color: var(--font-darkBrown);
+    }
+
+    tbody td {
+      font-weight: 600;
+      color: var(--font-black);
+    }
+
+    .premium-cta {
+      border: none;
+      border-radius: 12px;
+      padding: 0.8rem 1.4rem;
+      background: var(--button-color);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    @media (hover: hover) and (min-width: 429px) {
+      .premium-cta:hover {
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+/* Sidebar en barre du bas : mêmes marges que la page Info du groupe. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  .premium {
+    width: 100%;
+    padding: calc(4vh + 3rem) 4vw calc(70px + 5vh);
+  }
+}
+@media screen and (max-width: 428px) {
+  .premium {
+    width: 100%;
+    padding: calc(4vh + 3rem) 1rem 6rem 1rem;
+
+    h1 {
+      font-size: 33px;
+    }
+
+    .premium-table {
+      font-size: 0.85rem;
+
+      th,
+      td {
+        padding: 0.7rem 0.5rem;
+      }
+
+      .premium-cta {
+        padding: 0.6rem 0.8rem;
+      }
+    }
+  }
+}

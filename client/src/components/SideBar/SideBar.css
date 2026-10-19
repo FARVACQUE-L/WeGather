@@ -88,6 +88,7 @@
       /* Toute la largeur de la sidebar, pour que le surlignage d'Info du
          groupe fasse 90 % de large comme celui des onglets du haut. */
       width: 100%;
+      .sidebar-premium,
       .sidebar-group,
       .sidebar-events,
       .sidebar-signal {
@@ -113,6 +114,7 @@
       }
       /* Même surlignage que les onglets du menu principal (li.active) :
          barre à 90 %, bordure gauche et icône à 20px après la bordure. */
+      .sidebar-premium.active,
       .sidebar-group.active {
         margin-left: 0;
         padding-left: 20px;
@@ -295,7 +297,9 @@
 
       position: static;
 
-      .sidebar-events {
+      /* Premium masqué aussi : une 9e icône ne tiendrait plus à 360px. */
+      .sidebar-events,
+      .sidebar-premium {
         display: none;
       }
 

@@ -9,6 +9,7 @@ import "./TableauDeBord.css";
 
 import Budget from "../../components/Budget/Budget.tsx";
 import GroupInfo from "../../components/GroupInfo/GroupInfo.tsx";
+import Premium from "../../components/Premium/Premium.tsx";
 import Profil from "../../components/Profil/Profil.tsx";
 import Reservation from "../../components/Reservation/Reservation.tsx";
 
@@ -18,6 +19,7 @@ type ActiveComponent =
   | "reservation"
   | "budget"
   | "galerie"
+  | "premium"
   | "groupe";
 
 function TableauDeBord() {
@@ -49,6 +51,7 @@ function TableauDeBord() {
           {activeComponent === "reservation" && <Reservation />}
           {activeComponent === "budget" && <Budget />}
           {activeComponent === "galerie" && <Galerie />}
+          {activeComponent === "premium" && <Premium />}
           {activeComponent === "groupe" && <GroupInfo />}
         </main>
       </div>
