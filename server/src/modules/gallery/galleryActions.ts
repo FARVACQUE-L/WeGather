@@ -1,7 +1,30 @@
+import fs from "node:fs";
 import type { RequestHandler } from "express";
 
+import { getPlanLimits } from "../../helper/planLimits";
 import eventRepository from "../event/eventRepository";
 import galleryRepository from "./galleryRepository";
+
+// Nombre de photos dans la galerie d'un événement, tous participants
+// confondus, selon la formule de l'organisateur. Supprimer une photo libère
+// sa place.
+const readPhotoLimit = async (eventId: number) =>
+  getPlanLimits(await galleryRepository.readHostPlan(eventId)).galleryPhotos;
+
+const readLimit: RequestHandler = async (req, res, next) => {
+  try {
+    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
+
+    if (!eventId) {
+      res.sendStatus(404);
+      return;
+    }
+
+    res.json({ limit: await readPhotoLimit(eventId) });
+  } catch (err) {
+    next(err);
+  }
+};
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
@@ -78,6 +101,17 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
     if (!permissions.isParticipant) {
       res.status(403).json({
         message: "Action interdite : vous devez participer à l'événement.",
+      });
+      return;
+    }
+
+    const photoLimit = await readPhotoLimit(eventId);
+    const photoCount = await galleryRepository.countByEvent(eventId);
+    if (photoCount >= photoLimit) {
+      // multer a déjà écrit la photo sur disque : on ne la garde pas.
+      fs.rmSync(req.file.path, { force: true });
+      res.status(403).json({
+        message: `La galerie est limitée à ${photoLimit} photos.`,
       });
       return;
     }
@@ -189,6 +223,7 @@ const removeLike: RequestHandler = async (req, res, next) => {
 
 export default {
   browse,
+  readLimit,
   add,
   destroy,
   uploadPhoto,

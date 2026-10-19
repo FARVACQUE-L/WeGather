@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { RequestHandler } from "express";
+import { getPlanLimits } from "../../helper/planLimits";
+import userRepository from "../user/userRepository";
 import eventRepository from "./eventRepository";
 
 const browse: RequestHandler = async (req, res, next) => {
@@ -50,6 +52,21 @@ const add: RequestHandler = async (req, res, next) => {
     : `${baseUrl}/assets/images/logo-wegather.png`;
 
   try {
+    // Nombre d'événements créés selon la formule du compte. Un événement
+    // supprimé libère sa place ; un événement banni la garde, pour que le
+    // bannissement ne rende pas un créneau.
+    const { hostedEvents: maxHostedEvents } = getPlanLimits(
+      await userRepository.readUserPlan(event_id_host),
+    );
+    const hostedEvents = await eventRepository.countHostedEvents(event_id_host);
+    if (hostedEvents >= maxHostedEvents) {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      res.status(403).json({
+        message: `Vous ne pouvez pas créer plus de ${maxHostedEvents} événements avec votre formule.`,
+      });
+      return;
+    }
+
     const insertId = await eventRepository.create({
       event_name,
       event_date_start,

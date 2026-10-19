@@ -51,6 +51,13 @@ class EventRepository {
 
     return rows[0] as EventData;
   }
+  async countHostedEvents(userId: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT COUNT(*) AS total FROM event WHERE event_id_host = ?",
+      [userId],
+    );
+    return Number(rows[0].total);
+  }
   async isUserBanned(eventId: number, userId: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT * FROM event_user_ban WHERE eub_id_event = ? AND eub_id_user = ?",

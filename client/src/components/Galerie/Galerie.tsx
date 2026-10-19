@@ -31,6 +31,9 @@ function Galerie() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [likedPhotos, setLikedPhotos] = useState<number[]>([]);
+  // Limite de photos selon la formule de l'organisateur, donnée par le
+  // serveur. Tant qu'elle n'est pas connue, seul le serveur bloque l'envoi.
+  const [photoLimit, setPhotoLimit] = useState<number | null>(null);
 
   const formatImageUrl = (link: string): string => {
     if (!link) return "";
@@ -93,6 +96,14 @@ function Galerie() {
         });
         if (evRes.ok) {
           setEventName((await evRes.json()).event_name || "Mon Événement");
+        }
+
+        const limitRes = await fetch(
+          `${API_URL}/api/gallery/${eventUuid}/limit`,
+          { signal: controller.signal, credentials: "include" },
+        );
+        if (limitRes.ok) {
+          setPhotoLimit((await limitRes.json()).limit);
         }
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
@@ -249,7 +260,15 @@ function Galerie() {
         <button
           type="button"
           className="galerie-button"
-          onClick={() => setIsModalOpen(true)}
+          // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
+          // une modale dont l'envoi serait refusé.
+          onClick={() =>
+            photoLimit !== null && photos.length >= photoLimit
+              ? setError(
+                  `La galerie est limitée à ${photoLimit} photos. Supprimez-en une pour en ajouter une autre.`,
+                )
+              : setIsModalOpen(true)
+          }
         >
           <ImagePlus size={20} />
           <p>Ajouter une photo</p>

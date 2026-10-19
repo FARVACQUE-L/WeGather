@@ -21,6 +21,7 @@ const authVerif: RequestHandler = async (req, res, next) => {
       ...req.user,
       isAdmin: Boolean(user?.user_is_admin),
       isSuperAdmin: Boolean(user?.user_is_superadmin),
+      plan: user?.user_plan ?? "free",
     });
   } catch (error) {
     next(error);

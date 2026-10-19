@@ -1,4 +1,6 @@
+import fs from "node:fs";
 import type { RequestHandler } from "express";
+import { MAX_RESERVATIONS } from "../../helper/planLimits";
 import eventRepository from "../event/eventRepository";
 import reservationRepository from "./reservationRepository";
 
@@ -62,6 +64,17 @@ const addReservation: RequestHandler = async (req, res, next) => {
 
     if (!eventId) {
       res.sendStatus(404);
+      return;
+    }
+
+    if (
+      (await reservationRepository.countByEvent(eventId)) >= MAX_RESERVATIONS
+    ) {
+      // multer a déjà écrit l'image sur disque : on ne la garde pas.
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      res.status(403).json({
+        message: `Un événement est limité à ${MAX_RESERVATIONS} réservations.`,
+      });
       return;
     }
 

@@ -11,6 +11,12 @@ galleryRoutes.get(
   galleryActions.browse,
 );
 
+galleryRoutes.get(
+  "/api/gallery/:eventUuid/limit",
+  authorization,
+  galleryActions.readLimit,
+);
+
 galleryRoutes.post(
   "/api/gallery",
   authorization,
