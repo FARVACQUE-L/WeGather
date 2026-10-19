@@ -298,7 +298,8 @@
 
       position: static;
 
-      /* Premium masqué aussi : une 9e icône ne tiendrait plus à 360px. */
+      /* Premium masqué aussi : une 9e icône ne tiendrait plus à 360px. Il
+         réapparaît à partir de 429px (voir plus bas). */
       .sidebar-events,
       .sidebar-premium {
         display: none;
@@ -450,5 +451,11 @@
     .image {
       margin: 0;
     }
+  }
+}
+/* Entre 429px et 875px, la barre du bas a la place pour l'icône Premium. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  .sidebar .sidebar-end-menu .sidebar-premium {
+    display: flex;
   }
 }
