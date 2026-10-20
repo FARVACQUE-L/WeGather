@@ -67,7 +67,7 @@ function AdminReport() {
         const targetId =
           type === "user"
             ? report?.reported_user_id_user
-            : report?.event_id_host;
+            : report?.reported_event_id_host;
 
         response = await fetch(`${API_URL}/api/admin/ban-user/${targetId}`, {
           method: "PATCH",
@@ -200,8 +200,14 @@ function AdminReport() {
 
   const getImages = (): string[] => report?.images ?? [];
 
+  // Événement supprimé par son créateur : le signalement reste, sans cible.
+  const isEventDeleted =
+    type === "event" && report?.reported_event_id_event == null;
+
   const getInfoReport = () => {
     if (type === "user") return report?.target_username ?? "—";
+    if (isEventDeleted)
+      return `Événement supprimé, créé par ${report?.host_username ?? "—"}`;
     if (type === "event")
       return `${report?.event_name ?? "—"} créé par ${report?.host_username ?? "—"}`;
     return "—";
@@ -364,6 +370,7 @@ function AdminReport() {
       <ReportAdminModal
         open={isModalOpen}
         type={type}
+        isEventDeleted={isEventDeleted}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleBanConfirm}
       />

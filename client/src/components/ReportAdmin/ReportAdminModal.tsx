@@ -7,6 +7,8 @@ export type BanAction = "event" | "user";
 interface ReportAdminModalProps {
   open: boolean;
   type?: string;
+  // Événement signalé puis supprimé : seul l'organisateur peut être banni.
+  isEventDeleted?: boolean;
   onClose: () => void;
   onConfirm: (action: BanAction) => void;
 }
@@ -14,6 +16,7 @@ interface ReportAdminModalProps {
 function ReportAdminModal({
   open,
   type,
+  isEventDeleted = false,
   onClose,
   onConfirm,
 }: ReportAdminModalProps) {
@@ -54,28 +57,30 @@ function ReportAdminModal({
       </header>
 
       <div className="banModal-Options">
-        <button
-          type="button"
-          className="banModal-Option"
-          aria-pressed={selected === "event"}
-          onClick={() => setSelected("event")}
-        >
-          <span className="banModal-OptionIcon">
-            <CalendarX size={20} />
-          </span>
-          <span className="banModal-OptionText">
-            <span className="banModal-OptionTitle">
-              {type === "event"
-                ? "Bannir l'événement"
-                : "Retirer de l'événement"}
+        {!isEventDeleted && (
+          <button
+            type="button"
+            className="banModal-Option"
+            aria-pressed={selected === "event"}
+            onClick={() => setSelected("event")}
+          >
+            <span className="banModal-OptionIcon">
+              <CalendarX size={20} />
             </span>
-            <span className="banModal-OptionDesc">
-              {type === "event"
-                ? "Supprimer cet événement des listes publiques immédiatement."
-                : "Retirer cet utilisateur de l'événement, sans bannir son compte."}
+            <span className="banModal-OptionText">
+              <span className="banModal-OptionTitle">
+                {type === "event"
+                  ? "Bannir l'événement"
+                  : "Retirer de l'événement"}
+              </span>
+              <span className="banModal-OptionDesc">
+                {type === "event"
+                  ? "Supprimer cet événement des listes publiques immédiatement."
+                  : "Retirer cet utilisateur de l'événement, sans bannir son compte."}
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+        )}
 
         <button
           type="button"

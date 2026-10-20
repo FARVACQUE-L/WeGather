@@ -1,21 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { RequestHandler } from "express";
+import { removeUpload } from "../../helper/removeUpload";
 import { UPLOADS_DIRECTORY } from "../../middleware/upload";
 import { getIo } from "../../socket";
 import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import messageRepository, { REACTION_EMOJIS } from "./messageRepository";
-
-// Supprime du disque l'image d'un message (chemin « /uploads/<fichier> »).
-// path.basename garde le fichier dans le dossier des envois, quel que soit
-// le chemin enregistré.
-const removeImageFile = async (image: string | null) => {
-  if (!image) return;
-  await fs
-    .unlink(path.join(UPLOADS_DIRECTORY, path.basename(image)))
-    .catch(() => {});
-};
 
 // Extension de chaque format accepté, déjà vérifié par sa signature.
 const IMAGE_EXTENSIONS: Record<string, string> = {
@@ -272,7 +263,7 @@ const deleteMessage: RequestHandler = async (req, res, next) => {
     }
 
     await messageRepository.delete(found.message.message_id);
-    await removeImageFile(found.message.message_image);
+    await removeUpload(found.message.message_image);
 
     getIo()
       .to(`event-${req.params.eventUuid}`)

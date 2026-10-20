@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { RequestHandler } from "express";
 import { getPlanLimits } from "../../helper/planLimits";
+import { removeUpload } from "../../helper/removeUpload";
 import userRepository from "../user/userRepository";
 import eventRepository from "./eventRepository";
 
@@ -164,6 +165,33 @@ const read: RequestHandler = async (req, res, next) => {
   }
 };
 
+// Seul l'hôte, identifié par le cookie de session, peut modifier ou supprimer
+// son événement. Renvoie l'événement, ou null si la réponse d'erreur a déjà
+// été envoyée.
+const readHostedEvent = async (
+  req: Parameters<RequestHandler>[0],
+  res: Parameters<RequestHandler>[1],
+) => {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return null;
+  }
+
+  const event = await eventRepository.readByUuid(req.params.eventUuid);
+
+  if (!event) {
+    res.sendStatus(404);
+    return null;
+  }
+
+  if (event.event_id_host !== req.user.id) {
+    res.status(403).json({ message: "Seul l'hôte peut gérer l'événement." });
+    return null;
+  }
+
+  return event;
+};
+
 const edit: RequestHandler = async (req, res, next) => {
   const {
     event_name,
@@ -178,14 +206,15 @@ const edit: RequestHandler = async (req, res, next) => {
     : undefined;
 
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
+    const event = await readHostedEvent(req, res);
 
-    if (!eventId) {
-      res.sendStatus(404);
+    if (!event) {
+      // multer a déjà écrit la photo sur disque : on ne la garde pas.
+      if (req.file) fs.rmSync(req.file.path, { force: true });
       return;
     }
 
-    await eventRepository.update(eventId, {
+    await eventRepository.update(event.event_id, {
       event_name,
       event_date_start,
       event_date_end,
@@ -193,7 +222,11 @@ const edit: RequestHandler = async (req, res, next) => {
       event_location,
       event_picture,
     });
-    const updatedEvent = await eventRepository.read(eventId);
+    // L'ancienne photo n'est effacée que si une nouvelle la remplace. Le logo
+    // par défaut (sous /assets) est ignoré par removeUpload.
+    if (req.file) await removeUpload(event.event_picture);
+
+    const updatedEvent = await eventRepository.read(event.event_id);
     res.json(updatedEvent);
   } catch (error) {
     next(error);
@@ -201,14 +234,13 @@ const edit: RequestHandler = async (req, res, next) => {
 };
 const deleteEvent: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
+    const event = await readHostedEvent(req, res);
+    if (!event) return;
 
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
-
-    await eventRepository.deleteEvent(eventId);
+    // Les fichiers ne sont effacés qu'une fois la suppression en base réussie.
+    const images = await eventRepository.readImages(event.event_id);
+    await eventRepository.deleteEvent(event.event_id);
+    await Promise.all(images.map(removeUpload));
 
     res.sendStatus(204);
   } catch (error) {

@@ -6,7 +6,10 @@ class reportEventRepository {
   async create(
     reported_event: Omit<
       RepEvent,
-      "reported_event_id" | "reported_event_date" | "reported_event_is_done"
+      | "reported_event_id"
+      | "reported_event_id_host"
+      | "reported_event_date"
+      | "reported_event_is_done"
     >,
     imagePaths: string[],
   ) {
@@ -15,14 +18,21 @@ class reportEventRepository {
     try {
       await connection.beginTransaction();
 
+      // Le créateur est copié depuis l'événement : il reste connu de l'admin
+      // si l'événement est supprimé ensuite.
       const [result] = await connection.query<Result>(
-        "insert into reported_event (reported_event_id_event, reported_event_description, reported_event_by_id_user) values (?, ?, ?)",
+        "insert into reported_event (reported_event_id_event, reported_event_description, reported_event_by_id_user, reported_event_id_host) select event_id, ?, ?, event_id_host from event where event_id = ?",
         [
-          reported_event.reported_event_id_event,
           reported_event.reported_event_description,
           reported_event.reported_event_by_id_user,
+          reported_event.reported_event_id_event,
         ],
       );
+
+      // Événement supprimé entre la vérification de l'action et l'insert.
+      if (result.affectedRows === 0) {
+        throw new Error("Event not found");
+      }
 
       const reportId = result.insertId;
 

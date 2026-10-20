@@ -90,6 +90,14 @@ ORDER BY r.reservation_id DESC;
 
     return results;
   }
+  async read(reservationId: number) {
+    const [rows] = await mysql.query<Rows>(
+      "SELECT * FROM reservation WHERE reservation_id = ?",
+      [reservationId],
+    );
+
+    return rows[0] as (Reservation & { reservation_id: number }) | undefined;
+  }
   async deleteReservation(reservationId: number) {
     const [result] = await mysql.query(
       `

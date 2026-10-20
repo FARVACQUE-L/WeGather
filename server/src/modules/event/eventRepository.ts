@@ -160,45 +160,25 @@ class EventRepository {
       ],
     );
   }
+  // Toutes les images liées à l'événement, à lire avant sa suppression pour
+  // effacer les fichiers ensuite.
+  async readImages(eventId: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT event_picture AS image FROM event WHERE event_id = ?
+      UNION ALL
+      SELECT gallery_link FROM gallery WHERE gallery_id_event = ?
+      UNION ALL
+      SELECT reservation_picture FROM reservation WHERE reservation_id_event = ?
+      UNION ALL
+      SELECT message_image FROM message WHERE message_id_event = ?`,
+      [eventId, eventId, eventId, eventId],
+    );
+    return rows.map((row) => row.image as string | null);
+  }
+
+  // Les tables liées sont vidées par les ON DELETE CASCADE du schéma ; les
+  // signalements sont conservés avec reported_event_id_event à NULL.
   async deleteEvent(eventId: number) {
-    await databaseClient.query("DELETE FROM budget WHERE budget_id_event = ?", [
-      eventId,
-    ]);
-
-    await databaseClient.query(
-      "DELETE FROM event_user_joining WHERE euj_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query(
-      "DELETE FROM reservation WHERE reservation_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query(
-      "DELETE FROM reported_event WHERE reported_event_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query(
-      "DELETE FROM gallery WHERE gallery_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query(
-      "DELETE FROM message WHERE message_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query("DELETE FROM todo WHERE todo_id_event = ?", [
-      eventId,
-    ]);
-
-    await databaseClient.query(
-      "DELETE FROM event_user_ban WHERE eub_id_event = ?",
-      [eventId],
-    );
-
     const [result] = await databaseClient.query(
       "DELETE FROM event WHERE event_id = ?",
       [eventId],
