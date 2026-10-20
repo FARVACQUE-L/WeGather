@@ -198,7 +198,6 @@ FROM user
     const [rows] = await databaseClient.query<Rows>(
       `SELECT 
     re.*,
-    e.event_id_host,
     e.event_name,
     host.user_username AS host_username,
     u.user_username,
@@ -207,7 +206,7 @@ FROM user
   FROM reported_event AS re
   JOIN user AS u ON u.user_id = re.reported_event_by_id_user
   LEFT JOIN event AS e ON e.event_id = re.reported_event_id_event
-  LEFT JOIN user AS host ON host.user_id = e.event_id_host
+  JOIN user AS host ON host.user_id = re.reported_event_id_host
   WHERE re.reported_event_id = ?`,
       [id],
     );

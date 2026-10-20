@@ -110,6 +110,9 @@ CREATE TABLE `reported_event` (
   -- NULL une fois l'événement supprimé : le signalement reste visible par l'admin.
   `reported_event_id_event` INT NULL,
   `reported_event_by_id_user` INT NOT NULL,
+  -- Créateur de l'événement au moment du signalement, pour pouvoir le bannir
+  -- même après la suppression de l'événement.
+  `reported_event_id_host` INT NOT NULL,
   `reported_event_description` VARCHAR(255) NOT NULL,
   `reported_event_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -124,6 +127,10 @@ CREATE TABLE `reported_event` (
 
   CONSTRAINT `fk_reported_event_user`
     FOREIGN KEY (`reported_event_by_id_user`)
+    REFERENCES `user` (`user_id`),
+
+  CONSTRAINT `fk_reported_event_host`
+    FOREIGN KEY (`reported_event_id_host`)
     REFERENCES `user` (`user_id`))
 ENGINE = InnoDB;
 

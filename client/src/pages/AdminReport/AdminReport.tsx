@@ -67,7 +67,7 @@ function AdminReport() {
         const targetId =
           type === "user"
             ? report?.reported_user_id_user
-            : report?.event_id_host;
+            : report?.reported_event_id_host;
 
         response = await fetch(`${API_URL}/api/admin/ban-user/${targetId}`, {
           method: "PATCH",
@@ -206,7 +206,8 @@ function AdminReport() {
 
   const getInfoReport = () => {
     if (type === "user") return report?.target_username ?? "—";
-    if (isEventDeleted) return "Événement supprimé";
+    if (isEventDeleted)
+      return `Événement supprimé, créé par ${report?.host_username ?? "—"}`;
     if (type === "event")
       return `${report?.event_name ?? "—"} créé par ${report?.host_username ?? "—"}`;
     return "—";
@@ -352,7 +353,7 @@ function AdminReport() {
 
             <section aria-labelledby="actions" className="adminReport-Action">
               <h2 id="actions">Actions</h2>
-              {type !== "bug" && !isEventDeleted && (
+              {type !== "bug" && (
                 <button type="button" onClick={() => setIsModalOpen(true)}>
                   <Gavel size={16} />
                   Bannir
@@ -369,6 +370,7 @@ function AdminReport() {
       <ReportAdminModal
         open={isModalOpen}
         type={type}
+        isEventDeleted={isEventDeleted}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleBanConfirm}
       />
