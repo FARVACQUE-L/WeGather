@@ -2,6 +2,7 @@ import fs from "node:fs";
 import type { RequestHandler } from "express";
 
 import { getPlanLimits } from "../../helper/planLimits";
+import { removeUpload } from "../../helper/removeUpload";
 import eventRepository from "../event/eventRepository";
 import galleryRepository from "./galleryRepository";
 
@@ -147,6 +148,7 @@ const destroy: RequestHandler = async (req, res, next) => {
     }
 
     const resultAffectedRows = await galleryRepository.delete(galleryId);
+    await removeUpload(photo.gallery_link);
     res.status(200).json({ resultAffectedRows });
   } catch (err) {
     next(err);

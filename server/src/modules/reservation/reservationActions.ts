@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
 import { getPlanLimits } from "../../helper/planLimits";
+import { removeUpload } from "../../helper/removeUpload";
 import eventRepository from "../event/eventRepository";
 import reservationRepository from "./reservationRepository";
 
@@ -130,12 +131,18 @@ const updateReservation: RequestHandler = async (req, res, next) => {
       !reservation_location ||
       !reservation_description
     ) {
+      // multer a déjà écrit l'image sur disque : on ne la garde pas.
+      if (req.file) fs.rmSync(req.file.path, { force: true });
       res.status(400).json({ message: "Veuillez remplir tous les champs." });
       return;
     }
 
     const reservation_picture = req.file
       ? `/uploads/${req.file.filename}`
+      : null;
+    // Ancienne image, effacée seulement si une nouvelle la remplace.
+    const oldPicture = req.file
+      ? await reservationRepository.readPicture(reservationId)
       : null;
 
     const result = await reservationRepository.updateReservation(
@@ -149,6 +156,7 @@ const updateReservation: RequestHandler = async (req, res, next) => {
         reservation_picture,
       },
     );
+    await removeUpload(oldPicture);
 
     res.json(result);
   } catch (error) {
@@ -160,7 +168,9 @@ const deleteReservation: RequestHandler = async (req, res, next) => {
   try {
     const reservationId = Number(req.params.id);
 
+    const picture = await reservationRepository.readPicture(reservationId);
     await reservationRepository.deleteReservation(reservationId);
+    await removeUpload(picture);
 
     res.sendStatus(204);
   } catch (error) {
