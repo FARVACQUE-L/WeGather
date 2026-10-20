@@ -1,0 +1,134 @@
+.premium {
+  /* Mêmes marges que la page Info du groupe. */
+  padding: 3rem 3rem 2rem 0;
+  width: 70.5vw;
+
+  h1 {
+    color: var(--font-title);
+    margin-bottom: 1.5rem;
+  }
+
+  /* Le tableau défile horizontalement plutôt que de déborder sur petit
+     écran. */
+  .premium-table-wrapper {
+    overflow-x: auto;
+    background: var(--bg-neutral);
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .premium-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+
+    th,
+    td {
+      padding: 1rem;
+    }
+
+    /* Même largeur pour les trois offres : sinon le bouton plus long de
+       Premium+ élargit sa colonne et décentre celle de Premium. */
+    thead th:not(:first-child) {
+      width: 22%;
+    }
+
+    thead th {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--font-darkBrown);
+      background: var(--bg-composant-dash);
+
+      &.is-paid {
+        color: var(--font-brown);
+
+        svg {
+          vertical-align: -2px;
+          margin-right: 0.4rem;
+        }
+      }
+    }
+
+    tbody tr {
+      border-top: 1px solid var(--border-inline);
+    }
+
+    tbody th {
+      text-align: left;
+      font-weight: 500;
+      color: var(--font-darkBrown);
+    }
+
+    tbody td {
+      font-weight: 600;
+      color: var(--font-black);
+    }
+
+    .premium-price th,
+    .premium-price td {
+      font-weight: 700;
+      color: var(--font-title);
+      /* Respecte les retours à la ligne des tarifs (« tarif unique » sous
+         le prix). */
+      white-space: pre-line;
+    }
+
+    .premium-included {
+      color: var(--font-green);
+      vertical-align: middle;
+    }
+
+    /* Même style que le bouton de création d'événement
+       (.CreateForm-ButtonSubmit), sans sa largeur fixe. */
+    .premium-cta {
+      height: 2rem;
+      padding: 0 1rem;
+      border-radius: 1rem;
+      border: none;
+      background: linear-gradient(to right, #ff7e5f, #a53b22);
+      color: var(--font-neutral);
+      box-shadow: 1px 1px 5px black;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    @media (hover: hover) and (min-width: 429px) {
+      .premium-cta:hover {
+        transform: scale(0.95);
+      }
+    }
+  }
+}
+
+/* Sidebar en barre du bas : mêmes marges que la page Info du groupe. */
+@media screen and (min-width: 429px) and (max-width: 875px) {
+  .premium {
+    width: 100%;
+    padding: calc(4vh + 3rem) 4vw calc(70px + 5vh);
+  }
+}
+@media screen and (max-width: 428px) {
+  .premium {
+    width: 100%;
+    padding: calc(4vh + 3rem) 1rem 6rem 1rem;
+
+    h1 {
+      font-size: 33px;
+    }
+
+    .premium-table {
+      font-size: 0.85rem;
+
+      th,
+      td {
+        padding: 0.7rem 0.5rem;
+      }
+
+      .premium-cta {
+        padding: 0 0.8rem;
+        border: 1px solid var(--border-color);
+      }
+    }
+  }
+}
