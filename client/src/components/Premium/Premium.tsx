@@ -36,6 +36,7 @@ const MAX_RESERVATIONS = 10;
 const FEATURES: {
   label: string;
   value: (plan: Plan) => string | number | true;
+  className?: string;
 }[] = [
   { label: "Événements organisés", value: (plan) => plan.hostedEvents },
   { label: "Événements rejoints", value: () => "Illimité" },
@@ -48,7 +49,11 @@ const FEATURES: {
     value: (plan) => plan.galleryPhotos,
   },
   { label: "Signalement", value: () => true },
-  { label: "Tarif", value: (plan) => plan.price },
+  {
+    label: "Tarif",
+    value: (plan) => plan.price,
+    className: "premium-price",
+  },
 ];
 
 function Premium() {
@@ -86,7 +91,7 @@ function Premium() {
           </thead>
           <tbody>
             {FEATURES.map((feature) => (
-              <tr key={feature.label}>
+              <tr key={feature.label} className={feature.className}>
                 <th scope="row">{feature.label}</th>
                 {PLANS.map((plan) => {
                   const value = feature.value(plan);

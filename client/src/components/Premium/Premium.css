@@ -64,6 +64,12 @@
       color: var(--font-black);
     }
 
+    .premium-price th,
+    .premium-price td {
+      font-weight: 700;
+      color: var(--font-title);
+    }
+
     .premium-included {
       color: var(--font-green);
       vertical-align: middle;
