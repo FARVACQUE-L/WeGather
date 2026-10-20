@@ -6,23 +6,26 @@ type Plan = {
   name: string;
   hostedEvents: number;
   galleryPhotos: number;
+  price: string;
   // Libellé du bouton d'abonnement ; absent pour la formule gratuite.
   cta?: string;
 };
 
 // Mêmes valeurs que server/src/helper/planLimits.ts.
 const PLANS: Plan[] = [
-  { name: "Free", hostedEvents: 2, galleryPhotos: 15 },
+  { name: "Free", hostedEvents: 2, galleryPhotos: 15, price: "Gratuit" },
   {
     name: "Premium",
     hostedEvents: 5,
     galleryPhotos: 30,
+    price: "4,90 € (tarif unique)",
     cta: "Passer au Premium",
   },
   {
     name: "Premium+",
     hostedEvents: 10,
     galleryPhotos: 50,
+    price: "9,90 € / mois",
     cta: "Passer au Premium+",
   },
 ];
@@ -45,6 +48,7 @@ const FEATURES: {
     value: (plan) => plan.galleryPhotos,
   },
   { label: "Signalement", value: () => true },
+  { label: "Tarif", value: (plan) => plan.price },
 ];
 
 function Premium() {
