@@ -166,9 +166,9 @@ const read: RequestHandler = async (req, res, next) => {
 };
 
 // Seul l'hôte, identifié par le cookie de session, peut modifier ou supprimer
-// son événement. Renvoie l'id de l'événement, ou null si la réponse d'erreur
-// a déjà été envoyée.
-const readHostedEventId = async (
+// son événement. Renvoie l'événement, ou null si la réponse d'erreur a déjà
+// été envoyée.
+const readHostedEvent = async (
   req: Parameters<RequestHandler>[0],
   res: Parameters<RequestHandler>[1],
 ) => {
@@ -189,7 +189,7 @@ const readHostedEventId = async (
     return null;
   }
 
-  return event.event_id as number;
+  return event;
 };
 
 const edit: RequestHandler = async (req, res, next) => {
@@ -206,15 +206,15 @@ const edit: RequestHandler = async (req, res, next) => {
     : undefined;
 
   try {
-    const eventId = await readHostedEventId(req, res);
+    const event = await readHostedEvent(req, res);
 
-    if (!eventId) {
+    if (!event) {
       // multer a déjà écrit la photo sur disque : on ne la garde pas.
       if (req.file) fs.rmSync(req.file.path, { force: true });
       return;
     }
 
-    await eventRepository.update(eventId, {
+    await eventRepository.update(event.event_id, {
       event_name,
       event_date_start,
       event_date_end,
@@ -222,7 +222,11 @@ const edit: RequestHandler = async (req, res, next) => {
       event_location,
       event_picture,
     });
-    const updatedEvent = await eventRepository.read(eventId);
+    // L'ancienne photo n'est effacée que si une nouvelle la remplace. Le logo
+    // par défaut (sous /assets) est ignoré par removeUpload.
+    if (req.file) await removeUpload(event.event_picture);
+
+    const updatedEvent = await eventRepository.read(event.event_id);
     res.json(updatedEvent);
   } catch (error) {
     next(error);
@@ -230,12 +234,12 @@ const edit: RequestHandler = async (req, res, next) => {
 };
 const deleteEvent: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await readHostedEventId(req, res);
-    if (!eventId) return;
+    const event = await readHostedEvent(req, res);
+    if (!event) return;
 
     // Les fichiers ne sont effacés qu'une fois la suppression en base réussie.
-    const images = await eventRepository.readImages(eventId);
-    await eventRepository.deleteEvent(eventId);
+    const images = await eventRepository.readImages(event.event_id);
+    await eventRepository.deleteEvent(event.event_id);
     await Promise.all(images.map(removeUpload));
 
     res.sendStatus(204);
