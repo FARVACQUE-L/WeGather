@@ -22,11 +22,11 @@ const PLANS: Plan[] = [
     cta: "Passer au Premium",
   },
   {
-    name: "Premium+",
+    name: "Gold",
     hostedEvents: 10,
     galleryPhotos: 50,
     price: "9,90 € / mois",
-    cta: "Passer au Premium+",
+    cta: "Passer au Gold",
   },
 ];
 

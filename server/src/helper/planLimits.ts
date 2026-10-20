@@ -1,6 +1,6 @@
 // Limites de chaque formule (colonne user.user_plan). Rejoindre des
 // événements reste illimité quelle que soit la formule.
-export type UserPlan = "free" | "premium" | "premium_plus";
+export type UserPlan = "free" | "premium" | "gold";
 
 export const PLAN_LIMITS: Record<
   UserPlan,
@@ -8,7 +8,7 @@ export const PLAN_LIMITS: Record<
 > = {
   free: { hostedEvents: 2, galleryPhotos: 15 },
   premium: { hostedEvents: 5, galleryPhotos: 30 },
-  premium_plus: { hostedEvents: 10, galleryPhotos: 50 },
+  gold: { hostedEvents: 10, galleryPhotos: 50 },
 };
 
 // Réservations par événement : même limite pour toutes les formules.
