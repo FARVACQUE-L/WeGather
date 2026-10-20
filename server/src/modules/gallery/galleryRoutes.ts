@@ -25,7 +25,6 @@ galleryRoutes.post(
   galleryActions.uploadPhoto,
 );
 
-galleryRoutes.post("/api/gallery", authorization, galleryActions.add);
 galleryRoutes.delete(
   "/api/gallery/:gallery_id/:userId",
   authorization,

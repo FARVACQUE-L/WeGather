@@ -44,42 +44,6 @@ const browse: RequestHandler = async (req, res, next) => {
   }
 };
 
-const add: RequestHandler = async (req, res, next) => {
-  try {
-    const eventId = await eventRepository.readIdByUuid(req.body.event_uuid);
-    const userId = Number(req.body.gallery_id_user);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
-
-    const permissions = await galleryRepository.checkUserPermissions(
-      eventId,
-      userId,
-    );
-    if (!permissions.isParticipant) {
-      res.status(403).json({
-        message: "Action interdite : vous devez participer à l'événement.",
-      });
-      return;
-    }
-
-    const newGallery = {
-      gallery_id_event: eventId,
-      gallery_id_user: userId,
-      gallery_link: req.body.gallery_link,
-
-      gallery_description: req.body.gallery_description,
-    };
-
-    const insertId = await galleryRepository.create(newGallery);
-    res.status(201).json({ insertId });
-  } catch (err) {
-    next(err);
-  }
-};
-
 const uploadPhoto: RequestHandler = async (req, res, next) => {
   try {
     if (!req.file) {
@@ -259,7 +223,6 @@ const removeLike: RequestHandler = async (req, res, next) => {
 export default {
   browse,
   readLimit,
-  add,
   destroy,
   uploadPhoto,
   edit,
