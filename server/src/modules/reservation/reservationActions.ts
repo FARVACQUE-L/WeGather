@@ -69,8 +69,16 @@ const readAllReservation: RequestHandler = async (req, res, next) => {
 };
 const addReservation: RequestHandler = async (req, res, next) => {
   try {
+    if (!req.user) {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    // L'auteur est l'utilisateur du cookie de session, jamais un id envoyé
+    // par le client.
+    const reservation_id_user = req.user.id;
     const {
-      reservation_id_user,
       reservation_name,
       reservation_date,
       reservation_location,
@@ -115,9 +123,42 @@ const addReservation: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+// L'auteur peut gérer sa réservation, l'hôte n'importe quelle réservation de
+// son événement. Renvoie la réservation, ou undefined si la réponse d'erreur
+// a déjà été envoyée.
+const readManagedReservation = async (
+  req: Parameters<RequestHandler>[0],
+  res: Parameters<RequestHandler>[1],
+) => {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return undefined;
+  }
+
+  const reservation = await reservationRepository.read(Number(req.params.id));
+  if (!reservation) {
+    res.sendStatus(404);
+    return undefined;
+  }
+
+  const isAuthor = reservation.reservation_id_user === req.user.id;
+  const [event] = await eventRepository.readEventHostId(
+    reservation.reservation_id_event,
+  );
+  const isHost = event?.event_id_host === req.user.id;
+
+  if (!isAuthor && !isHost) {
+    res
+      .status(403)
+      .json({ message: "Vous ne pouvez pas gérer cette réservation." });
+    return undefined;
+  }
+
+  return reservation;
+};
+
 const updateReservation: RequestHandler = async (req, res, next) => {
   try {
-    const reservationId = Number(req.params.id);
     const {
       reservation_name,
       reservation_date,
@@ -137,16 +178,18 @@ const updateReservation: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    const reservation = await readManagedReservation(req, res);
+    if (!reservation) {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      return;
+    }
+
     const reservation_picture = req.file
       ? `/uploads/${req.file.filename}`
       : null;
-    // Ancienne image, effacée seulement si une nouvelle la remplace.
-    const oldPicture = req.file
-      ? await reservationRepository.readPicture(reservationId)
-      : null;
 
     const result = await reservationRepository.updateReservation(
-      reservationId,
+      reservation.reservation_id,
       {
         reservation_name,
         reservation_date,
@@ -156,7 +199,8 @@ const updateReservation: RequestHandler = async (req, res, next) => {
         reservation_picture,
       },
     );
-    await removeUpload(oldPicture);
+    // L'ancienne image n'est effacée que si une nouvelle la remplace.
+    if (req.file) await removeUpload(reservation.reservation_picture);
 
     res.json(result);
   } catch (error) {
@@ -166,11 +210,11 @@ const updateReservation: RequestHandler = async (req, res, next) => {
 
 const deleteReservation: RequestHandler = async (req, res, next) => {
   try {
-    const reservationId = Number(req.params.id);
+    const reservation = await readManagedReservation(req, res);
+    if (!reservation) return;
 
-    const picture = await reservationRepository.readPicture(reservationId);
-    await reservationRepository.deleteReservation(reservationId);
-    await removeUpload(picture);
+    await reservationRepository.deleteReservation(reservation.reservation_id);
+    await removeUpload(reservation.reservation_picture);
 
     res.sendStatus(204);
   } catch (error) {

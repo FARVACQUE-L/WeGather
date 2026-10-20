@@ -87,10 +87,19 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    if (!req.user) {
+      fs.rmSync(req.file.path, { force: true });
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const eventId = await eventRepository.readIdByUuid(req.body.event_uuid);
-    const userId = Number(req.body.gallery_id_user);
+    // L'auteur est l'utilisateur du cookie de session, jamais un id envoyé
+    // par le client.
+    const userId = req.user.id;
 
     if (!eventId) {
+      fs.rmSync(req.file.path, { force: true });
       res.sendStatus(404);
       return;
     }
@@ -100,6 +109,7 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
       userId,
     );
     if (!permissions.isParticipant) {
+      fs.rmSync(req.file.path, { force: true });
       res.status(403).json({
         message: "Action interdite : vous devez participer à l'événement.",
       });
@@ -137,17 +147,43 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
   }
 };
 
+// L'auteur peut gérer sa photo, l'hôte n'importe quelle photo de son
+// événement. L'utilisateur est celui du cookie de session, jamais le userId
+// de l'URL. Renvoie la photo, ou undefined si la réponse d'erreur a déjà été
+// envoyée.
+const readManagedPhoto = async (
+  req: Parameters<RequestHandler>[0],
+  res: Parameters<RequestHandler>[1],
+) => {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return undefined;
+  }
+
+  const photo = await galleryRepository.read(Number(req.params.gallery_id));
+  if (!photo) {
+    res.status(404).json({ message: "Photo introuvable" });
+    return undefined;
+  }
+
+  const isAuthor = photo.gallery_id_user === req.user.id;
+  const [event] = await eventRepository.readEventHostId(photo.gallery_id_event);
+  const isHost = event?.event_id_host === req.user.id;
+
+  if (!isAuthor && !isHost) {
+    res.status(403).json({ message: "Vous ne pouvez pas gérer cette photo." });
+    return undefined;
+  }
+
+  return photo;
+};
+
 const destroy: RequestHandler = async (req, res, next) => {
   try {
-    const galleryId = Number(req.params.gallery_id);
+    const photo = await readManagedPhoto(req, res);
+    if (!photo) return;
 
-    const photo = await galleryRepository.read(galleryId);
-    if (!photo) {
-      res.status(404).json({ message: "Photo introuvable" });
-      return;
-    }
-
-    const resultAffectedRows = await galleryRepository.delete(galleryId);
+    const resultAffectedRows = await galleryRepository.delete(photo.gallery_id);
     await removeUpload(photo.gallery_link);
     res.status(200).json({ resultAffectedRows });
   } catch (err) {
@@ -157,16 +193,13 @@ const destroy: RequestHandler = async (req, res, next) => {
 
 const edit: RequestHandler = async (req, res, next) => {
   try {
-    const galleryId = Number(req.params.gallery_id);
+    const photo = await readManagedPhoto(req, res);
+    if (!photo) return;
 
-    const description = req.body.gallery_description;
-
-    const photo = await galleryRepository.read(galleryId);
-    if (!photo) {
-      res.status(404).json({ message: "Photo introuvable" });
-      return;
-    }
-    await galleryRepository.updateDescription(galleryId, description);
+    await galleryRepository.updateDescription(
+      photo.gallery_id,
+      req.body.gallery_description,
+    );
 
     res.status(200).json({ message: "Description modifiée avec succès !" });
   } catch (err) {
