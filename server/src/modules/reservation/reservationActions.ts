@@ -85,12 +85,28 @@ const addReservation: RequestHandler = async (req, res, next) => {
       reservation_description,
     } = req.body;
 
-    const reservation_picture = req.file
-      ? `/uploads/${req.file.filename}`
-      : null;
+    // L'image est obligatoire à la création (colonne NOT NULL), comme dans le
+    // formulaire du client.
+    if (
+      !reservation_name ||
+      !reservation_date ||
+      !reservation_location ||
+      !reservation_description ||
+      !req.file
+    ) {
+      // multer a déjà écrit l'image sur disque : on ne la garde pas.
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      res.status(400).json({
+        message: "Veuillez remplir tous les champs et ajouter une image.",
+      });
+      return;
+    }
+
+    const reservation_picture = `/uploads/${req.file.filename}`;
     const eventId = await eventRepository.readIdByUuid(req.body.event_uuid);
 
     if (!eventId) {
+      fs.rmSync(req.file.path, { force: true });
       res.sendStatus(404);
       return;
     }
@@ -99,8 +115,7 @@ const addReservation: RequestHandler = async (req, res, next) => {
     if (
       (await reservationRepository.countByEvent(eventId)) >= maxReservations
     ) {
-      // multer a déjà écrit l'image sur disque : on ne la garde pas.
-      if (req.file) fs.rmSync(req.file.path, { force: true });
+      fs.rmSync(req.file.path, { force: true });
       res.status(403).json({
         message: `Un événement est limité à ${maxReservations} réservations.`,
       });
