@@ -28,8 +28,6 @@ type Reservation = {
 };
 
 const STARTS_WITH_URL = /^https?:\/\//i;
-// Même limite que le serveur (planLimits.ts), pour toutes les formules.
-const MAX_RESERVATIONS = 10;
 
 // La capitalisation s'applique à chaque frappe : au moment où l'on tape « h »,
 // le champ contient déjà « H ». Dès que le schéma est reconnaissable, on le
@@ -47,6 +45,10 @@ function Reservation() {
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  // Limite de réservations selon la formule de l'organisateur, donnée par le
+  // serveur. null quand elle n'est pas encore connue ou que la formule n'en
+  // a pas : seul le serveur bloque alors l'ajout.
+  const [reservationLimit, setReservationLimit] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reservationName, setReservationName] = useState("");
   const [reservationDate, setReservationDate] = useState("");
@@ -130,6 +132,16 @@ function Reservation() {
       .then((data) => {
         setEventName(data);
       });
+  }, [eventUuid]);
+
+  useEffect(() => {
+    if (!eventUuid) return;
+    fetch(`${API_URL}/api/reservations/${eventUuid}/limit`, {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setReservationLimit(data?.limit ?? null))
+      .catch(console.error);
   }, [eventUuid]);
 
   const toast = Swal.mixin({
@@ -305,10 +317,13 @@ function Reservation() {
           onClick={() => {
             // Limite atteinte : on le dit tout de suite au lieu d'ouvrir une
             // modale dont l'envoi serait refusé.
-            if (reservations.length >= MAX_RESERVATIONS) {
+            if (
+              reservationLimit !== null &&
+              reservations.length >= reservationLimit
+            ) {
               toast.fire({
                 icon: "error",
-                text: `Un événement est limité à ${MAX_RESERVATIONS} réservations.`,
+                text: `Un événement est limité à ${reservationLimit} réservations.`,
                 customClass: { popup: "toast-error-popup" },
               });
               return;

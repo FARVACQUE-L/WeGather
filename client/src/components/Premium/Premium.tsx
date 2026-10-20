@@ -6,6 +6,7 @@ type Plan = {
   name: string;
   hostedEvents: number;
   galleryPhotos: number;
+  reservations: number;
   price: string;
   // Libellé du bouton d'abonnement ; absent pour la formule gratuite.
   cta?: string;
@@ -13,11 +14,18 @@ type Plan = {
 
 // Mêmes valeurs que server/src/helper/planLimits.ts.
 const PLANS: Plan[] = [
-  { name: "Free", hostedEvents: 2, galleryPhotos: 15, price: "Gratuit" },
+  {
+    name: "Free",
+    hostedEvents: 2,
+    galleryPhotos: 15,
+    reservations: 10,
+    price: "Gratuit",
+  },
   {
     name: "Premium",
     hostedEvents: 5,
     galleryPhotos: 30,
+    reservations: 10,
     price: "4,90 €\n(tarif unique)",
     cta: "Passer au Premium",
   },
@@ -25,12 +33,15 @@ const PLANS: Plan[] = [
     name: "Gold",
     hostedEvents: Infinity,
     galleryPhotos: 50,
+    reservations: Infinity,
     price: "9,90 € / mois",
     cta: "Passer au Gold",
   },
 ];
 
-const MAX_RESERVATIONS = 10;
+// Infinity : pas de limite.
+const formatLimit = (limit: number) =>
+  limit === Infinity ? "Illimité" : limit;
 
 // true : fonctionnalité incluse, affichée par une coche.
 const FEATURES: {
@@ -40,13 +51,15 @@ const FEATURES: {
 }[] = [
   {
     label: "Événements organisés",
-    value: (plan) =>
-      plan.hostedEvents === Infinity ? "Illimité" : plan.hostedEvents,
+    value: (plan) => formatLimit(plan.hostedEvents),
   },
   { label: "Événements rejoints", value: () => "Illimité" },
   { label: "To-do list", value: () => true },
   { label: "Messagerie en temps réel", value: () => true },
-  { label: "Réservations par événement", value: () => MAX_RESERVATIONS },
+  {
+    label: "Réservations par événement",
+    value: (plan) => formatLimit(plan.reservations),
+  },
   { label: "Budget partagé", value: () => true },
   {
     label: "Galerie partagée / photos par galerie",

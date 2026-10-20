@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
-import { MAX_RESERVATIONS } from "../../helper/planLimits";
+import { getPlanLimits } from "../../helper/planLimits";
 import eventRepository from "../event/eventRepository";
 import reservationRepository from "./reservationRepository";
 
@@ -27,6 +27,25 @@ const browse: RequestHandler = async (req, res, next) => {
       await reservationRepository.readReservationDescriptionEvent(eventId);
 
     res.json(event);
+  } catch (error) {
+    next(error);
+  }
+};
+// Nombre de réservations d'un événement selon la formule de l'organisateur.
+// Infinity (sans limite) est envoyé en JSON comme null.
+const readReservationLimit = async (eventId: number) =>
+  getPlanLimits(await eventRepository.readHostPlan(eventId)).reservations;
+
+const readLimit: RequestHandler = async (req, res, next) => {
+  try {
+    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
+
+    if (!eventId) {
+      res.sendStatus(404);
+      return;
+    }
+
+    res.json({ limit: await readReservationLimit(eventId) });
   } catch (error) {
     next(error);
   }
@@ -67,13 +86,14 @@ const addReservation: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    const maxReservations = await readReservationLimit(eventId);
     if (
-      (await reservationRepository.countByEvent(eventId)) >= MAX_RESERVATIONS
+      (await reservationRepository.countByEvent(eventId)) >= maxReservations
     ) {
       // multer a déjà écrit l'image sur disque : on ne la garde pas.
       if (req.file) fs.rmSync(req.file.path, { force: true });
       res.status(403).json({
-        message: `Un événement est limité à ${MAX_RESERVATIONS} réservations.`,
+        message: `Un événement est limité à ${maxReservations} réservations.`,
       });
       return;
     }
@@ -150,6 +170,7 @@ const deleteReservation: RequestHandler = async (req, res, next) => {
 
 export default {
   browse,
+  readLimit,
   readAllReservation,
   addReservation,
   updateReservation,

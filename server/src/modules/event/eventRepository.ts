@@ -58,6 +58,18 @@ class EventRepository {
     );
     return Number(rows[0].total);
   }
+  // Les limites d'un événement (photos de la galerie, réservations) suivent
+  // la formule de l'organisateur, pas celle de qui ajoute l'élément.
+  async readHostPlan(eventId: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT u.user_plan
+      FROM event e
+      JOIN user u ON u.user_id = e.event_id_host
+      WHERE e.event_id = ?`,
+      [eventId],
+    );
+    return rows[0]?.user_plan as string | undefined;
+  }
   async isUserBanned(eventId: number, userId: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT * FROM event_user_ban WHERE eub_id_event = ? AND eub_id_user = ?",
