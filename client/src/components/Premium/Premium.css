@@ -82,6 +82,9 @@
        (.CreateForm-ButtonSubmit), sans sa largeur fixe. */
     .premium-cta {
       height: 2rem;
+      /* Assez large pour « Passer au Premium » : « Passer au Gold », plus
+         court, prend la même taille. */
+      min-width: 10rem;
       padding: 0 1rem;
       border-radius: 1rem;
       border: none;
