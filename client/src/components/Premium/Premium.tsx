@@ -23,7 +23,7 @@ const PLANS: Plan[] = [
   },
   {
     name: "Gold",
-    hostedEvents: 10,
+    hostedEvents: Infinity,
     galleryPhotos: 50,
     price: "9,90 € / mois",
     cta: "Passer au Gold",
@@ -38,7 +38,11 @@ const FEATURES: {
   value: (plan: Plan) => string | number | true;
   className?: string;
 }[] = [
-  { label: "Événements organisés", value: (plan) => plan.hostedEvents },
+  {
+    label: "Événements organisés",
+    value: (plan) =>
+      plan.hostedEvents === Infinity ? "Illimité" : plan.hostedEvents,
+  },
   { label: "Événements rejoints", value: () => "Illimité" },
   { label: "To-do list", value: () => true },
   { label: "Messagerie en temps réel", value: () => true },
