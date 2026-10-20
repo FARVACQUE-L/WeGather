@@ -27,8 +27,8 @@
       padding: 1rem;
     }
 
-    /* Même largeur pour les trois offres : sinon le bouton plus long de
-       Premium+ élargit sa colonne et décentre celle de Premium. */
+    /* Même largeur pour les trois offres : sinon les colonnes suivent la
+       longueur de leur bouton et celle de Premium n'est plus centrée. */
     thead th:not(:first-child) {
       width: 22%;
     }
@@ -82,6 +82,9 @@
        (.CreateForm-ButtonSubmit), sans sa largeur fixe. */
     .premium-cta {
       height: 2rem;
+      /* Assez large pour « Passer au Premium » : « Passer au Gold », plus
+         court, prend la même taille. */
+      min-width: 10rem;
       padding: 0 1rem;
       border-radius: 1rem;
       border: none;

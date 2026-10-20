@@ -9,7 +9,7 @@ import galleryRepository from "./galleryRepository";
 // confondus, selon la formule de l'organisateur. Supprimer une photo libère
 // sa place.
 const readPhotoLimit = async (eventId: number) =>
-  getPlanLimits(await galleryRepository.readHostPlan(eventId)).galleryPhotos;
+  getPlanLimits(await eventRepository.readHostPlan(eventId)).galleryPhotos;
 
 const readLimit: RequestHandler = async (req, res, next) => {
   try {

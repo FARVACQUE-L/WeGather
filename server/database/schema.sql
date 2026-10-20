@@ -25,7 +25,7 @@ CREATE TABLE `user` (
   `user_is_ban` TINYINT(1) NOT NULL DEFAULT 0,
   -- Formule de l'abonnement : fixe le nombre d'événements créés et de photos
   -- par galerie (src/helper/planLimits.ts).
-  `user_plan` ENUM('free', 'premium', 'premium_plus') NOT NULL DEFAULT 'free',
+  `user_plan` ENUM('free', 'premium', 'gold') NOT NULL DEFAULT 'free',
 
   PRIMARY KEY (`user_id`),
 

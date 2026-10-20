@@ -35,19 +35,6 @@ class GalleryRepository {
     return Number(rows[0].total);
   }
 
-  // La galerie appartient à l'événement : sa limite suit la formule de
-  // l'organisateur, pas celle de qui ajoute la photo.
-  async readHostPlan(gallery_id_event: number) {
-    const [rows] = await databaseClient.query<Rows>(
-      `SELECT u.user_plan
-      FROM event e
-      JOIN user u ON u.user_id = e.event_id_host
-      WHERE e.event_id = ?`,
-      [gallery_id_event],
-    );
-    return rows[0]?.user_plan as string | undefined;
-  }
-
   async read(gallery_id: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT * FROM gallery WHERE gallery_id = ?",

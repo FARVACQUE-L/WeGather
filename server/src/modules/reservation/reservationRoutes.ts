@@ -11,6 +11,11 @@ reservationRoutes.get(
   reservationActions.browse,
 );
 reservationRoutes.get(
+  "/api/reservations/:eventUuid/limit",
+  authorization,
+  reservationActions.readLimit,
+);
+reservationRoutes.get(
   "/api/reservations/all/:eventUuid",
   authorization,
   reservationActions.readAllReservation,
