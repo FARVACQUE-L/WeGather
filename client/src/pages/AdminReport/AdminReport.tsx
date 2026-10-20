@@ -200,8 +200,13 @@ function AdminReport() {
 
   const getImages = (): string[] => report?.images ?? [];
 
+  // Événement supprimé par son créateur : le signalement reste, sans cible.
+  const isEventDeleted =
+    type === "event" && report?.reported_event_id_event == null;
+
   const getInfoReport = () => {
     if (type === "user") return report?.target_username ?? "—";
+    if (isEventDeleted) return "Événement supprimé";
     if (type === "event")
       return `${report?.event_name ?? "—"} créé par ${report?.host_username ?? "—"}`;
     return "—";
@@ -347,7 +352,7 @@ function AdminReport() {
 
             <section aria-labelledby="actions" className="adminReport-Action">
               <h2 id="actions">Actions</h2>
-              {type !== "bug" && (
+              {type !== "bug" && !isEventDeleted && (
                 <button type="button" onClick={() => setIsModalOpen(true)}>
                   <Gavel size={16} />
                   Bannir

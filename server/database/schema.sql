@@ -107,7 +107,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE `reported_event` (
   `reported_event_id` INT NOT NULL AUTO_INCREMENT,
-  `reported_event_id_event` INT NOT NULL,
+  -- NULL une fois l'événement supprimé : le signalement reste visible par l'admin.
+  `reported_event_id_event` INT NULL,
   `reported_event_by_id_user` INT NOT NULL,
   `reported_event_description` VARCHAR(255) NOT NULL,
   `reported_event_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -118,7 +119,8 @@ CREATE TABLE `reported_event` (
 
   CONSTRAINT `fk_reported_event_event`
     FOREIGN KEY (`reported_event_id_event`)
-    REFERENCES `event` (`event_id`),
+    REFERENCES `event` (`event_id`)
+    ON DELETE SET NULL,
 
   CONSTRAINT `fk_reported_event_user`
     FOREIGN KEY (`reported_event_by_id_user`)
@@ -205,7 +207,8 @@ CREATE TABLE `message` (
 
   CONSTRAINT `fk_message_event`
     FOREIGN KEY (`message_id_event`)
-    REFERENCES `event` (`event_id`),
+    REFERENCES `event` (`event_id`)
+    ON DELETE CASCADE,
 
   CONSTRAINT `fk_message_reply_to`
     FOREIGN KEY (`message_reply_to`)
@@ -285,7 +288,8 @@ CREATE TABLE `budget` (
 
   CONSTRAINT `fk_budget_event`
     FOREIGN KEY (`budget_id_event`)
-    REFERENCES `event` (`event_id`))
+    REFERENCES `event` (`event_id`)
+    ON DELETE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -310,7 +314,8 @@ CREATE TABLE `todo` (
 
   CONSTRAINT `fk_todo_event`
     FOREIGN KEY (`todo_id_event`)
-    REFERENCES `event` (`event_id`))
+    REFERENCES `event` (`event_id`)
+    ON DELETE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -333,7 +338,8 @@ CREATE TABLE `reservation` (
 
   CONSTRAINT `fk_reservation_event`
     FOREIGN KEY (`reservation_id_event`)
-    REFERENCES `event` (`event_id`),
+    REFERENCES `event` (`event_id`)
+    ON DELETE CASCADE,
 
   CONSTRAINT `fk_reservation_user`
     FOREIGN KEY (`reservation_id_user`)
@@ -356,7 +362,8 @@ CREATE TABLE `gallery` (
 
   CONSTRAINT `fk_gallery_event`
     FOREIGN KEY (`gallery_id_event`)
-    REFERENCES `event` (`event_id`),
+    REFERENCES `event` (`event_id`)
+    ON DELETE CASCADE,
 
   CONSTRAINT `fk_gallery_user`
     FOREIGN KEY (`gallery_id_user`)
@@ -395,7 +402,8 @@ CREATE TABLE `event_user_ban` (
 
   CONSTRAINT `fk_eub_event`
     FOREIGN KEY (`eub_id_event`)
-    REFERENCES `event` (`event_id`),
+    REFERENCES `event` (`event_id`)
+    ON DELETE CASCADE,
 
   CONSTRAINT `fk_eub_user`
     FOREIGN KEY (`eub_id_user`)
@@ -414,7 +422,8 @@ CREATE TABLE `event_user_joining` (
 
   CONSTRAINT `fk_euj_event`
     FOREIGN KEY (`euj_id_event`)
-    REFERENCES `event` (`event_id`),
+    REFERENCES `event` (`event_id`)
+    ON DELETE CASCADE,
 
   CONSTRAINT `fk_euj_user`
     FOREIGN KEY (`euj_id_user`)

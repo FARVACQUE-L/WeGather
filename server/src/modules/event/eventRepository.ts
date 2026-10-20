@@ -160,45 +160,9 @@ class EventRepository {
       ],
     );
   }
+  // Les tables liées sont vidées par les ON DELETE CASCADE du schéma ; les
+  // signalements sont conservés avec reported_event_id_event à NULL.
   async deleteEvent(eventId: number) {
-    await databaseClient.query("DELETE FROM budget WHERE budget_id_event = ?", [
-      eventId,
-    ]);
-
-    await databaseClient.query(
-      "DELETE FROM event_user_joining WHERE euj_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query(
-      "DELETE FROM reservation WHERE reservation_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query(
-      "DELETE FROM reported_event WHERE reported_event_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query(
-      "DELETE FROM gallery WHERE gallery_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query(
-      "DELETE FROM message WHERE message_id_event = ?",
-      [eventId],
-    );
-
-    await databaseClient.query("DELETE FROM todo WHERE todo_id_event = ?", [
-      eventId,
-    ]);
-
-    await databaseClient.query(
-      "DELETE FROM event_user_ban WHERE eub_id_event = ?",
-      [eventId],
-    );
-
     const [result] = await databaseClient.query(
       "DELETE FROM event WHERE event_id = ?",
       [eventId],

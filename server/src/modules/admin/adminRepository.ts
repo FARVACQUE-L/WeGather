@@ -206,8 +206,8 @@ FROM user
     u.user_profile_picture
   FROM reported_event AS re
   JOIN user AS u ON u.user_id = re.reported_event_by_id_user
-  JOIN event AS e ON e.event_id = re.reported_event_id_event
-  JOIN user AS host ON host.user_id = e.event_id_host
+  LEFT JOIN event AS e ON e.event_id = re.reported_event_id_event
+  LEFT JOIN user AS host ON host.user_id = e.event_id_host
   WHERE re.reported_event_id = ?`,
       [id],
     );
