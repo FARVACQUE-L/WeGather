@@ -18,7 +18,7 @@ const PLANS: Plan[] = [
     name: "Premium",
     hostedEvents: 5,
     galleryPhotos: 30,
-    price: "4,90 € (tarif unique)",
+    price: "4,90 €\n(tarif unique)",
     cta: "Passer au Premium",
   },
   {

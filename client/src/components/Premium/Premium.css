@@ -68,6 +68,9 @@
     .premium-price td {
       font-weight: 700;
       color: var(--font-title);
+      /* Respecte les retours à la ligne des tarifs (« tarif unique » sous
+         le prix). */
+      white-space: pre-line;
     }
 
     .premium-included {
