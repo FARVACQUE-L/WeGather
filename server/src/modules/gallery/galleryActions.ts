@@ -1,8 +1,11 @@
 import fs from "node:fs";
+import path from "node:path";
+import { ZipArchive } from "archiver";
 import type { RequestHandler } from "express";
 
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeUpload } from "../../helper/removeUpload";
+import { detectMimeType, UPLOADS_DIRECTORY } from "../../middleware/upload";
 import eventRepository from "../event/eventRepository";
 import galleryRepository from "./galleryRepository";
 
@@ -171,6 +174,144 @@ const edit: RequestHandler = async (req, res, next) => {
   }
 };
 
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/avif": ".avif",
+};
+
+// path.basename garde le fichier dans le dossier des envois.
+const readUploadPath = (link: string) =>
+  path.join(
+    path.resolve(process.cwd(), UPLOADS_DIRECTORY),
+    path.basename(link),
+  );
+
+const photoFileName = (galleryId: number, mimeType: string | null) =>
+  `photo-${galleryId}${(mimeType && IMAGE_EXTENSIONS[mimeType]) ?? ""}`;
+
+// Les photos sont stockées sans extension et servies sans Content-Type par
+// /uploads : téléchargées telles quelles, l'OS ne les reconnaît pas comme
+// des images. On relit leur signature pour les envoyer avec le bon type et un
+// nom de fichier qui porte l'extension. Réservé aux participants.
+const download: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const photo = await galleryRepository.read(Number(req.params.gallery_id));
+    if (!photo) {
+      res.status(404).json({ message: "Photo introuvable" });
+      return;
+    }
+
+    const permissions = await galleryRepository.checkUserPermissions(
+      photo.gallery_id_event,
+      req.user.id,
+    );
+    if (!permissions.isParticipant) {
+      res.status(403).json({
+        message: "Action interdite : vous devez participer à l'événement.",
+      });
+      return;
+    }
+
+    const filePath = readUploadPath(photo.gallery_link);
+
+    try {
+      await fs.promises.access(filePath);
+    } catch {
+      res.status(404).json({ message: "Photo introuvable" });
+      return;
+    }
+
+    const mimeType = await detectMimeType(filePath);
+
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    // res.download déduit le type du fichier sur disque, sans extension, et
+    // enverrait application/octet-stream : on le fixe avant.
+    if (mimeType) {
+      res.type(mimeType);
+    }
+    res.download(filePath, photoFileName(photo.gallery_id, mimeType));
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Toutes les photos de l'événement dans un zip, avec les mêmes noms que le
+// téléchargement d'une photo. Réservé aux participants. Les photos sont déjà
+// compressées : store les range telles quelles, sans perdre de temps à les
+// recompresser. Une photo absente du disque est sautée plutôt que de faire
+// échouer toute l'archive.
+const downloadAll: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
+    if (!eventId) {
+      res.sendStatus(404);
+      return;
+    }
+
+    const permissions = await galleryRepository.checkUserPermissions(
+      eventId,
+      req.user.id,
+    );
+    if (!permissions.isParticipant) {
+      res.status(403).json({
+        message: "Action interdite : vous devez participer à l'événement.",
+      });
+      return;
+    }
+
+    const photos = (await galleryRepository.readAll(eventId)) as {
+      gallery_id: number;
+      gallery_link: string;
+    }[];
+    if (photos.length === 0) {
+      res.status(404).json({ message: "Aucune photo dans cette galerie" });
+      return;
+    }
+
+    const [event] = await eventRepository.readEventName(eventId);
+    res.attachment(`${event?.event_name || "galerie"}.zip`);
+
+    const archive = new ZipArchive({ store: true });
+    // Une fois l'archive commencée, on ne peut plus envoyer d'erreur JSON :
+    // on coupe la connexion pour que le téléchargement échoue franchement.
+    archive.on("error", (error) => res.destroy(error));
+    archive.pipe(res);
+
+    for (const photo of photos) {
+      const filePath = readUploadPath(photo.gallery_link);
+      try {
+        const mimeType = await detectMimeType(filePath);
+        archive.file(filePath, {
+          name: photoFileName(photo.gallery_id, mimeType),
+        });
+      } catch {
+        // Fichier absent du disque : la photo est sautée.
+      }
+    }
+
+    await archive.finalize();
+  } catch (error) {
+    if (res.headersSent) {
+      res.destroy(error as Error);
+      return;
+    }
+    next(error);
+  }
+};
+
 const getLikedPhotos: RequestHandler = async (req, res, next) => {
   try {
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
@@ -224,6 +365,8 @@ export default {
   browse,
   readLimit,
   destroy,
+  download,
+  downloadAll,
   uploadPhoto,
   edit,
   getLikedPhotos,

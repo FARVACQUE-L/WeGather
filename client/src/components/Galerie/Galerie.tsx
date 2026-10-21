@@ -1,10 +1,11 @@
 import "./Galerie.css";
 import { motion } from "framer-motion";
-import { ImagePlus, X } from "lucide-react";
-import { type CSSProperties, useEffect, useState } from "react";
+import { Download, ImagePlus, X } from "lucide-react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import GalleryModal from "./GalleryModal";
 import { PhotoItem } from "./PhotoItem";
+import { useCompactLevel } from "./useCompactLevel";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -34,12 +35,30 @@ function Galerie() {
   // Limite de photos selon la formule de l'organisateur, donnée par le
   // serveur. Tant qu'elle n'est pas connue, seul le serveur bloque l'envoi.
   const [photoLimit, setPhotoLimit] = useState<number | null>(null);
+  // Le serveur assemble le zip avant le téléchargement : le bouton l'indique
+  // et ne relance pas une archive en cours.
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+  // Les boutons de l'en-tête passent en icône quand ils touchent le titre :
+  // d'abord Tout télécharger, puis Ajouter une photo.
+  const headerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const downloadAllRef = useRef<HTMLButtonElement>(null);
+  const addPhotoRef = useRef<HTMLButtonElement>(null);
 
   const formatImageUrl = (link: string): string => {
     if (!link) return "";
     return link.startsWith("http") ? link : `${API_URL}${link}`;
   };
   const [userId, setUserId] = useState<number | null>(null);
+
+  // L'en-tête n'est rendu qu'une fois l'utilisateur connu : userId relance la
+  // mesure à ce moment-là.
+  const compactLevel = useCompactLevel(
+    headerRef,
+    titleRef,
+    [downloadAllRef, addPhotoRef],
+    [userId, eventName, photos.length > 0, isDownloadingAll],
+  );
 
   useEffect(() => {
     fetch(`${API_URL}/api/auth/authVerif`, {
@@ -226,23 +245,66 @@ function Galerie() {
     }
   };
 
-  // Motif répété tous les 10 photos, sur quatre lignes : la 5e en grand à
-  // droite des lignes 1-2, la 6e en grand à gauche des lignes 3-4. Seules
-  // ces deux-là sont placées : la grille (grid-auto-flow: dense) range les
-  // autres dans l'ordre dans les cases libres. Jusqu'à 4 photos, elles
-  // tiennent donc sur une ligne ; à la 5e, la 3e et la 4e passent dessous.
+  // Motif répété tous les 10 photos, sur quatre lignes, chaque ligne
+  // commençant à gauche : la 1re en grand à gauche des lignes 1-2 et les 4
+  // suivantes en petit à droite, puis les 6e à 9e en petit à gauche des
+  // lignes 3-4 et la 10e en grand à droite. Les 2e à 5e se rangent seules
+  // dans les cases libres (grid-auto-flow: dense) ; les 6e à 9e sont placées
+  // pour rester à gauche tant que la 10e n'est pas là.
   function getCellLayout(index: number) {
     const position = index % 10;
-    if (position !== 4 && position !== 5) {
-      return {};
+    const blockRow = Math.floor(index / 10) * 4;
+    if (position === 0) {
+      return {
+        className: "galerie-cell-large-left",
+        style: { "--row": blockRow + 1 } as CSSProperties,
+      };
     }
-    const firstRow = Math.floor(index / 10) * 4 + (position === 4 ? 1 : 3);
-    return {
-      className:
-        position === 4 ? "galerie-cell-large-right" : "galerie-cell-large-left",
-      style: { "--row": firstRow } as CSSProperties,
-    };
+    if (position === 9) {
+      return {
+        className: "galerie-cell-large-right",
+        style: { "--row": blockRow + 3 } as CSSProperties,
+      };
+    }
+    if (position >= 5) {
+      const offset = position - 5;
+      return {
+        className: "galerie-cell-small-left",
+        style: {
+          "--row": blockRow + 3 + Math.floor(offset / 2),
+          "--col": 1 + (offset % 2),
+        } as CSSProperties,
+      };
+    }
+    return {};
   }
+
+  // Même principe que le téléchargement d'une photo (PhotoItem) : blob, car
+  // l'attribut download est ignoré sur l'origine de l'API, et no-store pour
+  // ne pas réutiliser une réponse en cache.
+  const handleDownloadAll = async () => {
+    setIsDownloadingAll(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/api/gallery/${eventUuid}/archive`,
+        { credentials: "include", cache: "no-store" },
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const blobUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${eventName}.zip`;
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Erreur téléchargement de la galerie:", err);
+      setError("Impossible de télécharger les photos.");
+    } finally {
+      setIsDownloadingAll(false);
+    }
+  };
 
   if (userId === null) {
     return <p>Chargement utilisateur...</p>;
@@ -255,24 +317,50 @@ function Galerie() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="galerie-header">
-        <h1>{eventName}</h1>
-        <button
-          type="button"
-          className="galerie-button"
-          // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
-          // une modale dont l'envoi serait refusé.
-          onClick={() =>
-            photoLimit !== null && photos.length >= photoLimit
-              ? setError(
-                  `La galerie est limitée à ${photoLimit} photos. Supprimez-en une pour en ajouter une autre.`,
-                )
-              : setIsModalOpen(true)
-          }
-        >
-          <ImagePlus size={20} />
-          <p>Ajouter une photo</p>
-        </button>
+      <div
+        ref={headerRef}
+        className={[
+          "galerie-header",
+          compactLevel >= 1 && "is-compact-download",
+          compactLevel >= 2 && "is-compact-add",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <h1 ref={titleRef}>{eventName}</h1>
+        <div className="galerie-header-actions">
+          {photos.length > 0 && (
+            <button
+              ref={downloadAllRef}
+              type="button"
+              className="galerie-download-all-button"
+              onClick={handleDownloadAll}
+              disabled={isDownloadingAll}
+              aria-label="Télécharger toutes les photos"
+            >
+              <Download size={20} />
+              <p>{isDownloadingAll ? "Préparation..." : "Tout télécharger"}</p>
+            </button>
+          )}
+          <button
+            ref={addPhotoRef}
+            type="button"
+            className="galerie-button"
+            aria-label="Ajouter une photo"
+            // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
+            // une modale dont l'envoi serait refusé.
+            onClick={() =>
+              photoLimit !== null && photos.length >= photoLimit
+                ? setError(
+                    `La galerie est limitée à ${photoLimit} photos. Supprimez-en une pour en ajouter une autre.`,
+                  )
+                : setIsModalOpen(true)
+            }
+          >
+            <ImagePlus size={20} />
+            <p>Ajouter une photo</p>
+          </button>
+        </div>
       </div>
 
       {error && (
