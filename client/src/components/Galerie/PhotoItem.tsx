@@ -1,4 +1,4 @@
-import { Heart, Pencil, Trash2 } from "lucide-react";
+import { Download, Heart, Pencil, Trash2 } from "lucide-react";
 
 type Gallery = {
   gallery_id: number;
@@ -28,6 +28,26 @@ export function PhotoItem({
   onEdit,
   onDelete,
 }: PhotoItemProps) {
+  // L'image est servie par l'API, sur une autre origine en dev : l'attribut
+  // download d'un lien y est ignoré et le navigateur ouvrirait l'image. On la
+  // récupère donc en blob pour forcer le téléchargement.
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(photo.gallery_link);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const blobUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = photo.gallery_link.split("/").pop() || "photo";
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Erreur téléchargement:", err);
+    }
+  };
+
   return (
     <article className="galerie-item">
       <button
@@ -63,6 +83,15 @@ export function PhotoItem({
           </button>
           <span className="like-counter">{photo.like_count ?? 0}</span>
         </div>
+
+        <button
+          type="button"
+          className="download-button"
+          onClick={handleDownload}
+          aria-label="Télécharger la photo"
+        >
+          <Download size={18} />
+        </button>
 
         <button
           type="button"

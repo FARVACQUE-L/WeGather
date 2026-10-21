@@ -172,6 +172,7 @@
   transition: opacity 0.2s ease;
 }
 
+.download-button,
 .edit-button,
 .delete-button {
   display: flex;
@@ -190,6 +191,19 @@
   @media (hover: hover) and (min-width: 429px) {
     &:hover {
       transform: scale(1.1);
+    }
+  }
+}
+
+.download-button {
+  border-radius: 8px;
+  background-color: white;
+  color: var(--gallery-secondary);
+
+  @media (hover: hover) and (min-width: 429px) {
+    &:hover {
+      background-color: var(--gallery-secondary);
+      color: white;
     }
   }
 }
@@ -505,6 +519,7 @@
     gap: 0.35rem;
   }
 
+  .download-button,
   .edit-button,
   .delete-button {
     width: 28px;
