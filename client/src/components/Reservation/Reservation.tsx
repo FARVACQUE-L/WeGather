@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CalendarPlus } from "lucide-react";
 import Swal from "sweetalert2";
 import useCanHover from "../../helper/useCanHover";
+import { useCompactLevel } from "../../helper/useCompactLevel";
 import ImageCropper, {
   type Crop,
   cropImage,
@@ -67,6 +68,18 @@ function Reservation() {
   >(null);
   const [authLoading, setAuthLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Comme dans la galerie, le bouton d'ajout passe en icône quand il touche
+  // le titre. L'en-tête n'est rendu qu'une fois l'inscription vérifiée :
+  // userInEvent relance la mesure à ce moment-là.
+  const headerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const addReservationRef = useRef<HTMLButtonElement>(null);
+  const compactLevel = useCompactLevel(
+    headerRef,
+    titleRef,
+    [addReservationRef],
+    [userInEvent, eventName?.event_name],
+  );
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -302,8 +315,16 @@ function Reservation() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="reservation-title">
+      <div
+        ref={headerRef}
+        className={
+          compactLevel >= 1
+            ? "reservation-title is-compact"
+            : "reservation-title"
+        }
+      >
         <motion.h1
+          ref={titleRef}
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4 }}
@@ -312,8 +333,10 @@ function Reservation() {
         </motion.h1>
 
         <motion.button
+          ref={addReservationRef}
           type="button"
           className="reservation-button"
+          aria-label="Ajouter une réservation"
           onClick={() => {
             // Limite atteinte : on le dit tout de suite au lieu d'ouvrir une
             // modale dont l'envoi serait refusé.

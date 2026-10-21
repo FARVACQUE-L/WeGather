@@ -6,16 +6,22 @@ import {
   useState,
 } from "react";
 
-// Taille des boutons réduits à leur icône (rond de 40px, voir Galerie.css).
+// Taille des boutons réduits à leur icône (rond de 40px, voir Galerie.css et
+// Reservation.css).
 const COMPACT_BUTTON_WIDTH = 40;
-// Sous 428px, Ajouter une photo devient un bouton flottant hors de l'en-tête :
-// seul le premier bouton est réduit, quelle que soit la place.
+// Sous 428px, la mise en page mobile décide seule : le bouton d'ajout y
+// devient un bouton flottant hors de l'en-tête.
 const MOBILE_QUERY = "(max-width: 428px)";
+
+// Un gap non défini vaut « normal », que parseFloat lit comme NaN.
+const readGap = (element: Element) =>
+  Number.parseFloat(getComputedStyle(element).columnGap) || 0;
 
 // Nombre de boutons de l'en-tête à réduire à leur icône pour qu'ils ne
 // touchent pas le titre, dans l'ordre de `buttonRefs` : d'abord le premier,
 // puis le suivant s'il manque encore de la place. Le titre doit garder sa
 // largeur naturelle dans scrollWidth (white-space: nowrap, overflow: hidden).
+// Sur mobile, le niveau vaut `mobileLevel`, quelle que soit la place.
 //
 // La largeur d'un bouton avec son libellé ne se mesure que quand il est
 // affiché en entier : elle est mémorisée, sinon le bouton réduit paraîtrait
@@ -25,6 +31,7 @@ export function useCompactLevel(
   titleRef: RefObject<HTMLElement | null>,
   buttonRefs: RefObject<HTMLElement | null>[],
   deps: DependencyList,
+  mobileLevel = 0,
 ) {
   const [level, setLevel] = useState(0);
   const fullWidths = useRef<(number | undefined)[]>([]);
@@ -37,7 +44,7 @@ export function useCompactLevel(
 
     const measure = () => {
       if (window.matchMedia(MOBILE_QUERY).matches) {
-        setLevel(1);
+        setLevel(mobileLevel);
         return;
       }
 
@@ -60,10 +67,8 @@ export function useCompactLevel(
       }
 
       const actions = buttons.find(Boolean)?.parentElement;
-      const headerGap = Number.parseFloat(getComputedStyle(header).columnGap);
-      const actionsGap = actions
-        ? Number.parseFloat(getComputedStyle(actions).columnGap)
-        : 0;
+      const headerGap = readGap(header);
+      const actionsGap = actions ? readGap(actions) : 0;
       const present = buttons.flatMap((button, index) =>
         button ? [index] : [],
       );
@@ -92,7 +97,7 @@ export function useCompactLevel(
     const observer = new ResizeObserver(measure);
     observer.observe(header);
     return () => observer.disconnect();
-  }, [level, ...deps]);
+  }, [level, mobileLevel, ...deps]);
 
   return level;
 }

@@ -7,11 +7,19 @@
 
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     width: 63vw;
     margin-top: 0;
     height: 70px;
     h1 {
       color: var(--font-title);
+      /* Sur une ligne : useCompactLevel lit sa largeur naturelle dans
+         scrollWidth. Si même l'icône ne laisse pas la place, le titre finit
+         en points de suspension au lieu de passer sous le bouton. */
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Ciblé par sa classe : un sélecteur « button » touchait aussi les
@@ -35,6 +43,21 @@
         opacity 0.2s ease,
         transform 0.1s ease;
       width: auto;
+      flex-shrink: 0;
+    }
+
+    /* Bouton réduit à son icône quand il touche le titre (voir
+       useCompactLevel), comme ceux de la galerie. */
+    &.is-compact .reservation-button {
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 50%;
+
+      p {
+        display: none;
+      }
     }
 
     /* Classes préfixées : GalleryModal.css déclare des règles globales
@@ -293,6 +316,18 @@
     width: calc(98vw - 455px);
   }
 }
+/* Comme dans la galerie : sous 1175px, la flèche ne pointe plus
+   correctement vers le bouton d'ajout, on la masque, et le texte prend
+   toute la largeur. */
+@media screen and (max-width: 1175px) {
+  .reservation .reservation-card-global .reservation-empty {
+    width: 100%;
+
+    .reservation-empty-arrow {
+      display: none;
+    }
+  }
+}
 /* Sidebar en barre du bas : même largeur et mêmes marges que le dashboard. */
 @media screen and (min-width: 429px) and (max-width: 875px) {
   .reservation {
@@ -305,12 +340,6 @@
     /* Les colonnes de 16rem sont centrées dans la largeur disponible. */
     .reservation-card-global {
       justify-content: center;
-    }
-    .reservation-card-global .reservation-empty {
-      width: 100%;
-      .reservation-empty-arrow {
-        width: min(22rem, 40vw);
-      }
     }
   }
 }
@@ -345,6 +374,7 @@
       padding: 2vh 0;
       h1 {
         font-size: 33px;
+        white-space: normal;
       }
       .reservation-button {
         justify-content: center;
@@ -393,9 +423,6 @@
           flex-direction: column;
           gap: 1rem;
           width: 90vw;
-        }
-        .reservation-empty-arrow {
-          display: none;
         }
       }
     }
