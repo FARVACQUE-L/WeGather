@@ -1,6 +1,6 @@
 import "./Galerie.css";
 import { motion } from "framer-motion";
-import { ImagePlus, X } from "lucide-react";
+import { Download, ImagePlus, X } from "lucide-react";
 import { type CSSProperties, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import GalleryModal from "./GalleryModal";
@@ -34,6 +34,9 @@ function Galerie() {
   // Limite de photos selon la formule de l'organisateur, donnée par le
   // serveur. Tant qu'elle n'est pas connue, seul le serveur bloque l'envoi.
   const [photoLimit, setPhotoLimit] = useState<number | null>(null);
+  // Le serveur assemble le zip avant le téléchargement : le bouton l'indique
+  // et ne relance pas une archive en cours.
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   const formatImageUrl = (link: string): string => {
     if (!link) return "";
@@ -260,6 +263,33 @@ function Galerie() {
     return {};
   }
 
+  // Même principe que le téléchargement d'une photo (PhotoItem) : blob, car
+  // l'attribut download est ignoré sur l'origine de l'API, et no-store pour
+  // ne pas réutiliser une réponse en cache.
+  const handleDownloadAll = async () => {
+    setIsDownloadingAll(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/api/gallery/${eventUuid}/archive`,
+        { credentials: "include", cache: "no-store" },
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const blobUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${eventName}.zip`;
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Erreur téléchargement de la galerie:", err);
+      setError("Impossible de télécharger les photos.");
+    } finally {
+      setIsDownloadingAll(false);
+    }
+  };
+
   if (userId === null) {
     return <p>Chargement utilisateur...</p>;
   }
@@ -273,22 +303,36 @@ function Galerie() {
     >
       <div className="galerie-header">
         <h1>{eventName}</h1>
-        <button
-          type="button"
-          className="galerie-button"
-          // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
-          // une modale dont l'envoi serait refusé.
-          onClick={() =>
-            photoLimit !== null && photos.length >= photoLimit
-              ? setError(
-                  `La galerie est limitée à ${photoLimit} photos. Supprimez-en une pour en ajouter une autre.`,
-                )
-              : setIsModalOpen(true)
-          }
-        >
-          <ImagePlus size={20} />
-          <p>Ajouter une photo</p>
-        </button>
+        <div className="galerie-header-actions">
+          {photos.length > 0 && (
+            <button
+              type="button"
+              className="galerie-download-all-button"
+              onClick={handleDownloadAll}
+              disabled={isDownloadingAll}
+              aria-label="Télécharger toutes les photos"
+            >
+              <Download size={20} />
+              <p>{isDownloadingAll ? "Préparation..." : "Tout télécharger"}</p>
+            </button>
+          )}
+          <button
+            type="button"
+            className="galerie-button"
+            // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
+            // une modale dont l'envoi serait refusé.
+            onClick={() =>
+              photoLimit !== null && photos.length >= photoLimit
+                ? setError(
+                    `La galerie est limitée à ${photoLimit} photos. Supprimez-en une pour en ajouter une autre.`,
+                  )
+                : setIsModalOpen(true)
+            }
+          >
+            <ImagePlus size={20} />
+            <p>Ajouter une photo</p>
+          </button>
+        </div>
       </div>
 
       {error && (

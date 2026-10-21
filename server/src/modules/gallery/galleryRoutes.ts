@@ -18,6 +18,12 @@ galleryRoutes.get(
 );
 
 galleryRoutes.get(
+  "/api/gallery/:eventUuid/archive",
+  authorization,
+  galleryActions.downloadAll,
+);
+
+galleryRoutes.get(
   "/api/gallery/:gallery_id/download",
   authorization,
   galleryActions.download,

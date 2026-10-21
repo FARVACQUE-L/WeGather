@@ -29,6 +29,47 @@
     text-align: center;
   }
 
+  .galerie-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Action secondaire : même forme qu'Ajouter une photo, en contour pour
+     laisser la mise en avant au bouton principal. */
+  .galerie-download-all-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: calc(0.65rem - 2px) calc(1.5rem - 2px);
+    border: 2px solid var(--gallery-secondary);
+    border-radius: 999px;
+    background: white;
+    color: var(--gallery-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s;
+
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover:not(:disabled) {
+        background-color: var(--gallery-secondary);
+        color: white;
+        transform: scale(0.95);
+      }
+    }
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.7;
+    }
+  }
+
   /* Même taille que le bouton Ajouter une réservation. */
   .galerie-button {
     display: flex;
@@ -444,6 +485,23 @@
       align-self: center;
       text-align: center;
       padding: 2vh 0;
+    }
+
+    /* Ajouter une photo devient un bouton flottant : il ne reste dans
+       l'en-tête que l'icône de téléchargement. */
+    .galerie-header-actions {
+      align-self: center;
+    }
+
+    .galerie-download-all-button {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 50%;
+
+      p {
+        display: none;
+      }
     }
 
     .galerie-button {
