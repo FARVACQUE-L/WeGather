@@ -7,11 +7,19 @@
 
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     width: 63vw;
     margin-top: 0;
     height: 70px;
     h1 {
       color: var(--font-title);
+      /* Sur une ligne : useCompactLevel lit sa largeur naturelle dans
+         scrollWidth. Si même l'icône ne laisse pas la place, le titre finit
+         en points de suspension au lieu de passer sous le bouton. */
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Ciblé par sa classe : un sélecteur « button » touchait aussi les
@@ -35,6 +43,21 @@
         opacity 0.2s ease,
         transform 0.1s ease;
       width: auto;
+      flex-shrink: 0;
+    }
+
+    /* Bouton réduit à son icône quand il touche le titre (voir
+       useCompactLevel), comme ceux de la galerie. */
+    &.is-compact .reservation-button {
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 50%;
+
+      p {
+        display: none;
+      }
     }
 
     /* Classes préfixées : GalleryModal.css déclare des règles globales
@@ -351,6 +374,7 @@
       padding: 2vh 0;
       h1 {
         font-size: 33px;
+        white-space: normal;
       }
       .reservation-button {
         justify-content: center;

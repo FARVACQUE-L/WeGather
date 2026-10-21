@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import { Download, ImagePlus, X } from "lucide-react";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
+import { useCompactLevel } from "../../helper/useCompactLevel";
 import GalleryModal from "./GalleryModal";
 import { PhotoItem } from "./PhotoItem";
-import { useCompactLevel } from "./useCompactLevel";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -52,12 +52,13 @@ function Galerie() {
   const [userId, setUserId] = useState<number | null>(null);
 
   // L'en-tête n'est rendu qu'une fois l'utilisateur connu : userId relance la
-  // mesure à ce moment-là.
+  // mesure à ce moment-là. Sur mobile, Tout télécharger reste en icône.
   const compactLevel = useCompactLevel(
     headerRef,
     titleRef,
     [downloadAllRef, addPhotoRef],
     [userId, eventName, photos.length > 0, isDownloadingAll],
+    1,
   );
 
   useEffect(() => {
