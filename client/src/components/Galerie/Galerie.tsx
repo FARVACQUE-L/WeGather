@@ -226,20 +226,20 @@ function Galerie() {
     }
   };
 
-  // Motif répété tous les 10 photos, sur quatre lignes : la 5e en grand à
-  // droite des lignes 1-2, la 6e en grand à gauche des lignes 3-4. Seules
+  // Motif répété tous les 10 photos, sur quatre lignes : la 1re en grand à
+  // gauche des lignes 1-2, la 6e en grand à droite des lignes 3-4. Seules
   // ces deux-là sont placées : la grille (grid-auto-flow: dense) range les
-  // autres dans l'ordre dans les cases libres. Jusqu'à 4 photos, elles
-  // tiennent donc sur une ligne ; à la 5e, la 3e et la 4e passent dessous.
+  // autres dans l'ordre dans les cases libres, les 4 suivantes à côté de la
+  // grande. Le motif tient donc dès la première photo.
   function getCellLayout(index: number) {
     const position = index % 10;
-    if (position !== 4 && position !== 5) {
+    if (position !== 0 && position !== 5) {
       return {};
     }
-    const firstRow = Math.floor(index / 10) * 4 + (position === 4 ? 1 : 3);
+    const firstRow = Math.floor(index / 10) * 4 + (position === 0 ? 1 : 3);
     return {
       className:
-        position === 4 ? "galerie-cell-large-right" : "galerie-cell-large-left",
+        position === 0 ? "galerie-cell-large-left" : "galerie-cell-large-right",
       style: { "--row": firstRow } as CSSProperties,
     };
   }

@@ -65,6 +65,8 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-auto-flow: dense;
+    /* Sans ça, avec peu de photos, les lignes s'étirent sur les 80vh. */
+    align-content: start;
     gap: 12px;
     width: 65vw;
     height: 80vh;
