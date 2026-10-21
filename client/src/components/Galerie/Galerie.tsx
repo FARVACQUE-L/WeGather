@@ -1,10 +1,11 @@
 import "./Galerie.css";
 import { motion } from "framer-motion";
 import { Download, ImagePlus, X } from "lucide-react";
-import { type CSSProperties, useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import GalleryModal from "./GalleryModal";
 import { PhotoItem } from "./PhotoItem";
+import { useCompactLevel } from "./useCompactLevel";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -37,12 +38,27 @@ function Galerie() {
   // Le serveur assemble le zip avant le téléchargement : le bouton l'indique
   // et ne relance pas une archive en cours.
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+  // Les boutons de l'en-tête passent en icône quand ils touchent le titre :
+  // d'abord Tout télécharger, puis Ajouter une photo.
+  const headerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const downloadAllRef = useRef<HTMLButtonElement>(null);
+  const addPhotoRef = useRef<HTMLButtonElement>(null);
 
   const formatImageUrl = (link: string): string => {
     if (!link) return "";
     return link.startsWith("http") ? link : `${API_URL}${link}`;
   };
   const [userId, setUserId] = useState<number | null>(null);
+
+  // L'en-tête n'est rendu qu'une fois l'utilisateur connu : userId relance la
+  // mesure à ce moment-là.
+  const compactLevel = useCompactLevel(
+    headerRef,
+    titleRef,
+    [downloadAllRef, addPhotoRef],
+    [userId, eventName, photos.length > 0, isDownloadingAll],
+  );
 
   useEffect(() => {
     fetch(`${API_URL}/api/auth/authVerif`, {
@@ -301,11 +317,21 @@ function Galerie() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="galerie-header">
-        <h1>{eventName}</h1>
+      <div
+        ref={headerRef}
+        className={[
+          "galerie-header",
+          compactLevel >= 1 && "is-compact-download",
+          compactLevel >= 2 && "is-compact-add",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <h1 ref={titleRef}>{eventName}</h1>
         <div className="galerie-header-actions">
           {photos.length > 0 && (
             <button
+              ref={downloadAllRef}
               type="button"
               className="galerie-download-all-button"
               onClick={handleDownloadAll}
@@ -317,8 +343,10 @@ function Galerie() {
             </button>
           )}
           <button
+            ref={addPhotoRef}
             type="button"
             className="galerie-button"
+            aria-label="Ajouter une photo"
             // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
             // une modale dont l'envoi serait refusé.
             onClick={() =>

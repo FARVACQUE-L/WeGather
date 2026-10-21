@@ -27,10 +27,35 @@
     height: 70px;
     margin-bottom: 2rem;
     text-align: center;
+
+    /* Sur une ligne : useCompactLevel lit sa largeur naturelle dans
+       scrollWidth. Si même les icônes ne laissent pas la place, le titre
+       finit en points de suspension au lieu de passer sous les boutons. */
+    h1 {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Boutons réduits à leur icône quand ils touchent le titre (voir
+       useCompactLevel) : d'abord Tout télécharger, puis Ajouter une photo. */
+    &.is-compact-download .galerie-download-all-button,
+    &.is-compact-add .galerie-button {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 50%;
+
+      p {
+        display: none;
+      }
+    }
   }
 
   .galerie-header-actions {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     gap: 0.75rem;
   }
@@ -485,10 +510,12 @@
       align-self: center;
       text-align: center;
       padding: 2vh 0;
+      white-space: normal;
     }
 
     /* Ajouter une photo devient un bouton flottant : il ne reste dans
-       l'en-tête que l'icône de téléchargement. */
+       l'en-tête que l'icône de téléchargement (useCompactLevel la réduit
+       toujours sous 428px). */
     .galerie-header-actions {
       align-self: center;
     }
@@ -637,20 +664,6 @@
 
   .galerie-empty-arrow {
     display: none;
-  }
-}
-/* Sous 1100px, l'en-tête n'a plus la place pour deux libellés : Tout
-   télécharger ne garde que son icône, dans un rond. */
-@media screen and (max-width: 1100px) {
-  .galerie .galerie-download-all-button {
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border-radius: 50%;
-
-    p {
-      display: none;
-    }
   }
 }
 /* Sidebar en barre du bas : mêmes marges que la page Réservation, et le
