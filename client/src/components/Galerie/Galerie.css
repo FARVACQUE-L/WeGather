@@ -556,8 +556,16 @@
   }
 }
 /* Sous 1175px, la flèche ne pointe plus correctement vers le bouton Ajouter
-   une photo : on la masque. */
+   une photo : on la masque, et le texte prend toute la largeur. */
 @media screen and (max-width: 1175px) {
+  .galerie-empty {
+    width: 100%;
+  }
+
+  .galerie-empty-text {
+    max-width: none;
+  }
+
   .galerie-empty-arrow {
     display: none;
   }
