@@ -17,6 +17,12 @@ galleryRoutes.get(
   galleryActions.readLimit,
 );
 
+galleryRoutes.get(
+  "/api/gallery/:gallery_id/download",
+  authorization,
+  galleryActions.download,
+);
+
 galleryRoutes.post(
   "/api/gallery",
   authorization,

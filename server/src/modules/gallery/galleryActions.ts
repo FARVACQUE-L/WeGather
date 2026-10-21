@@ -1,8 +1,10 @@
 import fs from "node:fs";
+import path from "node:path";
 import type { RequestHandler } from "express";
 
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeUpload } from "../../helper/removeUpload";
+import { detectMimeType, UPLOADS_DIRECTORY } from "../../middleware/upload";
 import eventRepository from "../event/eventRepository";
 import galleryRepository from "./galleryRepository";
 
@@ -171,6 +173,65 @@ const edit: RequestHandler = async (req, res, next) => {
   }
 };
 
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/avif": ".avif",
+};
+
+// Les photos sont stockées sans extension et servies sans Content-Type par
+// /uploads : téléchargées telles quelles, l'OS ne les reconnaît pas comme
+// des images. On relit leur signature pour les envoyer avec le bon type et un
+// nom de fichier qui porte l'extension. Réservé aux participants.
+const download: RequestHandler = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const photo = await galleryRepository.read(Number(req.params.gallery_id));
+    if (!photo) {
+      res.status(404).json({ message: "Photo introuvable" });
+      return;
+    }
+
+    const permissions = await galleryRepository.checkUserPermissions(
+      photo.gallery_id_event,
+      req.user.id,
+    );
+    if (!permissions.isParticipant) {
+      res.status(403).json({
+        message: "Action interdite : vous devez participer à l'événement.",
+      });
+      return;
+    }
+
+    // path.basename garde le fichier dans le dossier des envois.
+    const filePath = path.join(
+      path.resolve(process.cwd(), UPLOADS_DIRECTORY),
+      path.basename(photo.gallery_link),
+    );
+
+    try {
+      await fs.promises.access(filePath);
+    } catch {
+      res.status(404).json({ message: "Photo introuvable" });
+      return;
+    }
+
+    const mimeType = await detectMimeType(filePath);
+    const extension = (mimeType && IMAGE_EXTENSIONS[mimeType]) ?? "";
+
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.download(filePath, `photo-${photo.gallery_id}${extension}`);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getLikedPhotos: RequestHandler = async (req, res, next) => {
   try {
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
@@ -224,6 +285,7 @@ export default {
   browse,
   readLimit,
   destroy,
+  download,
   uploadPhoto,
   edit,
   getLikedPhotos,

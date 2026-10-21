@@ -1,5 +1,7 @@
 import { Download, Heart, Pencil, Trash2 } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type Gallery = {
   gallery_id: number;
   gallery_id_event: number;
@@ -28,19 +30,26 @@ export function PhotoItem({
   onEdit,
   onDelete,
 }: PhotoItemProps) {
-  // L'image est servie par l'API, sur une autre origine en dev : l'attribut
-  // download d'un lien y est ignoré et le navigateur ouvrirait l'image. On la
-  // récupère donc en blob pour forcer le téléchargement.
+  // /uploads sert les photos sans extension ni Content-Type : la route de
+  // téléchargement renvoie le vrai type. L'API est sur une autre origine en
+  // dev, où l'attribut download d'un lien est ignoré : on passe par un blob.
   const handleDownload = async () => {
     try {
-      const response = await fetch(photo.gallery_link);
+      const response = await fetch(
+        `${API_URL}/api/gallery/${photo.gallery_id}/download`,
+        { credentials: "include" },
+      );
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      const blobUrl = URL.createObjectURL(await response.blob());
+      const blob = await response.blob();
+      const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg");
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = photo.gallery_link.split("/").pop() || "photo";
+      link.download = extension
+        ? `photo-${photo.gallery_id}.${extension}`
+        : `photo-${photo.gallery_id}`;
       link.click();
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
