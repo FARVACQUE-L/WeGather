@@ -226,22 +226,38 @@ function Galerie() {
     }
   };
 
-  // Motif répété tous les 10 photos, sur quatre lignes : la 1re en grand à
-  // gauche des lignes 1-2, la 6e en grand à droite des lignes 3-4. Seules
-  // ces deux-là sont placées : la grille (grid-auto-flow: dense) range les
-  // autres dans l'ordre dans les cases libres, les 4 suivantes à côté de la
-  // grande. Le motif tient donc dès la première photo.
+  // Motif répété tous les 10 photos, sur quatre lignes, chaque ligne
+  // commençant à gauche : la 1re en grand à gauche des lignes 1-2 et les 4
+  // suivantes en petit à droite, puis les 6e à 9e en petit à gauche des
+  // lignes 3-4 et la 10e en grand à droite. Les 2e à 5e se rangent seules
+  // dans les cases libres (grid-auto-flow: dense) ; les 6e à 9e sont placées
+  // pour rester à gauche tant que la 10e n'est pas là.
   function getCellLayout(index: number) {
     const position = index % 10;
-    if (position !== 0 && position !== 5) {
-      return {};
+    const blockRow = Math.floor(index / 10) * 4;
+    if (position === 0) {
+      return {
+        className: "galerie-cell-large-left",
+        style: { "--row": blockRow + 1 } as CSSProperties,
+      };
     }
-    const firstRow = Math.floor(index / 10) * 4 + (position === 0 ? 1 : 3);
-    return {
-      className:
-        position === 0 ? "galerie-cell-large-left" : "galerie-cell-large-right",
-      style: { "--row": firstRow } as CSSProperties,
-    };
+    if (position === 9) {
+      return {
+        className: "galerie-cell-large-right",
+        style: { "--row": blockRow + 3 } as CSSProperties,
+      };
+    }
+    if (position >= 5) {
+      const offset = position - 5;
+      return {
+        className: "galerie-cell-small-left",
+        style: {
+          "--row": blockRow + 3 + Math.floor(offset / 2),
+          "--col": 1 + (offset % 2),
+        } as CSSProperties,
+      };
+    }
+    return {};
   }
 
   if (userId === null) {
