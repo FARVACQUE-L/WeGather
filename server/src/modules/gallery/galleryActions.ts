@@ -226,6 +226,11 @@ const download: RequestHandler = async (req, res, next) => {
     const extension = (mimeType && IMAGE_EXTENSIONS[mimeType]) ?? "";
 
     res.setHeader("X-Content-Type-Options", "nosniff");
+    // res.download déduit le type du fichier sur disque, sans extension, et
+    // enverrait application/octet-stream : on le fixe avant.
+    if (mimeType) {
+      res.type(mimeType);
+    }
     res.download(filePath, `photo-${photo.gallery_id}${extension}`);
   } catch (error) {
     next(error);

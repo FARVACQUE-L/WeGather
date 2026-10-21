@@ -33,17 +33,21 @@ export function PhotoItem({
   // /uploads sert les photos sans extension ni Content-Type : la route de
   // téléchargement renvoie le vrai type. L'API est sur une autre origine en
   // dev, où l'attribut download d'un lien est ignoré : on passe par un blob.
+  // Sans no-store, un 304 réutilise la réponse en cache, Content-Type compris,
+  // et une ancienne réponse sans le bon type donnait un fichier sans extension.
   const handleDownload = async () => {
     try {
       const response = await fetch(
         `${API_URL}/api/gallery/${photo.gallery_id}/download`,
-        { credentials: "include" },
+        { credentials: "include", cache: "no-store" },
       );
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
       const blob = await response.blob();
-      const extension = blob.type.split("/")[1]?.replace("jpeg", "jpg");
+      const extension = blob.type.startsWith("image/")
+        ? blob.type.slice("image/".length).replace("jpeg", "jpg")
+        : null;
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
