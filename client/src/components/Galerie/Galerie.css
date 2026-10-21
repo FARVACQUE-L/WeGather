@@ -492,10 +492,6 @@
     font-size: 1rem;
   }
 
-  .galerie-empty-arrow {
-    display: none;
-  }
-
   .photo-actions {
     top: 6px;
     right: 6px;
@@ -557,6 +553,13 @@
      moins 3vw de marge à droite (2vw + 300px à gauche, 3vw à droite). */
   .galerie .galerie-grid {
     width: min(65vw, calc(95vw - 300px));
+  }
+}
+/* Sous 1175px, la flèche ne pointe plus correctement vers le bouton Ajouter
+   une photo : on la masque. */
+@media screen and (max-width: 1175px) {
+  .galerie-empty-arrow {
+    display: none;
   }
 }
 /* Sidebar en barre du bas : mêmes marges que la page Réservation, et le
