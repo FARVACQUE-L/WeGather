@@ -361,20 +361,30 @@ function Budget() {
       timerProgressBar: true,
     });
 
+    // Mêmes fond, titre et boutons que les modales de suppression du site
+    // (voir Budget.css). Sans buttonsStyling, SweetAlert ne remet pas ses
+    // couleurs en style inline. L'animation d'entrée passe par showClass :
+    // posée sur la popup, elle bloquait celle de sortie, dont SweetAlert
+    // attend la fin pour retirer la modale.
     const result = await Swal.fire({
-      title: "Supprimer cette dépense ?",
-      text: "Cette action est irréversible",
-      icon: "error",
+      title: "Supprimer la dépense",
+      text: "Êtes-vous sûr de vouloir supprimer cette dépense ?",
 
       showCancelButton: true,
       confirmButtonText: "Supprimer",
       cancelButtonText: "Annuler",
+      reverseButtons: true,
+      buttonsStyling: false,
+      showClass: { popup: "BudgetDeleteModal-Show" },
 
       customClass: {
-        container: "budget-backdrop",
-        popup: "budget-delete-popup",
-        confirmButton: "budget-delete-confirm",
-        cancelButton: "budget-delete-cancel",
+        container: "BudgetDeleteModal-Backdrop",
+        popup: "BudgetDeleteModal",
+        title: "BudgetDeleteModal-Title",
+        htmlContainer: "BudgetDeleteModal-Text",
+        actions: "BudgetDeleteModal-Actions",
+        confirmButton: "BudgetDeleteModal-Confirm",
+        cancelButton: "BudgetDeleteModal-Cancel",
       },
     });
 

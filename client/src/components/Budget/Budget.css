@@ -118,9 +118,8 @@ body {
     backdrop-filter: blur(6px);
   }
 
-  /* Shared sizes for the sweetalert delete and settlement modals */
-  .toast-edit-popup,
-  .budget-delete-popup {
+  /* Sizes for the sweetalert settlement modal */
+  .toast-edit-popup {
     border-radius: 16px;
 
     .swal2-title {
@@ -151,11 +150,6 @@ body {
       .budget-cancel:hover,
       .budget-cancel:active {
         background-color: #f5f5f5;
-      }
-
-      .budget-delete-cancel:hover,
-      .budget-delete-cancel:active {
-        background-color: #f3f4f6;
       }
     }
   }
@@ -228,23 +222,75 @@ body {
     }
   }
 
-  .budget-delete-popup {
-    .swal2-title {
-      color: #b91c1c;
-    }
-
-    .swal2-icon {
-      margin: 0 auto;
-    }
+  /* Confirmation de suppression d'une dépense : mêmes fond, titre et
+     boutons que les modales de suppression de CardEvents.css. Le body
+     parent l'emporte sur les styles par défaut de SweetAlert. */
+  .BudgetDeleteModal-Backdrop.swal2-backdrop-show {
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
   }
 
-  .budget-delete-confirm {
-    background: linear-gradient(135deg, #ef4444, #b91c1c);
-  }
+  .BudgetDeleteModal {
+    width: min(90vw, 420px);
+    padding: 2rem;
+    row-gap: 1rem;
+    background: var(--bg-color);
+    border-radius: 2rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
 
-  .budget-delete-cancel {
-    background: #f3f4f6;
-    color: #374151;
+    &.BudgetDeleteModal-Show {
+      animation: BudgetDeleteModal-Appear 0.25s ease;
+    }
+
+    .BudgetDeleteModal-Title {
+      padding: 0;
+      font-size: x-large;
+      text-align: start;
+      color: var(--font-title);
+    }
+
+    .BudgetDeleteModal-Text {
+      margin: 0;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1.5;
+      text-align: start;
+      color: inherit;
+    }
+
+    .BudgetDeleteModal-Actions {
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      gap: 1rem;
+      width: 100%;
+      margin: 0.5rem 0 0;
+      padding: 0;
+
+      /* Annuler garde le gris par défaut des boutons, comme dans les
+         autres modales. */
+      button {
+        flex: 1;
+        max-width: 12rem;
+        height: 2rem;
+        margin: 0;
+        border: none;
+        border-radius: 5rem;
+        box-shadow: 1px 1px 5px black;
+        cursor: pointer;
+        transition: transform 0.2s;
+
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: scale(0.95);
+          }
+        }
+      }
+
+      .BudgetDeleteModal-Confirm {
+        background: var(--button-color);
+        color: var(--font-neutral);
+      }
+    }
   }
 
   .budget-confirm {
@@ -259,8 +305,7 @@ body {
 }
 @media screen and (max-width: 429px) {
   body {
-    .toast-edit-popup,
-    .budget-delete-popup {
+    .toast-edit-popup {
       --swal2-width: 90%;
       --swal2-padding: 20px;
       max-width: 400px;
@@ -417,8 +462,7 @@ body {
 }
 @media screen and (min-width: 429px) {
   body {
-    .toast-edit-popup,
-    .budget-delete-popup {
+    .toast-edit-popup {
       --swal2-width: 25vw;
       --swal2-padding: 30px;
       row-gap: 20px;
