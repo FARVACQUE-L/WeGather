@@ -272,7 +272,7 @@
 }
 /* Sur mobile, la barre du bas ne garde que Tableau de bord, Messagerie,
    Réservation, Budget, Galerie et Premium. La flèche au-dessus de la barre
-   l'agrandit pour afficher les autres icônes sur une ligne au-dessus. */
+   l'agrandit pour afficher les autres icônes sur une ligne en dessous. */
 @media screen and (max-width: 428px) {
   .sidebar {
     /* Onglet posé sur le bord haut de la barre, de même fond et même ombre :
@@ -303,7 +303,7 @@
     }
 
     /* Les icônes de la fin du menu deviennent des éléments de la barre :
-       elles peuvent passer sur la ligne du haut, Premium restant en bas. */
+       elles peuvent passer sur la ligne du bas, Premium restant en haut. */
     .sidebar-end-menu {
       display: contents;
 
@@ -318,8 +318,8 @@
       }
     }
 
-    /* 15px en haut et en bas : la ligne du bas reste à sa place, centrée
-       comme dans les 70px de la barre repliée. */
+    /* 15px en haut et en bas, comme les icônes centrées dans les 70px de la
+       barre repliée. */
     &.is-expanded {
       flex-wrap: wrap;
       height: auto;
@@ -330,11 +330,11 @@
         transform: rotate(180deg);
       }
 
-      /* Saut de ligne entre les icônes ajoutées (order -2) et la barre
-         habituelle. */
-      &::before {
+      /* Saut de ligne entre la barre habituelle et les icônes ajoutées
+         (order 2). */
+      &::after {
         content: "";
-        order: -1;
+        order: 1;
         flex-basis: 100%;
         height: 0;
       }
@@ -345,7 +345,7 @@
         .sidebar-signal,
         .sidebar-delete-event {
           display: flex;
-          order: -2;
+          order: 2;
         }
       }
     }
