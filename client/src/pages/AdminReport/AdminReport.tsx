@@ -22,6 +22,10 @@ const API_URL = import.meta.env.VITE_API_URL;
 function AdminReport() {
   const { id, type } = useParams();
   const navigate = useNavigate();
+  // L'onglet actif de /admin n'est pas dans l'historique : navigate(-1)
+  // ramenait au tableau de bord. On rouvre explicitement les signalements.
+  const backToReports = () =>
+    navigate("/admin", { state: { tab: "signalement" } });
 
   const [report, setReport] = useState<ReportData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -117,7 +121,7 @@ function AdminReport() {
         customClass: {
           popup: "toast-success-popup",
         },
-        didClose: () => navigate(-1),
+        didClose: backToReports,
       });
     } catch (error) {
       console.error(error);
@@ -162,7 +166,7 @@ function AdminReport() {
         customClass: {
           popup: "toast-success-popup",
         },
-        didClose: () => navigate(-1),
+        didClose: backToReports,
       });
     } catch (error) {
       console.error(error);
@@ -261,7 +265,7 @@ function AdminReport() {
           <div className="adminReport-Leftside">
             <section className="adminReport-Title">
               <div className="adminReport-TitleText">
-                <button type="button" onClick={() => navigate(-1)}>
+                <button type="button" onClick={backToReports}>
                   <ArrowLeft size={18} /> Retour aux signalements
                 </button>
                 <h1>Signalement #{id} - Détails</h1>
