@@ -442,6 +442,11 @@
       padding: 2vh 0;
     }
 
+    /* Un peu plus d'écart avec le bouton du code au-dessus. */
+    .event-description {
+      margin-top: 1.5rem;
+    }
+
     .dashboard-stats {
       flex-direction: column;
       width: 100%;
