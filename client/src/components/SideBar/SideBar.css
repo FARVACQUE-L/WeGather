@@ -214,6 +214,8 @@
         display: none;
       }
 
+      /* Liens : sans ça, la couleur des liens visités (violet). */
+      .sidebar-events,
       .sidebar-signal {
         a {
           color: black;
