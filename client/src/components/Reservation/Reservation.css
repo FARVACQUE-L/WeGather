@@ -60,10 +60,9 @@
       }
     }
 
-    /* Classes préfixées : GalleryModal.css déclare des règles globales
-       .modal, .modal-overlay et .modal-actions (texte centré, couleurs et
-       marges des boutons) qui s'appliquaient aussi à cette modale. Le
-       contenu reprend les styles de la modale de modification d'événement. */
+    /* Classes préfixées, pour ne pas hériter de règles globales d'autres
+       modales. Le contenu reprend les styles de la modale de modification
+       d'événement. */
     .ReservationModal-Overlay {
       position: fixed;
       inset: 0;
