@@ -277,6 +277,10 @@
    l'agrandit pour afficher les autres icônes sur une ligne en dessous. */
 @media screen and (max-width: 428px) {
   .sidebar {
+    /* Le glissé vertical ouvre ou ferme la barre (SideBar.tsx) : il ne doit
+       pas faire défiler la page en même temps. Les appuis restent actifs. */
+    touch-action: none;
+
     /* Onglet posé sur le bord haut de la barre, de même fond et même ombre :
        le contour de la barre fait le tour de la flèche. Il recouvre l'ombre
        de la barre, et clip-path coupe la sienne côté barre. */

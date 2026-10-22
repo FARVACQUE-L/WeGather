@@ -75,6 +75,27 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
   // Sur mobile, la flèche au-dessus de la barre affiche les icônes masquées.
   const [isExpanded, setIsExpanded] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Glisser vers le haut sur la barre l'agrandit, vers le bas la replie. Un
+  // geste surtout horizontal, ou trop court (un appui), est ignoré.
+  const handleTouchStart = (event: React.TouchEvent) => {
+    const touch = event.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start || !window.matchMedia("(max-width: 428px)").matches) return;
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    if (Math.abs(deltaY) < 30 || Math.abs(deltaY) < Math.abs(deltaX)) return;
+
+    setIsExpanded(deltaY < 0);
+  };
 
   // Une fois une section choisie, la barre se replie.
   // biome-ignore lint/correctness/useExhaustiveDependencies: activeComponent ne sert qu'à déclencher le repli.
@@ -203,6 +224,8 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   return (
     <motion.nav
       className={`sidebar${isExpanded ? " is-expanded" : ""}`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       initial={{ x: -80, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
