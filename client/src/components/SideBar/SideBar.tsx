@@ -1,7 +1,7 @@
 import "./SideBar.css";
 import { motion } from "framer-motion";
 import {
-  BadgeDollarSign,
+  BadgeEuro,
   Book,
   CalendarDays,
   Gem,
@@ -278,7 +278,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
             whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
           >
-            <BadgeDollarSign size={20} className="dollar" />
+            <BadgeEuro size={20} className="dollar" />
             <span>Budget</span>
           </motion.button>
         </motion.li>
