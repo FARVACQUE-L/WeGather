@@ -99,11 +99,11 @@ export function PhotoItem({
 
         <button
           type="button"
-          className="delete-button"
-          onClick={() => onDelete(photo.gallery_id)}
-          aria-label="Supprimer la photo"
+          className="download-button"
+          onClick={handleDownload}
+          aria-label="Télécharger la photo"
         >
-          <Trash2 size={18} />
+          <Download size={18} />
         </button>
 
         <button
@@ -117,11 +117,11 @@ export function PhotoItem({
 
         <button
           type="button"
-          className="download-button"
-          onClick={handleDownload}
-          aria-label="Télécharger la photo"
+          className="delete-button"
+          onClick={() => onDelete(photo.gallery_id)}
+          aria-label="Supprimer la photo"
         >
-          <Download size={18} />
+          <Trash2 size={18} />
         </button>
       </div>
     </article>

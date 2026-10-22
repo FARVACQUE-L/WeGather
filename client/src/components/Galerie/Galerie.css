@@ -364,7 +364,8 @@
 
 /* Sur une photo étroite, la rangée de boutons dépassait à gauche et le like
    sortait de l'image : supprimer, modifier et télécharger s'empilent à
-   droite, le like reste à côté du premier. */
+   droite, le like reste à côté du premier. En rangée, l'ordre du HTML est
+   gardé (télécharger, modifier, supprimer). */
 @container (max-width: 240px) {
   .photo-actions {
     display: grid;
@@ -379,6 +380,18 @@
     .edit-button,
     .delete-button {
       grid-column: 2;
+    }
+
+    .delete-button {
+      grid-row: 1;
+    }
+
+    .edit-button {
+      grid-row: 2;
+    }
+
+    .download-button {
+      grid-row: 3;
     }
   }
 }
