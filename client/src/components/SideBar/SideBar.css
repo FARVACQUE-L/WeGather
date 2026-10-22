@@ -308,43 +308,54 @@
       }
     }
 
-    /* Les icônes de la fin du menu deviennent des éléments de la barre :
-       elles peuvent passer sur la ligne du bas, Premium restant en haut. */
+    /* Toutes les icônes forment une grille de 6 colonnes : une ligne de 70px
+       (la barre repliée), puis les 4 autres sous les colonnes 2 à 5, donc
+       centrées sous les 6 du haut. Repliée, la barre fixée en bas ne montre
+       que la première ligne : la seconde est sous le bas de l'écran. En
+       s'agrandissant, la barre monte et la fait glisser à l'écran. */
+    display: grid;
+    grid-template-columns: repeat(6, auto);
+    grid-template-rows: 70px 56px;
+    justify-content: center;
+    justify-items: center;
+    align-content: start;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 0;
+    transition: height 0.3s ease;
+
+    .sidebar-menu,
     .sidebar-end-menu {
       display: contents;
+    }
 
+    .sidebar-end-menu {
       .sidebar-premium {
         display: flex;
       }
 
+      /* Masquées hors de l'écran mais toujours là : visibility les retire
+         du clavier et des lecteurs d'écran, une fois la barre repliée. */
       .sidebar-group,
+      .sidebar-events,
       .sidebar-signal,
       .sidebar-delete-event {
-        display: none;
+        display: flex;
+        visibility: hidden;
+        transition: visibility 0s 0.3s;
+      }
+
+      .sidebar-group {
+        grid-column-start: 2;
       }
     }
 
-    /* 15px en haut et en bas, comme les icônes centrées dans les 70px de la
-       barre repliée. */
-    /* Toutes les icônes forment une grille de 6 colonnes : les 4 ajoutées
-       sont alignées sous les colonnes 2 à 5, donc centrées sous les 6 de la
-       ligne du haut. */
+    /* 70px + la seconde ligne de 56px (la hauteur d'une icône active). */
     &.is-expanded {
-      display: grid;
-      grid-template-columns: repeat(6, auto);
-      justify-content: center;
-      justify-items: center;
-      column-gap: 8px;
-      row-gap: 6px;
-      height: auto;
-      padding: 15px 0;
+      height: 126px;
 
       .sidebar-toggle svg {
         transform: rotate(180deg);
-      }
-
-      .sidebar-menu {
-        display: contents;
       }
 
       .sidebar-end-menu {
@@ -352,11 +363,8 @@
         .sidebar-events,
         .sidebar-signal,
         .sidebar-delete-event {
-          display: flex;
-        }
-
-        .sidebar-group {
-          grid-column-start: 2;
+          visibility: visible;
+          transition-delay: 0s;
         }
       }
     }
