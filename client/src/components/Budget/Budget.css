@@ -473,12 +473,20 @@ body {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 1rem;
 
+        /* Titre sur une ligne, pour que useCompactLevel mesure sa largeur :
+           le bouton se réduit à son icône avant de le toucher. */
         h1 {
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
           color: var(--font-brown);
         }
 
         button {
+          flex-shrink: 0;
           display: flex;
           gap: 0.4rem;
           align-items: center;
@@ -497,6 +505,18 @@ body {
             opacity 0.2s ease,
             transform 0.1s ease;
           width: auto;
+        }
+
+        &.is-compact button {
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          padding: 0;
+          border-radius: 50%;
+
+          span {
+            display: none;
+          }
         }
       }
 

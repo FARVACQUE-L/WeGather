@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
 import useCanHover from "../../helper/useCanHover";
+import { useCompactLevel } from "../../helper/useCompactLevel";
 import "./Budget.css";
 
 import {
@@ -203,6 +204,18 @@ function Budget() {
     { mode: "add" } | { mode: "edit"; budget: Budget } | null
   >(null);
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const addBudgetRef = useRef<HTMLButtonElement>(null);
+
+  // L'en-tête n'est rendu qu'une fois l'inscription connue : userInEvent
+  // relance la mesure à ce moment-là.
+  const compactLevel = useCompactLevel(
+    headerRef,
+    titleRef,
+    [addBudgetRef],
+    [userInEvent, budgetEvent?.event_name],
+  );
 
   const fetchBudgetLists = useCallback(() => {
     if (!eventUuid) return;
@@ -458,14 +471,18 @@ function Budget() {
     <div className="budget">
       <div className="budgetHeader">
         <motion.header
+          ref={headerRef}
+          className={compactLevel >= 1 ? "is-compact" : undefined}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1>{budgetEvent?.event_name}</h1>
+          <h1 ref={titleRef}>{budgetEvent?.event_name}</h1>
           <motion.button
+            ref={addBudgetRef}
             type="button"
             className="button-header"
+            aria-label="Ajouter une dépense"
             onClick={() => setBudgetForm({ mode: "add" })}
             // Même survol que Créer / Rejoindre un événement.
             whileHover={
