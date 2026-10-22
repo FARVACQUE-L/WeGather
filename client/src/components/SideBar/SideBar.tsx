@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import Logo from "../../assets/images/logo-wegather.png";
 import notificationSound from "../../assets/sounds/notification.mp3";
 import useCanHover from "../../helper/useCanHover";
@@ -63,6 +63,7 @@ type SideBarProps = {
 };
 function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   const canHover = useCanHover();
+  const navigate = useNavigate();
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -123,6 +124,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
       }
 
       setIsDeleteModalOpen(false);
+      navigate("/homeevents");
     } catch (error) {
       console.error(error);
     }
@@ -141,6 +143,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
         throw new Error("Erreur suppression");
       }
       setIsExitModalOpen(false);
+      navigate("/homeevents");
     } catch (error) {
       console.error(error);
     }
@@ -390,7 +393,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
                       </button>
 
                       <button type="button" onClick={handleDeleteEvent}>
-                        <Link to="/homeevents">Supprimer</Link>
+                        Supprimer
                       </button>
                     </div>
                   </div>
@@ -425,7 +428,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
                       </button>
 
                       <button type="button" onClick={handleDeleteUserJoining}>
-                        <Link to="/homeevents">Quitter</Link>
+                        Quitter
                       </button>
                     </div>
                   </div>

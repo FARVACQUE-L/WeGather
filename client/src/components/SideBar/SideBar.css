@@ -138,97 +138,6 @@
           gap: 10px;
           cursor: pointer;
         }
-        .delete-modal-overlay {
-          position: fixed;
-          inset: 0;
-
-          display: flex;
-          justify-content: center;
-          align-items: center;
-
-          background: rgba(15, 23, 42, 0.65);
-          backdrop-filter: blur(4px);
-
-          z-index: 9999;
-
-          .delete-modal {
-            width: 90%;
-            max-width: 420px;
-
-            padding: 2rem;
-
-            background: white;
-            border-radius: 24px;
-
-            box-shadow:
-              0 25px 50px -12px rgba(0, 0, 0, 0.25),
-              0 10px 20px rgba(0, 0, 0, 0.08);
-
-            animation: modalAppear 0.25s ease;
-
-            h3 {
-              margin-bottom: 1rem;
-
-              font-size: 1.3rem;
-              font-weight: 700;
-
-              color: #111827;
-            }
-
-            p {
-              margin-bottom: 2rem;
-
-              line-height: 1.5;
-
-              color: #6b7280;
-            }
-
-            .delete-modal-actions {
-              display: flex;
-              justify-content: space-around;
-              gap: 12px;
-
-              button {
-                border: none;
-                border-radius: 12px;
-
-                padding: 0.8rem 1.4rem;
-
-                font-weight: 600;
-                cursor: pointer;
-
-                transition: 0.2s ease;
-                a {
-                  text-decoration: none;
-                  color: white;
-                }
-              }
-
-              button:first-child {
-                background: #f3f4f6;
-                color: #374151;
-
-                @media (hover: hover) and (min-width: 429px) {
-                  &:hover {
-                    background: #e5e7eb;
-                  }
-                }
-              }
-
-              button:last-child {
-                background: var(--button-color);
-                color: white;
-
-                @media (hover: hover) and (min-width: 429px) {
-                  &:hover {
-                    background: #dc2626;
-                    transform: translateY(-2px);
-                  }
-                }
-              }
-            }
-          }
-        }
       }
     }
   }
@@ -329,108 +238,6 @@
           display: none;
         }
       }
-
-      .sidebar-delete-event {
-        .delete-modal-overlay {
-          position: fixed;
-          inset: 0;
-
-          display: flex;
-          justify-content: center;
-          align-items: center;
-
-          padding: 1rem;
-
-          background: rgba(15, 23, 42, 0.65);
-          backdrop-filter: blur(4px);
-
-          z-index: 9999;
-
-          .delete-modal {
-            width: 100%;
-            max-width: 360px;
-
-            padding: 1.5rem;
-
-            background: white;
-            border-radius: 18px;
-
-            box-shadow:
-              0 25px 50px -12px rgba(0, 0, 0, 0.25),
-              0 10px 20px rgba(0, 0, 0, 0.08);
-
-            animation: modalAppear 0.25s ease;
-
-            h3 {
-              margin-bottom: 0.8rem;
-
-              font-size: 1.15rem;
-              text-align: center;
-
-              color: #111827;
-            }
-
-            p {
-              margin-bottom: 1.5rem;
-
-              font-size: 0.95rem;
-              line-height: 1.5;
-              text-align: center;
-
-              color: #6b7280;
-            }
-
-            .delete-modal-actions {
-              display: flex;
-              flex-direction: column;
-
-              gap: 0.8rem;
-
-              button {
-                width: 100%;
-
-                border: none;
-                border-radius: 12px;
-
-                padding: 0.9rem;
-
-                font-weight: 600;
-
-                cursor: pointer;
-
-                transition: 0.2s ease;
-
-                a {
-                  color: white;
-                  text-decoration: none;
-                }
-              }
-
-              button:first-child {
-                background: #f3f4f6;
-                color: #374151;
-
-                @media (hover: hover) and (min-width: 429px) {
-                  &:hover {
-                    background: #e5e7eb;
-                  }
-                }
-              }
-
-              button:last-child {
-                background: var(--button-color);
-                color: white;
-
-                @media (hover: hover) and (min-width: 429px) {
-                  &:hover {
-                    background: #dc2626;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
 
     li.active {
@@ -457,5 +264,89 @@
 @media screen and (min-width: 429px) and (max-width: 875px) {
   .sidebar .sidebar-end-menu .sidebar-premium {
     display: flex;
+  }
+}
+/* Modales Supprimer / Quitter l'évenement, sur toutes les largeurs : mêmes
+   fond, titre et boutons que les modales de suppression de CardEvents.css.
+   Le sélecteur complet l'emporte sur les règles des boutons de la sidebar. */
+.sidebar .sidebar-delete-event .delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+
+  .delete-modal {
+    width: min(90vw, 420px);
+    padding: 2rem;
+    box-sizing: border-box;
+    background: var(--bg-color);
+    border-radius: 2rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: sidebarModalAppear 0.25s ease;
+
+    h3 {
+      margin: 0;
+      font-size: x-large;
+      color: var(--font-title);
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .delete-modal-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.5rem;
+
+      /* Annuler garde le gris par défaut des boutons, comme dans les
+         autres modales. */
+      button {
+        flex: 1;
+        justify-content: center;
+        max-width: 12rem;
+        height: 2rem;
+        padding: 0;
+        border: none;
+        border-radius: 5rem;
+        background: buttonface;
+        color: buttontext;
+        box-shadow: 1px 1px 5px black;
+        cursor: pointer;
+        transition: transform 0.2s;
+
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: scale(0.95);
+          }
+        }
+      }
+
+      button:last-child {
+        background: var(--button-color);
+        color: var(--font-neutral);
+      }
+    }
+  }
+}
+
+@keyframes sidebarModalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
