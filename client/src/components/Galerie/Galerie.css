@@ -164,6 +164,9 @@
 
   .galerie-item {
     position: relative;
+    /* Conteneur de requête : les boutons s'empilent selon la largeur de la
+       photo, qui varie entre les grandes et les petites cases. */
+    container-type: inline-size;
     overflow: hidden;
     width: 100%;
     height: 100%;
@@ -357,6 +360,27 @@
   font-size: 0.9rem;
   font-weight: 600;
   text-shadow: 1px 1px 3px rgb(0 0 0 / 80%);
+}
+
+/* Sur une photo étroite, la rangée de boutons dépassait à gauche et le like
+   sortait de l'image : télécharger, modifier et supprimer s'empilent à
+   droite, le like reste à côté du premier. */
+@container (max-width: 240px) {
+  .photo-actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+
+    .like-container {
+      grid-row: 1;
+    }
+
+    .download-button,
+    .edit-button,
+    .delete-button {
+      grid-column: 2;
+    }
+  }
 }
 
 .error-banner {
