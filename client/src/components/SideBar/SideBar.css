@@ -320,23 +320,25 @@
 
     /* 15px en haut et en bas, comme les icônes centrées dans les 70px de la
        barre repliée. */
+    /* Toutes les icônes forment une grille de 6 colonnes : les 4 ajoutées
+       sont alignées sous les colonnes 2 à 5, donc centrées sous les 6 de la
+       ligne du haut. */
     &.is-expanded {
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(6, auto);
+      justify-content: center;
+      justify-items: center;
+      column-gap: 8px;
+      row-gap: 6px;
       height: auto;
       padding: 15px 0;
-      row-gap: 6px;
 
       .sidebar-toggle svg {
         transform: rotate(180deg);
       }
 
-      /* Saut de ligne entre la barre habituelle et les icônes ajoutées
-         (order 2). */
-      &::after {
-        content: "";
-        order: 1;
-        flex-basis: 100%;
-        height: 0;
+      .sidebar-menu {
+        display: contents;
       }
 
       .sidebar-end-menu {
@@ -345,7 +347,10 @@
         .sidebar-signal,
         .sidebar-delete-event {
           display: flex;
-          order: 2;
+        }
+
+        .sidebar-group {
+          grid-column-start: 2;
         }
       }
     }
