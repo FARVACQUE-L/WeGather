@@ -44,8 +44,12 @@
     .code-wrapper {
       position: relative;
       /* Sans ça, le flex parent l'étire à la hauteur du titre voisin, et le
-         code en inset: 0 deviendrait plus haut que le bouton. */
-      align-self: flex-start;
+         code en inset: 0 deviendrait plus haut que le bouton. Centré sur la
+         hauteur du titre, et non plus collé en haut : la marge haute du h1
+         descendait le texte sous le bouton. La marge basse compense le
+         padding bas du titre (1vh), pour tomber au milieu du texte. */
+      align-self: center;
+      margin-bottom: 1vh;
     }
     /* Recouvre exactement .button-code : même conteneur, inset: 0, et même
        forme, dégradé et typographie que le bouton. */
