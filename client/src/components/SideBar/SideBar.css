@@ -207,8 +207,8 @@
 
       position: static;
 
-      /* Premium masqué aussi : une 9e icône ne tiendrait plus à 360px. Il
-         réapparaît à partir de 429px (voir plus bas). */
+      /* Premium masqué par défaut : il réapparaît entre 429px et 875px, et
+         sous 428px à la place d'autres icônes (voir plus bas). */
       .sidebar-events,
       .sidebar-premium {
         display: none;
@@ -264,6 +264,21 @@
 @media screen and (min-width: 429px) and (max-width: 875px) {
   .sidebar .sidebar-end-menu .sidebar-premium {
     display: flex;
+  }
+}
+/* Sur mobile, la barre du bas ne garde que Tableau de bord, Messagerie,
+   Réservation, Budget, Galerie et Premium. */
+@media screen and (max-width: 428px) {
+  .sidebar .sidebar-end-menu {
+    .sidebar-premium {
+      display: flex;
+    }
+
+    .sidebar-group,
+    .sidebar-signal,
+    .sidebar-delete-event {
+      display: none;
+    }
   }
 }
 /* Modales Supprimer / Quitter l'évenement, rendues dans body (voir
