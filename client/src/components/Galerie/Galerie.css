@@ -363,7 +363,7 @@
 }
 
 /* Sur une photo étroite, la rangée de boutons dépassait à gauche et le like
-   sortait de l'image : télécharger, modifier et supprimer s'empilent à
+   sortait de l'image : supprimer, modifier et télécharger s'empilent à
    droite, le like reste à côté du premier. */
 @container (max-width: 240px) {
   .photo-actions {
