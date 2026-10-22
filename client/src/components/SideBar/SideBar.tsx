@@ -4,6 +4,7 @@ import {
   BadgeEuro,
   Book,
   CalendarDays,
+  ChevronUp,
   Gem,
   Images,
   LayoutDashboard,
@@ -72,6 +73,14 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   const [isHost, setIsHost] = useState<number | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  // Sur mobile, la flèche au-dessus de la barre affiche les icônes masquées.
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Une fois une section choisie, la barre se replie.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: activeComponent ne sert qu'à déclencher le repli.
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [activeComponent]);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/auth/authVerif`, {
@@ -193,11 +202,25 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
 
   return (
     <motion.nav
-      className="sidebar"
+      className={`sidebar${isExpanded ? " is-expanded" : ""}`}
       initial={{ x: -80, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
+      {/* Affichée seulement sous 428px (voir SideBar.css). */}
+      <button
+        type="button"
+        className="sidebar-toggle"
+        onClick={() => setIsExpanded((expanded) => !expanded)}
+        aria-expanded={isExpanded}
+        aria-label={
+          isExpanded
+            ? "Masquer les autres icônes"
+            : "Afficher les autres icônes"
+        }
+      >
+        <ChevronUp size={18} />
+      </button>
       <motion.button
         type="button"
         className="logo-sidebar-container"

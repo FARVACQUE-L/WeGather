@@ -266,18 +266,88 @@
     display: flex;
   }
 }
+/* Flèche d'ouverture de la barre du bas : seulement sur mobile. */
+.sidebar .sidebar-toggle {
+  display: none;
+}
 /* Sur mobile, la barre du bas ne garde que Tableau de bord, Messagerie,
-   Réservation, Budget, Galerie et Premium. */
+   Réservation, Budget, Galerie et Premium. La flèche au-dessus de la barre
+   l'agrandit pour afficher les autres icônes sur une ligne au-dessus. */
 @media screen and (max-width: 428px) {
-  .sidebar .sidebar-end-menu {
-    .sidebar-premium {
+  .sidebar {
+    /* Onglet posé sur le bord haut de la barre, de même fond et même ombre :
+       le contour de la barre fait le tour de la flèche. Il recouvre l'ombre
+       de la barre, et clip-path coupe la sienne côté barre. */
+    .sidebar-toggle {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 52px;
+      height: 22px;
+      padding: 0;
+      border: none;
+      border-radius: 16px 16px 0 0;
+      background: var(--bg-color);
+      box-shadow: 0px -1px 5px rgba(0, 0, 0, 0.25);
+      clip-path: inset(-10px -10px 0 -10px);
+      color: inherit;
+      cursor: pointer;
+
+      svg {
+        transition: transform 0.2s;
+      }
     }
 
-    .sidebar-group,
-    .sidebar-signal,
-    .sidebar-delete-event {
-      display: none;
+    /* Les icônes de la fin du menu deviennent des éléments de la barre :
+       elles peuvent passer sur la ligne du haut, Premium restant en bas. */
+    .sidebar-end-menu {
+      display: contents;
+
+      .sidebar-premium {
+        display: flex;
+      }
+
+      .sidebar-group,
+      .sidebar-signal,
+      .sidebar-delete-event {
+        display: none;
+      }
+    }
+
+    /* 15px en haut et en bas : la ligne du bas reste à sa place, centrée
+       comme dans les 70px de la barre repliée. */
+    &.is-expanded {
+      flex-wrap: wrap;
+      height: auto;
+      padding: 15px 0;
+      row-gap: 6px;
+
+      .sidebar-toggle svg {
+        transform: rotate(180deg);
+      }
+
+      /* Saut de ligne entre les icônes ajoutées (order -2) et la barre
+         habituelle. */
+      &::before {
+        content: "";
+        order: -1;
+        flex-basis: 100%;
+        height: 0;
+      }
+
+      .sidebar-end-menu {
+        .sidebar-group,
+        .sidebar-events,
+        .sidebar-signal,
+        .sidebar-delete-event {
+          display: flex;
+          order: -2;
+        }
+      }
     }
   }
 }
