@@ -9,11 +9,11 @@ import "./Budget.css";
 import {
   ArrowDown,
   ArrowUp,
-  FilePlusCorner,
   HandCoins,
   History,
   Pen,
   Plus,
+  ReceiptEuro,
   Trash,
 } from "lucide-react";
 import BudgetFormModal from "./BudgetFormModal";
@@ -492,7 +492,7 @@ function Budget() {
             }
             whileTap={{ scale: 0.95 }}
           >
-            <FilePlusCorner size={20} />
+            <ReceiptEuro size={20} />
             <span> Ajouter une dépense</span>
           </motion.button>
         </motion.header>
