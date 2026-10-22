@@ -266,10 +266,10 @@
     display: flex;
   }
 }
-/* Modales Supprimer / Quitter l'évenement, sur toutes les largeurs : mêmes
-   fond, titre et boutons que les modales de suppression de CardEvents.css.
-   Le sélecteur complet l'emporte sur les règles des boutons de la sidebar. */
-.sidebar .sidebar-delete-event .delete-modal-overlay {
+/* Modales Supprimer / Quitter l'évenement, rendues dans body (voir
+   SideBar.tsx), sur toutes les largeurs : mêmes fond, titre et boutons que
+   les modales de suppression de CardEvents.css. */
+.SideBarModal-Overlay {
   position: fixed;
   inset: 0;
   z-index: 2000;
@@ -279,7 +279,7 @@
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(6px);
 
-  .delete-modal {
+  .SideBarModal {
     width: min(90vw, 420px);
     padding: 2rem;
     box-sizing: border-box;
@@ -302,7 +302,7 @@
       line-height: 1.5;
     }
 
-    .delete-modal-actions {
+    .SideBarModal-Actions {
       display: flex;
       justify-content: space-between;
       gap: 1rem;
@@ -312,14 +312,10 @@
          autres modales. */
       button {
         flex: 1;
-        justify-content: center;
         max-width: 12rem;
         height: 2rem;
-        padding: 0;
         border: none;
         border-radius: 5rem;
-        background: buttonface;
-        color: buttontext;
         box-shadow: 1px 1px 5px black;
         cursor: pointer;
         transition: transform 0.2s;

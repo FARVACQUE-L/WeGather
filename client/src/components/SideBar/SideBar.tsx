@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate, useParams } from "react-router";
 import Logo from "../../assets/images/logo-wegather.png";
 import notificationSound from "../../assets/sounds/notification.mp3";
@@ -377,28 +378,34 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
                 <span>Supprimer l'évenement</span>
               </motion.button>
 
-              {isDeleteModalOpen && (
-                <div className="delete-modal-overlay">
-                  <div className="delete-modal">
-                    <h3>Supprimer l'évenement</h3>
+              {/* Rendue dans body : la sidebar (position: fixed, z-index: 1)
+                  enfermait la modale sous le bouton du profil (z-index: 3). */}
+              {isDeleteModalOpen &&
+                createPortal(
+                  <div className="SideBarModal-Overlay">
+                    <div className="SideBarModal" role="alertdialog">
+                      <h3>Supprimer l'évenement</h3>
 
-                    <p>Êtes-vous sûr de vouloir supprimer votre évenement ?</p>
+                      <p>
+                        Êtes-vous sûr de vouloir supprimer votre évenement ?
+                      </p>
 
-                    <div className="delete-modal-actions">
-                      <button
-                        type="button"
-                        onClick={() => setIsDeleteModalOpen(false)}
-                      >
-                        Annuler
-                      </button>
+                      <div className="SideBarModal-Actions">
+                        <button
+                          type="button"
+                          onClick={() => setIsDeleteModalOpen(false)}
+                        >
+                          Annuler
+                        </button>
 
-                      <button type="button" onClick={handleDeleteEvent}>
-                        Supprimer
-                      </button>
+                        <button type="button" onClick={handleDeleteEvent}>
+                          Supprimer
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                  </div>,
+                  document.body,
+                )}
             </>
           ) : (
             <>
@@ -412,28 +419,30 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
                 <span>Quitter l'évenement</span>
               </motion.button>
 
-              {isExitModalOpen && (
-                <div className="delete-modal-overlay">
-                  <div className="delete-modal">
-                    <h3>Quitter l'évenement</h3>
+              {isExitModalOpen &&
+                createPortal(
+                  <div className="SideBarModal-Overlay">
+                    <div className="SideBarModal" role="alertdialog">
+                      <h3>Quitter l'évenement</h3>
 
-                    <p>Êtes-vous sûr de vouloir quitter l'évenement ?</p>
+                      <p>Êtes-vous sûr de vouloir quitter l'évenement ?</p>
 
-                    <div className="delete-modal-actions">
-                      <button
-                        type="button"
-                        onClick={() => setIsExitModalOpen(false)}
-                      >
-                        Annuler
-                      </button>
+                      <div className="SideBarModal-Actions">
+                        <button
+                          type="button"
+                          onClick={() => setIsExitModalOpen(false)}
+                        >
+                          Annuler
+                        </button>
 
-                      <button type="button" onClick={handleDeleteUserJoining}>
-                        Quitter
-                      </button>
+                        <button type="button" onClick={handleDeleteUserJoining}>
+                          Quitter
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                  </div>,
+                  document.body,
+                )}
             </>
           )}
         </motion.li>
