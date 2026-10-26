@@ -475,7 +475,10 @@
     }
 
     .dashboard-components {
-      grid-template-columns: 1fr;
+      /* minmax(0, 1fr) plutôt que 1fr : la colonne ne s'élargit pas à la
+         largeur minimale de son contenu (le champ de la todo list à
+         360px), et les blocs gardent la largeur des stats. */
+      grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto;
       gap: 16px;
       height: auto;
