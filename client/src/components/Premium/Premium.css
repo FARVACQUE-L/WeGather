@@ -72,35 +72,41 @@
          le prix). */
       white-space: pre-line;
     }
+  }
 
-    .premium-included {
-      color: var(--font-green);
-      vertical-align: middle;
-    }
+  /* Partagés par le tableau et les cards. */
+  .premium-included {
+    color: var(--font-green);
+    vertical-align: middle;
+  }
 
-    /* Même style que le bouton de création d'événement
-       (.CreateForm-ButtonSubmit), sans sa largeur fixe. */
-    .premium-cta {
-      height: 2rem;
-      /* Assez large pour « Passer au Premium » : « Passer au Gold », plus
-         court, prend la même taille. */
-      min-width: 10rem;
-      padding: 0 1rem;
-      border-radius: 1rem;
-      border: none;
-      background: linear-gradient(to right, #ff7e5f, #a53b22);
-      color: var(--font-neutral);
-      box-shadow: 1px 1px 5px black;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
+  /* Même style que le bouton de création d'événement
+     (.CreateForm-ButtonSubmit), sans sa largeur fixe. */
+  .premium-cta {
+    height: 2rem;
+    /* Assez large pour « Passer au Premium » : « Passer au Gold », plus
+       court, prend la même taille. */
+    min-width: 10rem;
+    padding: 0 1rem;
+    border-radius: 1rem;
+    border: none;
+    background: linear-gradient(to right, #ff7e5f, #a53b22);
+    color: var(--font-neutral);
+    box-shadow: 1px 1px 5px black;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
 
-    @media (hover: hover) and (min-width: 429px) {
-      .premium-cta:hover {
-        transform: scale(0.95);
-      }
+  @media (hover: hover) and (min-width: 429px) {
+    .premium-cta:hover {
+      transform: scale(0.95);
     }
+  }
+
+  /* Cards : seulement sous 428px, à la place du tableau. */
+  .premium-cards {
+    display: none;
   }
 }
 
@@ -120,16 +126,83 @@
       font-size: 33px;
     }
 
-    .premium-table {
-      font-size: 0.85rem;
+    .premium-table-wrapper {
+      display: none;
+    }
 
-      th,
-      td {
-        padding: 0.7rem 0.5rem;
+    .premium-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .premium-card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-neutral);
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+
+      /* Même en-tête que celui des colonnes du tableau. */
+      header {
+        padding: 1rem;
+        text-align: center;
+        background: var(--bg-composant-dash);
+
+        h2 {
+          margin: 0;
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: var(--font-darkBrown);
+
+          svg {
+            vertical-align: -2px;
+            margin-right: 0.4rem;
+          }
+        }
+      }
+
+      &.is-paid header h2 {
+        color: var(--font-brown);
+      }
+
+      /* Respecte le retour à la ligne de « tarif unique ». */
+      .premium-card-price {
+        margin: 0.4rem 0 0;
+        font-weight: 700;
+        color: var(--font-title);
+        white-space: pre-line;
+      }
+
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0 1rem;
+        font-size: 0.9rem;
+
+        li {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.7rem 0;
+          color: var(--font-darkBrown);
+
+          & + li {
+            border-top: 1px solid var(--border-inline);
+          }
+
+          strong {
+            flex-shrink: 0;
+            color: var(--font-black);
+          }
+        }
       }
 
       .premium-cta {
-        padding: 0 0.8rem;
+        align-self: center;
+        margin: 0.5rem 0 1.2rem;
         border: 1px solid var(--border-color);
       }
     }

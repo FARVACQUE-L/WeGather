@@ -146,6 +146,54 @@ function Premium() {
           </tfoot>
         </table>
       </div>
+
+      {/* Sous 428px, le tableau est remplacé par une card par formule
+          (Premium.css). Le tarif passe sous le nom de la formule. */}
+      <div className="premium-cards">
+        {PLANS.map((plan) => (
+          <article
+            key={plan.name}
+            className={`premium-card${plan.cta ? " is-paid" : ""}`}
+          >
+            <header>
+              <h2>
+                {plan.cta && <Gem size={18} />}
+                {plan.name}
+              </h2>
+              <p className="premium-card-price">{plan.price}</p>
+            </header>
+
+            <ul>
+              {FEATURES.filter(
+                (feature) => feature.className !== "premium-price",
+              ).map((feature) => {
+                const value = feature.value(plan);
+
+                return (
+                  <li key={feature.label}>
+                    <span>{feature.label}</span>
+                    {value === true ? (
+                      <Check
+                        size={20}
+                        className="premium-included"
+                        aria-label="Inclus"
+                      />
+                    ) : (
+                      <strong>{value}</strong>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+
+            {plan.cta && (
+              <button type="button" className="premium-cta">
+                {plan.cta}
+              </button>
+            )}
+          </article>
+        ))}
+      </div>
     </motion.div>
   );
 }
