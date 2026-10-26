@@ -516,8 +516,14 @@
   .messagerie {
     /* Avec les 2vh du titre, il commence à 4vh + 3rem comme sur le
        dashboard. */
-    padding: calc(2vh + 3rem) 1rem 0 1rem;
-    height: 90vh;
+    /* La page fait la hauteur de l'écran (dvh : sans la barre d'adresse du
+       navigateur) et la conversation prend la place sous le titre. Le
+       padding bas l'arrête juste au-dessus de la flèche de la sidebar :
+       70px de barre, 22px de flèche, 8px d'écart. */
+    padding: calc(2vh + 3rem) 1rem 100px 1rem;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
     h1 {
       padding: 2vh 0;
     }
@@ -525,11 +531,12 @@
     .global-messagerie {
       flex-direction: column-reverse;
       gap: 1rem;
-      height: 67vh;
+      flex: 1;
+      min-height: 0;
 
       .messagerie-box {
         width: 100%;
-        height: 80vh;
+        height: auto;
         padding: 0 15px 15px 15px;
         margin-top: 0;
 
