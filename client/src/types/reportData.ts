@@ -25,6 +25,9 @@ export type ReportData = {
   author_picture?: string;
   target_username?: string;
   target_picture?: string;
+  // Utilisateur signalé, ou organisateur de l'événement signalé, superadmin :
+  // son compte ne peut pas être banni.
+  target_is_superadmin?: number;
 
   reported_event_id_event?: number | null;
   reported_user_id_event?: number;

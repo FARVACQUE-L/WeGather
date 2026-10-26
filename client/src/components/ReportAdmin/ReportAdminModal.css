@@ -72,7 +72,7 @@
       cursor: pointer;
 
       @media (hover: hover) and (min-width: 429px) {
-        &:hover {
+        &:hover:not(:disabled) {
           border-color: var(--icon-color);
         }
       }
@@ -80,6 +80,13 @@
       &[aria-pressed="true"] {
         border-color: var(--icon-color);
         background: var(--hover-signalement);
+      }
+
+      /* Bannir un superadmin : option visible, avec son explication, mais
+         grisée. */
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .banModal-OptionIcon {

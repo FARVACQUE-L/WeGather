@@ -202,6 +202,17 @@ const markUserAsDone: RequestHandler = async (req, res, next) => {
 const banUser: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+
+    // Un superadmin ne peut pas être banni définitivement : il peut seulement
+    // être retiré d'un événement (banUserFromEvent).
+    const roles = await adminRepository.readRoles(id);
+    if (roles?.user_is_superadmin) {
+      res.status(403).json({
+        message: "Un superadmin ne peut pas être banni définitivement",
+      });
+      return;
+    }
+
     const user = await adminRepository.banUser(id);
 
     if (!user) {

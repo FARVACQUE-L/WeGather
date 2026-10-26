@@ -9,6 +9,9 @@ interface ReportAdminModalProps {
   type?: string;
   // Événement signalé puis supprimé : seul l'organisateur peut être banni.
   isEventDeleted?: boolean;
+  // Cible superadmin : son compte ne peut pas être banni (refusé aussi par le
+  // serveur), seulement retiré de l'événement.
+  isTargetSuperAdmin?: boolean;
   onClose: () => void;
   onConfirm: (action: BanAction) => void;
 }
@@ -17,6 +20,7 @@ function ReportAdminModal({
   open,
   type,
   isEventDeleted = false,
+  isTargetSuperAdmin = false,
   onClose,
   onConfirm,
 }: ReportAdminModalProps) {
@@ -86,6 +90,7 @@ function ReportAdminModal({
           type="button"
           className="banModal-Option"
           aria-pressed={selected === "user"}
+          disabled={isTargetSuperAdmin}
           onClick={() => setSelected("user")}
         >
           <span className="banModal-OptionIcon">
@@ -98,9 +103,11 @@ function ReportAdminModal({
                 : "Bannir l'utilisateur"}
             </span>
             <span className="banModal-OptionDesc">
-              {type === "event"
-                ? "Suspendre le compte de l'organisateur de façon permanente."
-                : "Suspendre le compte de l'utilisateur signalé de façon permanente."}
+              {isTargetSuperAdmin
+                ? "Un superadmin ne peut pas être banni définitivement."
+                : type === "event"
+                  ? "Suspendre le compte de l'organisateur de façon permanente."
+                  : "Suspendre le compte de l'utilisateur signalé de façon permanente."}
             </span>
           </span>
         </button>
