@@ -80,8 +80,16 @@
     }
   }
 }
+/* Marges resserrées : la modale ne fait plus 30rem de haut au minimum sur
+   mobile (ModalAddEvent.css). */
 @media screen and (max-width: 428px) {
+  .JoinForm-Body {
+    margin: 2rem 1.25rem 1.5rem;
+  }
   .JoinForm-Footer {
+    gap: 1rem;
+    margin: 3rem 1.25rem 1.5rem;
+
     .JoinForm-ButtonSubmit {
       width: 10rem;
       border: 1px solid var(--border-color);

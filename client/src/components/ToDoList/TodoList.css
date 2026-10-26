@@ -136,8 +136,9 @@
     margin-left: 0;
     width: 100%;
     min-height: max(40vh, 400px);
+    /* Prend la place laissée par le bouton (flex: 1 au-dessus) : en 65vw,
+       il débordait de la todo list à 360px. */
     .task-text {
-      width: 65vw;
       padding-left: 0.5rem;
     }
   }

@@ -38,6 +38,29 @@ const toast = Swal.mixin({
   customClass: { popup: "toast-error-popup" },
 });
 
+// Confirmations des changements de rôle : mêmes fond, titre et boutons que
+// les modales de suppression du site (voir AdminRoles.css). Sans
+// buttonsStyling, SweetAlert ne remet pas ses couleurs en style inline.
+const confirmModal = Swal.mixin({
+  showCancelButton: true,
+  cancelButtonText: "Annuler",
+  reverseButtons: true,
+  buttonsStyling: false,
+  // Animation d'entrée par une classe retirée à la fermeture : posée sur la
+  // popup, elle masquait celle de sortie, dont SweetAlert attend la fin pour
+  // retirer la modale.
+  showClass: { popup: "AdminRolesModal-Show" },
+  customClass: {
+    container: "AdminRolesModal-Backdrop",
+    popup: "AdminRolesModal",
+    title: "AdminRolesModal-Title",
+    htmlContainer: "AdminRolesModal-Text",
+    actions: "AdminRolesModal-Actions",
+    confirmButton: "AdminRolesModal-Confirm",
+    cancelButton: "AdminRolesModal-Cancel",
+  },
+});
+
 function AdminRoles() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UserResult[]>([]);
@@ -126,14 +149,10 @@ function AdminRoles() {
   }
 
   async function handleRevokeAdmin(admin: Admin) {
-    const { isConfirmed } = await Swal.fire({
+    const { isConfirmed } = await confirmModal.fire({
       title: "Retirer le rôle administrateur",
       text: `${admin.user_username} n'aura plus accès à l'espace admin.`,
-      icon: "warning",
-      showCancelButton: true,
       confirmButtonText: "Retirer",
-      cancelButtonText: "Annuler",
-      confirmButtonColor: "#a53b22",
     });
 
     if (!isConfirmed) return;
@@ -168,16 +187,12 @@ function AdminRoles() {
   }
 
   async function handleChangeSuperAdmin(admin: Admin, promote: boolean) {
-    const { isConfirmed } = await Swal.fire({
+    const { isConfirmed } = await confirmModal.fire({
       title: promote ? "Passer en superadmin" : "Repasser en administrateur",
       text: promote
         ? `${admin.user_username} pourra ajouter et retirer des administrateurs.`
         : `${admin.user_username} ne pourra plus gérer les rôles.`,
-      icon: "question",
-      showCancelButton: true,
       confirmButtonText: "Confirmer",
-      cancelButtonText: "Annuler",
-      confirmButtonColor: "#a53b22",
     });
 
     if (!isConfirmed) return;

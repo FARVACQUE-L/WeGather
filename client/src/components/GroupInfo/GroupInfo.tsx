@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Crown, UserCheck, UserX } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
 import { socket } from "../../socket/socket";
@@ -235,25 +236,35 @@ function GroupInfo() {
         </section>
       )}
 
-      {memberToBan && (
-        <div className="delete-modal-overlay">
-          <div className="delete-modal">
-            <h3>Bannir {memberToBan.user_username}</h3>
-            <p>
-              Ce membre sera retiré de l'événement et ne pourra plus le
-              rejoindre tant que vous ne l'aurez pas débanni.
-            </p>
-            <div className="delete-modal-actions">
-              <button type="button" onClick={() => setMemberToBan(null)}>
-                Annuler
-              </button>
-              <button type="button" onClick={handleBan}>
-                Bannir
-              </button>
+      {/* Rendue dans body, comme les modales de la sidebar : le voile couvre
+          aussi le bouton du profil. */}
+      {memberToBan &&
+        createPortal(
+          <div className="GroupInfoModal-Overlay">
+            <div className="GroupInfoModal" role="alertdialog">
+              <h3 className="GroupInfoModal-Title">
+                Bannir {memberToBan.user_username}
+              </h3>
+              <p className="GroupInfoModal-Text">
+                Ce membre sera retiré de l'événement et ne pourra plus le
+                rejoindre tant que vous ne l'aurez pas débanni.
+              </p>
+              <div className="GroupInfoModal-Actions">
+                <button type="button" onClick={() => setMemberToBan(null)}>
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  className="GroupInfoModal-Confirm"
+                  onClick={handleBan}
+                >
+                  Bannir
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </motion.div>
   );
 }

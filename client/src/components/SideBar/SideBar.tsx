@@ -1,9 +1,10 @@
 import "./SideBar.css";
 import { motion } from "framer-motion";
 import {
-  BadgeDollarSign,
+  BadgeEuro,
   Book,
   CalendarDays,
+  ChevronUp,
   Gem,
   Images,
   LayoutDashboard,
@@ -14,7 +15,8 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router";
+import { createPortal } from "react-dom";
+import { Link, useNavigate, useParams } from "react-router";
 import Logo from "../../assets/images/logo-wegather.png";
 import notificationSound from "../../assets/sounds/notification.mp3";
 import useCanHover from "../../helper/useCanHover";
@@ -63,6 +65,7 @@ type SideBarProps = {
 };
 function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   const canHover = useCanHover();
+  const navigate = useNavigate();
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -70,6 +73,35 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   const [isHost, setIsHost] = useState<number | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
+  // Sur mobile, la flèche au-dessus de la barre affiche les icônes masquées.
+  const [isExpanded, setIsExpanded] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Glisser vers le haut sur la barre l'agrandit, vers le bas la replie. Un
+  // geste surtout horizontal, ou trop court (un appui), est ignoré.
+  const handleTouchStart = (event: React.TouchEvent) => {
+    const touch = event.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent) => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start || !window.matchMedia("(max-width: 428px)").matches) return;
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    if (Math.abs(deltaY) < 30 || Math.abs(deltaY) < Math.abs(deltaX)) return;
+
+    setIsExpanded(deltaY < 0);
+  };
+
+  // Une fois une section choisie, la barre se replie.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: activeComponent ne sert qu'à déclencher le repli.
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [activeComponent]);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/auth/authVerif`, {
@@ -123,6 +155,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
       }
 
       setIsDeleteModalOpen(false);
+      navigate("/homeevents");
     } catch (error) {
       console.error(error);
     }
@@ -141,6 +174,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
         throw new Error("Erreur suppression");
       }
       setIsExitModalOpen(false);
+      navigate("/homeevents");
     } catch (error) {
       console.error(error);
     }
@@ -189,11 +223,27 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
 
   return (
     <motion.nav
-      className="sidebar"
+      className={`sidebar${isExpanded ? " is-expanded" : ""}`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       initial={{ x: -80, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
+      {/* Affichée seulement sous 428px (voir SideBar.css). */}
+      <button
+        type="button"
+        className="sidebar-toggle"
+        onClick={() => setIsExpanded((expanded) => !expanded)}
+        aria-expanded={isExpanded}
+        aria-label={
+          isExpanded
+            ? "Masquer les autres icônes"
+            : "Afficher les autres icônes"
+        }
+      >
+        <ChevronUp size={18} />
+      </button>
       <motion.button
         type="button"
         className="logo-sidebar-container"
@@ -278,7 +328,7 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
             whileHover={canHover ? { x: 6, scale: 1.02 } : undefined}
             whileTap={{ scale: 0.98 }}
           >
-            <BadgeDollarSign size={20} className="dollar" />
+            <BadgeEuro size={20} className="dollar" />
             <span>Budget</span>
           </motion.button>
         </motion.li>
@@ -374,28 +424,34 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
                 <span>Supprimer l'évenement</span>
               </motion.button>
 
-              {isDeleteModalOpen && (
-                <div className="delete-modal-overlay">
-                  <div className="delete-modal">
-                    <h3>Supprimer l'évenement</h3>
+              {/* Rendue dans body : la sidebar (position: fixed, z-index: 1)
+                  enfermait la modale sous le bouton du profil (z-index: 3). */}
+              {isDeleteModalOpen &&
+                createPortal(
+                  <div className="SideBarModal-Overlay">
+                    <div className="SideBarModal" role="alertdialog">
+                      <h3>Supprimer l'évenement</h3>
 
-                    <p>Êtes-vous sûr de vouloir supprimer votre évenement ?</p>
+                      <p>
+                        Êtes-vous sûr de vouloir supprimer votre évenement ?
+                      </p>
 
-                    <div className="delete-modal-actions">
-                      <button
-                        type="button"
-                        onClick={() => setIsDeleteModalOpen(false)}
-                      >
-                        Annuler
-                      </button>
+                      <div className="SideBarModal-Actions">
+                        <button
+                          type="button"
+                          onClick={() => setIsDeleteModalOpen(false)}
+                        >
+                          Annuler
+                        </button>
 
-                      <button type="button" onClick={handleDeleteEvent}>
-                        <Link to="/homeevents">Supprimer</Link>
-                      </button>
+                        <button type="button" onClick={handleDeleteEvent}>
+                          Supprimer
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                  </div>,
+                  document.body,
+                )}
             </>
           ) : (
             <>
@@ -409,28 +465,30 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
                 <span>Quitter l'évenement</span>
               </motion.button>
 
-              {isExitModalOpen && (
-                <div className="delete-modal-overlay">
-                  <div className="delete-modal">
-                    <h3>Quitter l'évenement</h3>
+              {isExitModalOpen &&
+                createPortal(
+                  <div className="SideBarModal-Overlay">
+                    <div className="SideBarModal" role="alertdialog">
+                      <h3>Quitter l'évenement</h3>
 
-                    <p>Êtes-vous sûr de vouloir quitter l'évenement ?</p>
+                      <p>Êtes-vous sûr de vouloir quitter l'évenement ?</p>
 
-                    <div className="delete-modal-actions">
-                      <button
-                        type="button"
-                        onClick={() => setIsExitModalOpen(false)}
-                      >
-                        Annuler
-                      </button>
+                      <div className="SideBarModal-Actions">
+                        <button
+                          type="button"
+                          onClick={() => setIsExitModalOpen(false)}
+                        >
+                          Annuler
+                        </button>
 
-                      <button type="button" onClick={handleDeleteUserJoining}>
-                        <Link to="/homeevents">Quitter</Link>
-                      </button>
+                        <button type="button" onClick={handleDeleteUserJoining}>
+                          Quitter
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                  </div>,
+                  document.body,
+                )}
             </>
           )}
         </motion.li>

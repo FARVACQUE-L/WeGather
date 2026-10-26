@@ -56,8 +56,11 @@ function UserReport() {
       .catch((error) => console.error(error));
   }, [eventUuid]);
 
+  // Vers le tableau de bord de l'événement, comme Annuler : navigate(-1) ne
+  // faisait rien quand la page était la première de l'historique (lien
+  // ouvert directement, page rechargée sur mobile).
   const handleGoBack = () => {
-    navigate(-1);
+    navigate(`/tableaudebord/${eventUuid}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -211,7 +214,7 @@ function UserReport() {
             type="button"
             className="userReport-Back"
             onClick={handleGoBack}
-            aria-label="Retour à la page précédente"
+            aria-label="Retour au tableau de bord"
           >
             <ArrowLeft size={64} />
           </button>

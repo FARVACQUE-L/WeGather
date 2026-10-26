@@ -1,18 +1,19 @@
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import Swal from "sweetalert2";
 import useCanHover from "../../helper/useCanHover";
+import { useCompactLevel } from "../../helper/useCompactLevel";
 import "./Budget.css";
 
 import {
   ArrowDown,
   ArrowUp,
-  FilePlusCorner,
   HandCoins,
   History,
   Pen,
   Plus,
+  ReceiptEuro,
   Trash,
 } from "lucide-react";
 import BudgetFormModal from "./BudgetFormModal";
@@ -203,6 +204,18 @@ function Budget() {
     { mode: "add" } | { mode: "edit"; budget: Budget } | null
   >(null);
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const addBudgetRef = useRef<HTMLButtonElement>(null);
+
+  // L'en-tête n'est rendu qu'une fois l'inscription connue : userInEvent
+  // relance la mesure à ce moment-là.
+  const compactLevel = useCompactLevel(
+    headerRef,
+    titleRef,
+    [addBudgetRef],
+    [userInEvent, budgetEvent?.event_name],
+  );
 
   const fetchBudgetLists = useCallback(() => {
     if (!eventUuid) return;
@@ -348,20 +361,30 @@ function Budget() {
       timerProgressBar: true,
     });
 
+    // Mêmes fond, titre et boutons que les modales de suppression du site
+    // (voir Budget.css). Sans buttonsStyling, SweetAlert ne remet pas ses
+    // couleurs en style inline. L'animation d'entrée passe par showClass :
+    // posée sur la popup, elle bloquait celle de sortie, dont SweetAlert
+    // attend la fin pour retirer la modale.
     const result = await Swal.fire({
-      title: "Supprimer cette dépense ?",
-      text: "Cette action est irréversible",
-      icon: "error",
+      title: "Supprimer la dépense",
+      text: "Êtes-vous sûr de vouloir supprimer cette dépense ?",
 
       showCancelButton: true,
       confirmButtonText: "Supprimer",
       cancelButtonText: "Annuler",
+      reverseButtons: true,
+      buttonsStyling: false,
+      showClass: { popup: "BudgetDeleteModal-Show" },
 
       customClass: {
-        container: "budget-backdrop",
-        popup: "budget-delete-popup",
-        confirmButton: "budget-delete-confirm",
-        cancelButton: "budget-delete-cancel",
+        container: "BudgetDeleteModal-Backdrop",
+        popup: "BudgetDeleteModal",
+        title: "BudgetDeleteModal-Title",
+        htmlContainer: "BudgetDeleteModal-Text",
+        actions: "BudgetDeleteModal-Actions",
+        confirmButton: "BudgetDeleteModal-Confirm",
+        cancelButton: "BudgetDeleteModal-Cancel",
       },
     });
 
@@ -458,14 +481,18 @@ function Budget() {
     <div className="budget">
       <div className="budgetHeader">
         <motion.header
+          ref={headerRef}
+          className={compactLevel >= 1 ? "is-compact" : undefined}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1>{budgetEvent?.event_name}</h1>
+          <h1 ref={titleRef}>{budgetEvent?.event_name}</h1>
           <motion.button
+            ref={addBudgetRef}
             type="button"
             className="button-header"
+            aria-label="Ajouter une dépense"
             onClick={() => setBudgetForm({ mode: "add" })}
             // Même survol que Créer / Rejoindre un événement.
             whileHover={
@@ -475,7 +502,7 @@ function Budget() {
             }
             whileTap={{ scale: 0.95 }}
           >
-            <FilePlusCorner size={20} />
+            <ReceiptEuro size={20} />
             <span> Ajouter une dépense</span>
           </motion.button>
         </motion.header>

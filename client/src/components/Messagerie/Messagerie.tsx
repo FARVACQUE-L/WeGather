@@ -196,11 +196,20 @@ function Messagerie() {
     if (!messagesElement || messagesCount === 0) return;
     messagesElement.scrollTop = messagesElement.scrollHeight;
   }, [receptionMessagesUser]);
+  // Écran tactile ou mobile (sous 428px, comme le reste du site) : donner le
+  // focus à un champ ouvre le clavier, qui recouvrirait le sélecteur
+  // d'emoji. La largeur seule ne suffit pas : un téléphone en paysage la
+  // dépasse.
+  const isTouchScreen = window.matchMedia(
+    "(pointer: coarse), (max-width: 428px)",
+  ).matches;
+
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setMessagesUser((prev) => prev + emojiData.emoji);
     setShowPicker(false);
-    // Le focus revient au champ pour enchaîner la saisie sans cliquer.
-    messageInputRef.current?.focus();
+    // Le focus revient au champ pour enchaîner la saisie sans cliquer. Pas
+    // sur mobile, où il rouvrirait le clavier.
+    if (!isTouchScreen) messageInputRef.current?.focus();
   };
 
   const fetchUserEvent = useCallback(async () => {
@@ -967,7 +976,12 @@ function Messagerie() {
                 type="button"
                 aria-label="Ouvrir le sélecteur d'emoji"
                 aria-expanded={showPicker}
-                onClick={() => setShowPicker(!showPicker)}
+                onClick={() => {
+                  // Ferme le clavier s'il était ouvert : Safari ne donne pas
+                  // le focus au bouton, le champ le garderait.
+                  if (isTouchScreen) messageInputRef.current?.blur();
+                  setShowPicker(!showPicker);
+                }}
               >
                 😊
               </button>
@@ -984,6 +998,10 @@ function Messagerie() {
                     emojiStyle={EmojiStyle.NATIVE}
                     previewConfig={{ showPreview: false }}
                     skinTonesDisabled
+                    // Par défaut, la recherche prend le focus à l'ouverture
+                    // et le clavier s'ouvre sur mobile : un appui sur la
+                    // recherche l'ouvre quand on en a besoin.
+                    autoFocusSearch={!isTouchScreen}
                     width="min(320px, 80vw)"
                     height="min(350px, 45vh)"
                     searchPlaceHolder="Rechercher un emoji"

@@ -268,6 +268,92 @@
   }
 }
 
+/* Confirmations SweetAlert des changements de rôle (confirmModal dans
+   AdminRoles.tsx) : mêmes fond, titre et boutons que les modales de
+   suppression de CardEvents.css. Rendues dans body, d'où les règles hors de
+   .admin-roles ; body l'emporte sur les styles par défaut de SweetAlert. */
+body .AdminRolesModal-Backdrop.swal2-backdrop-show {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+body .AdminRolesModal {
+  width: min(90vw, 420px);
+  padding: 2rem;
+  row-gap: 1rem;
+  background: var(--bg-color);
+  border-radius: 2rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+
+  /* Classe d'entrée (showClass), retirée à la fermeture pour laisser jouer
+     l'animation de sortie de SweetAlert. */
+  &.AdminRolesModal-Show {
+    animation: AdminRolesModal-Appear 0.25s ease;
+  }
+
+  .AdminRolesModal-Title {
+    padding: 0;
+    font-size: x-large;
+    text-align: start;
+    color: var(--font-title);
+  }
+
+  .AdminRolesModal-Text {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: start;
+    color: inherit;
+  }
+
+  .AdminRolesModal-Actions {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    margin: 0.5rem 0 0;
+    padding: 0;
+
+    /* Annuler garde le gris par défaut des boutons, comme dans les
+       autres modales. */
+    button {
+      flex: 1;
+      max-width: 12rem;
+      height: 2rem;
+      margin: 0;
+      border: none;
+      border-radius: 5rem;
+      box-shadow: 1px 1px 5px black;
+      cursor: pointer;
+      transition: transform 0.2s;
+
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    .AdminRolesModal-Confirm {
+      background: var(--button-color);
+      color: var(--font-neutral);
+    }
+  }
+}
+
+@keyframes AdminRolesModal-Appear {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Sous 1400px, la liste des administrateurs passe sous l'ajout. */
 @media screen and (max-width: 1400px) {
   .admin-roles .admin-roles-grid {

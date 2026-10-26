@@ -164,6 +164,9 @@
 
   .galerie-item {
     position: relative;
+    /* Conteneur de requête : les boutons s'empilent selon la largeur de la
+       photo, qui varie entre les grandes et les petites cases. */
+    container-type: inline-size;
     overflow: hidden;
     width: 100%;
     height: 100%;
@@ -359,6 +362,40 @@
   text-shadow: 1px 1px 3px rgb(0 0 0 / 80%);
 }
 
+/* Sur une photo étroite, la rangée de boutons dépassait à gauche et le like
+   sortait de l'image : supprimer, modifier et télécharger s'empilent à
+   droite, le like reste à côté du premier. En rangée, l'ordre du HTML est
+   gardé (télécharger, modifier, supprimer). */
+@container (max-width: 240px) {
+  .photo-actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+
+    .like-container {
+      grid-row: 1;
+    }
+
+    .download-button,
+    .edit-button,
+    .delete-button {
+      grid-column: 2;
+    }
+
+    .delete-button {
+      grid-row: 1;
+    }
+
+    .edit-button {
+      grid-row: 2;
+    }
+
+    .download-button {
+      grid-row: 3;
+    }
+  }
+}
+
 .error-banner {
   display: flex;
   align-items: center;
@@ -500,6 +537,7 @@
     /* Hauteur naturelle : centré dans 70px, le titre ne tombait pas à la
        même hauteur que sur les autres pages. */
     .galerie-header {
+      width: 100%;
       height: auto;
       align-items: flex-end;
       gap: 0.75rem;
@@ -515,9 +553,13 @@
 
     /* Ajouter une photo devient un bouton flottant : il ne reste dans
        l'en-tête que l'icône de téléchargement (useCompactLevel la réduit
-       toujours sous 428px). */
+       toujours sous 428px). Elle est centrée sur le même axe vertical que
+       lui : son centre à 48px du bord droit (20px + 56px / 2), donc son
+       bord droit à 28px (48px - 40px / 2), soit 12px de plus que les 1rem
+       de marge de la page. */
     .galerie-header-actions {
       align-self: center;
+      margin-right: 12px;
     }
 
     .galerie-button {
@@ -587,35 +629,106 @@
     font-size: 1rem;
   }
 
+  /* Sur mobile, les actions passent par un appui long sur la photo, qui
+     ouvre un menu (PhotoItem.tsx). */
   .photo-actions {
-    top: 6px;
-    right: 6px;
-    gap: 0.35rem;
+    display: none;
   }
 
-  .download-button,
-  .edit-button,
-  .delete-button {
-    width: 28px;
-    height: 28px;
+  /* L'appui long ne sélectionne pas l'image et n'ouvre pas la bulle
+     d'enregistrement d'iOS. */
+  .photo-button {
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+}
 
-    svg {
-      width: 15px;
-      height: 15px;
+/* Menu ouvert par un appui long sur une photo, sur mobile. Rendu dans body
+   (PhotoItem.tsx) : mêmes voile, fond et arrondis que les autres modales,
+   boutons en pilule. */
+.PhotoMenu-Overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+
+  .PhotoMenu-Close {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .PhotoMenu {
+    position: relative;
+    width: min(90vw, 340px);
+    padding: 1.5rem;
+    box-sizing: border-box;
+    background: var(--bg-color);
+    border-radius: 2rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    animation: PhotoMenu-Appear 0.25s ease;
+
+    .PhotoMenu-Preview {
+      width: 100%;
+      max-height: 30vh;
+      margin-bottom: 0.25rem;
+      border-radius: 1rem;
+      object-fit: cover;
+    }
+
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      min-height: 2.5rem;
+      border: none;
+      border-radius: 5rem;
+      box-shadow: 1px 1px 5px black;
+      background: var(--button-color-disable);
+      color: var(--font-title);
+      font-size: 0.9rem;
+      cursor: pointer;
+
+      &.is-liked svg {
+        color: #dc2626;
+      }
+    }
+
+    .PhotoMenu-Delete {
+      background: var(--bg-negative);
+      color: var(--font-red);
+    }
+
+    /* Annuler garde le gris par défaut des boutons, comme dans les autres
+       modales. */
+    .PhotoMenu-Cancel {
+      background: buttonface;
+      color: buttontext;
     }
   }
+}
 
-  .like-button {
-    padding: 4px;
-
-    svg {
-      width: 16px;
-      height: 16px;
-    }
+@keyframes PhotoMenu-Appear {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
   }
 
-  .like-counter {
-    font-size: 0.75rem;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

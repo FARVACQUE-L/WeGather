@@ -167,6 +167,10 @@
             font-size: 13px;
             padding-left: 20px;
           }
+          /* Pastille du type de ticket : seulement sous 428px. */
+          .report-ticket-badge {
+            display: none;
+          }
           /* La description s'arrête à trois lignes, avec des points de
              suspension, quelle que soit la largeur. */
           p:nth-child(3) {
@@ -324,8 +328,11 @@
       }
     }
 
+    /* minmax(0, 1fr) plutôt que 1fr : la colonne ne s'élargit pas aux
+       310px minimum du tableau des rapports (qui défile dans sa carte), et
+       les deux cartes gardent la largeur du graphique. */
     .bottom-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 18px;
       width: 100%;
       padding-bottom: 90px;
@@ -368,6 +375,47 @@
           width: 25%;
           padding-left: 0;
           font-size: 12px;
+        }
+
+        /* Colonne Ticket réduite à la pastille : la description récupère
+           la place. */
+        .titre-tableau-rapport h3:nth-child(2),
+        .contenu-tableau-rapport div p:nth-child(2) {
+          width: 14%;
+        }
+        .titre-tableau-rapport h3:nth-child(3),
+        .contenu-tableau-rapport div p:nth-child(3) {
+          width: 36%;
+        }
+
+        .contenu-tableau-rapport div .report-ticket {
+          .report-ticket-label {
+            display: none;
+          }
+
+          /* Mêmes couleurs que les icônes des stats de la page
+             Signalements (ReportStatCard.css). */
+          .report-ticket-badge {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+
+            &.is-user {
+              background: var(--icon-color-user);
+            }
+            &.is-event {
+              background: var(--icon-color-event);
+            }
+            &.is-bug {
+              background: var(--icon-color-bug);
+            }
+          }
         }
       }
     }

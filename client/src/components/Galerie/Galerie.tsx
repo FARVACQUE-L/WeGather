@@ -513,16 +513,19 @@ function Galerie() {
       )}
 
       {photoToDelete !== null && (
-        <div className="modal-overlay">
-          <div className="modal" role="alertdialog">
-            <h2>Supprimer cette photo ?</h2>
-            <div className="modal-actions">
+        <div className="GalleryDelete-Overlay">
+          <div className="GalleryDelete" role="alertdialog">
+            <h2 className="GalleryDelete-Title">Supprimer la photo</h2>
+            <p className="GalleryDelete-Text">
+              Êtes-vous sûr de vouloir supprimer cette photo ?
+            </p>
+            <div className="GalleryDelete-Actions">
               <button type="button" onClick={() => setPhotoToDelete(null)}>
                 Annuler
               </button>
               <button
                 type="button"
-                className="delete-confirm"
+                className="GalleryDelete-Confirm"
                 onClick={confirmDeletePhoto}
               >
                 Supprimer

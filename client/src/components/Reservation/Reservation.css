@@ -60,10 +60,9 @@
       }
     }
 
-    /* Classes préfixées : GalleryModal.css déclare des règles globales
-       .modal, .modal-overlay et .modal-actions (texte centré, couleurs et
-       marges des boutons) qui s'appliquaient aussi à cette modale. Le
-       contenu reprend les styles de la modale de modification d'événement. */
+    /* Classes préfixées, pour ne pas hériter de règles globales d'autres
+       modales. Le contenu reprend les styles de la modale de modification
+       d'événement. */
     .ReservationModal-Overlay {
       position: fixed;
       inset: 0;
@@ -383,6 +382,9 @@
            52px au total, pour ne pas les chevaucher dès 360px de large. */
         right: 16px;
         bottom: 100px;
+        /* Sous 360px, il chevauche les cartes : il reste au-dessus d'elles,
+           comme le bouton d'ajout de la galerie. */
+        z-index: 20;
         border-radius: 50%;
         padding: 0.7rem;
         .lucide.lucide-calendar-plus {
