@@ -399,7 +399,7 @@ function AdminReport() {
               {type !== "bug" && (
                 <button type="button" onClick={() => setIsModalOpen(true)}>
                   <Gavel size={16} />
-                  Bannir
+                  Modérer
                 </button>
               )}
               <button type="button" onClick={handleReject}>
