@@ -106,8 +106,8 @@ function ReportAdminModal({
               {isTargetSuperAdmin
                 ? "Un superadmin ne peut pas être banni définitivement."
                 : type === "event"
-                  ? "Suspendre le compte de l'organisateur de façon permanente."
-                  : "Suspendre le compte de l'utilisateur signalé de façon permanente."}
+                  ? "Suspendre le compte de l'organisateur de façon permanente, et bannir les événements qu'il organise."
+                  : "Suspendre le compte de l'utilisateur signalé de façon permanente, et bannir les événements qu'il organise."}
             </span>
           </span>
         </button>

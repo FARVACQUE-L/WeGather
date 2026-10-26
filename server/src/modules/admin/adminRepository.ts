@@ -360,6 +360,13 @@ FROM user
       [id],
     );
 
+    // Sans son hôte, plus personne ne pourrait gérer ses événements : ils
+    // sont bannis avec lui. Ceux qu'il a seulement rejoints restent actifs.
+    await databaseClient.query<Result>(
+      "UPDATE event SET event_is_ban = TRUE WHERE event_id_host = ?",
+      [id],
+    );
+
     return user;
   }
 
