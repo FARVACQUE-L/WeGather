@@ -324,8 +324,11 @@
       }
     }
 
+    /* minmax(0, 1fr) plutôt que 1fr : la colonne ne s'élargit pas aux
+       310px minimum du tableau des rapports (qui défile dans sa carte), et
+       les deux cartes gardent la largeur du graphique. */
     .bottom-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 18px;
       width: 100%;
       padding-bottom: 90px;
