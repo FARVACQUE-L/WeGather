@@ -199,8 +199,10 @@ FROM user
       `SELECT 
     re.*,
     e.event_name,
+    e.event_is_ban,
     host.user_username AS host_username,
     host.user_is_superadmin AS target_is_superadmin,
+    host.user_is_ban AS target_is_ban,
     u.user_username,
     u.user_mail,
     u.user_profile_picture
@@ -237,7 +239,13 @@ FROM user
       author.user_profile_picture AS author_picture,
       target.user_username AS target_username,
       target.user_profile_picture AS target_picture,
-      target.user_is_superadmin AS target_is_superadmin
+      target.user_is_superadmin AS target_is_superadmin,
+      target.user_is_ban AS target_is_ban,
+      EXISTS (
+        SELECT 1 FROM event_user_ban AS eub
+        WHERE eub.eub_id_event = ru.reported_user_id_event
+        AND eub.eub_id_user = ru.reported_user_id_user
+      ) AS target_is_event_ban
     FROM reported_user AS ru
     JOIN user AS author ON author.user_id = ru.reported_user_by_id_user
     JOIN user AS target ON target.user_id = ru.reported_user_id_user
@@ -404,6 +412,69 @@ FROM user
 
     await databaseClient.query<Result>(
       "UPDATE event SET event_is_ban = TRUE WHERE event_id = ?",
+      [id],
+    );
+
+    return data;
+  }
+
+  async unbanUser(id: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT user_mail, user_username FROM user WHERE user_id = ?",
+      [id],
+    );
+    const user = rows[0];
+    if (!user) return null;
+
+    await databaseClient.query<Result>(
+      "UPDATE user SET user_is_ban = FALSE WHERE user_id = ?",
+      [id],
+    );
+
+    // Inverse de banUser : les événements qu'il organise sont rétablis avec
+    // lui, y compris ceux bannis séparément par un signalement d'événement.
+    await databaseClient.query<Result>(
+      "UPDATE event SET event_is_ban = FALSE WHERE event_id_host = ?",
+      [id],
+    );
+
+    return user;
+  }
+
+  async unbanUserFromEvent(eventId: number, userId: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT user_mail, user_username FROM user WHERE user_id = ?",
+      [userId],
+    );
+    const user = rows[0];
+    if (!user) return null;
+
+    await databaseClient.query<Result>(
+      "DELETE FROM event_user_ban WHERE eub_id_event = ? AND eub_id_user = ?",
+      [eventId, userId],
+    );
+
+    await databaseClient.query<Result>(
+      "INSERT IGNORE INTO event_user_joining (euj_id_event, euj_id_user) VALUES (?, ?)",
+      [eventId, userId],
+    );
+
+    return user;
+  }
+
+  async unbanEvent(id: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT e.event_name, u.user_mail, u.user_username
+     FROM event AS e
+     JOIN user AS u ON u.user_id = e.event_id_host
+     WHERE e.event_id = ?`,
+      [id],
+    );
+    const data = rows[0];
+    if (!data) return null;
+
+    await databaseClient.query<Result>(
+      "UPDATE event SET event_is_ban = FALSE WHERE event_id = ?",
       [id],
     );
 

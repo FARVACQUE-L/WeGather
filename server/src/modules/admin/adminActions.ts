@@ -417,6 +417,88 @@ const banEvent: RequestHandler = async (req, res, next) => {
   }
 };
 
+const unbanUser: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const user = await adminRepository.unbanUser(id);
+
+    if (!user) {
+      res.status(404).json({ message: "Utilisateur introuvable" });
+      return;
+    }
+
+    try {
+      await transporter.sendMail({
+        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        to: user.user_mail,
+        subject: "Votre compte WeGather a été réactivé",
+        text: `Bonjour ${user.user_username},\n\nVotre compte WeGather a été réactivé, ainsi que les événements que vous organisez.\n\nL'équipe WeGather.`,
+      });
+    } catch (mailErr) {
+      console.error("Échec de l'envoi du mail :", mailErr);
+    }
+
+    res.json({ message: "Utilisateur débanni" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const unbanUserFromEvent: RequestHandler = async (req, res, next) => {
+  try {
+    const eventId = Number(req.params.eventId);
+    const userId = Number(req.params.userId);
+    const user = await adminRepository.unbanUserFromEvent(eventId, userId);
+
+    if (!user) {
+      res.status(404).json({ message: "Utilisateur introuvable" });
+      return;
+    }
+
+    try {
+      await transporter.sendMail({
+        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        to: user.user_mail,
+        subject: "Vous avez été réintégré à un événement WeGather",
+        text: `Bonjour ${user.user_username},\n\nVous avez été réintégré à l'événement dont vous aviez été retiré.\n\nL'équipe WeGather.`,
+      });
+    } catch (mailErr) {
+      console.error("Échec de l'envoi du mail :", mailErr);
+    }
+
+    res.json({ message: "Utilisateur rajouté à l'événement" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const unbanEvent: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const data = await adminRepository.unbanEvent(id);
+
+    if (!data) {
+      res.status(404).json({ message: "Événement introuvable" });
+      return;
+    }
+
+    try {
+      await transporter.sendMail({
+        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        to: data.user_mail,
+        subject: "Votre événement WeGather a été rétabli",
+        text: `Bonjour ${data.user_username},\n\nVotre événement "${data.event_name}" a été rétabli.\n\nL'équipe WeGather.`,
+      });
+    } catch (mailErr) {
+      console.error("Échec de l'envoi du mail :", mailErr);
+    }
+
+    res.json({ message: "Événement débanni" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export default {
   readAllUsers,
   readAllEvents,
@@ -443,4 +525,7 @@ export default {
   banUser,
   banUserFromEvent,
   banEvent,
+  unbanUser,
+  unbanUserFromEvent,
+  unbanEvent,
 };

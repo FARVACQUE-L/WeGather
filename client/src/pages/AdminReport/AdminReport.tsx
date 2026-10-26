@@ -52,6 +52,13 @@ function AdminReport() {
 
   const capitalize = (str = "") => str.charAt(0).toUpperCase() + str.slice(1);
 
+  const isTargetBanned = Boolean(report?.target_is_ban);
+  // Signalement d'événement : l'événement est banni. Signalement
+  // d'utilisateur : il est exclu de l'événement où il a été signalé.
+  const isEventBanned = Boolean(
+    type === "event" ? report?.event_is_ban : report?.target_is_event_ban,
+  );
+
   const handleBanConfirm = async (action: BanAction) => {
     const toast = Swal.mixin({
       toast: true,
@@ -64,6 +71,10 @@ function AdminReport() {
       },
     });
 
+    // Cible déjà bannie : l'option choisie annule le bannissement.
+    const isUnban = action === "user" ? isTargetBanned : isEventBanned;
+    const prefix = isUnban ? "unban" : "ban";
+
     try {
       let response: Response;
 
@@ -73,17 +84,20 @@ function AdminReport() {
             ? report?.reported_user_id_user
             : report?.reported_event_id_host;
 
-        response = await fetch(`${API_URL}/api/admin/ban-user/${targetId}`, {
-          method: "PATCH",
-          credentials: "include",
-        });
+        response = await fetch(
+          `${API_URL}/api/admin/${prefix}-user/${targetId}`,
+          {
+            method: "PATCH",
+            credentials: "include",
+          },
+        );
       } else {
         if (type === "user") {
           const eventId = report?.reported_user_id_event;
           const userId = report?.reported_user_id_user;
 
           response = await fetch(
-            `${API_URL}/api/admin/event-ban/${eventId}/${userId}`,
+            `${API_URL}/api/admin/event-${prefix}/${eventId}/${userId}`,
             {
               method: "PATCH",
               credentials: "include",
@@ -92,10 +106,13 @@ function AdminReport() {
         } else {
           const eventId = report?.reported_event_id_event;
 
-          response = await fetch(`${API_URL}/api/admin/ban-event/${eventId}`, {
-            method: "PATCH",
-            credentials: "include",
-          });
+          response = await fetch(
+            `${API_URL}/api/admin/${prefix}-event/${eventId}`,
+            {
+              method: "PATCH",
+              credentials: "include",
+            },
+          );
         }
       }
 
@@ -129,10 +146,16 @@ function AdminReport() {
         icon: "success",
         text:
           action === "user"
-            ? "L'utilisateur a bien été banni."
+            ? isUnban
+              ? "L'utilisateur a bien été débanni."
+              : "L'utilisateur a bien été banni."
             : type === "user"
-              ? "L'utilisateur a bien été retiré de l'événement."
-              : "L'événement a bien été banni.",
+              ? isUnban
+                ? "L'utilisateur a bien été rajouté à l'événement."
+                : "L'utilisateur a bien été retiré de l'événement."
+              : isUnban
+                ? "L'événement a bien été débanni."
+                : "L'événement a bien été banni.",
         customClass: {
           popup: "toast-success-popup",
         },
@@ -392,6 +415,8 @@ function AdminReport() {
         type={type}
         isEventDeleted={isEventDeleted}
         isTargetSuperAdmin={Boolean(report.target_is_superadmin)}
+        isTargetBanned={isTargetBanned}
+        isEventBanned={isEventBanned}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleBanConfirm}
       />
