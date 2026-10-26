@@ -31,8 +31,31 @@
     margin: 3rem;
   }
 }
+/* En 23rem (368px), plus le padding par défaut de dialog, la modale
+   dépassait de l'écran à 360px : elle prend la largeur de l'écran moins
+   1rem de chaque côté, et défile si elle est plus haute que lui. */
 @media screen and (max-width: 428px) {
+  .ModalAddEvent-Backdrop {
+    width: calc(100vw - 2rem);
+    max-width: none;
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border-radius: 2rem;
+    overflow-y: auto;
+    /* Barre masquée : la modale reste défilable au doigt. */
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
   .ModalAddEvent-Global {
-    width: 23rem;
+    width: 100%;
+    min-height: auto;
+
+    .ModalAddEvent-Tab {
+      padding: 0 0.5rem;
+      font-size: 0.8rem;
+    }
   }
 }
