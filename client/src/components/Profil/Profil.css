@@ -80,6 +80,13 @@
     &::-webkit-scrollbar {
       display: none;
     }
+
+    /* Quand la modale atteint sa hauteur maximale, la colonne flex
+       rétrécissait ses enfants au lieu de défiler : la photo s'écrasait et
+       le panneau de la photo, en overflow: hidden, coupait ses boutons. */
+    > * {
+      flex-shrink: 0;
+    }
   }
 
   .Profil-Title {
@@ -88,8 +95,6 @@
     text-align: center;
   }
 
-  /* flex-shrink: 0 : quand la modale atteint sa hauteur maximale, la
-     colonne flex rétrécissait la photo en hauteur et l'écrasait. */
   .Profil-Avatar,
   .Profil-Preview {
     flex-shrink: 0;
