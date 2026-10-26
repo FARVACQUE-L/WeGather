@@ -100,7 +100,19 @@ function AdminReport() {
       }
 
       if (!response.ok) {
-        throw new Error(`Erreur serveur : ${response.status}`);
+        // Message du serveur quand il y en a un, par exemple pour un
+        // superadmin, qui ne peut pas être banni.
+        const data = await response.json().catch(() => null);
+        toast.fire({
+          icon: "error",
+          text:
+            data?.message ??
+            "Une erreur est survenue, l'action n'a pas pu être effectuée.",
+          customClass: {
+            popup: "toast-error-popup",
+          },
+        });
+        return;
       }
 
       await fetch(`${API_URL}/api/admin/report${capitalize(type)}/${id}/done`, {
@@ -375,6 +387,7 @@ function AdminReport() {
         open={isModalOpen}
         type={type}
         isEventDeleted={isEventDeleted}
+        isTargetSuperAdmin={Boolean(report.target_is_superadmin)}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleBanConfirm}
       />

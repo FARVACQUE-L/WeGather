@@ -200,6 +200,7 @@ FROM user
     re.*,
     e.event_name,
     host.user_username AS host_username,
+    host.user_is_superadmin AS target_is_superadmin,
     u.user_username,
     u.user_mail,
     u.user_profile_picture
@@ -235,7 +236,8 @@ FROM user
       author.user_mail AS author_mail,
       author.user_profile_picture AS author_picture,
       target.user_username AS target_username,
-      target.user_profile_picture AS target_picture
+      target.user_profile_picture AS target_picture,
+      target.user_is_superadmin AS target_is_superadmin
     FROM reported_user AS ru
     JOIN user AS author ON author.user_id = ru.reported_user_by_id_user
     JOIN user AS target ON target.user_id = ru.reported_user_id_user
