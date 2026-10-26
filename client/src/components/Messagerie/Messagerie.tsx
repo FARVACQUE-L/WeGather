@@ -196,9 +196,13 @@ function Messagerie() {
     if (!messagesElement || messagesCount === 0) return;
     messagesElement.scrollTop = messagesElement.scrollHeight;
   }, [receptionMessagesUser]);
-  // Écran tactile : donner le focus à un champ ouvre le clavier, qui
-  // recouvrirait le sélecteur d'emoji.
-  const isTouchScreen = window.matchMedia("(pointer: coarse)").matches;
+  // Écran tactile ou mobile (sous 428px, comme le reste du site) : donner le
+  // focus à un champ ouvre le clavier, qui recouvrirait le sélecteur
+  // d'emoji. La largeur seule ne suffit pas : un téléphone en paysage la
+  // dépasse.
+  const isTouchScreen = window.matchMedia(
+    "(pointer: coarse), (max-width: 428px)",
+  ).matches;
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setMessagesUser((prev) => prev + emojiData.emoji);
