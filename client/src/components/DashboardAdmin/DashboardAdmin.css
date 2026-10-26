@@ -167,6 +167,10 @@
             font-size: 13px;
             padding-left: 20px;
           }
+          /* Pastille du type de ticket : seulement sous 428px. */
+          .report-ticket-badge {
+            display: none;
+          }
           /* La description s'arrête à trois lignes, avec des points de
              suspension, quelle que soit la largeur. */
           p:nth-child(3) {
@@ -371,6 +375,47 @@
           width: 25%;
           padding-left: 0;
           font-size: 12px;
+        }
+
+        /* Colonne Ticket réduite à la pastille : la description récupère
+           la place. */
+        .titre-tableau-rapport h3:nth-child(2),
+        .contenu-tableau-rapport div p:nth-child(2) {
+          width: 14%;
+        }
+        .titre-tableau-rapport h3:nth-child(3),
+        .contenu-tableau-rapport div p:nth-child(3) {
+          width: 36%;
+        }
+
+        .contenu-tableau-rapport div .report-ticket {
+          .report-ticket-label {
+            display: none;
+          }
+
+          /* Mêmes couleurs que les icônes des stats de la page
+             Signalements (ReportStatCard.css). */
+          .report-ticket-badge {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+
+            &.is-user {
+              background: var(--icon-color-user);
+            }
+            &.is-event {
+              background: var(--icon-color-event);
+            }
+            &.is-bug {
+              background: var(--icon-color-bug);
+            }
+          }
         }
       }
     }

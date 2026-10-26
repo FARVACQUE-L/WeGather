@@ -320,7 +320,20 @@ function DashboardAdmin() {
                   transition={{ duration: 0.25 }}
                 >
                   <p>{report.user_name}</p>
-                  <p>{report.report_type}</p>
+                  {/* Sous 428px, le type devient une pastille U, E ou B aux
+                      couleurs des stats de la page Signalements. */}
+                  <p className="report-ticket">
+                    <span className="report-ticket-label">
+                      {report.report_type}
+                    </span>
+                    <span
+                      className={`report-ticket-badge is-${report.report_type}`}
+                      role="img"
+                      aria-label={report.report_type}
+                    >
+                      {report.report_type.charAt(0).toUpperCase()}
+                    </span>
+                  </p>
                   <p>{report.description}</p>
                   <p>{formatDate(report.report_date)}</p>
                 </motion.div>
