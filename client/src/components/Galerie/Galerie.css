@@ -537,6 +537,7 @@
     /* Hauteur naturelle : centré dans 70px, le titre ne tombait pas à la
        même hauteur que sur les autres pages. */
     .galerie-header {
+      width: 100%;
       height: auto;
       align-items: flex-end;
       gap: 0.75rem;
@@ -552,9 +553,13 @@
 
     /* Ajouter une photo devient un bouton flottant : il ne reste dans
        l'en-tête que l'icône de téléchargement (useCompactLevel la réduit
-       toujours sous 428px). */
+       toujours sous 428px). Elle est centrée sur le même axe vertical que
+       lui : son centre à 48px du bord droit (20px + 56px / 2), donc son
+       bord droit à 28px (48px - 40px / 2), soit 12px de plus que les 1rem
+       de marge de la page. */
     .galerie-header-actions {
       align-self: center;
+      margin-right: 12px;
     }
 
     .galerie-button {
