@@ -144,5 +144,26 @@
         }
       }
     }
+
+    /* Les 40px de padding du formulaire et les 16px de chaque bloc
+       laissaient peu de place aux trois blocs : ils prennent presque toute
+       la largeur du formulaire. */
+    .userReport-Form {
+      padding: 24px 12px;
+
+      .reportType-global,
+      .reportDetails-global,
+      .reportEvidence-global {
+        padding: 12px 0;
+      }
+
+      .reportEvidence-dropzone {
+        padding: 24px 16px;
+      }
+
+      .userReport-Btn {
+        padding: 0;
+      }
+    }
   }
 }
