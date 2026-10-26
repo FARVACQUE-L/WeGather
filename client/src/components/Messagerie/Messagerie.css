@@ -386,9 +386,12 @@
         /* Enfant direct uniquement : sans ça, ces règles s'appliquaient aussi
            au champ de recherche du sélecteur d'emoji, imbriqué plus bas — il
            perdait son fond, sa bordure, et son texte passait sous la loupe. */
+        /* min-width: 0 : c'est le champ qui rétrécit sur un écran étroit,
+           pas les boutons à côté. */
         > input {
           padding-left: 10px;
           width: 94%;
+          min-width: 0;
           border-style: none;
           background: none;
           font-size: 1rem;
@@ -399,6 +402,7 @@
 
         .emoji-wrapper {
           position: relative;
+          flex-shrink: 0;
           display: flex;
           align-items: center;
         }
@@ -492,7 +496,10 @@
           color: var(--font-brown);
           cursor: pointer;
         }
+        /* flex-shrink: 0 : sur mobile, la barre manquait de place et le
+           bouton se resserrait en ovale. */
         .send-button {
+          flex-shrink: 0;
           border-radius: 21px;
           border-style: none;
           background-color: #ff7e5f;
