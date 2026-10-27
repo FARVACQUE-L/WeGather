@@ -55,7 +55,7 @@ function ReportAdminModal({
       onClose={onClose}
     >
       <header className="banModal-Header">
-        <h2 id="modal-title">Action de bannissement</h2>
+        <h2 id="modal-title">Action de modération</h2>
         <button
           type="button"
           className="banModal-Close"
