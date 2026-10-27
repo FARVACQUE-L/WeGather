@@ -169,4 +169,23 @@ adminRoutes.patch(
   adminActions.banUserFromEvent,
 );
 
+adminRoutes.patch(
+  "/api/admin/unban-user/:id",
+  authorization,
+  isAdmin,
+  adminActions.unbanUser,
+);
+adminRoutes.patch(
+  "/api/admin/unban-event/:id",
+  authorization,
+  isAdmin,
+  adminActions.unbanEvent,
+);
+adminRoutes.patch(
+  "/api/admin/event-unban/:eventId/:userId",
+  authorization,
+  isAdmin,
+  adminActions.unbanUserFromEvent,
+);
+
 export default adminRoutes;

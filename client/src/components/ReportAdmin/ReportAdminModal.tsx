@@ -12,6 +12,10 @@ interface ReportAdminModalProps {
   // Cible superadmin : son compte ne peut pas être banni (refusé aussi par le
   // serveur), seulement retiré de l'événement.
   isTargetSuperAdmin?: boolean;
+  // Cible déjà bannie (compte, ou événement / exclusion de l'événement) :
+  // l'option propose l'action inverse.
+  isTargetBanned?: boolean;
+  isEventBanned?: boolean;
   onClose: () => void;
   onConfirm: (action: BanAction) => void;
 }
@@ -21,6 +25,8 @@ function ReportAdminModal({
   type,
   isEventDeleted = false,
   isTargetSuperAdmin = false,
+  isTargetBanned = false,
+  isEventBanned = false,
   onClose,
   onConfirm,
 }: ReportAdminModalProps) {
@@ -49,7 +55,7 @@ function ReportAdminModal({
       onClose={onClose}
     >
       <header className="banModal-Header">
-        <h2 id="modal-title">Action de bannissement</h2>
+        <h2 id="modal-title">Action de modération</h2>
         <button
           type="button"
           className="banModal-Close"
@@ -74,13 +80,21 @@ function ReportAdminModal({
             <span className="banModal-OptionText">
               <span className="banModal-OptionTitle">
                 {type === "event"
-                  ? "Bannir l'événement"
-                  : "Retirer de l'événement"}
+                  ? isEventBanned
+                    ? "Débannir l'événement"
+                    : "Bannir l'événement"
+                  : isEventBanned
+                    ? "Rajouter à l'événement"
+                    : "Retirer de l'événement"}
               </span>
               <span className="banModal-OptionDesc">
                 {type === "event"
-                  ? "Supprimer cet événement des listes publiques immédiatement."
-                  : "Retirer cet utilisateur de l'événement, sans bannir son compte."}
+                  ? isEventBanned
+                    ? "Rendre cet événement de nouveau accessible à ses participants."
+                    : "Supprimer cet événement des listes publiques immédiatement."
+                  : isEventBanned
+                    ? "Lever l'exclusion et réinscrire cet utilisateur à l'événement."
+                    : "Retirer cet utilisateur de l'événement, sans bannir son compte."}
               </span>
             </span>
           </button>
@@ -90,7 +104,7 @@ function ReportAdminModal({
           type="button"
           className="banModal-Option"
           aria-pressed={selected === "user"}
-          disabled={isTargetSuperAdmin}
+          disabled={isTargetSuperAdmin && !isTargetBanned}
           onClick={() => setSelected("user")}
         >
           <span className="banModal-OptionIcon">
@@ -99,15 +113,23 @@ function ReportAdminModal({
           <span className="banModal-OptionText">
             <span className="banModal-OptionTitle">
               {type === "event"
-                ? "Bannir l'organisateur"
-                : "Bannir l'utilisateur"}
+                ? isTargetBanned
+                  ? "Débannir l'organisateur"
+                  : "Bannir l'organisateur"
+                : isTargetBanned
+                  ? "Débannir l'utilisateur"
+                  : "Bannir l'utilisateur"}
             </span>
             <span className="banModal-OptionDesc">
-              {isTargetSuperAdmin
-                ? "Un superadmin ne peut pas être banni définitivement."
-                : type === "event"
-                  ? "Suspendre le compte de l'organisateur de façon permanente."
-                  : "Suspendre le compte de l'utilisateur signalé de façon permanente."}
+              {isTargetBanned
+                ? type === "event"
+                  ? "Réactiver le compte de l'organisateur, et débannir les événements qu'il organise."
+                  : "Réactiver le compte de l'utilisateur signalé, et débannir les événements qu'il organise."
+                : isTargetSuperAdmin
+                  ? "Un superadmin ne peut pas être banni définitivement."
+                  : type === "event"
+                    ? "Suspendre le compte de l'organisateur de façon permanente, et bannir les événements qu'il organise."
+                    : "Suspendre le compte de l'utilisateur signalé de façon permanente, et bannir les événements qu'il organise."}
             </span>
           </span>
         </button>
