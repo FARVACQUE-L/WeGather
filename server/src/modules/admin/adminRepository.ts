@@ -375,6 +375,17 @@ FROM user
       [id],
     );
 
+    // Les autres signalements visant ce compte, ou les événements qu'il
+    // organise, sont réglés par ce ban.
+    await databaseClient.query<Result>(
+      "UPDATE reported_user SET reported_user_is_done = TRUE WHERE reported_user_id_user = ?",
+      [id],
+    );
+    await databaseClient.query<Result>(
+      "UPDATE reported_event SET reported_event_is_done = TRUE WHERE reported_event_id_host = ?",
+      [id],
+    );
+
     return user;
   }
 
@@ -396,6 +407,13 @@ FROM user
       [eventId, userId],
     );
 
+    // Les autres signalements de cet utilisateur dans cet événement sont
+    // réglés par son retrait.
+    await databaseClient.query<Result>(
+      "UPDATE reported_user SET reported_user_is_done = TRUE WHERE reported_user_id_user = ? AND reported_user_id_event = ?",
+      [userId, eventId],
+    );
+
     return user;
   }
 
@@ -412,6 +430,12 @@ FROM user
 
     await databaseClient.query<Result>(
       "UPDATE event SET event_is_ban = TRUE WHERE event_id = ?",
+      [id],
+    );
+
+    // Les autres signalements de cet événement sont réglés par ce ban.
+    await databaseClient.query<Result>(
+      "UPDATE reported_event SET reported_event_is_done = TRUE WHERE reported_event_id_event = ?",
       [id],
     );
 
