@@ -245,7 +245,10 @@ FROM user
         SELECT 1 FROM event_user_ban AS eub
         WHERE eub.eub_id_event = ru.reported_user_id_event
         AND eub.eub_id_user = ru.reported_user_id_user
-      ) AS target_is_event_ban
+      ) AS target_is_event_ban,
+      NOT EXISTS (
+        SELECT 1 FROM event AS e WHERE e.event_id = ru.reported_user_id_event
+      ) AS event_is_deleted
     FROM reported_user AS ru
     JOIN user AS author ON author.user_id = ru.reported_user_by_id_user
     JOIN user AS target ON target.user_id = ru.reported_user_id_user
@@ -370,8 +373,10 @@ FROM user
 
     // Sans son hôte, plus personne ne pourrait gérer ses événements : ils
     // sont bannis avec lui. Ceux qu'il a seulement rejoints restent actifs.
+    // Un événement déjà banni garde sa date de ban : son délai avant
+    // suppression ne repart pas de zéro.
     await databaseClient.query<Result>(
-      "UPDATE event SET event_is_ban = TRUE WHERE event_id_host = ?",
+      "UPDATE event SET event_is_ban = TRUE, event_ban_date = COALESCE(event_ban_date, NOW()) WHERE event_id_host = ?",
       [id],
     );
 
@@ -429,7 +434,7 @@ FROM user
     if (!data) return null;
 
     await databaseClient.query<Result>(
-      "UPDATE event SET event_is_ban = TRUE WHERE event_id = ?",
+      "UPDATE event SET event_is_ban = TRUE, event_ban_date = COALESCE(event_ban_date, NOW()) WHERE event_id = ?",
       [id],
     );
 
@@ -458,7 +463,7 @@ FROM user
     // Inverse de banUser : les événements qu'il organise sont rétablis avec
     // lui, y compris ceux bannis séparément par un signalement d'événement.
     await databaseClient.query<Result>(
-      "UPDATE event SET event_is_ban = FALSE WHERE event_id_host = ?",
+      "UPDATE event SET event_is_ban = FALSE, event_ban_date = NULL WHERE event_id_host = ?",
       [id],
     );
 
@@ -498,7 +503,7 @@ FROM user
     if (!data) return null;
 
     await databaseClient.query<Result>(
-      "UPDATE event SET event_is_ban = FALSE WHERE event_id = ?",
+      "UPDATE event SET event_is_ban = FALSE, event_ban_date = NULL WHERE event_id = ?",
       [id],
     );
 

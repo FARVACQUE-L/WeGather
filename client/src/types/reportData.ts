@@ -33,6 +33,8 @@ export type ReportData = {
   target_is_ban?: number;
   target_is_event_ban?: number;
   event_is_ban?: number | null;
+  // Signalement d'utilisateur dont l'événement a été supprimé.
+  event_is_deleted?: number;
 
   reported_event_id_event?: number | null;
   reported_user_id_event?: number;
