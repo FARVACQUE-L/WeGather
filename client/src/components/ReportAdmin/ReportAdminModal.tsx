@@ -7,7 +7,8 @@ export type BanAction = "event" | "user";
 interface ReportAdminModalProps {
   open: boolean;
   type?: string;
-  // Événement signalé puis supprimé : seul l'organisateur peut être banni.
+  // Événement supprimé (par son créateur, ou un mois après son ban) : seul le
+  // compte visé peut être banni.
   isEventDeleted?: boolean;
   // Cible superadmin : son compte ne peut pas être banni (refusé aussi par le
   // serveur), seulement retiré de l'événement.
@@ -91,7 +92,7 @@ function ReportAdminModal({
                 {type === "event"
                   ? isEventBanned
                     ? "Rendre cet événement de nouveau accessible à ses participants."
-                    : "Supprimer cet événement des listes publiques immédiatement."
+                    : "Supprimer cet événement des listes publiques immédiatement. Sans débannissement, il est supprimé définitivement au bout d'un mois."
                   : isEventBanned
                     ? "Lever l'exclusion et réinscrire cet utilisateur à l'événement."
                     : "Retirer cet utilisateur de l'événement, sans bannir son compte."}
@@ -128,8 +129,8 @@ function ReportAdminModal({
                 : isTargetSuperAdmin
                   ? "Un superadmin ne peut pas être banni définitivement."
                   : type === "event"
-                    ? "Suspendre le compte de l'organisateur de façon permanente, et bannir les événements qu'il organise."
-                    : "Suspendre le compte de l'utilisateur signalé de façon permanente, et bannir les événements qu'il organise."}
+                    ? "Suspendre le compte de l'organisateur de façon permanente, et bannir les événements qu'il organise (supprimés définitivement au bout d'un mois)."
+                    : "Suspendre le compte de l'utilisateur signalé de façon permanente, et bannir les événements qu'il organise (supprimés définitivement au bout d'un mois)."}
             </span>
           </span>
         </button>

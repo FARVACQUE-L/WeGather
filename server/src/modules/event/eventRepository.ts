@@ -186,6 +186,15 @@ class EventRepository {
 
     return result;
   }
+  // Événements bannis depuis plus d'un mois sans avoir été débannis.
+  async readExpiredBannedIds() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT event_id FROM event
+      WHERE event_is_ban = TRUE
+      AND event_ban_date < NOW() - INTERVAL 1 MONTH`,
+    );
+    return rows.map((row) => row.event_id as number);
+  }
   async readEventHostId(eventId: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT event_id_host FROM event WHERE event_id=?;",

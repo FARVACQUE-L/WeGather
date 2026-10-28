@@ -245,7 +245,9 @@ function AdminReport() {
 
   // Événement supprimé par son créateur : le signalement reste, sans cible.
   const isEventDeleted =
-    type === "event" && report?.reported_event_id_event == null;
+    type === "event"
+      ? report?.reported_event_id_event == null
+      : Boolean(report?.event_is_deleted);
 
   const getInfoReport = () => {
     if (type === "user") return report?.target_username ?? "—";

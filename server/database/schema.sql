@@ -89,6 +89,9 @@ CREATE TABLE `event` (
   `event_creation_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `event_picture` VARCHAR(255) NOT NULL,
  `event_is_ban` TINYINT(1) NOT NULL DEFAULT 0,
+  -- Date du ban, remise à NULL au débannissement : un événement banni depuis
+  -- plus d'un mois est supprimé définitivement (purgeBannedEvents).
+  `event_ban_date` DATETIME NULL DEFAULT NULL,
 
   `event_link_key` VARCHAR(6) NOT NULL, -- const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 
