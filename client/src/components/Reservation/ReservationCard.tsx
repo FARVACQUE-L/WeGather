@@ -133,29 +133,34 @@ function ReservationCard({
         )}
 
         <div className="WalletCard-Actions">
-          {reservation.reservation_link && (
-            <a
-              className="WalletCard-Link"
-              href={reservation.reservation_link}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLink size={14} />
-              Voir le site
-            </a>
-          )}
+          {/* « Voir le site » au-dessus de « Ajouter un billet », tous deux
+              calés en bas de la carte : les « Ajouter un billet » d'une même
+              ligne de cartes sont alignés, avec ou sans lien. */}
+          <div className="WalletCard-Links">
+            {reservation.reservation_link && (
+              <a
+                className="WalletCard-Link"
+                href={reservation.reservation_link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink size={14} />
+                Voir le site
+              </a>
+            )}
 
-          {canAddDocument && (
-            <button
-              type="button"
-              className="WalletCard-AddDocument"
-              disabled={isUploading}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Paperclip size={14} />
-              {isUploading ? "Envoi…" : "Ajouter un billet"}
-            </button>
-          )}
+            {canAddDocument && (
+              <button
+                type="button"
+                className="WalletCard-AddDocument"
+                disabled={isUploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Paperclip size={14} />
+                {isUploading ? "Envoi…" : "Ajouter un billet"}
+              </button>
+            )}
+          </div>
           <input
             ref={fileInputRef}
             type="file"

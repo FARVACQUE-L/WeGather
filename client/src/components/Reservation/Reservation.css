@@ -744,13 +744,22 @@
     }
   }
 
+  /* Collées en bas de la carte : liens empilés à gauche, crayon et poubelle
+     à droite, tous alignés sur la dernière ligne. */
   .WalletCard-Actions {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 1rem;
+    align-items: flex-end;
+    gap: 1rem;
     margin-top: auto;
     padding-top: 0.3rem;
+  }
+
+  .WalletCard-Links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    min-width: 0;
   }
 
   .WalletCard-Link,
