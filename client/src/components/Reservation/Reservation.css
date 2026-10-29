@@ -987,10 +987,11 @@
     }
   }
 }
-/* Sous 875px (sidebar en barre du bas), les cartes sont centrées dans la
-   largeur de la page. */
+/* Sous 875px (sidebar en barre du bas), les cartes et les filtres sont
+   centrés dans la largeur de la page. */
 @media screen and (max-width: 875px) {
-  .reservation .Wallet .Wallet-Grid {
+  .reservation .Wallet .Wallet-Grid,
+  .reservation .Wallet .Wallet-Filters {
     justify-content: center;
   }
 }
