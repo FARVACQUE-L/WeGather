@@ -28,6 +28,9 @@ export interface CardEventsProps {
   onEventDeleted?: (deletedId: number) => void;
   onEventUpdated?: (updatedEvent: EventData) => void;
   reservation_id_user?: number | null;
+  /* Auteur de la réservation ou hôte de l'événement : affiche le crayon et
+     la poubelle de la réservation, comme le permet le serveur. */
+  canManageReservation?: boolean;
   onEditReservation?: (reservationId: number) => void;
   onReservationDeleted?: (deletedId: number) => void;
 }

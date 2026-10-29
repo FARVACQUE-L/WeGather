@@ -42,7 +42,7 @@ function CardEvents({
   location,
   siteUrl,
   onEventDeleted,
-  reservation_id_user,
+  canManageReservation = false,
   onEditReservation,
   onReservationDeleted,
   onEventUpdated,
@@ -206,18 +206,16 @@ function CardEvents({
             </div>
           </div>
         )}
-        {onEditReservation &&
-          reservation_id_user != null &&
-          user_id === reservation_id_user && (
-            <button
-              type="button"
-              className="CardEvents-Edit"
-              onClick={() => onEditReservation?.(event_id)}
-            >
-              <PencilLine size={16} />
-            </button>
-          )}
-        {onTableau && (
+        {onEditReservation && canManageReservation && (
+          <button
+            type="button"
+            className="CardEvents-Edit"
+            onClick={() => onEditReservation?.(event_id)}
+          >
+            <PencilLine size={16} />
+          </button>
+        )}
+        {onTableau && canManageReservation && (
           <button
             type="button"
             className="CardEvents-Deleted"

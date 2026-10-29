@@ -3,7 +3,69 @@ import type { RequestHandler } from "express";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeUpload } from "../../helper/removeUpload";
 import eventRepository from "../event/eventRepository";
+import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import reservationRepository from "./reservationRepository";
+
+type Req = Parameters<RequestHandler>[0];
+type Res = Parameters<RequestHandler>[1];
+
+// Seuls les participants de l'événement (l'hôte en fait partie) voient et
+// ajoutent ses réservations. Renvoie l'id de l'événement, ou undefined si la
+// réponse d'erreur a déjà été envoyée.
+const readMemberEventId = async (req: Req, res: Res, eventUuid: string) => {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return undefined;
+  }
+
+  const eventId = await eventRepository.readIdByUuid(eventUuid);
+  if (!eventId) {
+    res.sendStatus(404);
+    return undefined;
+  }
+
+  const joined = await eventUserJoiningRepository.readBy(eventId, req.user.id);
+  if (joined.length === 0) {
+    res
+      .status(403)
+      .json({ message: "Vous n'êtes pas inscrit à cet événement." });
+    return undefined;
+  }
+
+  return eventId;
+};
+
+// Renvoie le message d'erreur à afficher, ou null si les champs sont valides.
+// Les dates arrivent en « AAAA-MM-JJ » (dateStrings) : la comparaison de
+// chaînes suit l'ordre chronologique.
+const validateReservationFields = async (
+  eventId: number,
+  body: Record<string, unknown>,
+) => {
+  const { reservation_name, reservation_date, reservation_location } = body;
+
+  // 255 : taille des colonnes reservation_name et reservation_location.
+  if (
+    String(reservation_name).length > 255 ||
+    String(reservation_location).length > 255
+  ) {
+    return "Le nom et le lieu ne doivent pas dépasser 255 caractères.";
+  }
+
+  const date = String(reservation_date);
+  const [event] = await eventRepository.readEventName(eventId);
+
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    !event ||
+    date < event.event_date_start ||
+    date > event.event_date_end
+  ) {
+    return "La date doit être comprise dans les dates de l'événement";
+  }
+
+  return null;
+};
 
 // Champ facultatif. Seuls http et https sont acceptés : le lien est rendu
 // cliquable côté client, et un « javascript: » y serait exécutable.
@@ -17,12 +79,8 @@ const sanitizeLink = (value: unknown): string | null => {
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const event =
       await reservationRepository.readReservationDescriptionEvent(eventId);
@@ -39,12 +97,8 @@ const readReservationLimit = async (eventId: number) =>
 
 const readLimit: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     res.json({ limit: await readReservationLimit(eventId) });
   } catch (error) {
@@ -53,12 +107,8 @@ const readLimit: RequestHandler = async (req, res, next) => {
 };
 const readAllReservation: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const event = await reservationRepository.readAllReservation(eventId);
 
@@ -103,11 +153,21 @@ const addReservation: RequestHandler = async (req, res, next) => {
     }
 
     const reservation_picture = `/uploads/${req.file.filename}`;
-    const eventId = await eventRepository.readIdByUuid(req.body.event_uuid);
+    const eventId = await readMemberEventId(
+      req,
+      res,
+      String(req.body.event_uuid),
+    );
 
     if (!eventId) {
       fs.rmSync(req.file.path, { force: true });
-      res.sendStatus(404);
+      return;
+    }
+
+    const invalidMessage = await validateReservationFields(eventId, req.body);
+    if (invalidMessage) {
+      fs.rmSync(req.file.path, { force: true });
+      res.status(400).json({ message: invalidMessage });
       return;
     }
 
@@ -141,10 +201,7 @@ const addReservation: RequestHandler = async (req, res, next) => {
 // L'auteur peut gérer sa réservation, l'hôte n'importe quelle réservation de
 // son événement. Renvoie la réservation, ou undefined si la réponse d'erreur
 // a déjà été envoyée.
-const readManagedReservation = async (
-  req: Parameters<RequestHandler>[0],
-  res: Parameters<RequestHandler>[1],
-) => {
+const readManagedReservation = async (req: Req, res: Res) => {
   if (!req.user) {
     res.status(401).json({ message: "Unauthorized" });
     return undefined;
@@ -196,6 +253,16 @@ const updateReservation: RequestHandler = async (req, res, next) => {
     const reservation = await readManagedReservation(req, res);
     if (!reservation) {
       if (req.file) fs.rmSync(req.file.path, { force: true });
+      return;
+    }
+
+    const invalidMessage = await validateReservationFields(
+      reservation.reservation_id_event,
+      req.body,
+    );
+    if (invalidMessage) {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      res.status(400).json({ message: invalidMessage });
       return;
     }
 

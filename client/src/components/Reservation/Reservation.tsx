@@ -45,6 +45,8 @@ function Reservation() {
   const canHover = useCanHover();
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
+  // L'hôte peut modifier et supprimer toutes les réservations de l'événement.
+  const [hostId, setHostId] = useState<number | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   // Limite de réservations selon la formule de l'organisateur, donnée par le
   // serveur. null quand elle n'est pas encore connue ou que la formule n'en
@@ -113,7 +115,8 @@ function Reservation() {
       },
     );
     const data = await res.json();
-    setReservations(data);
+    // 403 pour un non-inscrit : le serveur renvoie un message, pas une liste.
+    setReservations(Array.isArray(data) ? data : []);
   }, [eventUuid]);
 
   useEffect(() => {
@@ -145,6 +148,16 @@ function Reservation() {
       .then((data) => {
         setEventName(data);
       });
+  }, [eventUuid]);
+
+  useEffect(() => {
+    if (!eventUuid) return;
+    fetch(`${API_URL}/api/event/host/${eventUuid}`, {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setHostId(data?.event_id_host ?? null))
+      .catch(console.error);
   }, [eventUuid]);
 
   useEffect(() => {
@@ -384,7 +397,12 @@ function Reservation() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                // Entrée dans la description va à la ligne au lieu
+                // d'enregistrer.
+                if (
+                  e.key === "Enter" &&
+                  !(e.target instanceof HTMLTextAreaElement)
+                ) {
                   handleSubmitReservation(e);
                 }
               }}
@@ -417,6 +435,7 @@ function Reservation() {
                     className="ReservationModal-Input"
                     type="text"
                     placeholder="Ex : Hôtel du Parc"
+                    maxLength={255}
                     value={reservationName}
                     onChange={(e) =>
                       setReservationName(capitalize(e.target.value))
@@ -454,6 +473,7 @@ function Reservation() {
                     className="ReservationModal-Input"
                     type="text"
                     placeholder="Ex : Paris"
+                    maxLength={255}
                     value={reservationLocation}
                     onChange={(e) =>
                       setReservationLocation(capitalize(e.target.value))
@@ -499,6 +519,7 @@ function Reservation() {
                     className="ReservationModal-Input"
                     type="url"
                     placeholder="https://..."
+                    maxLength={255}
                     value={reservationLink}
                     onChange={(e) => setReservationLink(e.target.value)}
                   />
@@ -627,6 +648,9 @@ function Reservation() {
               event_uuid={eventUuid ?? ""}
               event_id_host={null}
               reservation_id_user={event.reservation_id_user}
+              canManageReservation={
+                event.reservation_id_user === userId || hostId === userId
+              }
               onEditReservation={openEditModal}
               onReservationDeleted={(deletedId) => {
                 setReservations((prev) =>
