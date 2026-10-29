@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import {
   Book,
   CalendarClock,
+  CalendarDays,
   Copy,
   Hand,
-  HandCoins,
   PiggyBank,
   UsersRound,
 } from "lucide-react";
@@ -19,9 +19,10 @@ type EventDashboard = {
   event_link_key: string;
   event_name: string;
   event_description: string | null;
+  event_date_start: string;
+  event_date_end: string;
   total_users: number | null;
   total_reservations: number | null;
-  total_budgets: string | number | null;
 };
 type ReservationDashboard = {
   event_id: number | null;
@@ -31,12 +32,53 @@ type ReservationDashboard = {
   reservation_date: string;
   reservation_id: number;
 };
-type UserAndBudget = {
+type UserBudget = {
   user_id: number;
-  user_username: string | null;
-  user_name: string | null;
-  total_price: number | null;
+  total_price: number | string;
 };
+
+// « 12-15 sept. » dans le même mois, « 28 juin - 14 juil. » à cheval sur deux.
+function formatStayDates(start: string, end: string) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const month = (date: Date) =>
+    date.toLocaleDateString("fr-FR", { month: "short" });
+
+  if (
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getFullYear() === endDate.getFullYear()
+  ) {
+    if (startDate.getDate() === endDate.getDate()) {
+      return `${endDate.getDate()} ${month(endDate)}`;
+    }
+    return `${startDate.getDate()}-${endDate.getDate()} ${month(endDate)}`;
+  }
+
+  return `${startDate.getDate()} ${month(startDate)} - ${endDate.getDate()} ${month(endDate)}`;
+}
+
+// Même calcul que les « Equilibres » de l'onglet Budget : ce que j'ai payé
+// moins ma part des dépenses. Positif, on me doit ; négatif, je dois.
+function getMyBalance(budgets: UserBudget[], userId: number) {
+  if (budgets.length === 0) return 0;
+
+  const total = budgets.reduce((sum, row) => sum + Number(row.total_price), 0);
+  const mine = budgets.find((row) => row.user_id === userId);
+  const balance = Number(mine?.total_price ?? 0) - total / budgets.length;
+
+  return Math.round(balance * 100) / 100;
+}
+
+function formatBalance(balance: number) {
+  const amount = Math.abs(balance).toLocaleString("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+
+  if (balance > 0) return `+${amount} €`;
+  if (balance < 0) return `-${amount} €`;
+  return "0 €";
+}
 
 // Couleurs des pastilles d'initiales : chaque organisateur garde la sienne,
 // choisie à partir de son id pour qu'elle ne change pas avec son pseudo.
@@ -68,7 +110,7 @@ function Dashboard({ onSeeAllReservations }: DashboardProps) {
   >([]);
   const [userId, setUserId] = useState<number | null>(null);
   const [userName, setUserName] = useState<string>("");
-  const [userAndBudgetData, setUserAndBudgetData] = useState<UserAndBudget>();
+  const [usersBudget, setUsersBudget] = useState<UserBudget[]>([]);
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
   const { eventUuid } = useParams();
   const [isModalCode, setIsModalCode] = useState(false);
@@ -143,18 +185,18 @@ function Dashboard({ onSeeAllReservations }: DashboardProps) {
   }, [eventUuid]);
 
   useEffect(() => {
-    if (!eventUuid || !userId) return;
+    if (!eventUuid) return;
     fetch(
-      `${import.meta.env.VITE_API_URL}/api/budget/user/${eventUuid}/${userId}`,
+      `${import.meta.env.VITE_API_URL}/api/budget/${eventUuid}/totalUsers`,
       {
         credentials: "include",
       },
     )
       .then((res) => res.json())
       .then((data) => {
-        setUserAndBudgetData(data);
+        setUsersBudget(Array.isArray(data) ? data : []);
       });
-  }, [eventUuid, userId]);
+  }, [eventUuid]);
 
   function getInitials(userName: string) {
     return userName
@@ -278,27 +320,32 @@ function Dashboard({ onSeeAllReservations }: DashboardProps) {
       <div className="dashboard-stats">
         {[
           {
-            icon: <UsersRound size={20} />,
-            title: "Total de participants",
-            value: eventData?.total_users,
+            icon: <CalendarDays size={20} />,
+            title: "Dates du séjour",
+            value: eventData
+              ? formatStayDates(
+                  eventData.event_date_start,
+                  eventData.event_date_end,
+                )
+              : "",
             className: "stat-1",
           },
           {
-            icon: <Book size={20} />,
-            title: "Reservations",
-            value: eventData?.total_reservations,
+            icon: <UsersRound size={20} />,
+            title: "L'équipe au complet",
+            value: eventData?.total_users,
             className: "stat-2",
           },
           {
-            icon: <HandCoins size={20} />,
-            title: "Budget total",
-            value: `${eventData?.total_budgets}€`,
+            icon: <Book size={20} />,
+            title: "Nos réservations",
+            value: eventData?.total_reservations,
             className: "stat-3",
           },
           {
             icon: <PiggyBank size={20} />,
-            title: "Budget propre",
-            value: `${userAndBudgetData?.total_price || 0}€`,
+            title: "Ton budget",
+            value: formatBalance(getMyBalance(usersBudget, safeUserId)),
             className: "stat-4",
           },
         ].map((stat, index) => (
