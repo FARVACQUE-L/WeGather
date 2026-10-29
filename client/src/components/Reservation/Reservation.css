@@ -589,11 +589,14 @@
     padding: 1rem;
   }
 
+  /* Tout ce qui précède les documents a une hauteur fixe : type, horaires,
+     nom et lieu sur une ligne chacun, description sur deux. Les documents
+     commencent ainsi à la même hauteur sur toutes les cartes d'une ligne. */
   .WalletCard-Meta {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
     font-size: 0.75rem;
   }
 
@@ -638,6 +641,9 @@
     gap: 0.3rem;
     color: var(--font-darkBrown);
     font-weight: 600;
+    /* Réservée même vide : la hauteur d'une ligne d'icône. */
+    min-height: 14px;
+    max-width: 100%;
   }
 
   .WalletCard-Title {
@@ -652,12 +658,29 @@
     gap: 0.3rem;
     font-size: 0.8rem;
     font-weight: bold;
+
+    svg {
+      flex-shrink: 0;
+    }
+  }
+
+  /* Une ligne, terminée par « … » si le texte est trop long ; le texte
+     complet reste dans l'infobulle. */
+  .WalletCard-Title,
+  .WalletCard-Schedule > span,
+  .WalletCard-Location > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .WalletCard-Description {
     color: var(--font-input);
     font-size: 0.8rem;
     line-height: 1.4;
+    /* Toujours deux lignes, même pour une description courte. */
+    height: 2.8em;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;

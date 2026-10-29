@@ -79,18 +79,26 @@ function ReservationCard({
             <Icon size={14} />
             {label}
           </span>
-          {schedule && (
-            <span className="WalletCard-Schedule">
-              <Clock size={14} />
-              {schedule}
-            </span>
-          )}
+          {/* Ligne gardée même sans horaires : les documents restent alignés
+              d'une carte à l'autre. */}
+          <span className="WalletCard-Schedule">
+            {schedule && (
+              <>
+                <Clock size={14} />
+                <span title={schedule}>{schedule}</span>
+              </>
+            )}
+          </span>
         </div>
 
-        <h3 className="WalletCard-Title">{reservation.reservation_name}</h3>
+        <h3 className="WalletCard-Title" title={reservation.reservation_name}>
+          {reservation.reservation_name}
+        </h3>
         <p className="WalletCard-Location">
           <MapPin size={14} />
-          {reservation.reservation_location}
+          <span title={reservation.reservation_location}>
+            {reservation.reservation_location}
+          </span>
         </p>
         <p className="WalletCard-Description">
           {reservation.reservation_description}
