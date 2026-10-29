@@ -1,7 +1,15 @@
 import type { Rows } from "../../../database/client";
 import mysql from "../../../database/client";
 
-type Reservation = {
+// Champs du wallet, tous facultatifs sauf le type ('autre' par défaut).
+type ReservationSchedule = {
+  reservation_type: string;
+  reservation_time_start: string | null;
+  reservation_date_end: string | null;
+  reservation_time_end: string | null;
+};
+
+type Reservation = ReservationSchedule & {
   reservation_id_event: number;
   reservation_id_user: number;
   reservation_name: string;
@@ -20,6 +28,7 @@ class reservationRepository {
   e.event_id,
   u.user_id,
   u.user_username,
+  r.reservation_type,
   r.reservation_location,
   r.reservation_date,
   r.reservation_id
@@ -47,7 +56,11 @@ ORDER BY r.reservation_id DESC;
 
       WHERE reservation_id_event = ?
 
-      ORDER BY reservation_date ASC, reservation_id ASC;
+      ORDER BY
+        reservation_date ASC,
+        reservation_time_start IS NULL,
+        reservation_time_start ASC,
+        reservation_id ASC;
       `,
       [eventId],
     );
@@ -73,9 +86,13 @@ ORDER BY r.reservation_id DESC;
       reservation_location,
       reservation_description,
       reservation_link,
-      reservation_picture
+      reservation_picture,
+      reservation_type,
+      reservation_time_start,
+      reservation_date_end,
+      reservation_time_end
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         reservation.reservation_id_event,
@@ -86,6 +103,10 @@ ORDER BY r.reservation_id DESC;
         reservation.reservation_description,
         reservation.reservation_link,
         reservation.reservation_picture,
+        reservation.reservation_type,
+        reservation.reservation_time_start,
+        reservation.reservation_date_end,
+        reservation.reservation_time_end,
       ],
     );
 
@@ -112,7 +133,7 @@ ORDER BY r.reservation_id DESC;
   }
   async updateReservation(
     reservationId: number,
-    reservation: {
+    reservation: ReservationSchedule & {
       reservation_name: string;
       reservation_date: string;
       reservation_location: string;
@@ -130,7 +151,11 @@ ORDER BY r.reservation_id DESC;
       reservation_location = ?,
       reservation_description = ?,
       reservation_link = ?,
-      reservation_picture = COALESCE(?, reservation_picture)
+      reservation_picture = COALESCE(?, reservation_picture),
+      reservation_type = ?,
+      reservation_time_start = ?,
+      reservation_date_end = ?,
+      reservation_time_end = ?
     WHERE reservation_id = ?
     `,
       [
@@ -140,6 +165,10 @@ ORDER BY r.reservation_id DESC;
         reservation.reservation_description,
         reservation.reservation_link,
         reservation.reservation_picture ?? null,
+        reservation.reservation_type,
+        reservation.reservation_time_start,
+        reservation.reservation_date_end,
+        reservation.reservation_time_end,
         reservationId,
       ],
     );

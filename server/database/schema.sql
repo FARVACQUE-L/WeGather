@@ -337,7 +337,13 @@ CREATE TABLE `reservation` (
   `reservation_id_event` INT NOT NULL,
   `reservation_id_user` INT NOT NULL,
   `reservation_name` VARCHAR(255) NOT NULL,
+  -- Icône et filtre du wallet.
+  `reservation_type` ENUM('hebergement', 'transport', 'restaurant', 'activite', 'autre') NOT NULL DEFAULT 'autre',
   `reservation_date` DATE NOT NULL,
+  -- Facultatifs : une nuit d'hôtel, un vol avec heures de départ et d'arrivée.
+  `reservation_time_start` TIME NULL,
+  `reservation_date_end` DATE NULL,
+  `reservation_time_end` TIME NULL,
   `reservation_location` VARCHAR(255) NOT NULL,
   `reservation_description` VARCHAR(255) NOT NULL,
   `reservation_link` VARCHAR(255) NULL,

@@ -35,13 +35,38 @@ const readMemberEventId = async (req: Req, res: Res, eventUuid: string) => {
   return eventId;
 };
 
-// Renvoie le message d'erreur à afficher, ou null si les champs sont valides.
-// Les dates arrivent en « AAAA-MM-JJ » (dateStrings) : la comparaison de
-// chaînes suit l'ordre chronologique.
+// Valeurs de la colonne reservation_type.
+const RESERVATION_TYPES = [
+  "hebergement",
+  "transport",
+  "restaurant",
+  "activite",
+  "autre",
+];
+
+const DATE_FORMAT = /^\d{4}-\d{2}-\d{2}$/;
+// « 14:00 » depuis un <input type="time">, « 14:00:00 » tel que le renvoie
+// MySQL.
+const TIME_FORMAT = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
+
+// Champ facultatif : une chaîne vide du formulaire devient null.
+const optionalValue = (value: unknown) =>
+  typeof value === "string" && value.trim() ? value.trim() : null;
+
+type ReservationExtraFields = {
+  reservation_type: string;
+  reservation_time_start: string | null;
+  reservation_date_end: string | null;
+  reservation_time_end: string | null;
+};
+
+// Renvoie les champs du wallet normalisés, ou le message d'erreur à afficher.
+// Les dates arrivent en « AAAA-MM-JJ » (dateStrings) et les heures en
+// « HH:MM » : la comparaison de chaînes suit l'ordre chronologique.
 const validateReservationFields = async (
   eventId: number,
   body: Record<string, unknown>,
-) => {
+): Promise<{ message: string } | { fields: ReservationExtraFields }> => {
   const { reservation_name, reservation_date, reservation_location } = body;
 
   // 255 : taille des colonnes reservation_name et reservation_location.
@@ -49,22 +74,63 @@ const validateReservationFields = async (
     String(reservation_name).length > 255 ||
     String(reservation_location).length > 255
   ) {
-    return "Le nom et le lieu ne doivent pas dépasser 255 caractères.";
+    return {
+      message: "Le nom et le lieu ne doivent pas dépasser 255 caractères.",
+    };
   }
 
-  const date = String(reservation_date);
+  const type = optionalValue(body.reservation_type) ?? "autre";
+  if (!RESERVATION_TYPES.includes(type)) {
+    return { message: "Type de réservation inconnu." };
+  }
+
+  const dateStart = String(reservation_date);
+  const dateEnd = optionalValue(body.reservation_date_end);
+  const timeStart = optionalValue(body.reservation_time_start);
+  const timeEnd = optionalValue(body.reservation_time_end);
   const [event] = await eventRepository.readEventName(eventId);
 
-  if (
-    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-    !event ||
-    date < event.event_date_start ||
-    date > event.event_date_end
-  ) {
-    return "La date doit être comprise dans les dates de l'événement";
+  const isInEvent = (date: string) =>
+    DATE_FORMAT.test(date) &&
+    !!event &&
+    date >= event.event_date_start &&
+    date <= event.event_date_end;
+
+  if (!isInEvent(dateStart) || (dateEnd && !isInEvent(dateEnd))) {
+    return {
+      message: "Les dates doivent être comprises dans les dates de l'événement",
+    };
   }
 
-  return null;
+  if (
+    (timeStart && !TIME_FORMAT.test(timeStart)) ||
+    (timeEnd && !TIME_FORMAT.test(timeEnd))
+  ) {
+    return { message: "Heure invalide." };
+  }
+
+  // Sans date de fin, la réservation finit le jour même.
+  const endDay = dateEnd ?? dateStart;
+  const endsBeforeStart =
+    endDay < dateStart ||
+    (endDay === dateStart &&
+      timeStart !== null &&
+      timeEnd !== null &&
+      timeEnd.slice(0, 5) <= timeStart.slice(0, 5));
+
+  if (endsBeforeStart) {
+    return { message: "La fin doit être après le début." };
+  }
+
+  return {
+    fields: {
+      reservation_type: type,
+      reservation_time_start: timeStart,
+      // Une date de fin égale au début n'apporte rien : on ne la garde pas.
+      reservation_date_end: dateEnd && dateEnd !== dateStart ? dateEnd : null,
+      reservation_time_end: timeEnd,
+    },
+  };
 };
 
 // Champ facultatif. Seuls http et https sont acceptés : le lien est rendu
@@ -164,10 +230,10 @@ const addReservation: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const invalidMessage = await validateReservationFields(eventId, req.body);
-    if (invalidMessage) {
+    const validation = await validateReservationFields(eventId, req.body);
+    if ("message" in validation) {
       fs.rmSync(req.file.path, { force: true });
-      res.status(400).json({ message: invalidMessage });
+      res.status(400).json({ message: validation.message });
       return;
     }
 
@@ -191,6 +257,7 @@ const addReservation: RequestHandler = async (req, res, next) => {
       reservation_description,
       reservation_link: sanitizeLink(req.body.reservation_link),
       reservation_picture,
+      ...validation.fields,
     });
 
     res.status(201).json(event);
@@ -256,13 +323,13 @@ const updateReservation: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const invalidMessage = await validateReservationFields(
+    const validation = await validateReservationFields(
       reservation.reservation_id_event,
       req.body,
     );
-    if (invalidMessage) {
+    if ("message" in validation) {
       if (req.file) fs.rmSync(req.file.path, { force: true });
-      res.status(400).json({ message: invalidMessage });
+      res.status(400).json({ message: validation.message });
       return;
     }
 
@@ -279,6 +346,7 @@ const updateReservation: RequestHandler = async (req, res, next) => {
         reservation_description,
         reservation_link: sanitizeLink(req.body.reservation_link),
         reservation_picture,
+        ...validation.fields,
       },
     );
     // L'ancienne image n'est effacée que si une nouvelle la remplace.
