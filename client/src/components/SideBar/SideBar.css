@@ -14,7 +14,7 @@
     position: fixed;
     z-index: 1;
     background: var(--sideBar-color);
-    border-radius: 40px;
+    border-radius: 20px;
     .logo-sidebar-container {
       display: flex;
       align-items: center;

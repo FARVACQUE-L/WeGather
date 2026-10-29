@@ -140,13 +140,31 @@ function Profil() {
 
     try {
       setErrorMessage("");
-      await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user_id}`, {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_name }),
-      });
-      setUserName("");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/${user_id}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_name }),
+        },
+      );
+
+      if (!response.ok) {
+        // 409 : pseudo déjà pris, 400 : pseudo vide. Le serveur renvoie le
+        // message à afficher.
+        const data = await response.json().catch(() => null);
+        setErrorMessage(
+          response.status === 409 || response.status === 400
+            ? (data?.message ?? "Impossible de modifier le pseudo")
+            : "Impossible de modifier le pseudo, réessaie plus tard",
+        );
+        return;
+      }
+
+      // Le pseudo est affiché à plusieurs endroits (dashboard, budget,
+      // réservations…) : on recharge la page pour tout mettre à jour.
+      window.location.reload();
     } catch (error) {
       console.error(error);
     }

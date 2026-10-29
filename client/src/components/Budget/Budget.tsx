@@ -431,7 +431,7 @@ function Budget() {
         .map(
           (row) => `
           <li>
-            <span>${escapeHtml(toMe ? row.from.user_name : row.to.user_name)}</span>
+            <span>${escapeHtml(toMe ? row.from.user_username : row.to.user_username)}</span>
             <strong class="${toMe ? "positif" : "negatif"}">${row.amount.toFixed(2)} €</strong>
           </li>`,
         )
@@ -640,7 +640,7 @@ function Budget() {
               {listBalance.map((row) => {
                 return (
                   <article key={row.user_id}>
-                    <span>{row.user_name}</span>
+                    <span>{row.user_username}</span>
                     <span
                       className={row.total_price >= 0 ? "positif" : "negatif"}
                     >

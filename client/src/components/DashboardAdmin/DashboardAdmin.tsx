@@ -33,14 +33,13 @@ type AllEvents = {
   event_id: number;
 };
 type ArrayReport = {
-  user_name: string;
+  user_username: string;
   report_type: "user" | "bug" | "event";
   description: string;
   report_date: string;
 };
 type ArrayUser = {
   user_id: number;
-  user_name: string;
   user_username: string;
   user_profile_picture: string;
   user_joining_date: string;
@@ -314,12 +313,12 @@ function DashboardAdmin() {
             <div className="contenu-tableau-rapport">
               {arrayReport.map((report) => (
                 <motion.div
-                  key={`${report.user_name}-${report.report_date}`}
+                  key={`${report.user_username}-${report.report_date}`}
                   initial={{ opacity: 0, x: -15 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <p>{report.user_name}</p>
+                  <p>{report.user_username}</p>
                   {/* Sous 428px, le type devient une pastille U, E ou B aux
                       couleurs des stats de la page Signalements. */}
                   <p className="report-ticket">
@@ -366,14 +365,13 @@ function DashboardAdmin() {
               >
                 <img
                   src={`${import.meta.env.VITE_API_URL}${user.user_profile_picture}`}
-                  alt={user.user_name}
+                  alt={user.user_username}
                 />
 
                 <div>
-                  <h3>{user.user_name}</h3>
+                  <h3>{user.user_username}</h3>
                   <p className="user-name-datejoin">
-                    {user.user_username} • Rejoint le{" "}
-                    {formatDate(user.user_joining_date)}
+                    Rejoint le {formatDate(user.user_joining_date)}
                   </p>
                 </div>
               </motion.div>

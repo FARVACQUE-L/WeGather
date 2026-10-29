@@ -14,7 +14,7 @@ class AdminRepository {
   }
   async readArrayReport() {
     const [rows] = await databaseClient.query(`SELECT
-    u.user_name,
+    u.user_username,
     'user' AS report_type,
     ru.reported_user_description AS description,
     ru.reported_user_date AS report_date
@@ -25,7 +25,7 @@ JOIN user AS u
 UNION ALL
 
 SELECT
-    u.user_name,
+    u.user_username,
     'event' AS report_type,
     re.reported_event_description AS description,
     re.reported_event_date AS report_date
@@ -36,7 +36,7 @@ JOIN user AS u
 UNION ALL
 
 SELECT
-    u.user_name,
+    u.user_username,
     'bug' AS report_type,
     rb.reported_bug_description AS description,
     rb.reported_bug_date AS report_date
@@ -50,7 +50,7 @@ ORDER BY report_date DESC;
   }
   async readArrayUser() {
     const [rows] =
-      await databaseClient.query(`SELECT user_name, user_id, user_profile_picture, user_username, user_joining_date
+      await databaseClient.query(`SELECT user_id, user_profile_picture, user_username, user_joining_date
 FROM user
 `);
     return rows;

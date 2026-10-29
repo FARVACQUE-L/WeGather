@@ -1,6 +1,8 @@
 import "./GalerieDashboard.css";
+// Styles de l'aperçu en grand (.image-modal-overlay), partagés avec la galerie.
+import "../Galerie/Galerie.css";
 import { motion } from "framer-motion";
-import { Images } from "lucide-react";
+import { Images, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import useCanHover from "../../helper/useCanHover";
@@ -19,6 +21,7 @@ type Gallery = {
 function GalerieDashboard() {
   const canHover = useCanHover();
   const [photos, setPhotos] = useState<Gallery[]>([]);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   const formatImageUrl = (link: string) => {
     if (!link) return "";
@@ -32,7 +35,8 @@ function GalerieDashboard() {
       credentials: "include",
     })
       .then((res) => res.json())
-      .then((data) => setPhotos(data))
+      // L'API trie déjà de la plus récente à la plus ancienne.
+      .then((data) => setPhotos(Array.isArray(data) ? data.slice(0, 3) : []))
       .catch((error) => console.error(error));
   }, [eventUuid]);
 
@@ -47,7 +51,12 @@ function GalerieDashboard() {
 
       <div className="galerie-grid">
         {photos.map((photo) => (
-          <article key={photo.gallery_id} className="galerie-item">
+          <button
+            type="button"
+            key={photo.gallery_id}
+            className="galerie-item"
+            onClick={() => setSelectedPhoto(formatImageUrl(photo.gallery_link))}
+          >
             <motion.img
               src={formatImageUrl(photo.gallery_link)}
               alt={photo.gallery_description ?? "Galerie événement"}
@@ -63,9 +72,22 @@ function GalerieDashboard() {
                 duration: 0.1,
               }}
             />
-          </article>
+          </button>
         ))}
       </div>
+
+      {selectedPhoto && (
+        <div className="image-modal-overlay">
+          <button
+            type="button"
+            className="overlay-close"
+            onClick={() => setSelectedPhoto(null)}
+          >
+            <X size={32} />
+          </button>
+          <img src={selectedPhoto} alt="Aperçu" className="image-modal" />
+        </div>
+      )}
     </section>
   );
 }

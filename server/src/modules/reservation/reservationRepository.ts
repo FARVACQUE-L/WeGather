@@ -18,7 +18,8 @@ class reservationRepository {
       `
       SELECT
   e.event_id,
-  u.user_name,
+  u.user_id,
+  u.user_username,
   r.reservation_location,
   r.reservation_date,
   r.reservation_id

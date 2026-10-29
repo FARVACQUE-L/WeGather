@@ -12,7 +12,7 @@
     position: fixed;
     flex-direction: column;
     background-color: #feb47b5b;
-    border-radius: 40px;
+    border-radius: 20px;
     .logo-sidebar-container {
       display: flex;
       align-items: center;

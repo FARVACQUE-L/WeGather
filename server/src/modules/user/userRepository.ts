@@ -110,22 +110,23 @@ class UserRepository {
       e.event_name,
       e.event_description,
       e.event_link_key,
+      e.event_date_start,
+      e.event_date_end,
         count(distinct euj.euj_id_user) AS total_users,
-        COUNT(distinct r.reservation_id) AS total_reservations,
-        COALESCE(SUM(distinct b.budget_price), 0) AS total_budgets
+        COUNT(distinct r.reservation_id) AS total_reservations
       FROM event AS e
       LEFT JOIN event_user_joining AS euj
         ON euj.euj_id_event = e.event_id
       LEFT JOIN reservation AS r
         ON r.reservation_id_event = e.event_id
-      LEFT JOIN budget AS b
-        ON b.budget_id_event = e.event_id
       WHERE e.event_id = ?
       GROUP BY 
         e.event_id, 
         e.event_name, 
         e.event_description,
-        e.event_link_key;
+        e.event_link_key,
+        e.event_date_start,
+        e.event_date_end;
       `,
       [eventId],
     );
