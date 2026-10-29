@@ -90,6 +90,28 @@ export const formatDayHeader = (day: string) => {
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
+// Pastille de date sur l'image, comme celle des cartes d'événement
+// (CardEvents.tsx) : « 28 » et « Juin ».
+const SHORT_MONTHS = [
+  "Jan",
+  "Fév",
+  "Mars",
+  "Avril",
+  "Mai",
+  "Juin",
+  "Juil",
+  "Août",
+  "Sept",
+  "Oct",
+  "Nov",
+  "Déc",
+];
+
+export const formatBadgeDate = (day: string) => {
+  const date = parseDay(day);
+  return { day: date.getDate(), month: SHORT_MONTHS[date.getMonth()] };
+};
+
 // « 30 juin ».
 export const formatShortDate = (day: string) =>
   parseDay(day).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });

@@ -558,6 +558,38 @@
     opacity: 0.6;
   }
 
+  .WalletCard-ImageDate {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* Pastille de date, identique à celle des cartes d'événement. */
+  .WalletCard-Date {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2.5rem;
+    height: 3rem;
+    background: var(--bg-color);
+    border-radius: 0.5rem;
+    border: 1px solid black;
+
+    .WalletCard-Date-Day {
+      color: var(--font-darkBrown);
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .WalletCard-Date-Month {
+      color: var(--font-gray);
+      font-size: 0.75rem;
+    }
+  }
+
   .WalletCard-Image {
     flex-shrink: 0;
     width: 100%;

@@ -11,6 +11,7 @@ import {
 import { useRef } from "react";
 import {
   ACCEPTED_DOCUMENTS,
+  formatBadgeDate,
   formatSchedule,
   MAX_DOCUMENTS_PER_RESERVATION,
   type ReservationDocument,
@@ -48,16 +49,26 @@ function ReservationCard({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { label, Icon } = readTypeInfo(reservation.reservation_type);
   const schedule = formatSchedule(reservation);
+  const badgeDate = formatBadgeDate(reservation.reservation_date_start);
   const canAddDocument =
     reservation.documents.length < MAX_DOCUMENTS_PER_RESERVATION;
 
   return (
     <article className={isPast ? "WalletCard is-past" : "WalletCard"}>
-      <img
-        className="WalletCard-Image"
-        src={`${import.meta.env.VITE_API_URL}${reservation.reservation_picture}`}
-        alt={reservation.reservation_name}
-      />
+      <div className="WalletCard-ImageDate">
+        <img
+          className="WalletCard-Image"
+          src={`${import.meta.env.VITE_API_URL}${reservation.reservation_picture}`}
+          alt={reservation.reservation_name}
+        />
+        <time
+          className="WalletCard-Date"
+          dateTime={reservation.reservation_date_start.slice(0, 10)}
+        >
+          <span className="WalletCard-Date-Day">{badgeDate.day}</span>
+          <span className="WalletCard-Date-Month">{badgeDate.month}</span>
+        </time>
+      </div>
 
       <div className="WalletCard-Body">
         <div className="WalletCard-Meta">
