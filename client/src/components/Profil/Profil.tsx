@@ -151,7 +151,14 @@ function Profil() {
       );
 
       if (!response.ok) {
-        setErrorMessage("Impossible de modifier le pseudo");
+        // 409 : pseudo déjà pris, 400 : pseudo vide. Le serveur renvoie le
+        // message à afficher.
+        const data = await response.json().catch(() => null);
+        setErrorMessage(
+          response.status === 409 || response.status === 400
+            ? (data?.message ?? "Impossible de modifier le pseudo")
+            : "Impossible de modifier le pseudo, réessaie plus tard",
+        );
         return;
       }
 
