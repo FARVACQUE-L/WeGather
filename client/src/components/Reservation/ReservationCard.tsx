@@ -30,7 +30,8 @@ type ReservationCardProps = {
   onEdit: () => void;
   onDelete: () => void;
   onAddDocument: (file: File) => void;
-  onDownloadDocument: (document: ReservationDocument) => void;
+  // Ouvre la modale « Ouvrir / Télécharger ».
+  onSelectDocument: (document: ReservationDocument) => void;
   onDeleteDocument: (document: ReservationDocument) => void;
 };
 
@@ -43,7 +44,7 @@ function ReservationCard({
   onEdit,
   onDelete,
   onAddDocument,
-  onDownloadDocument,
+  onSelectDocument,
   onDeleteDocument,
 }: ReservationCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -102,8 +103,8 @@ function ReservationCard({
                 <button
                   type="button"
                   className="WalletCard-DocumentDownload"
-                  title={`Télécharger ${document.document_name}`}
-                  onClick={() => onDownloadDocument(document)}
+                  title={`Ouvrir ou télécharger ${document.document_name}`}
+                  onClick={() => onSelectDocument(document)}
                 >
                   <FileText size={14} />
                   <span>{document.document_name}</span>

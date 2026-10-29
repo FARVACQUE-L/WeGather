@@ -161,16 +161,3 @@ export const formatCountdown = (day: string, now = new Date()) => {
   if (days === 1) return "Demain";
   return `Dans ${days} jours`;
 };
-
-// Réservations regroupées par jour de début, dans l'ordre reçu (le serveur
-// trie déjà par date puis par heure).
-export const groupByDay = (reservations: WalletReservation[]) => {
-  const days = new Map<string, WalletReservation[]>();
-
-  for (const reservation of reservations) {
-    const day = reservation.reservation_date_start.slice(0, 10);
-    days.set(day, [...(days.get(day) ?? []), reservation]);
-  }
-
-  return [...days.entries()].map(([day, items]) => ({ day, items }));
-};

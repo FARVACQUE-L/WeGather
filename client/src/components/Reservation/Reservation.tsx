@@ -2,7 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import "./Reservation.css";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarPlus, ChevronDown, Paperclip, X } from "lucide-react";
+import {
+  CalendarPlus,
+  ChevronDown,
+  Download,
+  ExternalLink,
+  FileText,
+  Paperclip,
+  X,
+} from "lucide-react";
 import Swal from "sweetalert2";
 import useCanHover from "../../helper/useCanHover";
 import { useCompactLevel } from "../../helper/useCompactLevel";
@@ -17,7 +25,6 @@ import {
   formatCountdown,
   formatDayHeader,
   formatSchedule,
-  groupByDay,
   isPastReservation,
   MAX_DOCUMENTS_PER_RESERVATION,
   RESERVATION_TYPE_INFO,
@@ -100,6 +107,10 @@ function Reservation() {
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(
     null,
   );
+  // Document cliqué sur une carte : la modale propose de l'ouvrir ou de le
+  // télécharger.
+  const [selectedDocument, setSelectedDocument] =
+    useState<ReservationDocument | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentsInputRef = useRef<HTMLInputElement>(null);
   // Comme dans la galerie, le bouton d'ajout passe en icône quand il touche
@@ -306,16 +317,22 @@ function Reservation() {
   }
 
   // L'API est sur une autre origine en dev, où l'attribut download d'un lien
-  // vers elle est ignoré : on passe par un blob, comme dans la galerie.
-  async function handleDownloadDocument(document: ReservationDocument) {
-    try {
-      const response = await fetch(
-        `${API_URL}/api/reservations/documents/${document.document_id}/download`,
-        { credentials: "include", cache: "no-store" },
-      );
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  // vers elle est ignoré, et la route demande le cookie de session : on
+  // récupère le fichier en blob, comme dans la galerie.
+  async function fetchDocumentUrl(document: ReservationDocument) {
+    const response = await fetch(
+      `${API_URL}/api/reservations/documents/${document.document_id}/download`,
+      { credentials: "include", cache: "no-store" },
+    );
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-      const blobUrl = URL.createObjectURL(await response.blob());
+    return URL.createObjectURL(await response.blob());
+  }
+
+  async function handleDownloadDocument(document: ReservationDocument) {
+    setSelectedDocument(null);
+    try {
+      const blobUrl = await fetchDocumentUrl(document);
       const link = window.document.createElement("a");
       link.href = blobUrl;
       link.download = document.document_name;
@@ -324,6 +341,29 @@ function Reservation() {
     } catch (error) {
       console.error(error);
       toastError("Impossible de télécharger le document.");
+    }
+  }
+
+  // Ouvre le document dans un nouvel onglet (lecteur PDF ou image du
+  // navigateur). L'onglet est ouvert tout de suite, pendant le clic : ouvert
+  // après le téléchargement, il serait bloqué comme une popup.
+  async function handleOpenDocument(document: ReservationDocument) {
+    setSelectedDocument(null);
+    const tab = window.open("", "_blank");
+    try {
+      const blobUrl = await fetchDocumentUrl(document);
+      if (tab) {
+        tab.location.href = blobUrl;
+      } else {
+        window.open(blobUrl, "_blank");
+      }
+      // Laisse le temps à l'onglet de charger le fichier avant de libérer
+      // la mémoire.
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch (error) {
+      console.error(error);
+      tab?.close();
+      toastError("Impossible d'ouvrir le document.");
     }
   }
 
@@ -567,46 +607,40 @@ function Reservation() {
     reservations.find((r) => r.reservation_id === editingReservationId)
       ?.documents.length ?? 0;
 
-  const renderDays = (items: WalletReservation[], isPast: boolean) =>
-    groupByDay(items).map(({ day, items: dayItems }) => (
-      <section key={day} className="Wallet-Day">
-        <h2 className="Wallet-DayTitle">{formatDayHeader(day)}</h2>
-        <div className="Wallet-DayItems">
-          {dayItems.map((reservation) => (
-            <div
-              key={reservation.reservation_id}
-              id={`reservation-${reservation.reservation_id}`}
-            >
-              <ReservationCard
-                reservation={reservation}
-                isPast={isPast}
-                canManage={canManage(reservation)}
-                canDeleteDocument={canDeleteDocument}
-                isUploading={uploadingId === reservation.reservation_id}
-                onEdit={() => openEditModal(reservation)}
-                onDelete={() =>
-                  setPendingDelete({
-                    kind: "reservation",
-                    id: reservation.reservation_id,
-                    name: reservation.reservation_name,
-                  })
-                }
-                onAddDocument={(file) =>
-                  handleAddDocument(reservation.reservation_id, file)
-                }
-                onDownloadDocument={handleDownloadDocument}
-                onDeleteDocument={(document) =>
-                  setPendingDelete({
-                    kind: "document",
-                    id: document.document_id,
-                    name: document.document_name,
-                  })
-                }
-              />
-            </div>
-          ))}
-        </div>
-      </section>
+  // Cartes à la suite, dans l'ordre chronologique donné par le serveur.
+  const renderCards = (items: WalletReservation[], isPast: boolean) =>
+    items.map((reservation) => (
+      <div
+        key={reservation.reservation_id}
+        id={`reservation-${reservation.reservation_id}`}
+      >
+        <ReservationCard
+          reservation={reservation}
+          isPast={isPast}
+          canManage={canManage(reservation)}
+          canDeleteDocument={canDeleteDocument}
+          isUploading={uploadingId === reservation.reservation_id}
+          onEdit={() => openEditModal(reservation)}
+          onDelete={() =>
+            setPendingDelete({
+              kind: "reservation",
+              id: reservation.reservation_id,
+              name: reservation.reservation_name,
+            })
+          }
+          onAddDocument={(file) =>
+            handleAddDocument(reservation.reservation_id, file)
+          }
+          onSelectDocument={setSelectedDocument}
+          onDeleteDocument={(document) =>
+            setPendingDelete({
+              kind: "document",
+              id: document.document_id,
+              name: document.document_name,
+            })
+          }
+        />
+      </div>
     ));
 
   return (
@@ -1094,8 +1128,8 @@ function Reservation() {
             )}
 
             {upcomingReservations.length > 0 ? (
-              <div className="Wallet-Timeline">
-                {renderDays(upcomingReservations, false)}
+              <div className="Wallet-Grid">
+                {renderCards(upcomingReservations, false)}
               </div>
             ) : (
               <p className="Wallet-Empty">
@@ -1119,8 +1153,8 @@ function Reservation() {
                   <ChevronDown size={18} />
                 </button>
                 {showPast && (
-                  <div className="Wallet-Timeline">
-                    {renderDays(pastReservations, true)}
+                  <div className="Wallet-Grid">
+                    {renderCards(pastReservations, true)}
                   </div>
                 )}
               </section>
@@ -1128,6 +1162,37 @@ function Reservation() {
           </>
         )}
       </motion.div>
+
+      {selectedDocument && (
+        <div className="Wallet-ConfirmOverlay">
+          <div className="Wallet-Confirm">
+            <h3>Document</h3>
+            <p className="Wallet-DocumentName">
+              <FileText size={18} />
+              {selectedDocument.document_name}
+            </p>
+            <div className="Wallet-ConfirmActions Wallet-DocumentActions">
+              <button type="button" onClick={() => setSelectedDocument(null)}>
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownloadDocument(selectedDocument)}
+              >
+                <Download size={16} />
+                Télécharger
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenDocument(selectedDocument)}
+              >
+                <ExternalLink size={16} />
+                Ouvrir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {pendingDelete && (
         <div className="Wallet-ConfirmOverlay">

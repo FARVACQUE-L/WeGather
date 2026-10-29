@@ -419,36 +419,15 @@
       color: var(--font-input);
     }
 
-    .Wallet-Timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 1.75rem;
-    }
+    /* Cartes de 16rem à la suite, comme les cartes d'événement. */
+    .Wallet-Grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 16rem);
+      align-items: stretch;
+      gap: 3rem;
 
-    .Wallet-Day {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-
-      .Wallet-DayTitle {
-        margin: 0;
-        padding-bottom: 0.4rem;
-        border-bottom: 1px solid var(--border-color);
-        color: var(--font-title);
-        font-size: 1.1rem;
-        font-weight: 600;
-      }
-
-      /* Cartes de 16rem côte à côte, comme les cartes d'événement. */
-      .Wallet-DayItems {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, 16rem);
-        align-items: stretch;
-        gap: 2rem;
-
-        > div {
-          display: flex;
-        }
+      > div {
+        display: flex;
       }
     }
 
@@ -868,6 +847,37 @@
         color: var(--font-neutral);
       }
     }
+
+    .Wallet-DocumentName {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--font-darkBrown);
+      font-weight: 600;
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+
+    /* Annuler, Télécharger et Ouvrir : trois boutons sur la largeur de la
+       modale, Ouvrir mis en avant. */
+    .Wallet-DocumentActions {
+      gap: 0.6rem;
+
+      button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+      }
+
+      button:nth-child(2) {
+        background: var(--button-color-disable);
+        color: var(--font-title);
+      }
+    }
   }
 }
 /* Au-dessus de 875px, l'image passe à droite des champs : avec le
@@ -940,7 +950,7 @@
 /* Sous 625px, deux cartes ne tiennent plus côte à côte : une seule colonne,
    cartes centrées, comme les cartes d'événement. */
 @media screen and (max-width: 625px) {
-  .reservation .Wallet .Wallet-Day .Wallet-DayItems {
+  .reservation .Wallet .Wallet-Grid {
     justify-content: center;
   }
 }
