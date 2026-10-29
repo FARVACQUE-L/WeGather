@@ -25,7 +25,7 @@ type EventDashboard = {
 };
 type ReservationDashboard = {
   event_id: number | null;
-  user_name: string;
+  user_username: string;
   reservation_location: string;
   reservation_date: string;
   reservation_id: number;
@@ -350,10 +350,10 @@ function Dashboard({ onSeeAllReservations }: DashboardProps) {
                 >
                   <div className="name">
                     <p className="initials">
-                      {getInitials(reservation.user_name)}
+                      {getInitials(reservation.user_username)}
                     </p>
 
-                    <p>{reservation.user_name}</p>
+                    <p>{reservation.user_username}</p>
                   </div>
 
                   <p>{reservation.reservation_location}</p>
