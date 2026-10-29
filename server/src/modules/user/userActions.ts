@@ -420,7 +420,14 @@ const browsePhoto: RequestHandler = async (req, res, next) => {
 };
 const editUserName: RequestHandler = async (req, res, next) => {
   try {
-    const userId = Number(req.params.id);
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    // L'id vient du token, pas de l'URL : on ne peut modifier que son
+    // propre pseudo.
+    const userId = req.user.id;
     const { user_name } = req.body;
 
     await userRepository.updateUserName(userId, user_name);
