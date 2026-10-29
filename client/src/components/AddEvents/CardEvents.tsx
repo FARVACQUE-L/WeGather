@@ -1,4 +1,4 @@
-import { ExternalLink, MapPin, PencilLine, Trash2 } from "lucide-react";
+import { MapPin, PencilLine, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import Swal from "sweetalert2";
@@ -40,16 +40,11 @@ function CardEvents({
   title,
   description,
   location,
-  siteUrl,
   onEventDeleted,
-  canManageReservation = false,
-  onEditReservation,
-  onReservationDeleted,
   onEventUpdated,
 }: CardEventsProps) {
   const uselocation = useLocation();
   const isHomeEvents = uselocation.pathname === "/homeevents";
-  const onTableau = uselocation.pathname.startsWith("/tableaudebord/");
   // const { id: user_id } = JSON.parse(localStorage.getItem("user") || "{}");
   const isHost = user_id === event_id_host;
   const [currentTitle, setCurrentTitle] = useState(title);
@@ -59,7 +54,6 @@ function CardEvents({
   const [currentDateStart, setCurrentDateStart] = useState(dateStart);
   const [currentDateEnd, setCurrentDateEnd] = useState(dateEnd);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleteEventModalOpen, setIsDeleteEventModalOpen] = useState(false);
 
   const toast = Swal.mixin({
@@ -84,26 +78,6 @@ function CardEvents({
       text: "Événement modifié",
       customClass: { popup: "toast-error-popup" },
     });
-  };
-  const handleDeleteReservation = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/reservations/delete/${event_id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Erreur suppression");
-      }
-
-      setIsDeleteModalOpen(false);
-      onReservationDeleted?.(event_id);
-    } catch (error) {
-      console.error(error);
-    }
   };
   const handleDeleteEvent = async () => {
     try {
@@ -155,20 +129,6 @@ function CardEvents({
           </div>
         </Link>
 
-        {/* Hors du <Link> de la carte : un lien dans un lien n'est pas du
-            HTML valide. Reste visible même si la description est tronquée. */}
-        {siteUrl && (
-          <a
-            className="CardEvents-Site"
-            href={siteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ExternalLink size={14} />
-            Voir le site
-          </a>
-        )}
-
         {isHost && (
           <button
             type="button"
@@ -200,46 +160,6 @@ function CardEvents({
                   Annuler
                 </button>
                 <button type="button" onClick={handleDeleteEvent}>
-                  Supprimer
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {onEditReservation && canManageReservation && (
-          <button
-            type="button"
-            className="CardEvents-Edit"
-            onClick={() => onEditReservation?.(event_id)}
-          >
-            <PencilLine size={16} />
-          </button>
-        )}
-        {onTableau && canManageReservation && (
-          <button
-            type="button"
-            className="CardEvents-Deleted"
-            onClick={() => setIsDeleteModalOpen(true)}
-          >
-            <Trash2 size={16} />
-          </button>
-        )}
-        {isDeleteModalOpen && (
-          <div className="delete-modal-overlay">
-            <div className="delete-modal">
-              <h3>Supprimer la réservation</h3>
-
-              <p>Êtes-vous sûr de vouloir supprimer cette réservation ?</p>
-
-              <div className="delete-modal-actions">
-                <button
-                  type="button"
-                  onClick={() => setIsDeleteModalOpen(false)}
-                >
-                  Annuler
-                </button>
-
-                <button type="button" onClick={handleDeleteReservation}>
                   Supprimer
                 </button>
               </div>

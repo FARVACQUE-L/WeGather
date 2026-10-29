@@ -100,28 +100,6 @@
       }
     }
   }
-  /* En bas à gauche, dans la bande réservée sous la localisation, à côté des
-     boutons modifier et supprimer qui occupent le coin droit. */
-  .CardEvents-Site {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    bottom: 1.2rem;
-    left: 1rem;
-    z-index: 1;
-    color: var(--font-brown);
-    font-size: 0.75rem;
-    font-weight: bold;
-    text-decoration: none;
-
-    @media (hover: hover) and (min-width: 429px) {
-      &:hover {
-        color: var(--color-chat);
-        text-decoration: underline;
-      }
-    }
-  }
   .CardEvents-Edit {
     position: absolute;
     padding: 0.5rem;

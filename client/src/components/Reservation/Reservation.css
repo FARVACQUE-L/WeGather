@@ -151,6 +151,112 @@
         display: none;
       }
 
+      /* Date et heure côte à côte. */
+      .ReservationModal-Row {
+        display: flex;
+        gap: 0.5rem;
+
+        .ReservationModal-Input {
+          flex: 1;
+          min-width: 0;
+        }
+      }
+
+      .ReservationModal-Types {
+        margin: 0;
+        padding: 0;
+        border: none;
+        min-width: 0;
+
+        legend {
+          margin-bottom: 0.5rem;
+          padding: 0;
+        }
+      }
+
+      .ReservationModal-TypeList {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      .ReservationModal-Type {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.7rem;
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        background: var(--input-color);
+        color: var(--font-darkBrown);
+        font-size: 0.75rem;
+        cursor: pointer;
+
+        &.is-active {
+          border-color: transparent;
+          background: var(--font-title);
+          color: var(--font-neutral);
+        }
+      }
+
+      .ReservationModal-Hint {
+        color: var(--font-input);
+        font-size: 0.75rem;
+      }
+
+      .ReservationModal-Documents {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        li {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          padding: 0.3rem 0.6rem;
+          border-radius: 0.5rem;
+          background: var(--input-color);
+          font-size: 0.75rem;
+
+          span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          button {
+            display: flex;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+          }
+        }
+      }
+
+      .ReservationModal-DocumentsButton {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        align-self: flex-start;
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--font-brown);
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .ReservationModal-ButtonSubmit:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
+
       /* Aperçu au-dessus du bouton, à la taille des cartes. */
       .ReservationModal-Image {
         display: flex;
@@ -213,14 +319,168 @@
       }
     }
   }
-  .reservation-card-global {
+  /* Wallet : prochaine réservation, filtres, puis les réservations
+     groupées par jour du séjour. */
+  .Wallet {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 63vw;
     padding-top: 2vh;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 16rem);
-    align-items: stretch;
-    gap: 3rem;
+    padding-bottom: 2rem;
+
+    .Wallet-Next {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      padding: 1.25rem 1.5rem;
+      border: none;
+      border-radius: 1rem;
+      background: linear-gradient(90deg, #ff8a65 0%, #b2553d 100%);
+      box-shadow: 0 4px 12px rgba(165, 59, 34, 0.35);
+      color: var(--font-neutral);
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s;
+
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: scale(1.01);
+        }
+      }
+
+      .Wallet-NextIcon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .Wallet-NextContent {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        min-width: 0;
+      }
+
+      .Wallet-NextLabel {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+
+      .Wallet-NextName {
+        font-size: 1.4rem;
+        font-weight: 600;
+      }
+
+      .Wallet-NextDetails {
+        font-size: 0.85rem;
+        opacity: 0.95;
+      }
+    }
+
+    .Wallet-Filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .Wallet-Filter {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      background: var(--bg-neutral);
+      color: var(--font-darkBrown);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition:
+        background 0.2s,
+        color 0.2s;
+
+      &.is-active {
+        border-color: transparent;
+        background: var(--font-title);
+        color: var(--font-neutral);
+      }
+    }
+
+    .Wallet-Empty {
+      color: var(--font-input);
+    }
+
+    .Wallet-Timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .Wallet-Day {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .Wallet-DayTitle {
+        margin: 0;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--font-title);
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      /* Cartes de 16rem côte à côte, comme les cartes d'événement. */
+      .Wallet-DayItems {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 16rem);
+        align-items: stretch;
+        gap: 2rem;
+
+        > div {
+          display: flex;
+        }
+      }
+    }
+
+    .Wallet-Past {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+
+      .Wallet-PastToggle {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        align-self: flex-start;
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--font-darkBrown);
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+
+        svg {
+          transition: transform 0.2s;
+        }
+
+        &.is-open svg {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
     .reservation-empty {
-      grid-column: 1 / -1;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -274,6 +534,310 @@
     opacity: 1;
   }
 }
+
+/* Carte d'une réservation (ReservationCard.tsx), au format des cartes
+   d'événement (CardEvents.css) : 16rem de large, image de 12rem en haut. */
+.WalletCard {
+  display: flex;
+  flex-direction: column;
+  width: 16rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--bg-neutral);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: transform linear 0.125s;
+
+  @media (hover: hover) and (min-width: 429px) {
+    &:hover {
+      transform: scale(1.025);
+    }
+  }
+
+  /* Une réservation passée reste lisible mais passe au second plan. */
+  &.is-past {
+    opacity: 0.6;
+  }
+
+  .WalletCard-Image {
+    flex-shrink: 0;
+    width: 100%;
+    height: 12rem;
+    /* Les images recadrées dans la modale sont déjà au format de la carte. */
+    object-fit: cover;
+    object-position: top;
+    display: block;
+    background: var(--bg-composant-dash);
+  }
+
+  .WalletCard-Body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    flex: 1;
+    min-width: 0;
+    padding: 1rem;
+  }
+
+  .WalletCard-Meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .WalletCard-Type {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  /* Une couleur par type, reprise des états de l'app. */
+  .WalletCard-Type--hebergement {
+    background: var(--bg-confirm-state);
+    color: var(--font-comfirm-state);
+  }
+
+  .WalletCard-Type--transport {
+    background: var(--bg-waiting-state);
+    color: var(--font-waiting-state);
+  }
+
+  .WalletCard-Type--restaurant {
+    background: var(--bg-negative);
+    color: var(--font-red);
+  }
+
+  .WalletCard-Type--activite {
+    background: var(--bg-positive);
+    color: var(--font-green);
+  }
+
+  .WalletCard-Type--autre {
+    background: var(--bg-composant-dash);
+    color: var(--font-darkBrown);
+  }
+
+  .WalletCard-Schedule {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--font-darkBrown);
+    font-weight: 600;
+  }
+
+  .WalletCard-Title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  .WalletCard-Location {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  .WalletCard-Description {
+    color: var(--font-input);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .WalletCard-Documents {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .WalletCard-Document {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--bg-composant-dash);
+    overflow: hidden;
+
+    button {
+      display: flex;
+      align-items: center;
+      border: none;
+      background: none;
+      color: var(--font-darkBrown);
+      cursor: pointer;
+    }
+
+    .WalletCard-DocumentDownload {
+      gap: 0.35rem;
+      min-width: 0;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+
+      span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .WalletCard-DocumentDelete {
+      padding: 0.3rem 0.4rem;
+      opacity: 0.6;
+    }
+
+    @media (hover: hover) and (min-width: 429px) {
+      .WalletCard-DocumentDownload:hover span {
+        text-decoration: underline;
+      }
+
+      .WalletCard-DocumentDelete:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .WalletCard-Actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin-top: auto;
+    padding-top: 0.3rem;
+  }
+
+  .WalletCard-Link,
+  .WalletCard-AddDocument {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--font-brown);
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+
+    @media (hover: hover) and (min-width: 429px) {
+      &:hover:not(:disabled) {
+        color: var(--color-chat);
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .WalletCard-FileInput {
+    display: none;
+  }
+
+  .WalletCard-Manage {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+
+    button {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      opacity: 0.5;
+      cursor: pointer;
+      transition: opacity linear 0.2s;
+
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+/* Confirmation de suppression (réservation ou document) : mêmes voile,
+   fond et boutons que les autres modales de suppression (CardEvents.css). */
+.Wallet-ConfirmOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+
+  .Wallet-Confirm {
+    width: min(90vw, 420px);
+    padding: 2rem;
+    box-sizing: border-box;
+    background: var(--bg-color);
+    border-radius: 2rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    h3 {
+      margin: 0;
+      font-size: x-large;
+      color: var(--font-title);
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .Wallet-ConfirmActions {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.5rem;
+
+      /* Annuler garde le gris par défaut des boutons. */
+      button {
+        flex: 1;
+        max-width: 12rem;
+        height: 2rem;
+        border: none;
+        border-radius: 5rem;
+        box-shadow: 1px 1px 5px black;
+        cursor: pointer;
+        transition: transform 0.2s;
+
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            transform: scale(0.95);
+          }
+        }
+      }
+
+      button:last-child {
+        background: var(--button-color);
+        color: var(--font-neutral);
+      }
+    }
+  }
+}
 /* Au-dessus de 875px, l'image passe à droite des champs : avec le
    recadreur, la modale sur une colonne devenait plus haute que l'écran et
    les boutons n'apparaissaient qu'en faisant défiler. */
@@ -300,9 +864,10 @@
       gap: 7rem;
     }
 
+    /* À côté des 8 champs de la colonne de gauche (nom à documents). */
     .ReservationModal-ImageField {
       grid-column: 2;
-      grid-row: 2 / span 5;
+      grid-row: 2 / span 8;
     }
   }
 }
@@ -311,7 +876,8 @@
    fenêtre, sa position à 1300px. Le titre part de 2vw + 300px (marge de la
    page et décalage de la sidebar). */
 @media screen and (min-width: 876px) and (max-width: 1300px) {
-  .reservation .reservation-title {
+  .reservation .reservation-title,
+  .reservation .Wallet {
     width: calc(98vw - 455px);
   }
 }
@@ -319,7 +885,7 @@
    correctement vers le bouton d'ajout, on la masque, et le texte prend
    toute la largeur. */
 @media screen and (max-width: 1175px) {
-  .reservation .reservation-card-global .reservation-empty {
+  .reservation .Wallet .reservation-empty {
     width: 100%;
 
     .reservation-empty-arrow {
@@ -333,26 +899,17 @@
     width: 100%;
     /* Les 4vh du dashboard, plus les 2rem de padding haut du bureau. */
     padding: calc(4vh + 2rem) 4vw 10vh;
-    .reservation-title {
+    .reservation-title,
+    .Wallet {
       width: 98%;
-    }
-    /* Les colonnes de 16rem sont centrées dans la largeur disponible. */
-    .reservation-card-global {
-      justify-content: center;
     }
   }
 }
 /* Sous 625px, deux cartes ne tiennent plus côte à côte : une seule colonne,
-   cartes centrées, comme sur mobile. */
-@media screen and (min-width: 429px) and (max-width: 625px) {
-  .reservation {
-    .reservation-card-global {
-      grid-template-columns: 1fr;
-    }
-    .card-reservation {
-      display: flex;
-      justify-content: center;
-    }
+   cartes centrées, comme les cartes d'événement. */
+@media screen and (max-width: 625px) {
+  .reservation .Wallet .Wallet-Day .Wallet-DayItems {
+    justify-content: center;
   }
 }
 @media screen and (max-width: 428px) {
@@ -361,9 +918,6 @@
     /* Avec les 2vh du titre, il commence à 4vh + 3rem comme sur le
        dashboard. */
     padding: calc(2vh + 3rem) 1rem 0 1rem;
-    .reservation-card-global {
-      gap: 0;
-    }
     .reservation-title {
       width: 100%;
       height: auto;
@@ -403,20 +957,18 @@
         }
       }
     }
-    .card-reservation {
-      margin-bottom: 25px;
-      display: flex;
-      justify-content: center;
-      /* Annule le height: 90% mobile de CardEvents.css : la carte perdait
-         10 % de sa hauteur et le lien « Voir le site » chevauchait le texte. */
-      .CardEvents-Wrapper {
-        height: auto;
-      }
-    }
-    .reservation-card-global {
-      grid-template-columns: 1fr;
+    .Wallet {
+      width: 100%;
       /* Dégage la dernière carte de la barre de navigation fixée en bas. */
       padding-bottom: 6rem;
+
+      .Wallet-Next {
+        padding: 1rem;
+
+        .Wallet-NextName {
+          font-size: 1.15rem;
+        }
+      }
       .reservation-empty {
         width: 90vw;
         .reservation-empty-text {

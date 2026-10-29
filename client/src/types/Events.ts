@@ -23,16 +23,8 @@ export interface CardEventsProps {
   title: string;
   description: string;
   location: string;
-  /* Lien saisi dans la modale de réservation, affiché en bas de la carte. */
-  siteUrl?: string | null;
   onEventDeleted?: (deletedId: number) => void;
   onEventUpdated?: (updatedEvent: EventData) => void;
-  reservation_id_user?: number | null;
-  /* Auteur de la réservation ou hôte de l'événement : affiche le crayon et
-     la poubelle de la réservation, comme le permet le serveur. */
-  canManageReservation?: boolean;
-  onEditReservation?: (reservationId: number) => void;
-  onReservationDeleted?: (deletedId: number) => void;
 }
 
 export interface ButtonAddEventProps {
