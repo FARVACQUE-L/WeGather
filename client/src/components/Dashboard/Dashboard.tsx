@@ -25,6 +25,7 @@ type EventDashboard = {
 };
 type ReservationDashboard = {
   event_id: number | null;
+  user_id: number;
   user_username: string;
   reservation_location: string;
   reservation_date: string;
@@ -36,6 +37,23 @@ type UserAndBudget = {
   user_name: string | null;
   total_price: number | null;
 };
+
+// Couleurs des pastilles d'initiales : chaque organisateur garde la sienne,
+// choisie à partir de son id pour qu'elle ne change pas avec son pseudo.
+const initialsColors = [
+  "#0080005c",
+  "#fa985f8c",
+  "#4a90e266",
+  "#a53b2259",
+  "#9b59b666",
+  "#f1c40f80",
+  "#1abc9c66",
+  "#e84a8a59",
+];
+
+function getInitialsColor(userId: number) {
+  return initialsColors[userId % initialsColors.length];
+}
 
 type DashboardProps = {
   // Ouvre l'onglet Réservation (bouton « Voir tout »).
@@ -349,7 +367,12 @@ function Dashboard({ onSeeAllReservations }: DashboardProps) {
                   }}
                 >
                   <div className="name">
-                    <p className="initials">
+                    <p
+                      className="initials"
+                      style={{
+                        backgroundColor: getInitialsColor(reservation.user_id),
+                      }}
+                    >
                       {getInitials(reservation.user_username)}
                     </p>
 
