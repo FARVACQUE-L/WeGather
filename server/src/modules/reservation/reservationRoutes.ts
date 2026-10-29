@@ -1,7 +1,11 @@
 import express from "express";
 import authorization from "../../middleware/auth";
-import upload, { verifyFileSignatures } from "../../middleware/upload";
+import upload, {
+  uploadReservationDocument,
+  verifyFileSignatures,
+} from "../../middleware/upload";
 import reservationActions from "./reservationActions";
+import reservationDocumentActions from "./reservationDocumentActions";
 
 const reservationRoutes = express.Router();
 
@@ -38,6 +42,25 @@ reservationRoutes.delete(
   "/api/reservations/delete/:id",
   authorization,
   reservationActions.deleteReservation,
+);
+
+// Billets et confirmations (PDF ou image) d'une réservation.
+reservationRoutes.post(
+  "/api/reservations/:id/documents",
+  authorization,
+  uploadReservationDocument.single("document"),
+  verifyFileSignatures,
+  reservationDocumentActions.addDocument,
+);
+reservationRoutes.get(
+  "/api/reservations/documents/:documentId/download",
+  authorization,
+  reservationDocumentActions.downloadDocument,
+);
+reservationRoutes.delete(
+  "/api/reservations/documents/:documentId",
+  authorization,
+  reservationDocumentActions.deleteDocument,
 );
 
 export default reservationRoutes;

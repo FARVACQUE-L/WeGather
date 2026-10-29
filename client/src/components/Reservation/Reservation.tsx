@@ -18,7 +18,7 @@ type Reservation = {
   reservation_id_event: number;
   reservation_id_user: number | null;
   reservation_name: string;
-  reservation_date: string;
+  reservation_date_start: string;
   reservation_location: string;
   reservation_description: string;
   reservation_link: string | null;
@@ -187,7 +187,7 @@ function Reservation() {
     if (!resa) return;
 
     setReservationName(capitalize(resa.reservation_name));
-    setReservationDate(resa.reservation_date.split("T")[0]);
+    setReservationDate(resa.reservation_date_start.split("T")[0]);
     setReservationLocation(capitalize(resa.reservation_location));
     setReservationDescription(capitalize(resa.reservation_description));
     setReservationLink(resa.reservation_link ?? "");
@@ -240,7 +240,7 @@ function Reservation() {
     formData.append("event_uuid", eventUuid ?? "");
     formData.append("reservation_id_user", String(userId));
     formData.append("reservation_name", reservationName);
-    formData.append("reservation_date", reservationDate);
+    formData.append("reservation_date_start", reservationDate);
     formData.append("reservation_location", reservationLocation);
     formData.append("reservation_description", reservationDescription);
     formData.append("reservation_link", reservationLink.trim());
@@ -640,7 +640,7 @@ function Reservation() {
         {reservations.map((event) => (
           <div
             className="card-reservation"
-            key={`${event.reservation_id}-${event.reservation_name}-${event.reservation_date}-${event.reservation_location}-${event.reservation_description}-${event.reservation_picture}`}
+            key={`${event.reservation_id}-${event.reservation_name}-${event.reservation_date_start}-${event.reservation_location}-${event.reservation_description}-${event.reservation_picture}`}
           >
             <CardEvents
               user_id={userId}
@@ -666,8 +666,8 @@ function Reservation() {
               }}
               image={`${import.meta.env.VITE_API_URL}${event.reservation_picture}`}
               imageAlt={event.reservation_name}
-              dateStart={event.reservation_date}
-              dateEnd={event.reservation_date}
+              dateStart={event.reservation_date_start}
+              dateEnd={event.reservation_date_start}
               title={event.reservation_name}
               description={event.reservation_description}
               location={event.reservation_location}

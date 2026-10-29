@@ -1,9 +1,11 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
 import { getPlanLimits } from "../../helper/planLimits";
+import { removeReservationDocument } from "../../helper/removeReservationDocument";
 import { removeUpload } from "../../helper/removeUpload";
 import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
+import reservationDocumentRepository from "./reservationDocumentRepository";
 import reservationRepository from "./reservationRepository";
 
 type Req = Parameters<RequestHandler>[0];
@@ -67,7 +69,8 @@ const validateReservationFields = async (
   eventId: number,
   body: Record<string, unknown>,
 ): Promise<{ message: string } | { fields: ReservationExtraFields }> => {
-  const { reservation_name, reservation_date, reservation_location } = body;
+  const { reservation_name, reservation_date_start, reservation_location } =
+    body;
 
   // 255 : taille des colonnes reservation_name et reservation_location.
   if (
@@ -84,7 +87,7 @@ const validateReservationFields = async (
     return { message: "Type de réservation inconnu." };
   }
 
-  const dateStart = String(reservation_date);
+  const dateStart = String(reservation_date_start);
   const dateEnd = optionalValue(body.reservation_date_end);
   const timeStart = optionalValue(body.reservation_time_start);
   const timeEnd = optionalValue(body.reservation_time_end);
@@ -176,9 +179,22 @@ const readAllReservation: RequestHandler = async (req, res, next) => {
     const eventId = await readMemberEventId(req, res, req.params.eventUuid);
     if (!eventId) return;
 
-    const event = await reservationRepository.readAllReservation(eventId);
+    const reservations = (await reservationRepository.readAllReservation(
+      eventId,
+    )) as { reservation_id: number }[];
+    const documents = await reservationDocumentRepository.readByEvent(eventId);
 
-    res.json(event);
+    // Chaque réservation arrive avec ses documents : une seule requête pour
+    // tout le wallet.
+    res.json(
+      reservations.map((reservation) => ({
+        ...reservation,
+        documents: documents.filter(
+          (document) =>
+            document.document_id_reservation === reservation.reservation_id,
+        ),
+      })),
+    );
   } catch (error) {
     next(error);
   }
@@ -196,7 +212,7 @@ const addReservation: RequestHandler = async (req, res, next) => {
     const reservation_id_user = req.user.id;
     const {
       reservation_name,
-      reservation_date,
+      reservation_date_start,
       reservation_location,
       reservation_description,
     } = req.body;
@@ -205,7 +221,7 @@ const addReservation: RequestHandler = async (req, res, next) => {
     // formulaire du client.
     if (
       !reservation_name ||
-      !reservation_date ||
+      !reservation_date_start ||
       !reservation_location ||
       !reservation_description ||
       !req.file
@@ -252,7 +268,7 @@ const addReservation: RequestHandler = async (req, res, next) => {
       reservation_id_event: eventId,
       reservation_id_user,
       reservation_name,
-      reservation_date,
+      reservation_date_start,
       reservation_location,
       reservation_description,
       reservation_link: sanitizeLink(req.body.reservation_link),
@@ -300,14 +316,14 @@ const updateReservation: RequestHandler = async (req, res, next) => {
   try {
     const {
       reservation_name,
-      reservation_date,
+      reservation_date_start,
       reservation_location,
       reservation_description,
     } = req.body;
 
     if (
       !reservation_name ||
-      !reservation_date ||
+      !reservation_date_start ||
       !reservation_location ||
       !reservation_description
     ) {
@@ -341,7 +357,7 @@ const updateReservation: RequestHandler = async (req, res, next) => {
       reservation.reservation_id,
       {
         reservation_name,
-        reservation_date,
+        reservation_date_start,
         reservation_location,
         reservation_description,
         reservation_link: sanitizeLink(req.body.reservation_link),
@@ -363,8 +379,14 @@ const deleteReservation: RequestHandler = async (req, res, next) => {
     const reservation = await readManagedReservation(req, res);
     if (!reservation) return;
 
+    // Les fichiers ne sont effacés qu'une fois la suppression en base réussie.
+    const documentFiles =
+      await reservationDocumentRepository.readFilesByReservation(
+        reservation.reservation_id,
+      );
     await reservationRepository.deleteReservation(reservation.reservation_id);
     await removeUpload(reservation.reservation_picture);
+    await Promise.all(documentFiles.map(removeReservationDocument));
 
     res.sendStatus(204);
   } catch (error) {

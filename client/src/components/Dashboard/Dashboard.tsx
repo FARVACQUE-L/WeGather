@@ -29,7 +29,7 @@ type ReservationDashboard = {
   user_id: number;
   user_username: string;
   reservation_location: string;
-  reservation_date: string;
+  reservation_date_start: string;
   reservation_id: number;
 };
 type UserBudget = {
@@ -428,14 +428,14 @@ function Dashboard({ onSeeAllReservations }: DashboardProps) {
 
                   <p>{reservation.reservation_location}</p>
 
-                  <p>{formatDate(reservation.reservation_date)}</p>
+                  <p>{formatDate(reservation.reservation_date_start)}</p>
 
                   <p
                     className={getReservationStatusCss(
-                      reservation.reservation_date,
+                      reservation.reservation_date_start,
                     )}
                   >
-                    {getReservationStatus(reservation.reservation_date)}
+                    {getReservationStatus(reservation.reservation_date_start)}
                   </p>
                 </motion.div>
               ))}

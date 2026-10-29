@@ -13,7 +13,7 @@ type Reservation = ReservationSchedule & {
   reservation_id_event: number;
   reservation_id_user: number;
   reservation_name: string;
-  reservation_date: string;
+  reservation_date_start: string;
   reservation_location: string;
   reservation_description: string;
   reservation_link: string | null;
@@ -30,7 +30,7 @@ class reservationRepository {
   u.user_username,
   r.reservation_type,
   r.reservation_location,
-  r.reservation_date,
+  r.reservation_date_start,
   r.reservation_id
 FROM reservation AS r
 
@@ -57,7 +57,7 @@ ORDER BY r.reservation_id DESC;
       WHERE reservation_id_event = ?
 
       ORDER BY
-        reservation_date ASC,
+        reservation_date_start ASC,
         reservation_time_start IS NULL,
         reservation_time_start ASC,
         reservation_id ASC;
@@ -82,7 +82,7 @@ ORDER BY r.reservation_id DESC;
       reservation_id_event,
       reservation_id_user,
       reservation_name,
-      reservation_date,
+      reservation_date_start,
       reservation_location,
       reservation_description,
       reservation_link,
@@ -98,7 +98,7 @@ ORDER BY r.reservation_id DESC;
         reservation.reservation_id_event,
         reservation.reservation_id_user,
         reservation.reservation_name,
-        reservation.reservation_date,
+        reservation.reservation_date_start,
         reservation.reservation_location,
         reservation.reservation_description,
         reservation.reservation_link,
@@ -135,7 +135,7 @@ ORDER BY r.reservation_id DESC;
     reservationId: number,
     reservation: ReservationSchedule & {
       reservation_name: string;
-      reservation_date: string;
+      reservation_date_start: string;
       reservation_location: string;
       reservation_description: string;
       reservation_link: string | null;
@@ -147,7 +147,7 @@ ORDER BY r.reservation_id DESC;
     UPDATE reservation
     SET
       reservation_name = ?,
-      reservation_date = ?,
+      reservation_date_start = ?,
       reservation_location = ?,
       reservation_description = ?,
       reservation_link = ?,
@@ -160,7 +160,7 @@ ORDER BY r.reservation_id DESC;
     `,
       [
         reservation.reservation_name,
-        reservation.reservation_date,
+        reservation.reservation_date_start,
         reservation.reservation_location,
         reservation.reservation_description,
         reservation.reservation_link,

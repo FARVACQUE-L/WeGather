@@ -9,6 +9,10 @@ const DESTINATION = "public/uploads/";
 // portée d'express.static, et servies par une route réservée aux admins.
 const REPORTS_DESTINATION = "private/reports/";
 
+// Même principe pour les billets et confirmations des réservations : noms,
+// adresses et numéros de réservation n'ont pas à être publics.
+const RESERVATION_DOCUMENTS_DESTINATION = "private/reservations/";
+
 // 8 Mo : une photo prise au téléphone passe, un envoi abusif est coupé.
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_FILES = 5;
@@ -55,6 +59,19 @@ const upload = multer({
 
 export const uploadEvidence = multer({
   dest: REPORTS_DESTINATION,
+  limits,
+  fileFilter: (_req, file, callback) => {
+    if (!EVIDENCE_MIME_TYPES.includes(file.mimetype)) {
+      callback(unsupportedFormat(EVIDENCE_MIME_TYPES));
+      return;
+    }
+
+    callback(null, true);
+  },
+});
+
+export const uploadReservationDocument = multer({
+  dest: RESERVATION_DOCUMENTS_DESTINATION,
   limits,
   fileFilter: (_req, file, callback) => {
     if (!EVIDENCE_MIME_TYPES.includes(file.mimetype)) {
@@ -175,6 +192,7 @@ export {
   MAX_FILE_SIZE,
   MAX_FILES,
   REPORTS_DESTINATION,
+  RESERVATION_DOCUMENTS_DESTINATION,
   verifyFileSignatures,
 };
 

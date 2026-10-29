@@ -2,7 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import type { RequestHandler } from "express";
 import { getPlanLimits } from "../../helper/planLimits";
+import { removeReservationDocument } from "../../helper/removeReservationDocument";
 import { removeUpload } from "../../helper/removeUpload";
+import reservationDocumentRepository from "../reservation/reservationDocumentRepository";
 import userRepository from "../user/userRepository";
 import eventRepository from "./eventRepository";
 
@@ -239,8 +241,12 @@ const deleteEvent: RequestHandler = async (req, res, next) => {
 
     // Les fichiers ne sont effacés qu'une fois la suppression en base réussie.
     const images = await eventRepository.readImages(event.event_id);
+    const documentFiles = await reservationDocumentRepository.readFilesByEvent(
+      event.event_id,
+    );
     await eventRepository.deleteEvent(event.event_id);
     await Promise.all(images.map(removeUpload));
+    await Promise.all(documentFiles.map(removeReservationDocument));
 
     res.sendStatus(204);
   } catch (error) {
