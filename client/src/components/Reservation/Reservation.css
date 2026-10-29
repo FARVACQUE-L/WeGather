@@ -325,15 +325,18 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    width: 63vw;
+    /* Toute la largeur de la page, comme l'ancienne grille de cartes : les
+       cartes ne passent à la ligne que quand la fenêtre manque de place. */
     padding-top: 2vh;
     padding-bottom: 2rem;
 
+    /* Le bandeau garde la largeur du titre, aligné sur le bouton d'ajout. */
     .Wallet-Next {
       display: flex;
       align-items: center;
       gap: 1rem;
-      width: 100%;
+      width: 63vw;
+      max-width: 100%;
       padding: 1.25rem 1.5rem;
       border: none;
       border-radius: 1rem;
@@ -951,7 +954,7 @@
    page et décalage de la sidebar). */
 @media screen and (min-width: 876px) and (max-width: 1300px) {
   .reservation .reservation-title,
-  .reservation .Wallet {
+  .reservation .Wallet .Wallet-Next {
     width: calc(98vw - 455px);
   }
 }
@@ -976,6 +979,9 @@
     .reservation-title,
     .Wallet {
       width: 98%;
+    }
+    .Wallet .Wallet-Next {
+      width: 100%;
     }
   }
 }
@@ -1037,6 +1043,7 @@
       padding-bottom: 6rem;
 
       .Wallet-Next {
+        width: 100%;
         padding: 1rem;
 
         .Wallet-NextName {
