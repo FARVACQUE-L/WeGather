@@ -315,6 +315,14 @@
               display: flex;
               font-size: 12px;
             }
+            /* Icône du type de réservation devant le lieu. */
+            .location {
+              gap: 5px;
+
+              svg {
+                flex-shrink: 0;
+              }
+            }
             .a_venir {
               font-size: 12px;
               background-color: #27b8fb3d;

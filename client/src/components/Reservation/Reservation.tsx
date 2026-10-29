@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
-import CardEvents from "../AddEvents/CardEvents";
 import "./Reservation.css";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarPlus } from "lucide-react";
+import {
+  CalendarPlus,
+  ChevronDown,
+  Download,
+  ExternalLink,
+  FileText,
+  Paperclip,
+  X,
+} from "lucide-react";
 import Swal from "sweetalert2";
 import useCanHover from "../../helper/useCanHover";
 import { useCompactLevel } from "../../helper/useCompactLevel";
@@ -12,21 +19,36 @@ import ImageCropper, {
   cropImage,
   DEFAULT_CROP,
 } from "../ImageCropper/ImageCropper";
+import ReservationCard from "./ReservationCard";
+import {
+  ACCEPTED_DOCUMENTS,
+  formatCountdown,
+  formatDayHeader,
+  formatSchedule,
+  isPastReservation,
+  MAX_DOCUMENTS_PER_RESERVATION,
+  RESERVATION_TYPE_INFO,
+  RESERVATION_TYPES,
+  type ReservationDocument,
+  type ReservationType,
+  readTypeInfo,
+  shortTime,
+  type WalletReservation,
+} from "./reservationWallet";
 
-type Reservation = {
-  reservation_id: number;
-  reservation_id_event: number;
-  reservation_id_user: number | null;
-  reservation_name: string;
-  reservation_date: string;
-  reservation_location: string;
-  reservation_description: string;
-  reservation_link: string | null;
-  reservation_picture: string;
+type EventInfo = {
   event_name: string;
   event_date_start: string;
   event_date_end: string;
 };
+
+// Suppression en attente de confirmation dans la modale.
+type PendingDelete =
+  | { kind: "reservation"; id: number; name: string }
+  | { kind: "document"; id: number; name: string };
+
+// 8 Mo, comme la limite de multer (upload.ts) : on prévient avant l'envoi.
+const MAX_DOCUMENT_SIZE = 8 * 1024 * 1024;
 
 const STARTS_WITH_URL = /^https?:\/\//i;
 
@@ -45,29 +67,52 @@ function Reservation() {
   const canHover = useCanHover();
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
+  // L'hôte peut modifier et supprimer toutes les réservations de l'événement.
+  const [hostId, setHostId] = useState<number | null>(null);
+  const [reservations, setReservations] = useState<WalletReservation[]>([]);
   // Limite de réservations selon la formule de l'organisateur, donnée par le
   // serveur. null quand elle n'est pas encore connue ou que la formule n'en
   // a pas : seul le serveur bloque alors l'ajout.
   const [reservationLimit, setReservationLimit] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reservationName, setReservationName] = useState("");
-  const [reservationDate, setReservationDate] = useState("");
+  const [reservationType, setReservationType] =
+    useState<ReservationType>("autre");
+  const [reservationDateStart, setReservationDateStart] = useState("");
+  const [reservationTimeStart, setReservationTimeStart] = useState("");
+  const [reservationDateEnd, setReservationDateEnd] = useState("");
+  const [reservationTimeEnd, setReservationTimeEnd] = useState("");
   const [reservationLocation, setReservationLocation] = useState("");
   const [reservationDescription, setReservationDescription] = useState("");
   const [reservationLink, setReservationLink] = useState("");
   const [reservationPicture, setReservationPicture] = useState<File | null>(
     null,
   );
+  // Documents choisis dans la modale, envoyés une fois la réservation
+  // enregistrée (il faut son id).
+  const [pendingDocuments, setPendingDocuments] = useState<File[]>([]);
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
   const [preview, setPreview] = useState("");
   const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
-  const [eventName, setEventName] = useState<Reservation>();
+  const [eventInfo, setEventInfo] = useState<EventInfo>();
   const [editingReservationId, setEditingReservationId] = useState<
     number | null
   >(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeType, setActiveType] = useState<ReservationType | "all">("all");
+  const [showPast, setShowPast] = useState(false);
+  // Réservation dont un document est en cours d'envoi depuis sa carte.
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(
+    null,
+  );
+  // Document cliqué sur une carte : la modale propose de l'ouvrir ou de le
+  // télécharger.
+  const [selectedDocument, setSelectedDocument] =
+    useState<ReservationDocument | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentsInputRef = useRef<HTMLInputElement>(null);
   // Comme dans la galerie, le bouton d'ajout passe en icône quand il touche
   // le titre. L'en-tête n'est rendu qu'une fois l'inscription vérifiée :
   // userInEvent relance la mesure à ce moment-là.
@@ -78,7 +123,7 @@ function Reservation() {
     headerRef,
     titleRef,
     [addReservationRef],
-    [userInEvent, eventName?.event_name],
+    [userInEvent, eventInfo?.event_name],
   );
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -113,7 +158,8 @@ function Reservation() {
       },
     );
     const data = await res.json();
-    setReservations(data);
+    // 403 pour un non-inscrit : le serveur renvoie un message, pas une liste.
+    setReservations(Array.isArray(data) ? data : []);
   }, [eventUuid]);
 
   useEffect(() => {
@@ -143,8 +189,18 @@ function Reservation() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setEventName(data);
+        setEventInfo(data);
       });
+  }, [eventUuid]);
+
+  useEffect(() => {
+    if (!eventUuid) return;
+    fetch(`${API_URL}/api/event/host/${eventUuid}`, {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setHostId(data?.event_id_host ?? null))
+      .catch(console.error);
   }, [eventUuid]);
 
   useEffect(() => {
@@ -169,65 +225,259 @@ function Reservation() {
     },
   });
 
-  function openEditModal(reservationId: number) {
-    const resa = reservations.find((r) => r.reservation_id === reservationId);
-    if (!resa) return;
+  const toastError = (text: string) =>
+    toast.fire({
+      icon: "error",
+      text,
+      customClass: { popup: "toast-error-popup" },
+    });
 
-    setReservationName(capitalize(resa.reservation_name));
-    setReservationDate(resa.reservation_date.split("T")[0]);
-    setReservationLocation(capitalize(resa.reservation_location));
-    setReservationDescription(capitalize(resa.reservation_description));
-    setReservationLink(resa.reservation_link ?? "");
+  const toastSuccess = (text: string) =>
+    toast.fire({
+      icon: "success",
+      text,
+      customClass: { popup: "toast-error-popup" },
+    });
+
+  const canManage = (reservation: WalletReservation) =>
+    reservation.reservation_id_user === userId || hostId === userId;
+
+  const canDeleteDocument = (document: ReservationDocument) =>
+    document.document_id_user === userId || hostId === userId;
+
+  function resetForm() {
+    setEditingReservationId(null);
+    setReservationName("");
+    setReservationType("autre");
+    setReservationDateStart("");
+    setReservationTimeStart("");
+    setReservationDateEnd("");
+    setReservationTimeEnd("");
+    setReservationLocation("");
+    setReservationDescription("");
+    setReservationLink("");
     setReservationPicture(null);
-    setPreview(`${import.meta.env.VITE_API_URL}${resa.reservation_picture}`);
-    setEditingReservationId(reservationId);
+    setPendingDocuments([]);
+    setPreview("");
+  }
+
+  function openEditModal(reservation: WalletReservation) {
+    setReservationName(capitalize(reservation.reservation_name));
+    setReservationType(reservation.reservation_type ?? "autre");
+    setReservationDateStart(reservation.reservation_date_start.slice(0, 10));
+    setReservationTimeStart(
+      shortTime(reservation.reservation_time_start) ?? "",
+    );
+    setReservationDateEnd(reservation.reservation_date_end?.slice(0, 10) ?? "");
+    setReservationTimeEnd(shortTime(reservation.reservation_time_end) ?? "");
+    setReservationLocation(capitalize(reservation.reservation_location));
+    setReservationDescription(capitalize(reservation.reservation_description));
+    setReservationLink(reservation.reservation_link ?? "");
+    setReservationPicture(null);
+    setPendingDocuments([]);
+    setPreview(
+      `${import.meta.env.VITE_API_URL}${reservation.reservation_picture}`,
+    );
+    setEditingReservationId(reservation.reservation_id);
     setIsModalOpen(true);
   }
 
-  async function handleSubmitReservation(e: React.FormEvent) {
-    e.preventDefault();
+  // Renvoie le message d'erreur du serveur, ou null si l'envoi a réussi.
+  async function uploadDocument(reservationId: number, file: File) {
+    if (file.size > MAX_DOCUMENT_SIZE) {
+      return `${file.name} dépasse 8 Mo.`;
+    }
 
-    if (!eventUuid) return;
+    const formData = new FormData();
+    formData.append("document", file);
 
-    const isEditing = editingReservationId !== null;
+    const response = await fetch(
+      `${API_URL}/api/reservations/${reservationId}/documents`,
+      { method: "POST", body: formData, credentials: "include" },
+    );
 
+    if (response.ok) return null;
+
+    const data = await response.json().catch(() => null);
+    return data?.message ?? data?.error ?? `Impossible d'envoyer ${file.name}.`;
+  }
+
+  async function handleAddDocument(reservationId: number, file: File) {
+    setUploadingId(reservationId);
+    const error = await uploadDocument(reservationId, file);
+    setUploadingId(null);
+
+    if (error) {
+      toastError(error);
+      return;
+    }
+
+    await fetchReservations();
+    toastSuccess("Document ajouté");
+  }
+
+  // L'API est sur une autre origine en dev, où l'attribut download d'un lien
+  // vers elle est ignoré, et la route demande le cookie de session : on
+  // récupère le fichier en blob, comme dans la galerie.
+  async function fetchDocumentUrl(document: ReservationDocument) {
+    const response = await fetch(
+      `${API_URL}/api/reservations/documents/${document.document_id}/download`,
+      { credentials: "include", cache: "no-store" },
+    );
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    return URL.createObjectURL(await response.blob());
+  }
+
+  async function handleDownloadDocument(document: ReservationDocument) {
+    setSelectedDocument(null);
+    try {
+      const blobUrl = await fetchDocumentUrl(document);
+      const link = window.document.createElement("a");
+      link.href = blobUrl;
+      link.download = document.document_name;
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error(error);
+      toastError("Impossible de télécharger le document.");
+    }
+  }
+
+  // Ouvre le document dans un nouvel onglet (lecteur PDF ou image du
+  // navigateur). L'onglet est ouvert tout de suite, pendant le clic : ouvert
+  // après le téléchargement, il serait bloqué comme une popup.
+  async function handleOpenDocument(document: ReservationDocument) {
+    setSelectedDocument(null);
+    const tab = window.open("", "_blank");
+    try {
+      const blobUrl = await fetchDocumentUrl(document);
+      if (tab) {
+        tab.location.href = blobUrl;
+      } else {
+        window.open(blobUrl, "_blank");
+      }
+      // Laisse le temps à l'onglet de charger le fichier avant de libérer
+      // la mémoire.
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch (error) {
+      console.error(error);
+      tab?.close();
+      toastError("Impossible d'ouvrir le document.");
+    }
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+
+    const url =
+      pendingDelete.kind === "reservation"
+        ? `${API_URL}/api/reservations/delete/${pendingDelete.id}`
+        : `${API_URL}/api/reservations/documents/${pendingDelete.id}`;
+
+    const response = await fetch(url, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    const deleted = pendingDelete;
+    setPendingDelete(null);
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      toastError(data?.message ?? "La suppression a échoué.");
+      return;
+    }
+
+    if (deleted.kind === "reservation") {
+      setReservations((prev) =>
+        prev.filter((r) => r.reservation_id !== deleted.id),
+      );
+      toastSuccess("Réservation supprimée");
+    } else {
+      setReservations((prev) =>
+        prev.map((r) => ({
+          ...r,
+          documents: r.documents.filter((d) => d.document_id !== deleted.id),
+        })),
+      );
+      toastSuccess("Document supprimé");
+    }
+  }
+
+  // Mêmes règles que le serveur (validateReservationFields) : on prévient
+  // avant l'envoi. Renvoie le message d'erreur, ou null.
+  function validateForm(isEditing: boolean) {
     const missingFields = [
       !reservationName && "le titre",
-      !reservationDate && "la date",
+      !reservationDateStart && "la date",
       !reservationLocation && "la localisation",
       !reservationDescription && "une description",
       !isEditing && !reservationPicture && "une image",
     ].filter(Boolean);
 
     if (missingFields.length > 0) {
-      toast.fire({
-        icon: "error",
-        text: `Il vous manque : ${missingFields.join(", ")}`,
-        customClass: {
-          popup: "toast-error-popup",
-        },
-      });
+      return `Il vous manque : ${missingFields.join(", ")}`;
+    }
+
+    const isInEvent = (day: string) =>
+      !eventInfo ||
+      (day >= eventInfo.event_date_start && day <= eventInfo.event_date_end);
+
+    if (
+      !isInEvent(reservationDateStart) ||
+      (reservationDateEnd && !isInEvent(reservationDateEnd))
+    ) {
+      return "Les dates doivent être comprises dans les dates de l'événement";
+    }
+
+    const endDay = reservationDateEnd || reservationDateStart;
+    if (
+      endDay < reservationDateStart ||
+      (endDay === reservationDateStart &&
+        reservationTimeStart &&
+        reservationTimeEnd &&
+        reservationTimeEnd <= reservationTimeStart)
+    ) {
+      return "La fin doit être après le début.";
+    }
+
+    const existingDocuments = isEditing
+      ? (reservations.find((r) => r.reservation_id === editingReservationId)
+          ?.documents.length ?? 0)
+      : 0;
+    if (
+      existingDocuments + pendingDocuments.length >
+      MAX_DOCUMENTS_PER_RESERVATION
+    ) {
+      return `Une réservation est limitée à ${MAX_DOCUMENTS_PER_RESERVATION} documents.`;
+    }
+
+    return null;
+  }
+
+  async function handleSubmitReservation(e: React.SyntheticEvent) {
+    e.preventDefault();
+
+    if (!eventUuid || isSaving) return;
+
+    const isEditing = editingReservationId !== null;
+    const error = validateForm(isEditing);
+
+    if (error) {
+      toastError(error);
       return;
     }
 
-    if (
-      eventName &&
-      (reservationDate < eventName.event_date_start ||
-        reservationDate > eventName.event_date_end)
-    ) {
-      toast.fire({
-        icon: "error",
-        text: "La date doit être comprise dans les dates de l'événement",
-        customClass: { popup: "toast-error-popup" },
-      });
-      return;
-    }
+    setIsSaving(true);
 
     const formData = new FormData();
     formData.append("event_uuid", eventUuid ?? "");
-    formData.append("reservation_id_user", String(userId));
     formData.append("reservation_name", reservationName);
-    formData.append("reservation_date", reservationDate);
+    formData.append("reservation_type", reservationType);
+    formData.append("reservation_date_start", reservationDateStart);
+    formData.append("reservation_time_start", reservationTimeStart);
+    formData.append("reservation_date_end", reservationDateEnd);
+    formData.append("reservation_time_end", reservationTimeEnd);
     formData.append("reservation_location", reservationLocation);
     formData.append("reservation_description", reservationDescription);
     formData.append("reservation_link", reservationLink.trim());
@@ -243,46 +493,52 @@ function Reservation() {
       : `${import.meta.env.VITE_API_URL}/api/reservations`;
     const method = isEditing ? "PUT" : "POST";
 
-    const response = await fetch(url, {
-      method,
-      body: formData,
-      credentials: "include",
-    });
-    await fetchReservations();
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      toast.fire({
-        icon: "error",
-        text:
-          data?.error ??
-          data?.message ??
-          "Une erreur est survenue, veuillez réessayer.",
-        customClass: {
-          popup: "toast-error-popup",
-        },
+    try {
+      const response = await fetch(url, {
+        method,
+        body: formData,
+        credentials: "include",
       });
-      return;
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        await fetchReservations();
+        toastError(
+          data?.error ??
+            data?.message ??
+            "Une erreur est survenue, veuillez réessayer.",
+        );
+        return;
+      }
+
+      // À la création, le serveur renvoie le résultat de l'INSERT.
+      const reservationId = isEditing ? editingReservationId : data?.insertId;
+      const failedUploads: string[] = [];
+
+      if (reservationId) {
+        for (const file of pendingDocuments) {
+          const uploadError = await uploadDocument(reservationId, file);
+          if (uploadError) failedUploads.push(uploadError);
+        }
+      }
+
+      await fetchReservations();
+      resetForm();
+      setIsModalOpen(false);
+
+      if (failedUploads.length > 0) {
+        toastError(
+          `Réservation enregistrée, mais ${failedUploads.length} document(s) n'ont pas pu être envoyés : ${failedUploads[0]}`,
+        );
+        return;
+      }
+
+      toastSuccess(isEditing ? "Réservation modifiée" : "Réservation ajoutée");
+    } finally {
+      setIsSaving(false);
     }
-
-    setReservationName("");
-    setReservationDate("");
-    setReservationLocation("");
-    setReservationDescription("");
-    setReservationLink("");
-    setReservationPicture(null);
-    setPreview("");
-    setEditingReservationId(null);
-    setIsModalOpen(false);
-
-    toast.fire({
-      icon: "success",
-      text: isEditing ? "Réservation modifiée" : "Réservation ajoutée",
-      customClass: {
-        popup: "toast-error-popup",
-      },
-    });
   }
+
   function handleReservationPictureChange(
     e: React.ChangeEvent<HTMLInputElement>,
   ) {
@@ -294,6 +550,27 @@ function Reservation() {
       setCrop(DEFAULT_CROP);
     }
   }
+
+  function handlePendingDocumentsChange(
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const files = Array.from(e.target.files ?? []);
+    // Un même fichier choisi deux fois n'est gardé qu'une fois.
+    setPendingDocuments((prev) => [
+      ...prev,
+      ...files.filter(
+        (file) =>
+          !prev.some(
+            (pending) =>
+              pending.name === file.name &&
+              pending.size === file.size &&
+              pending.lastModified === file.lastModified,
+          ),
+      ),
+    ]);
+    e.target.value = "";
+  }
+
   if (authLoading) {
     return <p>Chargement utilisateur...</p>;
   }
@@ -308,6 +585,64 @@ function Reservation() {
   if (userInEvent === false) {
     return <p>Vous n'êtes pas inscrit à cet événement.</p>;
   }
+
+  const filteredReservations =
+    activeType === "all"
+      ? reservations
+      : reservations.filter((r) => r.reservation_type === activeType);
+  const upcomingReservations = filteredReservations.filter(
+    (r) => !isPastReservation(r),
+  );
+  const pastReservations = filteredReservations.filter((r) =>
+    isPastReservation(r),
+  );
+  // Mise en avant indépendante du filtre : c'est toujours la prochaine étape
+  // du séjour.
+  const nextReservation = reservations.find((r) => !isPastReservation(r));
+  // Filtres limités aux types présents dans l'événement.
+  const presentTypes = RESERVATION_TYPES.filter((type) =>
+    reservations.some((r) => r.reservation_type === type),
+  );
+  const editingDocumentsCount =
+    reservations.find((r) => r.reservation_id === editingReservationId)
+      ?.documents.length ?? 0;
+
+  // Cartes à la suite, dans l'ordre chronologique donné par le serveur.
+  const renderCards = (items: WalletReservation[], isPast: boolean) =>
+    items.map((reservation) => (
+      <div
+        key={reservation.reservation_id}
+        id={`reservation-${reservation.reservation_id}`}
+      >
+        <ReservationCard
+          reservation={reservation}
+          isPast={isPast}
+          canManage={canManage(reservation)}
+          canDeleteDocument={canDeleteDocument}
+          isUploading={uploadingId === reservation.reservation_id}
+          onEdit={() => openEditModal(reservation)}
+          onDelete={() =>
+            setPendingDelete({
+              kind: "reservation",
+              id: reservation.reservation_id,
+              name: reservation.reservation_name,
+            })
+          }
+          onAddDocument={(file) =>
+            handleAddDocument(reservation.reservation_id, file)
+          }
+          onSelectDocument={setSelectedDocument}
+          onDeleteDocument={(document) =>
+            setPendingDelete({
+              kind: "document",
+              id: document.document_id,
+              name: document.document_name,
+            })
+          }
+        />
+      </div>
+    ));
+
   return (
     <motion.div
       className="reservation"
@@ -329,7 +664,7 @@ function Reservation() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4 }}
         >
-          {eventName?.event_name}
+          {eventInfo?.event_name}
         </motion.h1>
 
         <motion.button
@@ -344,21 +679,12 @@ function Reservation() {
               reservationLimit !== null &&
               reservations.length >= reservationLimit
             ) {
-              toast.fire({
-                icon: "error",
-                text: `Un événement est limité à ${reservationLimit} réservations.`,
-                customClass: { popup: "toast-error-popup" },
-              });
+              toastError(
+                `Un événement est limité à ${reservationLimit} réservations.`,
+              );
               return;
             }
-            setEditingReservationId(null);
-            setReservationName("");
-            setReservationDate("");
-            setReservationLocation("");
-            setReservationDescription("");
-            setReservationLink("");
-            setReservationPicture(null);
-            setPreview("");
+            resetForm();
             setIsModalOpen(true);
           }}
           initial={{ y: -20, opacity: 0 }}
@@ -384,7 +710,10 @@ function Reservation() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                // Entrée enregistre depuis un champ de saisie. Dans la
+                // description elle va à la ligne, et sur un bouton (type,
+                // fichiers) elle l'active sans enregistrer.
+                if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
                   handleSubmitReservation(e);
                 }
               }}
@@ -417,6 +746,7 @@ function Reservation() {
                     className="ReservationModal-Input"
                     type="text"
                     placeholder="Ex : Hôtel du Parc"
+                    maxLength={255}
                     value={reservationName}
                     onChange={(e) =>
                       setReservationName(capitalize(e.target.value))
@@ -424,22 +754,75 @@ function Reservation() {
                   />
                 </div>
 
+                <fieldset className="ReservationModal-Field ReservationModal-Types">
+                  <legend className="ReservationModal-Label">Type</legend>
+                  <div className="ReservationModal-TypeList">
+                    {RESERVATION_TYPES.map((type) => {
+                      const { label, Icon } = RESERVATION_TYPE_INFO[type];
+                      return (
+                        <button
+                          key={type}
+                          type="button"
+                          className={
+                            reservationType === type
+                              ? "ReservationModal-Type is-active"
+                              : "ReservationModal-Type"
+                          }
+                          aria-pressed={reservationType === type}
+                          onClick={() => setReservationType(type)}
+                        >
+                          <Icon size={14} />
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+
                 <div className="ReservationModal-Field">
-                  <label
-                    className="ReservationModal-Label"
-                    htmlFor="reservation-date"
-                  >
-                    Date
-                  </label>
-                  <input
-                    id="reservation-date"
-                    className="ReservationModal-Input"
-                    type="date"
-                    value={reservationDate}
-                    min={eventName?.event_date_start}
-                    max={eventName?.event_date_end}
-                    onChange={(e) => setReservationDate(e.target.value)}
-                  />
+                  <span className="ReservationModal-Label">Début</span>
+                  <div className="ReservationModal-Row">
+                    <input
+                      aria-label="Date de début"
+                      className="ReservationModal-Input"
+                      type="date"
+                      value={reservationDateStart}
+                      min={eventInfo?.event_date_start}
+                      max={eventInfo?.event_date_end}
+                      onChange={(e) => setReservationDateStart(e.target.value)}
+                    />
+                    <input
+                      aria-label="Heure de début (facultatif)"
+                      className="ReservationModal-Input"
+                      type="time"
+                      value={reservationTimeStart}
+                      onChange={(e) => setReservationTimeStart(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="ReservationModal-Field">
+                  <span className="ReservationModal-Label">
+                    Fin (facultatif)
+                  </span>
+                  <div className="ReservationModal-Row">
+                    <input
+                      aria-label="Date de fin (facultatif)"
+                      className="ReservationModal-Input"
+                      type="date"
+                      value={reservationDateEnd}
+                      min={reservationDateStart || eventInfo?.event_date_start}
+                      max={eventInfo?.event_date_end}
+                      onChange={(e) => setReservationDateEnd(e.target.value)}
+                    />
+                    <input
+                      aria-label="Heure de fin (facultatif)"
+                      className="ReservationModal-Input"
+                      type="time"
+                      value={reservationTimeEnd}
+                      onChange={(e) => setReservationTimeEnd(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="ReservationModal-Field">
@@ -454,6 +837,7 @@ function Reservation() {
                     className="ReservationModal-Input"
                     type="text"
                     placeholder="Ex : Paris"
+                    maxLength={255}
                     value={reservationLocation}
                     onChange={(e) =>
                       setReservationLocation(capitalize(e.target.value))
@@ -499,8 +883,59 @@ function Reservation() {
                     className="ReservationModal-Input"
                     type="url"
                     placeholder="https://..."
+                    maxLength={255}
                     value={reservationLink}
                     onChange={(e) => setReservationLink(e.target.value)}
+                  />
+                </div>
+
+                <div className="ReservationModal-Field">
+                  <span className="ReservationModal-Label">
+                    Billets et confirmations (facultatif)
+                  </span>
+                  {editingDocumentsCount > 0 && (
+                    <span className="ReservationModal-Hint">
+                      {editingDocumentsCount} document(s) déjà joint(s), à gérer
+                      depuis la carte.
+                    </span>
+                  )}
+                  {pendingDocuments.length > 0 && (
+                    <ul className="ReservationModal-Documents">
+                      {pendingDocuments.map((file) => (
+                        <li
+                          key={`${file.name}-${file.size}-${file.lastModified}`}
+                        >
+                          <span>{file.name}</span>
+                          <button
+                            type="button"
+                            aria-label={`Retirer ${file.name}`}
+                            onClick={() =>
+                              setPendingDocuments((prev) =>
+                                prev.filter((pending) => pending !== file),
+                              )
+                            }
+                          >
+                            <X size={14} />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <button
+                    type="button"
+                    className="ReservationModal-DocumentsButton"
+                    onClick={() => documentsInputRef.current?.click()}
+                  >
+                    <Paperclip size={14} />
+                    Ajouter des fichiers (PDF ou image)
+                  </button>
+                  <input
+                    ref={documentsInputRef}
+                    type="file"
+                    multiple
+                    accept={ACCEPTED_DOCUMENTS}
+                    onChange={handlePendingDocumentsChange}
+                    className="ReservationModal-FileInput"
                   />
                 </div>
 
@@ -559,9 +994,10 @@ function Reservation() {
                   <button
                     type="button"
                     className="ReservationModal-ButtonSubmit"
+                    disabled={isSaving}
                     onClick={handleSubmitReservation}
                   >
-                    Enregistrer
+                    {isSaving ? "Enregistrement…" : "Enregistrer"}
                   </button>
                 </div>
               </motion.div>
@@ -571,12 +1007,12 @@ function Reservation() {
       </div>
 
       <motion.div
-        className="reservation-card-global"
+        className="Wallet"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.2 }}
       >
-        {reservations.length === 0 && (
+        {reservations.length === 0 ? (
           <div className="reservation-empty">
             <div className="reservation-empty-text">
               <p className="reservation-empty-title">
@@ -615,43 +1051,173 @@ function Reservation() {
               />
             </svg>
           </div>
+        ) : (
+          <>
+            {nextReservation && (
+              <button
+                type="button"
+                className="Wallet-Next"
+                onClick={() =>
+                  window.document
+                    .getElementById(
+                      `reservation-${nextReservation.reservation_id}`,
+                    )
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" })
+                }
+              >
+                <span className="Wallet-NextIcon">
+                  {(() => {
+                    const { Icon } = readTypeInfo(
+                      nextReservation.reservation_type,
+                    );
+                    return <Icon size={24} />;
+                  })()}
+                </span>
+                <span className="Wallet-NextContent">
+                  <span className="Wallet-NextLabel">
+                    Prochaine réservation ·{" "}
+                    {formatCountdown(nextReservation.reservation_date_start)}
+                  </span>
+                  <span className="Wallet-NextName">
+                    {nextReservation.reservation_name}
+                  </span>
+                  <span className="Wallet-NextDetails">
+                    {formatDayHeader(nextReservation.reservation_date_start)}
+                    {formatSchedule(nextReservation) &&
+                      ` · ${formatSchedule(nextReservation)}`}
+                    {` · ${nextReservation.reservation_location}`}
+                  </span>
+                </span>
+              </button>
+            )}
+
+            {presentTypes.length > 1 && (
+              <div className="Wallet-Filters" role="toolbar">
+                <button
+                  type="button"
+                  className={
+                    activeType === "all"
+                      ? "Wallet-Filter is-active"
+                      : "Wallet-Filter"
+                  }
+                  aria-pressed={activeType === "all"}
+                  onClick={() => setActiveType("all")}
+                >
+                  Tout
+                </button>
+                {presentTypes.map((type) => {
+                  const { label, Icon } = RESERVATION_TYPE_INFO[type];
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      className={
+                        activeType === type
+                          ? "Wallet-Filter is-active"
+                          : "Wallet-Filter"
+                      }
+                      aria-pressed={activeType === type}
+                      onClick={() => setActiveType(type)}
+                    >
+                      <Icon size={14} />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {upcomingReservations.length > 0 ? (
+              <div className="Wallet-Grid">
+                {renderCards(upcomingReservations, false)}
+              </div>
+            ) : (
+              <p className="Wallet-Empty">
+                {activeType === "all"
+                  ? "Toutes les réservations sont passées."
+                  : "Aucune réservation à venir de ce type."}
+              </p>
+            )}
+
+            {pastReservations.length > 0 && (
+              <section className="Wallet-Past">
+                <button
+                  type="button"
+                  className={
+                    showPast ? "Wallet-PastToggle is-open" : "Wallet-PastToggle"
+                  }
+                  aria-expanded={showPast}
+                  onClick={() => setShowPast((prev) => !prev)}
+                >
+                  Réservations passées ({pastReservations.length})
+                  <ChevronDown size={18} />
+                </button>
+                {showPast && (
+                  <div className="Wallet-Grid">
+                    {renderCards(pastReservations, true)}
+                  </div>
+                )}
+              </section>
+            )}
+          </>
         )}
-        {reservations.map((event) => (
-          <div
-            className="card-reservation"
-            key={`${event.reservation_id}-${event.reservation_name}-${event.reservation_date}-${event.reservation_location}-${event.reservation_description}-${event.reservation_picture}`}
-          >
-            <CardEvents
-              user_id={userId}
-              event_id={event.reservation_id}
-              event_uuid={eventUuid ?? ""}
-              event_id_host={null}
-              reservation_id_user={event.reservation_id_user}
-              onEditReservation={openEditModal}
-              onReservationDeleted={(deletedId) => {
-                setReservations((prev) =>
-                  prev.filter((r) => r.reservation_id !== deletedId),
-                );
-                toast.fire({
-                  icon: "success",
-                  text: "Réservation supprimée",
-                  customClass: {
-                    popup: "toast-error-popup",
-                  },
-                });
-              }}
-              image={`${import.meta.env.VITE_API_URL}${event.reservation_picture}`}
-              imageAlt={event.reservation_name}
-              dateStart={event.reservation_date}
-              dateEnd={event.reservation_date}
-              title={event.reservation_name}
-              description={event.reservation_description}
-              location={event.reservation_location}
-              siteUrl={event.reservation_link}
-            />
-          </div>
-        ))}
       </motion.div>
+
+      {selectedDocument && (
+        <div className="Wallet-ConfirmOverlay">
+          <div className="Wallet-Confirm">
+            <h3>Document</h3>
+            <p className="Wallet-DocumentName">
+              <FileText size={18} />
+              {selectedDocument.document_name}
+            </p>
+            <div className="Wallet-ConfirmActions Wallet-DocumentActions">
+              <button type="button" onClick={() => setSelectedDocument(null)}>
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownloadDocument(selectedDocument)}
+              >
+                <Download size={16} />
+                Télécharger
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenDocument(selectedDocument)}
+              >
+                <ExternalLink size={16} />
+                Ouvrir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingDelete && (
+        <div className="Wallet-ConfirmOverlay">
+          <div className="Wallet-Confirm">
+            <h3>
+              {pendingDelete.kind === "reservation"
+                ? "Supprimer la réservation"
+                : "Supprimer le document"}
+            </h3>
+            <p>
+              Êtes-vous sûr de vouloir supprimer « {pendingDelete.name} » ?
+              {pendingDelete.kind === "reservation" &&
+                " Ses documents seront supprimés aussi."}
+            </p>
+            <div className="Wallet-ConfirmActions">
+              <button type="button" onClick={() => setPendingDelete(null)}>
+                Annuler
+              </button>
+              <button type="button" onClick={confirmDelete}>
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

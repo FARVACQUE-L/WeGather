@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import useCanHover from "../../helper/useCanHover";
 import GalerieDashboard from "../GalerieDashboard/GalerieDashboard";
+import { readTypeInfo } from "../Reservation/reservationWallet";
 import TodoList from "../ToDoList/TodoList";
 
 type EventDashboard = {
@@ -28,8 +29,9 @@ type ReservationDashboard = {
   event_id: number | null;
   user_id: number;
   user_username: string;
+  reservation_type: string;
   reservation_location: string;
-  reservation_date: string;
+  reservation_date_start: string;
   reservation_id: number;
 };
 type UserBudget = {
@@ -426,16 +428,27 @@ function Dashboard({ onSeeAllReservations }: DashboardProps) {
                     <p>{reservation.user_username}</p>
                   </div>
 
-                  <p>{reservation.reservation_location}</p>
+                  <p
+                    className="location"
+                    title={readTypeInfo(reservation.reservation_type).label}
+                  >
+                    {(() => {
+                      const { Icon } = readTypeInfo(
+                        reservation.reservation_type,
+                      );
+                      return <Icon size={14} />;
+                    })()}
+                    {reservation.reservation_location}
+                  </p>
 
-                  <p>{formatDate(reservation.reservation_date)}</p>
+                  <p>{formatDate(reservation.reservation_date_start)}</p>
 
                   <p
                     className={getReservationStatusCss(
-                      reservation.reservation_date,
+                      reservation.reservation_date_start,
                     )}
                   >
-                    {getReservationStatus(reservation.reservation_date)}
+                    {getReservationStatus(reservation.reservation_date_start)}
                   </p>
                 </motion.div>
               ))}

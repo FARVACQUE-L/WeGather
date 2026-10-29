@@ -1,4 +1,6 @@
 import eventRepository from "../modules/event/eventRepository";
+import reservationDocumentRepository from "../modules/reservation/reservationDocumentRepository";
+import { removeReservationDocument } from "./removeReservationDocument";
 import { removeUpload } from "./removeUpload";
 
 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -13,8 +15,11 @@ const purgeBannedEvents = async () => {
     for (const eventId of eventIds) {
       // Les fichiers ne sont effacés qu'une fois la suppression en base réussie.
       const images = await eventRepository.readImages(eventId);
+      const documentFiles =
+        await reservationDocumentRepository.readFilesByEvent(eventId);
       await eventRepository.deleteEvent(eventId);
       await Promise.all(images.map(removeUpload));
+      await Promise.all(documentFiles.map(removeReservationDocument));
     }
 
     if (eventIds.length) {
