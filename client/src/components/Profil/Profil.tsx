@@ -140,13 +140,24 @@ function Profil() {
 
     try {
       setErrorMessage("");
-      await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user_id}`, {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_name }),
-      });
-      setUserName("");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/${user_id}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_name }),
+        },
+      );
+
+      if (!response.ok) {
+        setErrorMessage("Impossible de modifier le pseudo");
+        return;
+      }
+
+      // Le pseudo est affiché à plusieurs endroits (dashboard, budget,
+      // réservations…) : on recharge la page pour tout mettre à jour.
+      window.location.reload();
     } catch (error) {
       console.error(error);
     }
