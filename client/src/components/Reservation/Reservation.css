@@ -585,7 +585,7 @@
     }
 
     .WalletCard-Date-Month {
-      color: var(--font-gray);
+      color: var(--font-grey);
       font-size: 0.75rem;
     }
   }
