@@ -211,9 +211,13 @@ function Galerie() {
       );
       if (res.ok) {
         setPhotos((prev) => prev.filter((p) => p.gallery_id !== photoToDelete));
+      } else {
+        const data = await res.json().catch(() => null);
+        setError(data?.message ?? "Impossible de supprimer la photo.");
       }
     } catch (err) {
       console.error("Erreur suppression:", err);
+      setError("Erreur réseau lors de la suppression.");
     } finally {
       setPhotoToDelete(null);
     }
@@ -454,6 +458,12 @@ function Galerie() {
                   gallery_link: formatImageUrl(photo.gallery_link),
                 }}
                 isLiked={likedPhotos.includes(photo.gallery_id)}
+                // Mêmes règles que le serveur (readManagedPhoto) : l'auteur
+                // ou l'hôte de l'événement.
+                canManage={
+                  photo.gallery_id_user === userId ||
+                  photo.event_host_id === userId
+                }
                 onPreview={(url) => setSelectedPhoto(url)}
                 onLike={toggleLike}
                 onDelete={(fid) => setPhotoToDelete(fid)}

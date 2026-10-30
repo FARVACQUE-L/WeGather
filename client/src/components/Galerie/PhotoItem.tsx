@@ -23,6 +23,8 @@ type Gallery = {
 type PhotoItemProps = {
   photo: Gallery;
   isLiked: boolean;
+  // Auteur de la photo ou hôte : modifier et supprimer.
+  canManage: boolean;
   onPreview: (url: string) => void;
   onLike: (id: number) => void;
   onEdit: (photo: Gallery) => void;
@@ -32,6 +34,7 @@ type PhotoItemProps = {
 export function PhotoItem({
   photo,
   isLiked,
+  canManage,
   onPreview,
   onLike,
   onEdit,
@@ -185,23 +188,27 @@ export function PhotoItem({
           <Download size={18} />
         </button>
 
-        <button
-          type="button"
-          className="edit-button"
-          onClick={() => onEdit(photo)}
-          aria-label="Modifier la description"
-        >
-          <Pencil size={18} />
-        </button>
+        {canManage && (
+          <>
+            <button
+              type="button"
+              className="edit-button"
+              onClick={() => onEdit(photo)}
+              aria-label="Modifier la description"
+            >
+              <Pencil size={18} />
+            </button>
 
-        <button
-          type="button"
-          className="delete-button"
-          onClick={() => onDelete(photo.gallery_id)}
-          aria-label="Supprimer la photo"
-        >
-          <Trash2 size={18} />
-        </button>
+            <button
+              type="button"
+              className="delete-button"
+              onClick={() => onDelete(photo.gallery_id)}
+              aria-label="Supprimer la photo"
+            >
+              <Trash2 size={18} />
+            </button>
+          </>
+        )}
       </div>
 
       {/* Rendu dans body : la case de la photo est en overflow: hidden et la
@@ -242,13 +249,15 @@ export function PhotoItem({
                 <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
                 {`${isLiked ? "Je n'aime plus" : "J'aime"} (${photo.like_count ?? 0})`}
               </button>
-              <button
-                type="button"
-                onClick={() => runMenuAction(() => onEdit(photo))}
-              >
-                <Pencil size={18} />
-                Modifier la description
-              </button>
+              {canManage && (
+                <button
+                  type="button"
+                  onClick={() => runMenuAction(() => onEdit(photo))}
+                >
+                  <Pencil size={18} />
+                  Modifier la description
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => runMenuAction(handleDownload)}
@@ -256,14 +265,18 @@ export function PhotoItem({
                 <Download size={18} />
                 Télécharger
               </button>
-              <button
-                type="button"
-                className="PhotoMenu-Delete"
-                onClick={() => runMenuAction(() => onDelete(photo.gallery_id))}
-              >
-                <Trash2 size={18} />
-                Supprimer
-              </button>
+              {canManage && (
+                <button
+                  type="button"
+                  className="PhotoMenu-Delete"
+                  onClick={() =>
+                    runMenuAction(() => onDelete(photo.gallery_id))
+                  }
+                >
+                  <Trash2 size={18} />
+                  Supprimer
+                </button>
+              )}
               <button
                 type="button"
                 className="PhotoMenu-Cancel"
