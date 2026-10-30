@@ -392,6 +392,12 @@
 
     .download-button {
       grid-row: 3;
+
+      /* Photo d'un autre participant : télécharger reste seul, à côté du
+         like. */
+      &:last-child {
+        grid-row: 1;
+      }
     }
   }
 }

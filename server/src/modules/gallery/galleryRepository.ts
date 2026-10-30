@@ -14,11 +14,13 @@ class GalleryRepository {
   async readAll(gallery_id_event: number) {
     const [rows] = await databaseClient.query<Rows>(
       `
-      SELECT g.*, COUNT(gl.gallery_like_id_user) AS like_count 
+      SELECT g.*, e.event_id_host AS event_host_id,
+        COUNT(gl.gallery_like_id_user) AS like_count
       FROM gallery g
+      JOIN event e ON e.event_id = g.gallery_id_event
       LEFT JOIN gallery_like gl ON g.gallery_id = gl.gallery_like_id_gallery
       WHERE g.gallery_id_event = ?
-      GROUP BY g.gallery_id
+      GROUP BY g.gallery_id, e.event_id_host
       ORDER BY g.gallery_creation_date DESC
       `,
       [gallery_id_event],
