@@ -49,6 +49,15 @@ class UserRepository {
     return (rows[0] as UserRow) ?? null;
   }
 
+  async findByEmail(email: string) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT * FROM user WHERE user_mail = ?",
+      [email],
+    );
+
+    return (rows[0] as UserRow) ?? null;
+  }
+
   async read(id: number) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT * FROM user WHERE user_id = ?",

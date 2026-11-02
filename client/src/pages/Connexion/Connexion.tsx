@@ -17,16 +17,14 @@ function Connexion() {
   }, []);
 
   const [showPassword, setShowPassword] = useState(false);
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [_submitted, setSubmitted] = useState(false);
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
-  const isUsername = identifier.trim().length >= 3;
-  const identifierValid = isEmail || isUsername;
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const passwordRules =
     password.length >= 12 &&
@@ -35,7 +33,7 @@ function Connexion() {
     /\d/.test(password) &&
     /[@$!%*?&]/.test(password);
 
-  const formValid = identifierValid && passwordRules;
+  const formValid = isEmail && passwordRules;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,7 +45,7 @@ function Connexion() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
 
       const data = await res.json();
@@ -99,15 +97,16 @@ function Connexion() {
           </div>
           <div className="input-group">
             <div className="input-header">
-              <label htmlFor="identifier">Pseudo ou Email</label>
+              <label htmlFor="email">Email</label>
             </div>
             <input
               ref={firstInputRef}
-              id="identifier"
-              type="text"
-              placeholder="Entrez votre pseudo ou email"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="Entrez votre email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="input-focus"
             />
           </div>

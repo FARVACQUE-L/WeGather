@@ -132,9 +132,14 @@ const add: RequestHandler = async (req, res, next) => {
 
 const login: RequestHandler = async (req, res, next) => {
   try {
-    const { identifier, password } = req.body;
+    const { email, password } = req.body;
 
-    const user = await userRepository.findByEmailOrUsername(identifier);
+    // Connexion par email uniquement : le pseudo est public, affiché à tous
+    // les participants.
+    const user =
+      typeof email === "string"
+        ? await userRepository.findByEmail(email.trim())
+        : null;
 
     if (!user) {
       res.status(401).json({
@@ -231,18 +236,19 @@ const browseUserAndBudget: RequestHandler = async (req, res, next) => {
 
 const forgotPassword: RequestHandler = async (req, res, next) => {
   try {
-    const { identifier } = req.body;
+    const { email } = req.body;
 
-    if (!identifier) {
-      res.status(400).json({ message: "Identifier manquant" });
+    if (typeof email !== "string" || !email.trim()) {
+      res.status(400).json({ message: "Email manquant" });
       return;
     }
 
-    const user = await userRepository.findByEmailOrUsername(identifier);
+    // Comme pour la connexion : email uniquement.
+    const user = await userRepository.findByEmail(email.trim());
 
     if (!user) {
       res.status(401).json({
-        message: "Pseudo ou email incorrect",
+        message: "Email incorrect",
       });
       return;
     }
