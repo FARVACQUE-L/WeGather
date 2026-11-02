@@ -14,14 +14,12 @@ function ForgetPassword() {
     firstInputRef.current?.focus();
   }, []);
 
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
-  const isUsername = identifier.trim().length >= 3;
-  const identifierValid = isEmail || isUsername;
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,7 +34,7 @@ function ForgetPassword() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ identifier }),
+          body: JSON.stringify({ email: email.trim() }),
         },
       );
 
@@ -94,30 +92,30 @@ function ForgetPassword() {
           <div className="wel-para-title-forgetPassword">
             <h2>Mot de passe oublié ?</h2>
             <p className="Welcome-forgetPassword-para">
-              Entrez votre email ou votre pseudo pour recevoir un lien de
-              réinitialisation.
+              Entrez votre email pour recevoir un lien de réinitialisation.
             </p>
           </div>
           <div className="input-group">
-            <label htmlFor="id">Pseudo ou Email</label>
+            <label htmlFor="email">Email</label>
             <input
               ref={firstInputRef}
-              id="id"
-              type="text"
-              placeholder="Entrez votre pseudo ou email"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="Entrez votre email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="input-focus"
             />
-            {identifier && !identifierValid && (
-              <p className="error">✗ Pseudo ou adresse email invalide</p>
+            {email && !isEmail && (
+              <p className="error">✗ Adresse email invalide</p>
             )}
             {errorMessage && <p className="error">{errorMessage}</p>}
           </div>
           <button
             type="submit"
             className="button-forgetPassword-submit"
-            disabled={!identifierValid}
+            disabled={!isEmail}
           >
             Envoyer
           </button>
