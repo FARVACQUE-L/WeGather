@@ -375,16 +375,16 @@ function Budget() {
       cancelButtonText: "Annuler",
       reverseButtons: true,
       buttonsStyling: false,
-      showClass: { popup: "BudgetDeleteModal-Show" },
+      showClass: { popup: "BudgetModal-Show" },
 
       customClass: {
-        container: "BudgetDeleteModal-Backdrop",
-        popup: "BudgetDeleteModal",
-        title: "BudgetDeleteModal-Title",
-        htmlContainer: "BudgetDeleteModal-Text",
-        actions: "BudgetDeleteModal-Actions",
-        confirmButton: "BudgetDeleteModal-Confirm",
-        cancelButton: "BudgetDeleteModal-Cancel",
+        container: "BudgetModal-Backdrop",
+        popup: "BudgetModal",
+        title: "BudgetModal-Title",
+        htmlContainer: "BudgetModal-Text",
+        actions: "BudgetModal-Actions",
+        confirmButton: "BudgetModal-Confirm",
+        cancelButton: "BudgetModal-Cancel",
       },
     });
 
@@ -460,11 +460,17 @@ function Budget() {
       html,
 
       confirmButtonText: "Fermer",
+      // Mêmes réglages que la modale de suppression (voir confirmDelete).
+      buttonsStyling: false,
+      showClass: { popup: "BudgetModal-Show" },
 
       customClass: {
-        container: "budget-backdrop",
-        popup: "toast-edit-popup settlement-popup",
-        confirmButton: "budget-confirm",
+        container: "BudgetModal-Backdrop",
+        popup: "BudgetModal BudgetModal-Single",
+        title: "BudgetModal-Title",
+        htmlContainer: "BudgetModal-Text",
+        actions: "BudgetModal-Actions",
+        confirmButton: "BudgetModal-Confirm",
       },
     });
   }
