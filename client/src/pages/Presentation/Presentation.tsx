@@ -5,35 +5,28 @@ import {
   Book,
   CalendarPlus,
   Check,
-  Download,
-  Ellipsis,
-  FileCheck,
   Heart,
-  House,
-  ImagePlus,
   Images,
   LayoutDashboard,
   type LucideIcon,
   MessagesSquare,
   Minus,
   Plus,
-  Send,
-  ShoppingBasket,
   Sparkles,
   Sun,
-  TrainFront,
   Users,
-  Utensils,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import galerieLavande from "../../assets/images/img-galerie-lavande.jpg";
-import galerieRepas from "../../assets/images/img-galerie-repas.jpg";
-import galerieVillage from "../../assets/images/img-galerie-village.jpg";
 import occasionFete from "../../assets/images/img-occasion-fete.jpg";
-import occasionPro from "../../assets/images/img-occasion-pro.jpg";
+import occasionPro from "../../assets/images/img-occasion-pro.png";
 import occasionVacances from "../../assets/images/img-occasion-vacances.jpg";
+import screenshotBudget from "../../assets/images/img-presentation-budget.png";
+import screenshotDashboard from "../../assets/images/img-presentation-dashboard.png";
+import screenshotGalerie from "../../assets/images/img-presentation-galerie.jpg";
 import hero from "../../assets/images/img-presentation-hero.png";
+import screenshotMessagerie from "../../assets/images/img-presentation-messagerie.png";
+import screenshotReservations from "../../assets/images/img-presentation-reservations.jpg";
 import logo from "../../assets/images/logo-wegather.png";
 
 type User = {
@@ -105,14 +98,6 @@ const steps: {
     description:
       "Réservations, dépenses, souvenirs : tout reste ensemble. Vous n’avez plus qu’à en profiter.",
   },
-];
-
-const dashboardMenu: { icon: LucideIcon; label: string }[] = [
-  { icon: LayoutDashboard, label: "Tableau de bord" },
-  { icon: MessagesSquare, label: "Messages" },
-  { icon: Book, label: "Réservations" },
-  { icon: BadgeEuro, label: "Budget" },
-  { icon: Images, label: "Galerie" },
 ];
 
 const faq = [
@@ -343,88 +328,12 @@ function Presentation() {
               Tout le monde garde le fil.
             </p>
           </div>
-          <div className="dashboard-preview-presentation">
-            <aside className="dashboard-nav-presentation">
-              <p className="dashboard-brand-presentation">wegather</p>
-              <div>
-                <p className="dashboard-event-presentation">
-                  Week-end en Provence
-                </p>
-                <p className="small-presentation">
-                  12–14 juin · 6 participants
-                </p>
-              </div>
-              <ul>
-                {dashboardMenu.map(({ icon: Icon, label }, index) => (
-                  <li key={label} className={index === 0 ? "active" : ""}>
-                    <Icon size={14} {...iconProps} />
-                    {label}
-                  </li>
-                ))}
-              </ul>
-              <p className="small-presentation">← Tous mes événements</p>
-            </aside>
-            <div className="dashboard-main-presentation">
-              <div className="dashboard-breadcrumb-presentation">
-                <p className="small-presentation">
-                  MES ÉVÉNEMENTS / WEEK-END EN PROVENCE
-                </p>
-                <span className="avatar-presentation">AL</span>
-              </div>
-              <div>
-                <p className="dashboard-title-presentation">
-                  Le week-end prend forme ☀️
-                </p>
-                <p className="dashboard-subtitle-presentation">
-                  Les infos essentielles, sans remonter tous les messages.
-                </p>
-              </div>
-              <div className="dashboard-summary-presentation">
-                <div>
-                  <p className="small-presentation">Dates du séjour</p>
-                  <p>12–14 juin</p>
-                </div>
-                <div>
-                  <p className="small-presentation">
-                    Notre point de rendez-vous
-                  </p>
-                  <p>L’Isle-sur-la-Sorgue</p>
-                </div>
-                <div>
-                  <p className="small-presentation">L’équipe au complet</p>
-                  <p>6 personnes</p>
-                </div>
-              </div>
-              <div className="dashboard-bottom-presentation">
-                <div className="dashboard-agenda-presentation">
-                  <p className="dashboard-heading-presentation">À l’agenda</p>
-                  <p className="row-presentation">
-                    <TrainFront size={16} {...iconProps} />
-                    Arrivée en gare
-                    <span>Ven. 18:30</span>
-                  </p>
-                  <p className="row-presentation">
-                    <Utensils size={16} {...iconProps} />
-                    Dîner à la maison
-                    <span>Ven. 20:00</span>
-                  </p>
-                  <p className="row-presentation">
-                    <Sun size={16} {...iconProps} />
-                    Marché &amp; balade
-                    <span>Sam. 10:00</span>
-                  </p>
-                </div>
-                <div className="dashboard-todo-presentation">
-                  <p>Avant de partir</p>
-                  <p>✓ Maison réservée</p>
-                  <p>✓ Billets ajoutés aux réservations</p>
-                  <p className="todo-pending-presentation">
-                    ○ Choisir le menu du vendredi
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <img
+            className="dashboard-preview-presentation"
+            src={screenshotDashboard}
+            alt="Tableau de bord de l’événement Week-end en Provence : dates, participants, réservations récentes, budget et to-do list"
+            loading="lazy"
+          />
         </div>
 
         <div className="tools-presentation">
@@ -438,29 +347,12 @@ function Presentation() {
               Échangez en direct avec les membres de l’événement. Une question,
               un détail à caler : la conversation reste à portée de main.
             </p>
-            <div className="tool-preview-presentation chat-presentation">
-              <div className="chat-header-presentation">
-                <div className="chat-contact-presentation">
-                  <span className="avatar-presentation">CM</span>
-                  <div>
-                    <p>Camille</p>
-                    <p className="small-presentation">Week-end en Provence</p>
-                  </div>
-                </div>
-                <Ellipsis size={20} {...iconProps} />
-              </div>
-              <div className="bubble-presentation received">
-                <p>J’arrive à 18h30, on fait le trajet ensemble ?</p>
-                <p className="bubble-time-presentation">14:32</p>
-              </div>
-              <div className="bubble-presentation sent">
-                <p>Oui ! Je t’attends à la gare 😊</p>
-              </div>
-              <div className="chat-input-presentation">
-                <p>Écrire à Camille…</p>
-                <Send size={17} {...iconProps} />
-              </div>
-            </div>
+            <img
+              className="tool-preview-presentation"
+              src={screenshotMessagerie}
+              alt="Conversation de groupe dans la messagerie de l’événement"
+              loading="lazy"
+            />
           </article>
 
           <article className="tool-presentation">
@@ -474,32 +366,12 @@ function Presentation() {
               train, le logement, les activités : retrouvez l’essentiel au bon
               moment.
             </p>
-            <div className="tool-preview-presentation wallet-presentation">
-              <div className="wallet-header-presentation">
-                <p>Mes réservations</p>
-                <span>+ Ajouter</span>
-              </div>
-              <div className="ticket-presentation">
-                <TrainFront size={28} {...iconProps} />
-                <div>
-                  <p>Paris → Avignon</p>
-                  <p className="ticket-detail-presentation">
-                    Vendredi 12 juin · 15:42–18:20
-                  </p>
-                </div>
-                <Download size={18} {...iconProps} />
-              </div>
-              <div className="ticket-presentation">
-                <House size={28} {...iconProps} />
-                <div>
-                  <p>La maison des oliviers</p>
-                  <p className="ticket-detail-presentation">
-                    12–14 juin · Confirmation ajoutée
-                  </p>
-                </div>
-                <FileCheck size={18} {...iconProps} />
-              </div>
-            </div>
+            <img
+              className="tool-preview-presentation"
+              src={screenshotReservations}
+              alt="Page Réservations avec la prochaine réservation, les filtres et les cartes train, restaurant et activité"
+              loading="lazy"
+            />
           </article>
 
           <article className="tool-presentation">
@@ -513,31 +385,12 @@ function Presentation() {
               intégré. Chacun sait ce qu’il a payé et ce qu’il lui reste à
               régler.
             </p>
-            <div className="tool-preview-presentation expenses-presentation">
-              <div className="expenses-summary-presentation">
-                <div>
-                  <p className="ticket-detail-presentation">
-                    Dépenses du week-end
-                  </p>
-                  <p className="expenses-total-presentation">420,00 €</p>
-                </div>
-                <span>70 € / personne</span>
-              </div>
-              <p className="row-presentation">
-                <House size={16} {...iconProps} />
-                Hébergement · Alex
-                <span>300,00 €</span>
-              </p>
-              <p className="row-presentation">
-                <ShoppingBasket size={16} {...iconProps} />
-                Courses · Camille
-                <span>120,00 €</span>
-              </p>
-              <div className="balance-presentation">
-                <p>Votre solde</p>
-                <p>Vous devez 70,00 €</p>
-              </div>
-            </div>
+            <img
+              className="tool-preview-presentation"
+              src={screenshotBudget}
+              alt="Page Budget avec le solde, les dépenses de chacun et les équilibres"
+              loading="lazy"
+            />
           </article>
 
           <article className="tool-presentation">
@@ -550,30 +403,18 @@ function Presentation() {
               Retrouvez les photos de l’événement dans une galerie commune. Les
               grands moments et les petits détails, vus par chacun.
             </p>
-            <div className="tool-preview-presentation gallery-presentation">
-              <div className="wallet-header-presentation">
-                <p>Les souvenirs du week-end</p>
-                <ImagePlus size={18} {...iconProps} />
-              </div>
-              <div className="photos-presentation">
-                <img src={galerieRepas} alt="Repas entre amis en terrasse" />
-                <img src={galerieVillage} alt="Ruelle d’un village provençal" />
-                <img
-                  src={galerieLavande}
-                  alt="Balade dans un champ de lavande"
-                />
-              </div>
-              <div className="contributors-presentation">
-                <span className="avatar-presentation">AL</span>
-                <span className="avatar-presentation">CM</span>
-                <p>Les moments de chacun, réunis.</p>
-              </div>
-            </div>
+            <img
+              className="tool-preview-presentation"
+              src={screenshotGalerie}
+              alt="Galerie de l’événement avec les photos du week-end"
+              loading="lazy"
+            />
           </article>
         </div>
 
         <p className="mention-presentation">
           Aperçus illustratifs d’un événement fictif : « Week-end en Provence ».
+          Illustrations réalisées par IA.
         </p>
       </section>
 

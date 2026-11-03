@@ -30,40 +30,6 @@
     text-transform: uppercase;
   }
 
-  .small-presentation {
-    font-size: 10px;
-    line-height: 1.5;
-    color: var(--font-darkBrown);
-  }
-
-  .avatar-presentation {
-    display: flex;
-    flex-shrink: 0;
-    justify-content: center;
-    align-items: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 100px;
-    background-color: var(--presentation-rose);
-    color: var(--font-brown);
-    font-size: 10px;
-    font-weight: 500;
-  }
-
-  .row-presentation {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    line-height: 1.5;
-
-    span {
-      margin-left: auto;
-      font-size: 12px;
-      color: var(--font-darkBrown);
-    }
-  }
-
   .action-presentation {
     display: flex;
     flex-shrink: 0;
@@ -463,143 +429,15 @@
     }
   }
 
+  /* Capture du tableau de bord, affichée en entier à toutes les tailles. */
   .dashboard-preview-presentation {
-    display: flex;
+    display: block;
     flex: 0 1 854px;
     min-width: 0;
-    min-height: 414px;
-    overflow: hidden;
+    height: auto;
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    background-color: white;
     box-shadow: var(--presentation-shadow);
-    line-height: 1.5;
-
-    .dashboard-nav-presentation {
-      display: flex;
-      flex-shrink: 0;
-      flex-direction: column;
-      gap: 25px;
-      width: 174px;
-      padding: 18px;
-      background-color: var(--presentation-cream);
-
-      ul {
-        display: flex;
-        flex-direction: column;
-        gap: 9px;
-        list-style: none;
-      }
-
-      li {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 9px;
-        border-radius: 8px;
-        font-size: 11px;
-        color: var(--font-darkBrown);
-      }
-
-      li.active {
-        background-color: var(--presentation-rose);
-        color: var(--font-brown);
-        font-weight: 500;
-      }
-    }
-
-    .dashboard-brand-presentation {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .dashboard-event-presentation {
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .dashboard-main-presentation {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      gap: 20px;
-      min-width: 0;
-      padding: 25px;
-    }
-
-    .dashboard-breadcrumb-presentation {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .dashboard-title-presentation {
-      font-size: 24px;
-      font-weight: 600;
-    }
-
-    .dashboard-subtitle-presentation {
-      font-size: 12px;
-      color: var(--font-darkBrown);
-    }
-
-    .dashboard-summary-presentation {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-
-      div {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        padding: 12px;
-        border-radius: 10px;
-        background-color: var(--presentation-cream);
-      }
-
-      p:last-child {
-        font-size: 12px;
-        font-weight: 500;
-      }
-    }
-
-    .dashboard-bottom-presentation {
-      display: flex;
-      gap: 16px;
-    }
-
-    .dashboard-agenda-presentation {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .dashboard-heading-presentation {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .dashboard-todo-presentation {
-      display: flex;
-      flex-shrink: 0;
-      flex-direction: column;
-      gap: 12px;
-      width: 210px;
-      padding: 15px;
-      border-radius: 12px;
-      background-color: var(--presentation-cream);
-      font-size: 11px;
-
-      p:first-child {
-        font-size: 13px;
-        font-weight: 500;
-      }
-
-      .todo-pending-presentation {
-        color: var(--font-brown);
-      }
-    }
   }
 
   .tools-presentation {
@@ -640,180 +478,19 @@
       }
     }
 
+    /* Les captures n'ont pas toutes le même format : un même cadre 16:10
+       pour les quatre, l'image entière centrée sur le fond du site (celui
+       des captures), sans rognage. Collée en bas de la carte, pour que les
+       cadres d'une même ligne restent alignés. */
     .tool-preview-presentation {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      min-height: 234px;
-      padding: 20px;
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      margin-top: auto;
+      object-fit: contain;
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      background-color: white;
-      line-height: 1.5;
-    }
-
-    .ticket-detail-presentation {
-      font-size: 11px;
-      color: var(--font-darkBrown);
-    }
-  }
-
-  .chat-presentation {
-    .chat-header-presentation {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .chat-contact-presentation {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      p:first-child {
-        font-size: 13px;
-        font-weight: 500;
-      }
-    }
-
-    .bubble-presentation {
-      max-width: 329px;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 13px;
-    }
-
-    .bubble-presentation.received {
-      align-self: flex-start;
-      width: 100%;
-      background-color: var(--presentation-cream);
-    }
-
-    .bubble-presentation.sent {
-      align-self: flex-end;
-      background-color: var(--presentation-rose);
-    }
-
-    .bubble-time-presentation {
-      font-size: 9px;
-      color: var(--font-darkBrown);
-    }
-
-    .chat-input-presentation {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      font-size: 12px;
-      color: var(--font-darkBrown);
-    }
-  }
-
-  .wallet-presentation {
-    gap: 14px;
-  }
-
-  .wallet-presentation,
-  .gallery-presentation {
-    .wallet-header-presentation {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-
-      p {
-        font-size: 13px;
-        font-weight: 500;
-      }
-
-      span {
-        font-size: 11px;
-        color: var(--font-brown);
-      }
-    }
-
-    .ticket-presentation {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px;
-      border-radius: 12px;
-      background-color: var(--presentation-cream);
-
-      div {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        gap: 3px;
-      }
-
-      p:first-child {
-        font-size: 14px;
-        font-weight: 500;
-      }
-    }
-  }
-
-  .expenses-presentation {
-    .expenses-summary-presentation {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      div {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-
-      span {
-        padding: 10px;
-        border-radius: 10px;
-        background-color: var(--presentation-cream);
-        font-size: 12px;
-        color: var(--font-brown);
-      }
-    }
-
-    .expenses-total-presentation {
-      font-size: 27px;
-      font-weight: 600;
-    }
-
-    .balance-presentation {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px;
-      border-radius: 10px;
-      background-color: var(--presentation-rose);
-      font-size: 12px;
-
-      p:last-child {
-        font-weight: 500;
-        color: var(--font-brown);
-      }
-    }
-  }
-
-  .gallery-presentation {
-    .photos-presentation {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-
-      img {
-        display: block;
-        width: 100%;
-        height: 134px;
-        object-fit: cover;
-        border-radius: 10px;
-      }
-    }
-
-    .contributors-presentation {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      color: var(--font-darkBrown);
+      background-color: var(--bg-color);
     }
   }
 
@@ -1060,17 +737,6 @@
   }
 }
 
-/* L'aperçu du tableau de bord garde sa taille et défile horizontalement */
-@media screen and (max-width: 768px) {
-  .presentation-content .dashboard-preview-presentation {
-    overflow-x: auto;
-
-    .dashboard-main-presentation {
-      min-width: 600px;
-    }
-  }
-}
-
 /* Mobile */
 @media screen and (max-width: 428px) {
   .presentation-content {
@@ -1146,11 +812,6 @@
       h3 {
         font-size: 21px;
       }
-    }
-
-    .expenses-presentation .expenses-summary-presentation {
-      flex-wrap: wrap;
-      gap: 8px;
     }
 
     .faq-presentation {
