@@ -278,7 +278,7 @@ function Confidentialite() {
           </p>
         </section>
 
-        <section>
+        <section id="cookies" className="cgv-Anchor">
           <h3>8. Cookies</h3>
           <p>
             WeGather dépose un seul cookie, strictement nécessaire au

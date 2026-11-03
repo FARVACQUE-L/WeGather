@@ -511,7 +511,7 @@ function Presentation() {
             <Link to="/CGV">CGU / CGV</Link>
             <Link to="/mentions-legales">Mentions légales</Link>
             <Link to="/confidentialite">Confidentialité</Link>
-            <span>Cookies</span>
+            <Link to="/confidentialite#cookies">Cookies</Link>
           </div>
         </div>
       </footer>

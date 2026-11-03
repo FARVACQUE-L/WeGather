@@ -57,6 +57,12 @@
       scroll-margin-top: 24px;
     }
 
+    /* Section ciblée par une ancre (/confidentialite#cookies) : un peu
+       d'air au-dessus du titre à l'arrivée. */
+    .cgv-Anchor {
+      scroll-margin-top: 24px;
+    }
+
     h3 {
       color: var(--font-title);
       font-size: 18px;
