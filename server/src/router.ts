@@ -1,6 +1,7 @@
 import express from "express";
 import adminRoutes from "./modules/admin/adminRoutes";
 import budgetRoutes from "./modules/budget/budgetRoutes";
+import contactRoutes from "./modules/contact/contactRoutes";
 import eventRoutes from "./modules/event/eventRoutes";
 import eventUserJoiningRoutes from "./modules/event_user_joining/eventUserJoiningRoutes";
 import galleryRoutes from "./modules/gallery/galleryRoutes";
@@ -26,5 +27,6 @@ router.use(reportEventRoutes);
 router.use(eventUserJoiningRoutes);
 router.use(adminRoutes);
 router.use(budgetRoutes);
+router.use(contactRoutes);
 
 export default router;

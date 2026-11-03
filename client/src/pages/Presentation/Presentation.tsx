@@ -502,7 +502,7 @@ function Presentation() {
           <div className="footer-column-presentation">
             <p>Un coup de main ?</p>
             <a href="#faq">Questions fréquentes</a>
-            <span>Nous contacter</span>
+            <Link to="/contact">Nous contacter</Link>
           </div>
         </div>
         <div className="footer-legal-presentation">

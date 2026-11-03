@@ -27,6 +27,10 @@ const DATA_CATEGORIES = [
     data: "Auteur, personne ou événement signalé, description, date, captures d'écran jointes ; signalements de bugs.",
   },
   {
+    category: "Formulaire de contact",
+    data: "Nom, adresse e-mail, sujet et message, accessibles sans compte.",
+  },
+  {
     category: "Modération",
     data: "Rôle administrateur, suspension du compte, exclusion d'un événement, bannissement d'un événement.",
   },
@@ -60,6 +64,10 @@ const PURPOSES = [
     purpose: "Gérer les formules payantes et la facturation",
     basis: "Exécution du contrat (CGV) et obligations légales comptables",
   },
+  {
+    purpose: "Répondre aux messages envoyés par le formulaire de contact",
+    basis: "Intérêt légitime : répondre aux demandes qui nous sont adressées",
+  },
 ];
 
 const RETENTION = [
@@ -85,6 +93,10 @@ const RETENTION = [
     data: "Signalements",
     duration:
       "Le temps nécessaire à leur traitement et à la prévention des récidives.",
+  },
+  {
+    data: "Messages de contact",
+    duration: "Un an au maximum après le traitement de la demande.",
   },
   {
     data: "Données de facturation (formules payantes)",
@@ -214,8 +226,9 @@ function Confidentialite() {
               instruction de WeGather et uniquement pour les besoins du Service
               : l'hébergeur du serveur (voir les{" "}
               <Link to="/mentions-legales">mentions légales</Link>), Google
-              (service Gmail) pour l'envoi des e-mails et, à l'ouverture des
-              formules payantes, le prestataire de paiement.
+              (service Gmail) pour l'envoi des e-mails, Discord pour la
+              réception des messages du formulaire de contact par l'équipe et, à
+              l'ouverture des formules payantes, le prestataire de paiement.
             </li>
             <li>
               <strong>Les autorités</strong>, uniquement sur demande légale.
@@ -226,13 +239,14 @@ function Confidentialite() {
         <section>
           <h3>5. Transferts hors de l'Union européenne</h3>
           <p>
-            L'envoi des e-mails par Gmail et le chargement des polices de
-            caractères par Google Fonts peuvent conduire Google à traiter
-            certaines données (adresse e-mail, adresse IP) hors de l'Union
-            européenne, notamment aux États-Unis. Ces transferts sont encadrés
-            par la décision d'adéquation de la Commission européenne relative au
-            cadre de protection des données UE–États-Unis (Data Privacy
-            Framework), auquel Google adhère.
+            L'envoi des e-mails par Gmail, le chargement des polices de
+            caractères par Google Fonts et la transmission des messages de
+            contact à Discord peuvent conduire Google et Discord à traiter
+            certaines données (nom, adresse e-mail, message, adresse IP) hors de
+            l'Union européenne, notamment aux États-Unis. Ces transferts sont
+            encadrés par le cadre de protection des données UE–États-Unis (Data
+            Privacy Framework) reconnu par la Commission européenne ou, à
+            défaut, par ses clauses contractuelles types.
           </p>
         </section>
 

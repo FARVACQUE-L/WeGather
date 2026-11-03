@@ -12,6 +12,7 @@ function NavBar() {
     pathname.startsWith("/cgv") ||
     pathname.startsWith("/mentions-legales") ||
     pathname.startsWith("/confidentialite") ||
+    pathname.startsWith("/contact") ||
     pathname.startsWith("/admin/report");
   const isAdmin = pathname.startsWith("/admin");
 
