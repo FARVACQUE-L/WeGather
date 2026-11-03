@@ -1,32 +1,49 @@
 import "./Presentation.css";
 import {
+  ArrowDown,
+  ArrowUp,
   ArrowUpRight,
   BadgeEuro,
   Book,
+  Calendar,
+  CalendarClock,
   CalendarPlus,
   Check,
+  Clock,
+  Download,
+  Euro,
+  Hand,
+  HandCoins,
   Heart,
+  History,
+  ImagePlus,
   Images,
   LayoutDashboard,
+  ListTodo,
   type LucideIcon,
+  MapPin,
+  MessageCircle,
   MessagesSquare,
   Minus,
+  PiggyBank,
   Plus,
+  Smile,
   Sparkles,
   Sun,
+  Ticket,
+  TrainFront,
   Users,
+  Utensils,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import galerieLavande from "../../assets/images/img-galerie-lavande.jpg";
+import galerieRepas from "../../assets/images/img-galerie-repas.jpg";
+import galerieVillage from "../../assets/images/img-galerie-village.jpg";
 import occasionFete from "../../assets/images/img-occasion-fete.jpg";
 import occasionPro from "../../assets/images/img-occasion-pro.png";
 import occasionVacances from "../../assets/images/img-occasion-vacances.jpg";
-import screenshotBudget from "../../assets/images/img-presentation-budget.png";
-import screenshotDashboard from "../../assets/images/img-presentation-dashboard.png";
-import screenshotGalerie from "../../assets/images/img-presentation-galerie.jpg";
 import hero from "../../assets/images/img-presentation-hero.png";
-import screenshotMessagerie from "../../assets/images/img-presentation-messagerie.png";
-import screenshotReservations from "../../assets/images/img-presentation-reservations.jpg";
 import logo from "../../assets/images/logo-wegather.png";
 
 type User = {
@@ -98,6 +115,73 @@ const steps: {
     description:
       "Réservations, dépenses, souvenirs : tout reste ensemble. Vous n’avez plus qu’à en profiter.",
   },
+];
+
+// Données des aperçus de la section « Tout au même endroit » : des maquettes
+// en HTML qui reprennent le style de l'application, pour un événement fictif.
+const sidebarMenu: { icon: LucideIcon; label: string }[] = [
+  { icon: LayoutDashboard, label: "Tableau de bord" },
+  { icon: MessageCircle, label: "Messagerie" },
+  { icon: Book, label: "Réservation" },
+  { icon: Euro, label: "Budget" },
+  { icon: Images, label: "Galerie" },
+];
+
+const dashboardStats: { icon: LucideIcon; label: string; value: string }[] = [
+  { icon: Calendar, label: "Dates du séjour", value: "12-14 juin" },
+  { icon: Users, label: "L’équipe au complet", value: "3" },
+  { icon: Book, label: "Nos réservations", value: "3" },
+  { icon: PiggyBank, label: "Ton budget", value: "+82,67 €" },
+];
+
+const recentBookings = [
+  { who: "Lolo", place: "L’Isle-sur-la-Sorgue", date: "13/06" },
+  { who: "Camille", place: "L’Isle-sur-la-Sorgue", date: "12/06" },
+  { who: "Camille", place: "Avignon", date: "12/06" },
+];
+
+const bookings: {
+  icon: LucideIcon;
+  type: string;
+  kind: string;
+  title: string;
+  place: string;
+  day: string;
+  time: string;
+}[] = [
+  {
+    icon: TrainFront,
+    type: "Transport",
+    kind: "transport",
+    title: "Train",
+    place: "Avignon",
+    day: "12",
+    time: "15:42 → 18:20",
+  },
+  {
+    icon: Utensils,
+    type: "Restaurant",
+    kind: "restaurant",
+    title: "Dîner à la maison",
+    place: "L’Isle-sur-la-Sorgue",
+    day: "12",
+    time: "À 20:00",
+  },
+  {
+    icon: Ticket,
+    type: "Activité",
+    kind: "activity",
+    title: "Marché & balade",
+    place: "L’Isle-sur-la-Sorgue",
+    day: "13",
+    time: "À 10:00",
+  },
+];
+
+const expenses = [
+  { name: "Maison", author: "Alex", amount: "+300,00 €", positive: true },
+  { name: "Courses", author: "Camille", amount: "-124,00 €", positive: false },
+  { name: "Train", author: "Camille", amount: "-150,00 €", positive: false },
 ];
 
 const faq = [
@@ -328,12 +412,106 @@ function Presentation() {
               Tout le monde garde le fil.
             </p>
           </div>
-          <img
-            className="dashboard-preview-presentation"
-            src={screenshotDashboard}
-            alt="Tableau de bord de l’événement Week-end en Provence : dates, participants, réservations récentes, budget et to-do list"
-            loading="lazy"
-          />
+          <div
+            className="dashboard-preview-presentation mock-presentation"
+            role="img"
+            aria-label="Tableau de bord de l’événement Week-end en Provence : dates, participants, réservations récentes, budget et to-do list"
+          >
+            <aside className="mock-sidebar">
+              <p className="mock-brand">
+                <img src={logo} alt="" />
+                WeGather
+              </p>
+              <ul>
+                {sidebarMenu.map(({ icon: Icon, label }, index) => (
+                  <li key={label} className={index === 0 ? "active" : ""}>
+                    <Icon size={13} strokeWidth={1.8} />
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            </aside>
+            <div className="mock-main">
+              <span className="mock-avatar mock-avatar-corner">C</span>
+              <p className="mock-title">Week-end en Provence</p>
+              <div className="mock-greeting">
+                <div>
+                  <p>
+                    Salut, Camille <Hand size={14} strokeWidth={1.8} />
+                  </p>
+                  <p className="mock-muted">
+                    Les infos essentielles, sans remonter tous les messages.
+                  </p>
+                </div>
+                <span className="mock-button">Code de l’événement</span>
+              </div>
+              <div className="mock-stats">
+                {dashboardStats.map(({ icon: Icon, label, value }) => (
+                  <div key={label}>
+                    <p className="mock-muted">
+                      <Icon size={11} strokeWidth={1.8} />
+                      {label}
+                    </p>
+                    <p>{value}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mock-dashboard-bottom">
+                <div className="mock-panel mock-recent">
+                  <p className="mock-panel-title">
+                    <CalendarClock size={12} strokeWidth={1.8} />
+                    Réservations récentes
+                    <span>Voir tout</span>
+                  </p>
+                  <div className="mock-table">
+                    <p className="mock-table-head">
+                      <span>Organisateur</span>
+                      <span>Lieu</span>
+                      <span>Date</span>
+                      <span>Statut</span>
+                    </p>
+                    {recentBookings.map(({ who, place, date }) => (
+                      <p key={`${who}-${date}-${place}`}>
+                        <span>
+                          <span className="mock-avatar mock-avatar-small">
+                            {who[0]}
+                          </span>
+                          {who}
+                        </span>
+                        <span>{place}</span>
+                        <span>{date}</span>
+                        <span>
+                          <span className="mock-status">À venir</span>
+                        </span>
+                      </p>
+                    ))}
+                  </div>
+                </div>
+                <div className="mock-panel mock-todo">
+                  <p className="mock-panel-title">
+                    <ListTodo size={12} strokeWidth={1.8} />
+                    To-do list
+                  </p>
+                  <p className="mock-todo-row">
+                    <span className="mock-checkbox" />
+                    Choisir le menu de vendredi
+                  </p>
+                  <p className="mock-todo-row done">
+                    <span className="mock-checkbox">
+                      <Check size={8} strokeWidth={3} />
+                    </span>
+                    Maison réservée
+                  </p>
+                  <p className="mock-todo-row done">
+                    <span className="mock-checkbox">
+                      <Check size={8} strokeWidth={3} />
+                    </span>
+                    Billets ajoutés
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="tools-presentation">
@@ -347,12 +525,38 @@ function Presentation() {
               Échangez en direct avec les membres de l’événement. Une question,
               un détail à caler : la conversation reste à portée de main.
             </p>
-            <img
-              className="tool-preview-presentation"
-              src={screenshotMessagerie}
-              alt="Conversation de groupe dans la messagerie de l’événement"
-              loading="lazy"
-            />
+            <div
+              className="tool-preview-presentation mock-presentation mock-chat"
+              role="img"
+              aria-label="Conversation de groupe dans la messagerie de l’événement"
+            >
+              <p className="mock-day">Aujourd’hui</p>
+              <div className="mock-message received">
+                <span className="mock-avatar">A</span>
+                <p className="mock-bubble">
+                  <span className="mock-author">Alex</span>
+                  Hello tout le monde ! On fait le trajet ensemble ?
+                  <span className="mock-time">13:55</span>
+                </p>
+              </div>
+              <div className="mock-message sent">
+                <p className="mock-bubble">Oui, je t’attends à la gare 😊</p>
+                <span className="mock-time">13:57</span>
+              </div>
+              <div className="mock-message received">
+                <span className="mock-avatar">L</span>
+                <p className="mock-bubble">
+                  <span className="mock-author">Lolo</span>
+                  Je vous rejoins pour le dîner 🍝
+                  <span className="mock-time">14:02</span>
+                </p>
+              </div>
+              <p className="mock-chat-input">
+                <Plus size={14} strokeWidth={1.8} />
+                Écrire un message…
+                <Smile size={14} strokeWidth={1.8} />
+              </p>
+            </div>
           </article>
 
           <article className="tool-presentation">
@@ -366,12 +570,55 @@ function Presentation() {
               train, le logement, les activités : retrouvez l’essentiel au bon
               moment.
             </p>
-            <img
-              className="tool-preview-presentation"
-              src={screenshotReservations}
-              alt="Page Réservations avec la prochaine réservation, les filtres et les cartes train, restaurant et activité"
-              loading="lazy"
-            />
+            <div
+              className="tool-preview-presentation mock-presentation mock-bookings"
+              role="img"
+              aria-label="Page Réservations avec la prochaine réservation, les filtres et les cartes train, restaurant et activité"
+            >
+              <div className="mock-next">
+                <span className="mock-next-icon">
+                  <TrainFront size={14} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <p className="mock-next-label">Prochaine réservation</p>
+                  <p className="mock-next-title">Train</p>
+                  <p>Ven. 12 juin · 15:42 → 18:20 · Avignon</p>
+                </div>
+              </div>
+              <p className="mock-filters">
+                <span className="active">Tout</span>
+                <span>Transport</span>
+                <span>Restaurant</span>
+                <span>Activité</span>
+              </p>
+              <div className="mock-booking-cards">
+                {bookings.map(
+                  ({ icon: Icon, type, kind, title, place, day, time }) => (
+                    <div key={title} className="mock-booking-card">
+                      <div className={`mock-booking-cover ${kind}`}>
+                        <Icon size={22} strokeWidth={1.5} />
+                        <span className="mock-booking-date">
+                          {day}
+                          <span>Juin</span>
+                        </span>
+                      </div>
+                      <div className="mock-booking-body">
+                        <span className={`mock-tag ${kind}`}>{type}</span>
+                        <p className="mock-muted">
+                          <Clock size={9} strokeWidth={2} />
+                          {time}
+                        </p>
+                        <p className="mock-booking-title">{title}</p>
+                        <p className="mock-booking-place">
+                          <MapPin size={9} strokeWidth={2} />
+                          {place}
+                        </p>
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
           </article>
 
           <article className="tool-presentation">
@@ -385,12 +632,54 @@ function Presentation() {
               intégré. Chacun sait ce qu’il a payé et ce qu’il lui reste à
               régler.
             </p>
-            <img
-              className="tool-preview-presentation"
-              src={screenshotBudget}
-              alt="Page Budget avec le solde, les dépenses de chacun et les équilibres"
-              loading="lazy"
-            />
+            <div
+              className="tool-preview-presentation mock-presentation mock-budget"
+              role="img"
+              aria-label="Page Budget avec le solde, les dépenses de chacun et les équilibres"
+            >
+              <div className="mock-budget-top">
+                <div className="mock-balance">
+                  <p>On te doit</p>
+                  <p className="mock-balance-amount">82,67 €</p>
+                  <p className="mock-balance-update">
+                    <History size={10} strokeWidth={2} />
+                    Mise à jour il y a 4 jours
+                  </p>
+                  <span className="mock-balance-button">
+                    <HandCoins size={10} strokeWidth={2} />
+                    Équilibrer les comptes
+                  </span>
+                </div>
+                <div className="mock-totals">
+                  <p className="positive">
+                    <span>
+                      <ArrowDown size={9} strokeWidth={2.4} />
+                      Dépenses globales
+                    </span>
+                    574,00 €
+                  </p>
+                  <p className="negative">
+                    <span>
+                      <ArrowUp size={9} strokeWidth={2.4} />
+                      Mes dépenses
+                    </span>
+                    274,00 €
+                  </p>
+                </div>
+              </div>
+              <p className="mock-heading">Dépenses</p>
+              {expenses.map(({ name, author, amount, positive }) => (
+                <p key={name} className="mock-row">
+                  <span>
+                    <strong>{name}</strong>
+                    <span className="mock-muted"> · {author}</span>
+                  </span>
+                  <span className={positive ? "positive" : "negative"}>
+                    {amount}
+                  </span>
+                </p>
+              ))}
+            </div>
           </article>
 
           <article className="tool-presentation">
@@ -403,12 +692,27 @@ function Presentation() {
               Retrouvez les photos de l’événement dans une galerie commune. Les
               grands moments et les petits détails, vus par chacun.
             </p>
-            <img
-              className="tool-preview-presentation"
-              src={screenshotGalerie}
-              alt="Galerie de l’événement avec les photos du week-end"
-              loading="lazy"
-            />
+            <div
+              className="tool-preview-presentation mock-presentation mock-gallery"
+              role="img"
+              aria-label="Galerie de l’événement avec les photos du week-end"
+            >
+              <p className="mock-gallery-actions">
+                <span className="mock-button-outline">
+                  <Download size={10} strokeWidth={2} />
+                  Tout télécharger
+                </span>
+                <span className="mock-button">
+                  <ImagePlus size={10} strokeWidth={2} />
+                  Ajouter une photo
+                </span>
+              </p>
+              <div className="mock-photos">
+                <img src={galerieLavande} alt="" loading="lazy" />
+                <img src={galerieVillage} alt="" loading="lazy" />
+                <img src={galerieRepas} alt="" loading="lazy" />
+              </div>
+            </div>
           </article>
         </div>
 

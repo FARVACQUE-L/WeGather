@@ -429,12 +429,10 @@
     }
   }
 
-  /* Capture du tableau de bord, affichée en entier à toutes les tailles. */
   .dashboard-preview-presentation {
-    display: block;
+    display: flex;
     flex: 0 1 854px;
     min-width: 0;
-    height: auto;
     border: 1px solid var(--border-color);
     border-radius: 16px;
     box-shadow: var(--presentation-shadow);
@@ -478,19 +476,690 @@
       }
     }
 
-    /* Les captures n'ont pas toutes le même format : un même cadre 16:10
-       pour les quatre, l'image entière centrée sur le fond du site (celui
-       des captures), sans rognage. Collée en bas de la carte, pour que les
-       cadres d'une même ligne restent alignés. */
+    /* Collé en bas de la carte, pour que les aperçus d'une même ligne
+       restent alignés. */
     .tool-preview-presentation {
-      display: block;
-      width: 100%;
-      aspect-ratio: 16 / 10;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 250px;
       margin-top: auto;
-      object-fit: contain;
+      padding: 16px;
       border: 1px solid var(--border-color);
       border-radius: 16px;
+    }
+  }
+
+  /* Aperçus : des maquettes qui reprennent le style de l'application
+     (couleurs, cartes, boutons), en plus petit. Purement décoratives :
+     chacune est décrite par son aria-label. */
+  .mock-presentation {
+    overflow: hidden;
+    background-color: var(--bg-color);
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--font-black);
+    user-select: none;
+
+    p {
+      margin: 0;
+    }
+
+    svg {
+      flex-shrink: 0;
+    }
+
+    .mock-muted {
+      color: var(--font-darkBrown);
+    }
+
+    .mock-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--font-title);
+    }
+
+    .mock-avatar {
+      display: inline-flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: var(--icon-bg-user);
+      color: var(--icon-color-user);
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .mock-avatar-small {
+      width: 14px;
+      height: 14px;
+      font-size: 7px;
+    }
+
+    .mock-button,
+    .mock-button-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 100px;
+      font-size: 9px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .mock-button {
+      background: var(--button-color);
+      box-shadow: 0 2px 6px rgba(87, 51, 40, 0.25);
+      color: var(--font-neutral);
+    }
+
+    .mock-button-outline {
+      border: 1px solid var(--font-brown);
+      background-color: white;
+      color: var(--font-brown);
+    }
+
+    .positive {
+      color: var(--font-green);
+    }
+
+    .negative {
+      color: var(--font-red);
+    }
+  }
+
+  /* Tableau de bord */
+  .dashboard-preview-presentation {
+    .mock-sidebar {
+      display: flex;
+      flex-shrink: 0;
+      flex-direction: column;
+      gap: 18px;
+      width: 150px;
+      padding: 18px 0 18px 10px;
+      border-radius: 16px 0 0 16px;
+      background-color: var(--sideBar-color);
+
+      ul {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 10px;
+        font-size: 10px;
+      }
+
+      li.active {
+        border-left: 2px solid var(--font-title);
+        border-radius: 0 100px 100px 0;
+        background-color: #feb47b99;
+      }
+    }
+
+    .mock-brand {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      padding-right: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--font-title);
+
+      img {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .mock-main {
+      position: relative;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+      padding: 26px 22px 22px;
+    }
+
+    .mock-avatar-corner {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background-color: var(--presentation-rose);
+      color: var(--font-brown);
+    }
+
+    .mock-greeting {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+
+      p:first-child {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 15px;
+      }
+
+      .mock-muted {
+        font-size: 10px;
+      }
+    }
+
+    .mock-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+
+      div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 12px 6px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background-color: var(--bg-composant-dash);
+        text-align: center;
+      }
+
+      .mock-muted {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 9px;
+      }
+
+      p:last-child {
+        font-size: 15px;
+      }
+    }
+
+    .mock-dashboard-bottom {
+      display: flex;
+      gap: 10px;
+    }
+
+    .mock-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--bg-composant-dash);
+    }
+
+    .mock-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 500;
+
+      span {
+        margin-left: auto;
+        font-size: 9px;
+        font-weight: 400;
+        color: var(--font-brown);
+      }
+    }
+
+    .mock-recent {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 0 4px;
+
+      .mock-panel-title {
+        padding: 0 12px;
+      }
+    }
+
+    .mock-table p {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 0.7fr 0.8fr;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      font-size: 9px;
       background-color: var(--bg-color);
+
+      > span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .mock-table .mock-table-head {
+      background-color: var(--bg-composant-dash);
+      font-weight: 600;
+    }
+
+    .mock-status {
+      padding: 1px 6px;
+      border-radius: 3px;
+      background-color: var(--bg-confirm-state);
+      color: var(--font-comfirm-state);
+    }
+
+    .mock-todo {
+      flex: 0 0 150px;
+    }
+
+    .mock-todo-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9px;
+    }
+
+    .mock-todo-row.done {
+      text-decoration: line-through;
+      color: var(--font-darkBrown);
+    }
+
+    .mock-checkbox {
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      width: 10px;
+      height: 10px;
+      border: 1px solid var(--font-darkBrown);
+      border-radius: 2px;
+    }
+
+    .done .mock-checkbox {
+      border-color: var(--font-brown);
+      background-color: var(--font-brown);
+      color: white;
+    }
+  }
+
+  /* Messagerie */
+  .mock-chat {
+    background-color: var(--bg-composant-dash);
+
+    .mock-day {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--font-darkBrown);
+      text-align: center;
+    }
+
+    .mock-message {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .mock-message.sent {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .mock-bubble {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+      padding: 5px 9px;
+      border-radius: 10px;
+    }
+
+    .received .mock-bubble {
+      border: 1px solid #e8b8a8;
+      background-color: white;
+    }
+
+    .sent .mock-bubble {
+      background-color: var(--color-chat);
+      color: white;
+    }
+
+    .mock-author {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--font-brown);
+    }
+
+    .mock-time {
+      align-self: flex-end;
+      font-size: 8px;
+      color: var(--font-darkBrown);
+    }
+
+    .mock-chat-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      padding: 8px 12px;
+      border: 1px solid var(--color-chat);
+      border-radius: 100px;
+      color: var(--font-placeholder);
+
+      svg:first-child {
+        color: var(--font-brown);
+      }
+
+      svg:last-child {
+        margin-left: auto;
+        color: #f2a33a;
+      }
+    }
+  }
+
+  /* Réservations */
+  .mock-bookings {
+    .mock-next {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ff8a65, #b2553d);
+      box-shadow: 0 4px 12px rgba(165, 59, 34, 0.25);
+      font-size: 9px;
+      color: white;
+    }
+
+    .mock-next-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .mock-next-label {
+      font-size: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+
+    .mock-next-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .mock-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+
+      span {
+        padding: 3px 9px;
+        border: 1px solid var(--border-color);
+        border-radius: 100px;
+        background-color: white;
+        font-size: 9px;
+      }
+
+      .active {
+        border-color: var(--font-brown);
+        background-color: var(--font-brown);
+        color: white;
+      }
+    }
+
+    .mock-booking-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .mock-booking-card {
+      overflow: hidden;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 3px 8px rgba(87, 51, 40, 0.15);
+    }
+
+    .mock-booking-cover {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 52px;
+
+      &.transport {
+        background: linear-gradient(135deg, #ffd6bf, #ff9d76);
+        color: #8a3a1c;
+      }
+
+      &.restaurant {
+        background: linear-gradient(135deg, #ffe0e6, #f59ab0);
+        color: #9f1239;
+      }
+
+      &.activity {
+        background: linear-gradient(135deg, #d1fae5, #7fd8b0);
+        color: #047857;
+      }
+    }
+
+    .mock-booking-date {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1px 4px;
+      border: 1px solid var(--font-darkBrown);
+      border-radius: 4px;
+      background-color: white;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.1;
+      color: var(--font-darkBrown);
+
+      span {
+        font-size: 6px;
+        font-weight: 400;
+      }
+    }
+
+    .mock-booking-body {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      padding: 7px;
+
+      p {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 8px;
+      }
+    }
+
+    .mock-tag {
+      padding: 1px 6px;
+      border-radius: 100px;
+      font-size: 7px;
+      font-weight: 600;
+
+      &.transport {
+        background-color: var(--bg-waiting-state);
+        color: #8a3a1c;
+      }
+
+      &.restaurant {
+        background-color: var(--bg-negative);
+        color: var(--font-red);
+      }
+
+      &.activity {
+        background-color: var(--bg-positive);
+        color: var(--font-green);
+      }
+    }
+
+    .mock-booking-body .mock-booking-title {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .mock-booking-body .mock-booking-place {
+      font-weight: 600;
+    }
+  }
+
+  /* Budget */
+  .mock-budget {
+    gap: 8px;
+
+    .mock-budget-top {
+      display: flex;
+      gap: 10px;
+    }
+
+    .mock-balance {
+      display: flex;
+      flex: 1.6;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ff8a65, #b2553d);
+      box-shadow: 0 4px 12px rgba(165, 59, 34, 0.35);
+      color: white;
+    }
+
+    .mock-balance-amount {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .mock-balance-update {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+    }
+
+    .mock-balance-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      padding: 4px 9px;
+      border-radius: 100px;
+      background-color: rgba(255, 255, 255, 0.2);
+      font-size: 8px;
+      font-weight: 600;
+    }
+
+    .mock-totals {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 8px;
+
+      p {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 9px;
+        font-weight: 400;
+      }
+
+      .positive {
+        background-color: var(--bg-positive);
+      }
+
+      .negative {
+        background-color: var(--bg-negative);
+      }
+    }
+
+    .mock-heading {
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--font-darkBrown);
+    }
+
+    .mock-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 1px 4px rgba(87, 51, 40, 0.08);
+
+      > span:last-child {
+        font-weight: 600;
+      }
+    }
+  }
+
+  /* Galerie */
+  .mock-gallery {
+    .mock-gallery-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .mock-photos {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      height: 240px;
+
+      img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      img:first-child {
+        grid-row: span 2;
+      }
     }
   }
 
@@ -802,6 +1471,35 @@
       h3 {
         font-size: 21px;
       }
+    }
+
+    /* Aperçus : comme dans l'application sur mobile, sans barre latérale */
+    .dashboard-preview-presentation {
+      .mock-sidebar,
+      .mock-todo,
+      .mock-greeting .mock-button {
+        display: none;
+      }
+
+      .mock-main {
+        padding: 22px 14px 14px;
+      }
+
+      .mock-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .tool-preview-presentation {
+      padding: 12px;
+    }
+
+    .mock-budget .mock-budget-top {
+      flex-direction: column;
+    }
+
+    .mock-bookings .mock-booking-cards {
+      gap: 5px;
     }
 
     .faq-presentation {
