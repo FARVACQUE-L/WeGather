@@ -355,12 +355,15 @@ function PageCGV() {
           <p>
             WeGather traite les données personnelles des utilisateurs
             conformément au Règlement général sur la protection des données
-            (RGPD) et à la loi Informatique et Libertés.
+            (RGPD) et à la loi Informatique et Libertés. Le détail de ces
+            traitements figure dans la{" "}
+            <Link to="/confidentialite">politique de confidentialité</Link> ;
+            l'essentiel est résumé ci-dessous.
           </p>
           <ul>
             <li>
               <strong>Données traitées :</strong> adresse e-mail, pseudo, mot de
-              passe (stocké sous forme chiffrée), photo de profil, formule,
+              passe (haché, jamais stocké en clair), photo de profil, formule,
               ainsi que les contenus publiés dans les événements.
             </li>
             <li>

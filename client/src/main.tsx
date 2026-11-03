@@ -9,6 +9,7 @@ import AuthRequire from "./helper/AuthRequire";
 import AuthRequireAdmin from "./helper/AuthRequireAdmin";
 import AdminReport from "./pages/AdminReport/AdminReport";
 import ChangePassword from "./pages/ChangePassword/ChangePassword";
+import Confidentialite from "./pages/Confidentialite/Confidentialite";
 import Connexion from "./pages/Connexion/Connexion";
 import ForgetPassword from "./pages/ForgetPassword/ForgetPassword";
 import HomeEvents from "./pages/HomeEvents/HomeEvents";
@@ -100,6 +101,10 @@ const router = createBrowserRouter([
       {
         path: "/mentions-legales",
         element: <MentionsLegales />,
+      },
+      {
+        path: "/confidentialite",
+        element: <Confidentialite />,
       },
     ],
   },

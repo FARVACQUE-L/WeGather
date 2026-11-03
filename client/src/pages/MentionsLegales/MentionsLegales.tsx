@@ -145,8 +145,8 @@ function MentionsLegales() {
             Les données personnelles des utilisateurs sont traitées conformément
             au Règlement général sur la protection des données (RGPD). Les
             données traitées, leurs finalités, leur durée de conservation et les
-            droits des utilisateurs sont décrits à l'article 11 des{" "}
-            <Link to="/CGV">conditions générales d'utilisation</Link>. Ces
+            droits des utilisateurs sont décrits dans la{" "}
+            <Link to="/confidentialite">politique de confidentialité</Link>. Ces
             droits s'exercent en écrivant à {contactLink} ; une réclamation peut
             également être adressée à la CNIL (www.cnil.fr).
           </p>
