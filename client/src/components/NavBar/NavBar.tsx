@@ -10,6 +10,7 @@ function NavBar() {
     pathname.startsWith("/homeevents") ||
     pathname.startsWith("/events/") ||
     pathname.startsWith("/cgv") ||
+    pathname.startsWith("/mentions-legales") ||
     pathname.startsWith("/admin/report");
   const isAdmin = pathname.startsWith("/admin");
 

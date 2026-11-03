@@ -508,7 +508,8 @@ function Presentation() {
         <div className="footer-legal-presentation">
           <p>© 2026 Wegather. Les bons moments commencent ici.</p>
           <div>
-            <span>Mentions légales</span>
+            <Link to="/CGV">CGU / CGV</Link>
+            <Link to="/mentions-legales">Mentions légales</Link>
             <span>Confidentialité</span>
             <span>Cookies</span>
           </div>

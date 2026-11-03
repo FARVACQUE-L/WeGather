@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import NavBar from "../../components/NavBar/NavBar";
 import Profil from "../../components/Profil/Profil";
 import "./PageCGV.css";
@@ -57,9 +58,9 @@ function PageCGV() {
 
         <section className="cgv-Intro">
           <p>
-            Le service WeGather est édité par WeGatherCorp, dont le siège social
-            est situé à Toulouse (France). Pour toute question :{" "}
-            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+            L'éditeur du service WeGather est présenté dans les{" "}
+            <Link to="/mentions-legales">mentions légales</Link>. Pour toute
+            question : <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
           </p>
           <p>Ce document comprend trois parties :</p>
           <nav className="cgv-Summary" aria-label="Sommaire">
@@ -94,7 +95,7 @@ function PageCGV() {
             Les présentes Conditions Générales d'Utilisation (ci-après « CGU »)
             définissent les conditions d'accès et d'utilisation de l'application
             web WeGather (ci-après « le Service »), ainsi que les droits et
-            obligations de WeGatherCorp (ci-après « WeGather ») et des
+            obligations de l'éditeur du Service (ci-après « WeGather ») et des
             utilisateurs.
           </p>
           <p>
@@ -404,8 +405,8 @@ function PageCGV() {
           <p>
             La marque WeGather, son logo, son interface, ses textes, ses
             illustrations et son code source sont la propriété exclusive de
-            WeGatherCorp. Toute reproduction ou utilisation sans autorisation
-            est interdite. L'utilisateur bénéficie seulement d'un droit
+            WeGather. Toute reproduction ou utilisation sans autorisation est
+            interdite. L'utilisateur bénéficie seulement d'un droit
             d'utilisation du Service, personnel et non transférable, pour la
             durée de son compte.
           </p>
@@ -649,7 +650,7 @@ function PageCGV() {
           </p>
           <blockquote>
             <p>
-              À l'attention de WeGatherCorp, Toulouse —{" "}
+              À l'attention de WeGather —{" "}
               <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
             </p>
             <p>

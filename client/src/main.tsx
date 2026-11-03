@@ -12,6 +12,7 @@ import ChangePassword from "./pages/ChangePassword/ChangePassword";
 import Connexion from "./pages/Connexion/Connexion";
 import ForgetPassword from "./pages/ForgetPassword/ForgetPassword";
 import HomeEvents from "./pages/HomeEvents/HomeEvents";
+import MentionsLegales from "./pages/MentionsLegales/MentionsLegales";
 import PageCGV from "./pages/PageCGV/PageCGV";
 import Presentation from "./pages/Presentation/Presentation";
 import Register from "./pages/Register/Register";
@@ -94,11 +95,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/CGV",
-        element: (
-          <AuthRequire>
-            <PageCGV />
-          </AuthRequire>
-        ),
+        element: <PageCGV />,
+      },
+      {
+        path: "/mentions-legales",
+        element: <MentionsLegales />,
       },
     ],
   },
