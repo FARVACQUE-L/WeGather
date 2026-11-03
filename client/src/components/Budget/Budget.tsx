@@ -12,7 +12,6 @@ import {
   HandCoins,
   History,
   Pen,
-  Plus,
   ReceiptEuro,
   Trash,
 } from "lucide-react";
@@ -543,17 +542,19 @@ function Budget() {
           transition={{ delay: 0.2 }}
         >
           <article className="myBalanceBox">
-            {userBalance > 0 && <span>on te doit</span>}
-            {userBalance < 0 && <span>tu dois</span>}
-            {userBalance === 0 && <span>comptes équilibrés</span>}
-            {/* Sans signe : « on te doit » / « tu dois » donne déjà le sens. */}
+            {userBalance > 0 && <span>On te doit</span>}
+            {userBalance < 0 && <span>Tu dois</span>}
+            {userBalance === 0 && <span>Comptes équilibrés</span>}
+            {/* Sans signe : « On te doit » / « Tu dois » donne déjà le sens. */}
             <h2>{Math.abs(userBalance)}€</h2>
-            <small>
-              <History /> last update :{" "}
-              {returnDateString(
-                listBudget[listBudget.length - 1]?.budget_creation_date,
-              )}
-            </small>
+            {listBudget.length > 0 && (
+              <small>
+                <History /> Dernière mise à jour :{" "}
+                {returnDateString(
+                  listBudget[listBudget.length - 1].budget_creation_date,
+                )}
+              </small>
+            )}
 
             <motion.button
               type="button"
@@ -571,7 +572,7 @@ function Budget() {
             <div className="positif">
               <p className="total-label">
                 <ArrowDown size={20} className="lucid" />
-                <span>dépense globales</span>
+                <span>Dépenses globales</span>
               </p>
               <h3> {budgetEvent?.total_price} € </h3>
             </div>
@@ -579,7 +580,7 @@ function Budget() {
             <div className="negatif">
               <p className="total-label">
                 <ArrowUp size={20} className="lucid" />
-                <span>mes dépenses</span>
+                <span>Mes dépenses</span>
               </p>
               <h3>{userBudget} €</h3>
             </div>
@@ -593,53 +594,58 @@ function Budget() {
           transition={{ delay: 0.4 }}
         >
           <div className="expenses">
-            <div className="mobileExpenses">
-              <h5 className="titleExpenses">Dépenses</h5>
-              <button
-                type="button"
-                className="addButton"
-                onClick={() => setBudgetForm({ mode: "add" })}
-              >
-                <Plus size={20} />
-              </button>
-            </div>
+            <h5>Dépenses</h5>
             <section>
+              {listBudget.length === 0 && (
+                <p className="budgetEmpty">
+                  Aucune dépense pour l’instant. Ajoute la première avec le
+                  bouton « Ajouter une dépense ».
+                </p>
+              )}
               {listBudget.map((row) => {
+                const isMine = row.budget_id_user === userID;
+
                 return (
                   <article key={row.budget_id}>
-                    <span>
+                    <span className="expenseName">
                       {row.budget_name}
                       <span className="expenseAuthor">
                         {" "}
                         · {row.user_username}
                       </span>
                     </span>
-                    <span
-                      className={
-                        row.budget_id_user !== userID
-                          ? "price positif"
-                          : "price negatif"
-                      }
-                    >
-                      {row.budget_id_user !== userID
-                        ? `+${row.budget_price}`
-                        : `-${row.budget_price}`}
-                      €
-                      <div
-                        className={
-                          row.budget_id_user === userID ? "icons" : "Noicons"
-                        }
-                      >
-                        <Pen
-                          onClick={() =>
-                            setBudgetForm({ mode: "edit", budget: row })
-                          }
-                        />
-                        <Trash
-                          onClick={(e) => confirmDelete(e, row.budget_id)}
-                        />
+                    <div className="expenseRight">
+                      <span className={isMine ? "negatif" : "positif"}>
+                        {isMine
+                          ? `-${row.budget_price}`
+                          : `+${row.budget_price}`}
+                        €
+                      </span>
+                      {/* Vide sur les dépenses des autres : la largeur
+                          réservée garde les prix alignés. */}
+                      <div className="expenseManage">
+                        {isMine && (
+                          <>
+                            <button
+                              type="button"
+                              aria-label="Modifier la dépense"
+                              onClick={() =>
+                                setBudgetForm({ mode: "edit", budget: row })
+                              }
+                            >
+                              <Pen size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Supprimer la dépense"
+                              onClick={(e) => confirmDelete(e, row.budget_id)}
+                            >
+                              <Trash size={16} />
+                            </button>
+                          </>
+                        )}
                       </div>
-                    </span>
+                    </div>
                   </article>
                 );
               })}
@@ -647,7 +653,7 @@ function Budget() {
           </div>
 
           <div className="balance">
-            <h5>Equilibres</h5>
+            <h5>Équilibres</h5>
             <section>
               {listBalance.map((row) => {
                 return (
