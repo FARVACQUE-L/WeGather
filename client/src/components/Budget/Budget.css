@@ -88,6 +88,12 @@ body {
 
             transition: transform 0.2s;
 
+            /* Auteur de la dépense, en retrait par rapport à son nom. */
+            .expenseAuthor {
+              font-weight: normal;
+              color: var(--font-input);
+            }
+
             @media (hover: hover) and (min-width: 429px) {
               &:hover {
                 transform: translateX(5px);

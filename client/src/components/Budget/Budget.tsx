@@ -601,7 +601,13 @@ function Budget() {
               {listBudget.map((row) => {
                 return (
                   <article key={row.budget_id}>
-                    <span>{row.budget_name}</span>
+                    <span>
+                      {row.budget_name}
+                      <span className="expenseAuthor">
+                        {" "}
+                        · {row.user_username}
+                      </span>
+                    </span>
                     <span
                       className={
                         row.budget_id_user !== userID
