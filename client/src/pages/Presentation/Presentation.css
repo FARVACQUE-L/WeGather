@@ -639,7 +639,8 @@
     }
 
     @media (hover: hover) and (min-width: 429px) {
-      .footer-column-presentation a:hover {
+      .footer-column-presentation a:hover,
+      .footer-legal-presentation a:hover {
         color: white;
       }
     }
