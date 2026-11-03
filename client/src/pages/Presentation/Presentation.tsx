@@ -496,12 +496,7 @@ function Presentation() {
           </div>
           <div className="footer-column-presentation">
             <p>À vous de jouer</p>
-            <button type="button" onClick={goToEvents}>
-              Créer un événement
-            </button>
-            <button type="button" onClick={goToEvents}>
-              Rejoindre un événement
-            </button>
+            <Link to="/register">Créer un compte</Link>
             <Link to="/connexion">Se connecter</Link>
           </div>
           <div className="footer-column-presentation">

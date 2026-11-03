@@ -632,16 +632,6 @@
         line-height: 1.55;
         color: white;
       }
-
-      button {
-        padding: 0;
-        border: none;
-        background: none;
-        color: inherit;
-        font-family: "Be Vietnam Pro", sans-serif;
-        font-size: 13px;
-        cursor: pointer;
-      }
     }
 
     .footer-column-presentation:last-child {
@@ -649,8 +639,7 @@
     }
 
     @media (hover: hover) and (min-width: 429px) {
-      .footer-column-presentation a:hover,
-      .footer-column-presentation button:hover {
+      .footer-column-presentation a:hover {
         color: white;
       }
     }
