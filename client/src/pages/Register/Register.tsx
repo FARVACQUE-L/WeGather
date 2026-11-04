@@ -254,8 +254,12 @@ function Register() {
               onChange={(e) => setAcceptedTerms(e.target.checked)}
             />
             <label htmlFor="terms">
-              J'accepte les <span>conditions générales d'utilisation</span> de
-              WeGather
+              J'accepte les{" "}
+              {/* Nouvel onglet : la saisie du formulaire n'est pas perdue. */}
+              <Link to="/CGV" target="_blank" rel="noopener noreferrer">
+                conditions générales d'utilisation
+              </Link>{" "}
+              de WeGather
             </label>
           </div>
           <button
