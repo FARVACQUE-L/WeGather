@@ -1,5 +1,10 @@
 import "./Presentation.css";
-import { MotionConfig, motion, type Variants } from "framer-motion";
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  type Variants,
+} from "framer-motion";
 import {
   ArrowDown,
   ArrowUp,
@@ -895,13 +900,31 @@ function Presentation() {
                     onClick={() => setOpenQuestion(isOpen ? null : question)}
                   >
                     {question}
-                    {isOpen ? (
-                      <Minus size={20} {...iconProps} />
-                    ) : (
-                      <Plus size={20} {...iconProps} />
-                    )}
+                    <motion.span
+                      className="faq-icon-presentation"
+                      animate={{ rotate: isOpen ? 180 : 0 }}
+                      transition={{ duration: 0.3, ease }}
+                    >
+                      {isOpen ? (
+                        <Minus size={20} {...iconProps} />
+                      ) : (
+                        <Plus size={20} {...iconProps} />
+                      )}
+                    </motion.span>
                   </button>
-                  {isOpen && <p>{answer}</p>}
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        className="faq-answer-presentation"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease }}
+                      >
+                        <p>{answer}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               );
             })}

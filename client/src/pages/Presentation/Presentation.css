@@ -1213,6 +1213,20 @@
         line-height: 1.55;
         text-align: left;
         cursor: pointer;
+        transition:
+          padding 0.3s ease-out,
+          font-size 0.3s ease-out;
+      }
+
+      .faq-icon-presentation {
+        display: flex;
+        flex-shrink: 0;
+      }
+
+      /* Hauteur animée à l'ouverture : le texte est rogné pendant le
+         déroulé, et la marge est dans le paragraphe pour suivre la hauteur. */
+      .faq-answer-presentation {
+        overflow: hidden;
       }
 
       p {
