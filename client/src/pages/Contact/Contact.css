@@ -86,6 +86,11 @@
     color: var(--font-input);
   }
 
+  .Contact-Actions {
+    display: flex;
+    flex-direction: column;
+  }
+
   .Contact-Button {
     display: flex;
     align-items: center;

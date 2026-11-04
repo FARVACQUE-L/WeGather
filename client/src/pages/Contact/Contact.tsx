@@ -1,3 +1,9 @@
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  type Variants,
+} from "framer-motion";
 import { Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
@@ -19,6 +25,19 @@ const SUBJECTS = [
   "Partenariat",
   "Autre",
 ];
+
+// Animations dans le style du reste du site : le titre descend, puis les
+// champs du formulaire arrivent les uns après les autres.
+const formVariants: Variants = {
+  hidden: {},
+  visible: { transition: { delayChildren: 0.2, staggerChildren: 0.08 } },
+  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+};
+
+const fieldVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+};
 
 // Page publique : le menu du profil n'apparaît que pour un utilisateur
 // connecté.
@@ -84,140 +103,195 @@ function Contact() {
   };
 
   return (
-    <div className="cgv-Layout">
-      <header className="cvg-HeaderNav">
-        <NavBar />
-        {isLoggedIn && <Profil />}
-      </header>
-      <main className="cgv-Page">
-        <h1>Nous contacter</h1>
-        <p className="cgv-Updated">
-          Une question, un souci, une idée ? L'équipe WeGather vous répond par
-          e-mail.
-        </p>
+    <MotionConfig reducedMotion="user">
+      <div className="cgv-Layout">
+        <header className="cvg-HeaderNav">
+          <NavBar />
+          {isLoggedIn && <Profil />}
+        </header>
+        <main className="cgv-Page">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            Nous contacter
+          </motion.h1>
+          <motion.p
+            className="cgv-Updated"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            Une question, un souci, une idée ? L'équipe WeGather vous répond par
+            e-mail.
+          </motion.p>
 
-        {status === "sent" ? (
-          <div className="Contact-Sent" role="status">
-            <h3>Message envoyé, merci !</h3>
-            <p>
-              Nous l'avons bien reçu et vous répondrons à l'adresse{" "}
-              <strong>{email}</strong> dès que possible.
-            </p>
-            <button
-              type="button"
-              className="Contact-Button"
-              onClick={resetForm}
-            >
-              Envoyer un autre message
-            </button>
-          </div>
-        ) : (
-          <form className="Contact-Form" onSubmit={handleSubmit}>
-            <div className="Contact-Row">
-              <div className="Contact-Field">
-                <label htmlFor="contact-name">Nom</label>
-                <input
-                  id="contact-name"
-                  type="text"
-                  autoComplete="name"
-                  maxLength={100}
-                  placeholder="Ex : Camille Martin"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="Contact-Field">
-                <label htmlFor="contact-email">Adresse e-mail</label>
-                <input
-                  id="contact-email"
-                  type="email"
-                  autoComplete="email"
-                  maxLength={100}
-                  placeholder="nom@exemple.fr"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="Contact-Field">
-              <label htmlFor="contact-subject">Sujet</label>
-              <select
-                id="contact-subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
+          <AnimatePresence mode="wait">
+            {status === "sent" ? (
+              <motion.div
+                key="sent"
+                className="Contact-Sent"
+                role="status"
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                {SUBJECTS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <h3>Message envoyé, merci !</h3>
+                <p>
+                  Nous l'avons bien reçu et vous répondrons à l'adresse{" "}
+                  <strong>{email}</strong> dès que possible.
+                </p>
+                <button
+                  type="button"
+                  className="Contact-Button"
+                  onClick={resetForm}
+                >
+                  Envoyer un autre message
+                </button>
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                className="Contact-Form"
+                onSubmit={handleSubmit}
+                variants={formVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <motion.div className="Contact-Row" variants={fieldVariants}>
+                  <div className="Contact-Field">
+                    <label htmlFor="contact-name">Nom</label>
+                    <input
+                      id="contact-name"
+                      type="text"
+                      autoComplete="name"
+                      maxLength={100}
+                      placeholder="Ex : Camille Martin"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
 
-            <div className="Contact-Field">
-              <label htmlFor="contact-message">Message</label>
-              <textarea
-                id="contact-message"
-                rows={7}
-                minLength={MESSAGE_MIN}
-                maxLength={MESSAGE_MAX}
-                placeholder="Décrivez votre demande…"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                required
-              />
-              <span className="Contact-Counter">
-                {message.length} / {MESSAGE_MAX}
-              </span>
-            </div>
+                  <div className="Contact-Field">
+                    <label htmlFor="contact-email">Adresse e-mail</label>
+                    <input
+                      id="contact-email"
+                      type="email"
+                      autoComplete="email"
+                      maxLength={100}
+                      placeholder="nom@exemple.fr"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                </motion.div>
 
-            {/* Hors écran et ignoré au clavier et par les lecteurs d'écran. */}
-            <div className="Contact-Trap" aria-hidden="true">
-              <label htmlFor="contact-website">Site web</label>
-              <input
-                id="contact-website"
-                type="text"
-                tabIndex={-1}
-                autoComplete="off"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-              />
-            </div>
+                <motion.div className="Contact-Field" variants={fieldVariants}>
+                  <label htmlFor="contact-subject">Sujet</label>
+                  <select
+                    id="contact-subject"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                  >
+                    {SUBJECTS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </motion.div>
 
-            {error && (
-              <p className="Contact-Error" role="alert">
-                {error}
-              </p>
+                <motion.div className="Contact-Field" variants={fieldVariants}>
+                  <label htmlFor="contact-message">Message</label>
+                  <textarea
+                    id="contact-message"
+                    rows={7}
+                    minLength={MESSAGE_MIN}
+                    maxLength={MESSAGE_MAX}
+                    placeholder="Décrivez votre demande…"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    required
+                  />
+                  <span className="Contact-Counter">
+                    {message.length} / {MESSAGE_MAX}
+                  </span>
+                </motion.div>
+
+                {/* Hors écran et ignoré au clavier et par les lecteurs d'écran. */}
+                <div className="Contact-Trap" aria-hidden="true">
+                  <label htmlFor="contact-website">Site web</label>
+                  <input
+                    id="contact-website"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                  />
+                </div>
+
+                <AnimatePresence>
+                  {error && (
+                    <motion.p
+                      key={error}
+                      className="Contact-Error"
+                      role="alert"
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+
+                <motion.p className="Contact-Notice" variants={fieldVariants}>
+                  Votre nom, votre adresse e-mail et votre message sont transmis
+                  à l'équipe WeGather, via Discord, uniquement pour vous
+                  répondre. Voir la{" "}
+                  <Link to="/confidentialite">
+                    politique de confidentialité
+                  </Link>
+                  .
+                </motion.p>
+
+                {/* L'animation est sur l'enveloppe : sur le bouton, elle
+                    écraserait l'effet de survol (transform) de Contact.css. */}
+                <motion.div
+                  className="Contact-Actions"
+                  variants={fieldVariants}
+                >
+                  <button
+                    type="submit"
+                    className="Contact-Button"
+                    disabled={status === "sending"}
+                  >
+                    <Send size={16} />
+                    {status === "sending" ? "Envoi…" : "Envoyer"}
+                  </button>
+                </motion.div>
+              </motion.form>
             )}
+          </AnimatePresence>
 
-            <p className="Contact-Notice">
-              Votre nom, votre adresse e-mail et votre message sont transmis à
-              l'équipe WeGather, via Discord, uniquement pour vous répondre.
-              Voir la{" "}
-              <Link to="/confidentialite">politique de confidentialité</Link>.
-            </p>
-
-            <button
-              type="submit"
-              className="Contact-Button"
-              disabled={status === "sending"}
-            >
-              <Send size={16} />
-              {status === "sending" ? "Envoi…" : "Envoyer"}
-            </button>
-          </form>
-        )}
-
-        <p className="Contact-Alternative">
-          Vous préférez l'e-mail ? Écrivez-nous à{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
-        </p>
-      </main>
-    </div>
+          <motion.p
+            className="Contact-Alternative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.7 }}
+          >
+            Vous préférez l'e-mail ? Écrivez-nous à{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+          </motion.p>
+        </main>
+      </div>
+    </MotionConfig>
   );
 }
 
