@@ -628,8 +628,8 @@ function Presentation() {
             </div>
             <h3>Les bons comptes font les bons moments.</h3>
             <p className="tool-description-presentation">
-              Ajoutez les dépenses et répartissez les frais avec le tricount
-              intégré. Chacun sait ce qu’il a payé et ce qu’il lui reste à
+              Ajoutez les dépenses et répartissez les frais entre les
+              participants. Chacun sait ce qu’il a payé et ce qu’il lui reste à
               régler.
             </p>
             <div
