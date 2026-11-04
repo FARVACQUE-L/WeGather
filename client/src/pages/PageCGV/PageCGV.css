@@ -202,3 +202,14 @@
     }
   }
 }
+
+/* Les sections s'affichent au défilement : à l'impression (formulaire de
+   rétractation par exemple), celles pas encore vues resteraient invisibles. */
+@media print {
+  .cgv-Layout .cgv-Page :is(h1, h2, p, section) {
+    /* biome-ignore lint/complexity/noImportantStyles: seul moyen de passer devant les styles en ligne de framer-motion */
+    opacity: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: idem */
+    transform: none !important;
+  }
+}
