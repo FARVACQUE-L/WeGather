@@ -271,6 +271,11 @@ const faq = [
     answer:
       "Dans l’espace de votre événement : l’onglet Réservations rassemble vos billets et confirmations, et l’onglet Budget suit qui a payé quoi.",
   },
+  {
+    question: "Comment ajouter mes billets à une réservation ?",
+    answer:
+      "Dans l’onglet Réservations, joignez vos billets en créant la réservation, ou plus tard avec « Ajouter un billet » sur sa carte. Un PDF ou une capture d’écran suffit, par exemple celle de votre code-barres ou de votre QR code, jusqu’à 5 documents par réservation. Le jour venu, touchez le billet sur la carte puis « Ouvrir » pour le présenter au contrôle.",
+  },
 ];
 
 function Presentation() {
