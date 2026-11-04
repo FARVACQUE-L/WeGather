@@ -520,7 +520,7 @@ function Presentation() {
               <MessagesSquare size={24} {...iconProps} />
               <span>02 / 05</span>
             </div>
-            <h3>Le bon message, à la bonne personne.</h3>
+            <h3>Tout le groupe. Une seule conversation.</h3>
             <p className="tool-description-presentation">
               Échangez en direct avec les membres de l’événement. Une question,
               un détail à caler : la conversation reste à portée de main.
