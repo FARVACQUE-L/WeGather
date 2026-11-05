@@ -1,4 +1,5 @@
 import type { RequestHandler } from "express";
+import { clientIp } from "../../middleware/rateLimit";
 
 export const CONTACT_SUBJECTS = [
   "Question",
@@ -20,15 +21,6 @@ let sentGlobal: number[] = [];
 
 const recent = (timestamps: number[], now: number) =>
   timestamps.filter((time) => now - time < WINDOW_MS);
-
-const clientIp: (req: Parameters<RequestHandler>[0]) => string = (req) => {
-  const forwarded = req.headers["x-forwarded-for"];
-  const last = (Array.isArray(forwarded) ? forwarded.join(",") : forwarded)
-    ?.split(",")
-    .pop()
-    ?.trim();
-  return last || req.ip || "unknown";
-};
 
 const pruneIps = (now: number) => {
   for (const [ip, timestamps] of sentByIp) {

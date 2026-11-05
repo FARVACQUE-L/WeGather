@@ -1,5 +1,6 @@
 import express from "express";
 import authorization from "../../middleware/auth";
+import { joinEventLimit } from "../../middleware/rateLimit";
 import upload, { verifyFileSignatures } from "../../middleware/upload";
 import eventActions from "./eventActions";
 
@@ -12,7 +13,12 @@ eventRoutes.get(
   eventActions.readEventName,
 );
 eventRoutes.get("/api/events/:eventUuid", authorization, eventActions.read);
-eventRoutes.post("/api/events/join", authorization, eventActions.join);
+eventRoutes.post(
+  "/api/events/join",
+  authorization,
+  joinEventLimit,
+  eventActions.join,
+);
 eventRoutes.post(
   "/api/events",
   authorization,

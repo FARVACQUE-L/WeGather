@@ -157,9 +157,11 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
     }
   };
   const handleDeleteUserJoining = async () => {
+    if (!eventUuid) return;
+
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/euj/delete/${userId}`,
+        `${import.meta.env.VITE_API_URL}/api/events/${eventUuid}/leave`,
         {
           method: "DELETE",
           credentials: "include",

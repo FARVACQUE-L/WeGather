@@ -2,6 +2,7 @@ import { MapPin, PencilLine, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import Swal from "sweetalert2";
+import { imageUrl } from "../../helper/imageUrl";
 import type { CardEventsProps, EventData } from "../../types/Events";
 import ModalEditEvent from "./ModalEditEvent";
 import "./CardEvents.css";
@@ -107,7 +108,7 @@ function CardEvents({
           <div className="CardEvents-ImageDate">
             <img
               className="CardEvents-Image"
-              src={currentImage}
+              src={imageUrl(currentImage)}
               alt={imageAlt}
             />
             <time className="CardEvents-Date">

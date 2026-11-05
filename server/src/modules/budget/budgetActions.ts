@@ -1,14 +1,40 @@
 import type { RequestHandler } from "express";
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
+import {
+  asPrice,
+  asText,
+  isId,
+  isText,
+  LIMITS,
+  MAX_PRICE,
+} from "../../helper/validation";
 import eventRepository from "../event/eventRepository";
 import budgetRepository from "./budgetRepository";
 
+const readExpense = (
+  body: Record<string, unknown>,
+): { message: string } | { name: string; price: number } => {
+  if (!isText(body.name, LIMITS.budgetName)) {
+    return {
+      message: `Le nom de la dépense doit contenir entre 1 et ${LIMITS.budgetName} caractères.`,
+    };
+  }
+
+  const price = asPrice(body.price);
+  if (price === null) {
+    return {
+      message: `Le montant doit être un nombre entre 0 et ${MAX_PRICE.toLocaleString("fr-FR")} €.`,
+    };
+  }
+
+  return { name: asText(body.name), price };
+};
+
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
+
     const budget = await budgetRepository.readByEvent(eventId);
 
     res.json(budget);
@@ -19,11 +45,9 @@ const browse: RequestHandler = async (req, res, next) => {
 
 const browseTotalUser: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
+
     const budget = await budgetRepository.readAllTotalBudgetByEvent(eventId);
 
     res.json(budget);
@@ -34,11 +58,9 @@ const browseTotalUser: RequestHandler = async (req, res, next) => {
 
 const browseEvent: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
+
     const budget = await budgetRepository.readBudgetInfoEvent(eventId);
 
     res.json(budget);
@@ -49,17 +71,22 @@ const browseEvent: RequestHandler = async (req, res, next) => {
 
 const create: RequestHandler = async (req, res, next) => {
   try {
-    const event = await eventRepository.readIdByUuid(req.body.event_uuid);
-    const user = Number(req.body.id_user);
-    const name = String(req.body.name);
-    const price = Number(req.body.price);
+    const eventId = await readMemberEventId(req, res, req.body.event_uuid);
+    if (!eventId || !req.user) return;
 
-    if (!event) {
-      res.sendStatus(404);
+    const expense = readExpense(req.body);
+    if ("message" in expense) {
+      res.status(400).json({ message: expense.message });
       return;
     }
+    const { name, price } = expense;
 
-    const budget = await budgetRepository.create(event, user, name, price);
+    const budget = await budgetRepository.create(
+      eventId,
+      req.user.id,
+      name,
+      price,
+    );
 
     res.json(budget);
   } catch (err) {
@@ -67,15 +94,62 @@ const create: RequestHandler = async (req, res, next) => {
   }
 };
 
+const readManagedBudget = async (
+  req: Parameters<RequestHandler>[0],
+  res: Parameters<RequestHandler>[1],
+  budgetId: number,
+) => {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return undefined;
+  }
+
+  if (!isId(budgetId)) {
+    res.status(400).json({ message: "Identifiant invalide." });
+    return undefined;
+  }
+
+  const budget = await budgetRepository.read(budgetId);
+  if (!budget) {
+    res.sendStatus(404);
+    return undefined;
+  }
+
+  const isAuthor =
+    budget.budget_id_user === req.user.id &&
+    (await isEventMember(budget.budget_id_event, req.user.id));
+  const [event] = await eventRepository.readEventHostId(budget.budget_id_event);
+  const isHost = event?.event_id_host === req.user.id;
+
+  if (!isAuthor && !isHost) {
+    res
+      .status(403)
+      .json({ message: "Vous ne pouvez pas gérer cette dépense." });
+    return undefined;
+  }
+
+  return budget;
+};
+
 const update: RequestHandler = async (req, res, next) => {
   try {
-    const id_budget = Number(req.body.id_budget);
-    const name = String(req.body.name);
-    const price = Number(req.body.price);
+    const budget = await readManagedBudget(
+      req,
+      res,
+      Number(req.body.id_budget),
+    );
+    if (!budget) return;
 
-    const budget = await budgetRepository.update(id_budget, name, price);
+    const expense = readExpense(req.body);
+    if ("message" in expense) {
+      res.status(400).json({ message: expense.message });
+      return;
+    }
+    const { name, price } = expense;
 
-    res.json(budget);
+    const result = await budgetRepository.update(budget.budget_id, name, price);
+
+    res.json(result);
   } catch (err) {
     next(err);
   }
@@ -83,11 +157,12 @@ const update: RequestHandler = async (req, res, next) => {
 
 const destroy: RequestHandler = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const budget = await readManagedBudget(req, res, Number(req.params.id));
+    if (!budget) return;
 
-    const budget = await budgetRepository.delete(id);
+    const result = await budgetRepository.delete(budget.budget_id);
 
-    res.json(budget);
+    res.json(result);
   } catch (err) {
     next(err);
   }

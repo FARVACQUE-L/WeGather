@@ -1,9 +1,12 @@
 import express from "express";
 import authorization from "../../middleware/auth";
 import upload, { verifyFileSignatures } from "../../middleware/upload";
+import { validateIds } from "../../middleware/validateIds";
 import galleryActions from "./galleryActions";
 
 const galleryRoutes = express.Router();
+
+validateIds(galleryRoutes, "gallery_id", "id", "userId");
 
 galleryRoutes.get(
   "/api/gallery/:eventUuid",

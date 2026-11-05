@@ -1,20 +1,80 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
+import { readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeReservationDocument } from "../../helper/removeReservationDocument";
 import { removeUpload } from "../../helper/removeUpload";
+import { asText, isDate, isText, LIMITS } from "../../helper/validation";
 import reservationDocumentRepository from "../reservation/reservationDocumentRepository";
 import userRepository from "../user/userRepository";
 import eventRepository from "./eventRepository";
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const userId = Number(req.query.userId);
-    const events = await eventRepository.readAll(userId);
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const events = await eventRepository.readAll(req.user.id);
     res.json(events);
   } catch (error) {
     next(error);
   }
+};
+
+type EventFields = {
+  event_name: string;
+  event_date_start: string;
+  event_date_end: string;
+  event_description: string;
+  event_location: string;
+};
+
+const validateEventFields = (
+  body: Record<string, unknown>,
+  current?: EventFields,
+): { message: string } | { fields: EventFields } => {
+  const pick = (key: keyof EventFields) =>
+    body[key] === undefined && current ? current[key] : asText(body[key]);
+
+  const fields: EventFields = {
+    event_name: pick("event_name"),
+    event_date_start: pick("event_date_start"),
+    event_date_end: pick("event_date_end"),
+    event_description: pick("event_description"),
+    event_location: pick("event_location"),
+  };
+
+  if (
+    !fields.event_name ||
+    !fields.event_date_start ||
+    !fields.event_date_end ||
+    !fields.event_description ||
+    !fields.event_location
+  ) {
+    return { message: "Veuillez remplir tous les champs." };
+  }
+
+  if (
+    !isText(fields.event_name, LIMITS.eventName) ||
+    !isText(fields.event_description, LIMITS.eventDescription) ||
+    !isText(fields.event_location, LIMITS.eventLocation)
+  ) {
+    return {
+      message: `Le nom (${LIMITS.eventName} caractères), la description (${LIMITS.eventDescription}) et le lieu (${LIMITS.eventLocation}) sont trop longs.`,
+    };
+  }
+
+  if (!isDate(fields.event_date_start) || !isDate(fields.event_date_end)) {
+    return { message: "Dates invalides." };
+  }
+
+  if (fields.event_date_end < fields.event_date_start) {
+    return { message: "La date de fin doit être après la date de début." };
+  }
+
+  return { fields };
 };
 
 const add: RequestHandler = async (req, res, next) => {
@@ -24,31 +84,17 @@ const add: RequestHandler = async (req, res, next) => {
   }
 
   const event_id_host = req.user.id;
+  const validation = validateEventFields(req.body);
 
-  const {
-    event_name,
-    event_date_start,
-    event_date_end,
-    event_description,
-    event_location,
-  } = req.body;
-
-  if (
-    !event_name ||
-    !event_date_start ||
-    !event_date_end ||
-    !event_description ||
-    !event_location
-  ) {
+  if ("message" in validation) {
     if (req.file) fs.rmSync(req.file.path, { force: true });
-    res.status(400).json({ message: "Veuillez remplir tous les champs." });
+    res.status(400).json({ message: validation.message });
     return;
   }
 
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
   const event_picture = req.file
-    ? `${baseUrl}/uploads/${req.file.filename}`
-    : `${baseUrl}/assets/images/logo-wegather.png`;
+    ? `/uploads/${req.file.filename}`
+    : "/assets/images/logo-wegather.png";
 
   try {
     const { hostedEvents: maxHostedEvents } = getPlanLimits(
@@ -64,13 +110,9 @@ const add: RequestHandler = async (req, res, next) => {
     }
 
     const insertId = await eventRepository.create({
-      event_name,
-      event_date_start,
-      event_date_end,
+      ...validation.fields,
       event_id_host,
       event_picture,
-      event_description,
-      event_location,
     });
     const newEvent = await eventRepository.read(insertId);
     res.status(201).json(newEvent);
@@ -86,10 +128,10 @@ const join: RequestHandler = async (req, res, next) => {
   }
 
   const user_id = req.user.id;
-  const { event_link_key } = req.body;
+  const event_link_key = asText(req.body.event_link_key).toUpperCase();
 
-  if (!event_link_key || !user_id) {
-    res.status(400).json({ message: "Code et utilisateur requis." });
+  if (!/^[A-Z0-9]{6}$/.test(event_link_key)) {
+    res.status(400).json({ message: "Le code doit contenir 6 caractères." });
     return;
   }
 
@@ -129,6 +171,9 @@ const join: RequestHandler = async (req, res, next) => {
 
 const read: RequestHandler = async (req, res, next) => {
   try {
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
+
     const event = await eventRepository.readByUuid(req.params.eventUuid);
 
     if (!event) {
@@ -167,17 +212,7 @@ const readHostedEvent = async (
 };
 
 const edit: RequestHandler = async (req, res, next) => {
-  const {
-    event_name,
-    event_date_start,
-    event_date_end,
-    event_description,
-    event_location,
-  } = req.body;
-
-  const event_picture = req.file
-    ? `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`
-    : undefined;
+  const event_picture = req.file ? `/uploads/${req.file.filename}` : undefined;
 
   try {
     const event = await readHostedEvent(req, res);
@@ -187,12 +222,16 @@ const edit: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    const validation = validateEventFields(req.body, event);
+
+    if ("message" in validation) {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+      res.status(400).json({ message: validation.message });
+      return;
+    }
+
     await eventRepository.update(event.event_id, {
-      event_name,
-      event_date_start,
-      event_date_end,
-      event_description,
-      event_location,
+      ...validation.fields,
       event_picture,
     });
     if (req.file) await removeUpload(event.event_picture);
@@ -223,12 +262,8 @@ const deleteEvent: RequestHandler = async (req, res, next) => {
 };
 const readEventHostId: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const rows = await eventRepository.readEventHostId(eventId);
 
@@ -239,12 +274,8 @@ const readEventHostId: RequestHandler = async (req, res, next) => {
 };
 const readEventName: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.status(404).json({ message: "eventUuid invalide" });
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const event = await eventRepository.readEventName(eventId);
 

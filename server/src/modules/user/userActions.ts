@@ -1,9 +1,23 @@
 import crypto from "node:crypto";
+import fs from "node:fs";
 import argon2 from "argon2";
 import type { RequestHandler } from "express";
 import nodemailer from "nodemailer";
-import { encodeJWT } from "../../helper/jwtHelper";
-import eventRepository from "../event/eventRepository";
+import {
+  isValidEmail,
+  isValidPassword,
+  isValidUsername,
+  PASSWORD_RULES_MESSAGE,
+} from "../../helper/credentials";
+import { readMemberEventId } from "../../helper/eventMembership";
+import {
+  encodeJWT,
+  passwordFingerprint,
+  sessionCookie,
+  sessionCookieOptions,
+} from "../../helper/jwtHelper";
+import { removeUpload } from "../../helper/removeUpload";
+import { disconnectUser } from "../../socket";
 import userRepository from "./userRepository";
 
 const authVerif: RequestHandler = async (req, res, next) => {
@@ -15,8 +29,10 @@ const authVerif: RequestHandler = async (req, res, next) => {
 
     const user = await userRepository.readUserAdmin(req.user.id);
 
+    const { pwd: _pwd, ...publicUser } = req.user;
+
     res.status(200).json({
-      ...req.user,
+      ...publicUser,
       isAdmin: Boolean(user?.user_is_admin),
       isSuperAdmin: Boolean(user?.user_is_superadmin),
       plan: user?.user_plan ?? "free",
@@ -34,36 +50,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const browseInscription: RequestHandler = async (_req, res, next) => {
+const readUserName: RequestHandler = async (req, res, next) => {
   try {
-    const users = await userRepository.readAll();
-
-    res.json(users);
-  } catch (err) {
-    next(err);
-  }
-};
-
-const read: RequestHandler = async (req, res, next) => {
-  try {
-    const userId = Number(req.params.id);
-
-    const user = await userRepository.read(userId);
-
-    if (!user) {
-      res.sendStatus(404);
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    res.json(user);
-  } catch (err) {
-    next(err);
-  }
-};
-
-const readUserName: RequestHandler = async (req, res, next) => {
-  try {
-    const userId = Number(req.params.id);
+    const userId = req.user.id;
 
     const userName = await userRepository.readUserName(userId);
 
@@ -78,13 +72,64 @@ const readUserName: RequestHandler = async (req, res, next) => {
   }
 };
 
+const escapeHtml = (text: string) =>
+  text.replace(
+    /[&<>"']/g,
+    (char) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        char
+      ] as string,
+  );
+
+const createSession = (
+  res: Parameters<RequestHandler>[1],
+  user: {
+    user_id: number;
+    user_username: string;
+    user_mail: string;
+    user_password: string;
+    user_is_admin: number;
+  },
+) => {
+  const token = encodeJWT({
+    id: user.user_id,
+    username: user.user_username,
+    email: user.user_mail,
+    isAdmin: Boolean(user.user_is_admin),
+    pwd: passwordFingerprint(user.user_password),
+  });
+
+  res.cookie(...sessionCookie(token));
+};
+
 const add: RequestHandler = async (req, res, next) => {
   try {
-    const hashedPassword = await argon2.hash(req.body.password);
+    const username =
+      typeof req.body.username === "string" ? req.body.username.trim() : "";
+    const email =
+      typeof req.body.email === "string" ? req.body.email.trim() : "";
+
+    if (!isValidUsername(username)) {
+      res
+        .status(400)
+        .json({ message: "Le pseudo doit contenir entre 3 et 45 caractères." });
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      res.status(400).json({ message: "Adresse e-mail invalide." });
+      return;
+    }
+
+    if (!isValidPassword(req.body.password)) {
+      res.status(400).json({ message: PASSWORD_RULES_MESSAGE });
+      return;
+    }
+
     const newUser = {
-      username: req.body.username,
-      email: req.body.email,
-      password: hashedPassword,
+      username,
+      email,
+      password: await argon2.hash(req.body.password),
     };
 
     const existingUsername = await userRepository.findByEmailOrUsername(
@@ -112,65 +157,66 @@ const add: RequestHandler = async (req, res, next) => {
       insertId,
     });
 
-    transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: newUser.email,
-      subject: "Bienvenue sur WeGather",
-      html: `
+    transporter
+      .sendMail({
+        from: process.env.EMAIL_USER,
+        to: newUser.email,
+        subject: "Bienvenue sur WeGather",
+        html: `
     <h1>Bienvenue sur WeGather 🎉</h1>
     <p>Votre compte a été créé avec succès.</p>
-    <p>Pseudo : ${newUser.username}</p>
+    <p>Pseudo : ${escapeHtml(newUser.username)}</p>
   `,
-    });
+      })
+      .catch((err) => console.error("Échec de l'envoi du mail :", err));
     return;
   } catch (err) {
     next(err);
   }
 };
 
+const RESET_TOKEN_DURATION_MS = 1000 * 60 * 30;
+
+const hashResetToken = (token: string) =>
+  crypto.createHash("sha256").update(token).digest("hex");
+
+let dummyHash: Promise<string> | null = null;
+
+const verifyAgainstDummy = async (password: string) => {
+  dummyHash ??= argon2.hash("mot-de-passe-factice-WeGather-1!");
+  await argon2.verify(await dummyHash, password);
+};
+
 const login: RequestHandler = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user =
-      typeof email === "string"
-        ? await userRepository.findByEmail(email.trim())
-        : null;
-
-    if (!user) {
-      res.status(401).json({
-        message: "Utilisateur introuvable",
-      });
+    if (typeof email !== "string" || typeof password !== "string") {
+      res.status(401).json({ message: "Email ou mot de passe incorrect" });
       return;
     }
 
-    const isPasswordValid = await argon2.verify(user.user_password, password);
+    const user = await userRepository.findByEmail(email.trim());
+
+    if (!user) {
+      await verifyAgainstDummy(password);
+      res.status(401).json({ message: "Email ou mot de passe incorrect" });
+      return;
+    }
+
+    if (!(await argon2.verify(user.user_password, password))) {
+      res.status(401).json({ message: "Email ou mot de passe incorrect" });
+      return;
+    }
+
     if (user.user_is_ban) {
       res.status(403).json({
         message: "Votre compte a été banni.",
       });
       return;
     }
-    if (!isPasswordValid) {
-      res.status(401).json({
-        message: "Mot de passe incorrect",
-      });
-      return;
-    }
 
-    const token = encodeJWT({
-      id: user.user_id,
-      username: user.user_username,
-      email: user.user_mail,
-      isAdmin: Boolean(user.user_is_admin),
-    });
-
-    res.cookie("auth_token", `Bearer ${token}`, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      maxAge: 1000 * 60 * 60 * 24 * 30,
-    });
+    createSession(res, user);
 
     res.status(200).json({
       message: "Connexion réussie",
@@ -186,11 +232,7 @@ const login: RequestHandler = async (req, res, next) => {
   }
 };
 const logout: RequestHandler = (_req, res) => {
-  res.clearCookie("auth_token", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-  });
+  res.clearCookie("auth_token", sessionCookieOptions());
 
   res.status(200).json({
     message: "Déconnexion réussie",
@@ -198,12 +240,8 @@ const logout: RequestHandler = (_req, res) => {
 };
 const readUserDescriptionEvent: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const event = await userRepository.readUserDescriptionEvent(eventId);
 
@@ -223,34 +261,39 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
     }
 
     const user = await userRepository.findByEmail(email.trim());
+    const token = crypto.randomBytes(32).toString("hex");
 
-    if (!user) {
-      res.status(401).json({
-        message: "Email incorrect",
-      });
-      return;
+    if (user) {
+      const expires = Date.now() + RESET_TOKEN_DURATION_MS;
+      await userRepository.saveResetToken(
+        user.user_id,
+        hashResetToken(token),
+        expires,
+      );
     }
 
-    const token = crypto.randomBytes(32).toString("hex");
-    const expires = Date.now() + 1000 * 60 * 3;
+    res.json({
+      message:
+        "Si un compte existe avec cette adresse, un lien de réinitialisation vient d'être envoyé.",
+    });
 
-    await userRepository.saveResetToken(user.user_id, token, expires);
+    if (!user) return;
 
     const link = `${process.env.CLIENT_URL}/resetpassword?token=${token}`;
 
-    res.json({ message: "Lien envoyé" });
-
-    transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.user_mail,
-      subject: "Réinitialisation du mot de passe",
-      html: `
+    transporter
+      .sendMail({
+        from: process.env.EMAIL_USER,
+        to: user.user_mail,
+        subject: "Réinitialisation du mot de passe",
+        html: `
     <h1>WeGather</h1>
     <h2>Réinitialisation du mot de passe</h2>
     <p>Cliquez sur le lien suivant :</p>
     <a href="${link}">${link}</a>
   `,
-    });
+      })
+      .catch((err) => console.error("Échec de l'envoi du mail :", err));
   } catch (err) {
     next(err);
   }
@@ -260,7 +303,17 @@ const resetPassword: RequestHandler = async (req, res, next) => {
   try {
     const { token, password } = req.body;
 
-    const user = await userRepository.findByResetToken(token);
+    if (typeof token !== "string" || !token) {
+      res.status(401).json({ message: "Token invalide" });
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      res.status(400).json({ message: PASSWORD_RULES_MESSAGE });
+      return;
+    }
+
+    const user = await userRepository.findByResetToken(hashResetToken(token));
 
     if (!user) {
       res.status(401).json({ message: "Token invalide" });
@@ -282,6 +335,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
     }
     const hashedPassword = await argon2.hash(password);
     await userRepository.resetPassword(user.user_id, hashedPassword);
+    disconnectUser(user.user_id);
 
     res.json({
       message: "Mot de passe modifié avec succès",
@@ -313,7 +367,17 @@ const changePassword: RequestHandler = async (req, res, next) => {
     const userId = req.user.id;
     const { currentPassword, newPassword } = req.body;
 
-    const user = await userRepository.read(userId);
+    if (typeof currentPassword !== "string") {
+      res.status(400).json({ message: "Ancien mot de passe incorrect" });
+      return;
+    }
+
+    if (!isValidPassword(newPassword)) {
+      res.status(400).json({ message: PASSWORD_RULES_MESSAGE });
+      return;
+    }
+
+    const user = await userRepository.findById(userId);
 
     if (!user) {
       res.status(404).json({
@@ -322,7 +386,7 @@ const changePassword: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const isValid = await argon2.verify(user.password, currentPassword);
+    const isValid = await argon2.verify(user.user_password, currentPassword);
 
     if (!isValid) {
       res.status(400).json({
@@ -331,7 +395,7 @@ const changePassword: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const samePassword = await argon2.verify(user.password, newPassword);
+    const samePassword = await argon2.verify(user.user_password, newPassword);
 
     if (samePassword) {
       res.status(400).json({
@@ -343,17 +407,22 @@ const changePassword: RequestHandler = async (req, res, next) => {
     const hashedPassword = await argon2.hash(newPassword);
 
     await userRepository.resetPassword(userId, hashedPassword);
+    disconnectUser(userId);
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "Mot de passe modifié",
-      html: `
+    createSession(res, { ...user, user_password: hashedPassword });
+
+    transporter
+      .sendMail({
+        from: process.env.EMAIL_USER,
+        to: user.user_mail,
+        subject: "Mot de passe modifié",
+        html: `
         <h1>WeGather</h1>
         <p>Votre mot de passe a été modifié avec succès.</p>
         <p>Si ce n’était pas vous, contactez le support client.</p>
       `,
-    });
+      })
+      .catch((_err) => {});
 
     res.status(200).json({
       message: "Mot de passe modifié avec succès",
@@ -365,16 +434,25 @@ const changePassword: RequestHandler = async (req, res, next) => {
 
 const uploadPhoto: RequestHandler = async (req, res, next) => {
   try {
-    const userId = Number(req.params.id);
-
     if (!req.file) {
       res.status(400).json({ message: "Aucune image envoyée" });
       return;
     }
 
+    if (!req.user || Number(req.params.id) !== req.user.id) {
+      fs.rmSync(req.file.path, { force: true });
+      res
+        .status(403)
+        .json({ message: "Vous ne pouvez modifier que votre photo." });
+      return;
+    }
+
+    const userId = req.user.id;
     const photoUrl = `/uploads/${req.file.filename}`;
+    const previous = await userRepository.readUserPhoto(userId);
 
     await userRepository.updatePhoto(userId, photoUrl);
+    await removeUpload(previous?.user_profile_picture);
 
     res.status(200).json({
       message: "Photo mise à jour",
@@ -386,16 +464,12 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
 };
 const browsePhoto: RequestHandler = async (req, res, next) => {
   try {
-    const userId = Number(req.params.id);
-
-    if (Number.isNaN(userId)) {
-      res.status(400).json({
-        message: "ID invalide",
-      });
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    const photo = await userRepository.readUserPhoto(userId);
+    const photo = await userRepository.readUserPhoto(req.user.id);
 
     res.json(photo);
   } catch (error) {
@@ -415,6 +489,13 @@ const editUserName: RequestHandler = async (req, res, next) => {
 
     if (!userName) {
       res.status(400).json({ message: "Rentrer un pseudo" });
+      return;
+    }
+
+    if (!isValidUsername(userName)) {
+      res
+        .status(400)
+        .json({ message: "Le pseudo doit contenir entre 3 et 45 caractères." });
       return;
     }
 
@@ -441,9 +522,7 @@ const editUserName: RequestHandler = async (req, res, next) => {
 export default {
   authVerif,
   readUserDescriptionEvent,
-  browseInscription,
   browsePhoto,
-  read,
   add,
   login,
   logout,

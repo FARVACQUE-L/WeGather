@@ -2,6 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { RequestHandler } from "express";
 import { detectMimeType, REPORTS_DESTINATION } from "../../middleware/upload";
+import { disconnectUser, removeFromEventRoom } from "../../socket";
+import eventRepository from "../event/eventRepository";
 import transporter from "../services/mailer";
 import adminRepository from "./adminRepository";
 
@@ -200,6 +202,11 @@ const banUser: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
 
+    if (id === req.user?.id) {
+      res.status(400).json({ message: "Vous ne pouvez pas vous bannir." });
+      return;
+    }
+
     const roles = await adminRepository.readRoles(id);
     if (roles?.user_is_superadmin) {
       res.status(403).json({
@@ -208,12 +215,27 @@ const banUser: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    if (roles?.user_is_admin) {
+      const requester = req.user
+        ? await adminRepository.readRoles(req.user.id)
+        : undefined;
+
+      if (!requester?.user_is_superadmin) {
+        res.status(403).json({
+          message: "Seul un superadmin peut bannir un administrateur",
+        });
+        return;
+      }
+    }
+
     const user = await adminRepository.banUser(id);
 
     if (!user) {
       res.status(404).json({ message: "Utilisateur introuvable" });
       return;
     }
+
+    disconnectUser(id);
 
     try {
       await transporter.sendMail({
@@ -360,6 +382,9 @@ const banUserFromEvent: RequestHandler = async (req, res, next) => {
       res.status(404).json({ message: "Utilisateur introuvable" });
       return;
     }
+
+    const eventUuid = await eventRepository.readUuidById(eventId);
+    if (eventUuid) removeFromEventRoom(userId, eventUuid);
 
     try {
       await transporter.sendMail({

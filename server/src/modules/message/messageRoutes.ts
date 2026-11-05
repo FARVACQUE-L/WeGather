@@ -1,9 +1,13 @@
 import express from "express";
 import authorization from "../../middleware/auth";
+import { messageLimit } from "../../middleware/rateLimit";
 import upload, { verifyFileSignatures } from "../../middleware/upload";
+import { validateIds } from "../../middleware/validateIds";
 import messageActions from "./messageActions";
 
 const messageRoutes = express.Router();
+
+validateIds(messageRoutes, "messageId");
 
 messageRoutes.get(
   "/api/messages/:eventUuid",
@@ -13,6 +17,7 @@ messageRoutes.get(
 messageRoutes.post(
   "/api/messages/:eventUuid",
   authorization,
+  messageLimit,
   upload.single("image"),
   verifyFileSignatures,
   messageActions.addMessage,

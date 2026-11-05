@@ -1,38 +1,16 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeReservationDocument } from "../../helper/removeReservationDocument";
 import { removeUpload } from "../../helper/removeUpload";
+import { LIMITS } from "../../helper/validation";
 import eventRepository from "../event/eventRepository";
-import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import reservationDocumentRepository from "./reservationDocumentRepository";
 import reservationRepository from "./reservationRepository";
 
 type Req = Parameters<RequestHandler>[0];
 type Res = Parameters<RequestHandler>[1];
-
-const readMemberEventId = async (req: Req, res: Res, eventUuid: string) => {
-  if (!req.user) {
-    res.status(401).json({ message: "Unauthorized" });
-    return undefined;
-  }
-
-  const eventId = await eventRepository.readIdByUuid(eventUuid);
-  if (!eventId) {
-    res.sendStatus(404);
-    return undefined;
-  }
-
-  const joined = await eventUserJoiningRepository.readBy(eventId, req.user.id);
-  if (joined.length === 0) {
-    res
-      .status(403)
-      .json({ message: "Vous n'êtes pas inscrit à cet événement." });
-    return undefined;
-  }
-
-  return eventId;
-};
 
 const RESERVATION_TYPES = [
   "hebergement",
@@ -64,10 +42,12 @@ const validateReservationFields = async (
 
   if (
     String(reservation_name).length > 255 ||
-    String(reservation_location).length > 255
+    String(reservation_location).length > 255 ||
+    String(body.reservation_description).length > LIMITS.reservationDescription
   ) {
     return {
-      message: "Le nom et le lieu ne doivent pas dépasser 255 caractères.",
+      message:
+        "Le nom, le lieu et la description ne doivent pas dépasser 255 caractères.",
     };
   }
 
@@ -270,7 +250,9 @@ const readManagedReservation = async (req: Req, res: Res) => {
     return undefined;
   }
 
-  const isAuthor = reservation.reservation_id_user === req.user.id;
+  const isAuthor =
+    reservation.reservation_id_user === req.user.id &&
+    (await isEventMember(reservation.reservation_id_event, req.user.id));
   const [event] = await eventRepository.readEventHostId(
     reservation.reservation_id_event,
   );

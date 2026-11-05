@@ -3,23 +3,23 @@ import path from "node:path";
 import { ZipArchive } from "archiver";
 import type { RequestHandler } from "express";
 
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeUpload } from "../../helper/removeUpload";
+import { asText, isText, LIMITS } from "../../helper/validation";
 import { detectMimeType, UPLOADS_DIRECTORY } from "../../middleware/upload";
 import eventRepository from "../event/eventRepository";
 import galleryRepository from "./galleryRepository";
+
+const DESCRIPTION_TOO_LONG = `La description ne doit pas dépasser ${LIMITS.galleryDescription} caractères.`;
 
 const readPhotoLimit = async (eventId: number) =>
   getPlanLimits(await eventRepository.readHostPlan(eventId)).galleryPhotos;
 
 const readLimit: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     res.json({ limit: await readPhotoLimit(eventId) });
   } catch (err) {
@@ -29,12 +29,8 @@ const readLimit: RequestHandler = async (req, res, next) => {
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const gallery = await galleryRepository.readAll(eventId);
 
@@ -66,6 +62,12 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    if (!isText(req.body.gallery_description, LIMITS.galleryDescription, 0)) {
+      fs.rmSync(req.file.path, { force: true });
+      res.status(400).json({ message: DESCRIPTION_TOO_LONG });
+      return;
+    }
+
     const permissions = await galleryRepository.checkUserPermissions(
       eventId,
       userId,
@@ -94,7 +96,7 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
       gallery_id_event: eventId,
       gallery_id_user: userId,
       gallery_link: photoUrl,
-      gallery_description: req.body.gallery_description ?? null,
+      gallery_description: asText(req.body.gallery_description) || null,
     };
 
     const insertId = await galleryRepository.create(newGallery);
@@ -123,7 +125,9 @@ const readManagedPhoto = async (
     return undefined;
   }
 
-  const isAuthor = photo.gallery_id_user === req.user.id;
+  const isAuthor =
+    photo.gallery_id_user === req.user.id &&
+    (await isEventMember(photo.gallery_id_event, req.user.id));
   const [event] = await eventRepository.readEventHostId(photo.gallery_id_event);
   const isHost = event?.event_id_host === req.user.id;
 
@@ -153,9 +157,14 @@ const edit: RequestHandler = async (req, res, next) => {
     const photo = await readManagedPhoto(req, res);
     if (!photo) return;
 
+    if (!isText(req.body.gallery_description, LIMITS.galleryDescription, 0)) {
+      res.status(400).json({ message: DESCRIPTION_TOO_LONG });
+      return;
+    }
+
     await galleryRepository.updateDescription(
       photo.gallery_id,
-      req.body.gallery_description,
+      asText(req.body.gallery_description),
     );
 
     res.status(200).json({ message: "Description modifiée avec succès !" });
@@ -288,17 +297,12 @@ const downloadAll: RequestHandler = async (req, res, next) => {
 
 const getLikedPhotos: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    const userId = Number(req.params.userId);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId || !req.user) return;
 
     const likedRows = (await galleryRepository.getLikesByEventAndUser(
       eventId,
-      userId,
+      req.user.id,
     )) as { gallery_like_id_gallery: number }[];
 
     const likedPhotoIds = likedRows.map((row) => row.gallery_like_id_gallery);
@@ -309,25 +313,57 @@ const getLikedPhotos: RequestHandler = async (req, res, next) => {
   }
 };
 
+const readLikeablePhoto = async (
+  req: Parameters<RequestHandler>[0],
+  res: Parameters<RequestHandler>[1],
+) => {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return undefined;
+  }
+
+  const photo = await galleryRepository.read(Number(req.params.id));
+  if (!photo) {
+    res.status(404).json({ message: "Photo introuvable" });
+    return undefined;
+  }
+
+  if (!(await isEventMember(photo.gallery_id_event, req.user.id))) {
+    res.status(403).json({
+      message: "Action interdite : vous devez participer à l'événement.",
+    });
+    return undefined;
+  }
+
+  return { photo, userId: req.user.id };
+};
+
 const addLike: RequestHandler = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
-    const { user_id } = req.body;
+    const found = await readLikeablePhoto(req, res);
+    if (!found) return;
 
-    const newLike = await galleryRepository.insertLike(id, Number(user_id));
+    const newLike = await galleryRepository.insertLike(
+      found.photo.gallery_id,
+      found.userId,
+    );
 
     res.status(201).json(newLike);
   } catch (error) {
+    if ((error as { code?: string }).code === "ER_DUP_ENTRY") {
+      res.status(409).json({ message: "Photo déjà likée." });
+      return;
+    }
     next(error);
   }
 };
 
 const removeLike: RequestHandler = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
-    const userId = Number(req.params.userId);
+    const found = await readLikeablePhoto(req, res);
+    if (!found) return;
 
-    await galleryRepository.deleteLike(id, userId);
+    await galleryRepository.deleteLike(found.photo.gallery_id, found.userId);
 
     res.sendStatus(204);
   } catch (error) {

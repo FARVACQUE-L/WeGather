@@ -1,8 +1,11 @@
 import express from "express";
 import authorization from "../../middleware/auth";
+import { validateIds } from "../../middleware/validateIds";
 import budgetActions from "./budgetActions";
 
 const budgetRoutes = express.Router();
+
+validateIds(budgetRoutes, "id");
 
 budgetRoutes.get("/api/budget/:eventUuid", authorization, budgetActions.browse);
 budgetRoutes.get(

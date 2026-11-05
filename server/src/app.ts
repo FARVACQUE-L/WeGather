@@ -1,8 +1,11 @@
 import cookieParser from "cookie-parser";
 import express from "express";
+import securityHeaders from "./middleware/securityHeaders";
 
 const app = express();
 
+app.disable("x-powered-by");
+app.use(securityHeaders);
 app.use(cookieParser());
 app.use(
   cors({
@@ -18,7 +21,7 @@ if (process.env.CLIENT_URL != null) {
 }
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.text());
 app.use(express.raw());
 app.use(
@@ -78,17 +81,22 @@ const handleUploadErrors: ErrorRequestHandler = (err, _req, res, next) => {
 
 app.use(handleUploadErrors);
 
-const logErrors: ErrorRequestHandler = (err, req, res, _next) => {
+const logErrors: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Error occurred:", err.message);
   console.error("Stack:", err.stack);
   console.error("Request:", req.method, req.path);
 
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     error:
-      process.env.NODE_ENV === "production"
-        ? "Internal Server Error"
-        : err.message,
+      process.env.NODE_ENV === "development" || statusCode < 500
+        ? err.message
+        : "Internal Server Error",
     status: statusCode,
   });
 };

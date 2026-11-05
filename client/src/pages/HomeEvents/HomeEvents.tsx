@@ -56,7 +56,7 @@ function HomeEvents() {
   useEffect(() => {
     if (!user?.id) return;
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/events?userId=${user.id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/api/events`, {
       credentials: "include",
     })
       .then((res) => res.json())

@@ -2,9 +2,12 @@ import express from "express";
 import authorization from "../../middleware/auth";
 import isAdmin from "../../middleware/isAdmin";
 import isSuperAdmin from "../../middleware/isSuperAdmin";
+import { validateIds } from "../../middleware/validateIds";
 import adminActions from "./adminActions";
 
 const adminRoutes = express.Router();
+
+validateIds(adminRoutes, "id", "eventId", "userId");
 
 adminRoutes.get(
   "/api/admin/reportUser",

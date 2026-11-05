@@ -1,10 +1,21 @@
 import type { RequestHandler } from "express";
+import { discardUploadedFiles } from "../../helper/discardUploadedFiles";
+import { asText, isText, LIMITS } from "../../helper/validation";
 import reportBugRepository from "./reportBugRepository";
 
 const add: RequestHandler = async (req, res, next) => {
+  let filesKept = false;
+
   try {
     if (!req.user) {
       res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    if (!isText(req.body.reported_bug_description, LIMITS.reportDescription)) {
+      res.status(400).json({
+        message: `La description doit contenir entre 1 et ${LIMITS.reportDescription} caractères.`,
+      });
       return;
     }
 
@@ -12,7 +23,7 @@ const add: RequestHandler = async (req, res, next) => {
     const imagePaths = files?.map((file) => file.filename) ?? [];
 
     const newReportBug = {
-      reported_bug_description: req.body.reported_bug_description,
+      reported_bug_description: asText(req.body.reported_bug_description),
       reported_bug_by_id_user: req.user.id,
     };
 
@@ -29,10 +40,13 @@ const add: RequestHandler = async (req, res, next) => {
     }
 
     const insertId = await reportBugRepository.create(newReportBug, imagePaths);
+    filesKept = true;
 
     res.status(201).json({ insertId });
   } catch (err) {
     next(err);
+  } finally {
+    if (!filesKept) await discardUploadedFiles(req);
   }
 };
 

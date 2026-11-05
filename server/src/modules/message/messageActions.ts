@@ -1,7 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { RequestHandler } from "express";
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { removeUpload } from "../../helper/removeUpload";
+import { isId, LIMITS } from "../../helper/validation";
 import { UPLOADS_DIRECTORY } from "../../middleware/upload";
 import { getIo } from "../../socket";
 import eventRepository from "../event/eventRepository";
@@ -15,6 +17,8 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/gif": ".gif",
   "image/avif": ".avif",
 };
+
+const MESSAGE_TOO_LONG = `Le message ne doit pas dépasser ${LIMITS.messageText} caractères.`;
 
 const addImageExtension = async (file: Express.Multer.File) => {
   const filename = `${file.filename}${IMAGE_EXTENSIONS[file.mimetype] ?? ""}`;
@@ -59,9 +63,16 @@ const addMessage: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    if (messageText.length > LIMITS.messageText) {
+      res.status(400).json({ message: MESSAGE_TOO_LONG });
+      return;
+    }
+
     let replyToId: number | null = null;
     if (replyTo !== undefined && replyTo !== null && replyTo !== "") {
-      const repliedMessage = await messageRepository.readOwner(Number(replyTo));
+      const repliedMessage = isId(replyTo)
+        ? await messageRepository.readOwner(Number(replyTo))
+        : undefined;
 
       if (!repliedMessage || repliedMessage.message_id_event !== eventId) {
         res.status(400).json({ message: "Message cité introuvable." });
@@ -94,12 +105,8 @@ const addMessage: RequestHandler = async (req, res, next) => {
 };
 const browseMessagesByEventId: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const messages = await messageRepository.getMessagesByEventId(eventId);
 
@@ -111,17 +118,8 @@ const browseMessagesByEventId: RequestHandler = async (req, res, next) => {
 };
 const notificationMessage: RequestHandler = async (req, res, next) => {
   try {
-    if (!req.user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId || !req.user) return;
 
     await messageRepository.notificationMessage(eventId, req.user.id);
 
@@ -135,17 +133,8 @@ const notificationMessage: RequestHandler = async (req, res, next) => {
 };
 const getUnreadMessages: RequestHandler = async (req, res, next) => {
   try {
-    if (!req.user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId || !req.user) return;
 
     const count = await messageRepository.getUnreadMessages(
       eventId,
@@ -189,7 +178,10 @@ const editMessage: RequestHandler = async (req, res, next) => {
     );
     if (!found) return;
 
-    if (found.message.message_id_user !== req.user.id) {
+    if (
+      found.message.message_id_user !== req.user.id ||
+      !(await isEventMember(found.event.event_id, req.user.id))
+    ) {
       res
         .status(403)
         .json({ message: "Vous ne pouvez modifier que vos messages." });
@@ -198,6 +190,11 @@ const editMessage: RequestHandler = async (req, res, next) => {
 
     if (!messageText && !found.message.message_image) {
       res.status(400).json({ message: "Le message est vide." });
+      return;
+    }
+
+    if (messageText.length > LIMITS.messageText) {
+      res.status(400).json({ message: MESSAGE_TOO_LONG });
       return;
     }
 
@@ -229,7 +226,9 @@ const deleteMessage: RequestHandler = async (req, res, next) => {
     );
     if (!found) return;
 
-    const isAuthor = found.message.message_id_user === req.user.id;
+    const isAuthor =
+      found.message.message_id_user === req.user.id &&
+      (await isEventMember(found.event.event_id, req.user.id));
     const isHost = found.event.event_id_host === req.user.id;
 
     if (!isAuthor && !isHost) {

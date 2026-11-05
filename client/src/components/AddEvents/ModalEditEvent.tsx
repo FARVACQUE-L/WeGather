@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { imageUrl } from "../../helper/imageUrl";
 import type { EventData, ModalEditEventProps } from "../../types/Events";
 import ImageCropper, {
   type Crop,
@@ -22,7 +23,9 @@ function ModalEditEvent({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string>(event.event_picture);
+  const [previewImage, setPreviewImage] = useState<string>(
+    imageUrl(event.event_picture),
+  );
   const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
   const [form, setForm] = useState({
     event_name: event.event_name,
@@ -43,7 +46,7 @@ function ModalEditEvent({
         event_description: event.event_description,
         event_location: event.event_location,
       });
-      setPreviewImage(event.event_picture);
+      setPreviewImage(imageUrl(event.event_picture));
       setSelectedFile(null);
       setError(null);
     } else {

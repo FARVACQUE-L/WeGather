@@ -77,13 +77,13 @@ class eventUserJoiningRepository {
     return result.affectedRows;
   }
 
-  async deleteAll(euj_id_user: number) {
-    const [rows] = await databaseClient.query<Rows>(
-      "DELETE FROM event_user_joining WHERE euj_id_user = ?",
-      [euj_id_user],
+  async leave(id_event: number, id_user: number) {
+    const [result] = await databaseClient.query<Result>(
+      "DELETE FROM event_user_joining WHERE euj_id_event = ? AND euj_id_user = ?",
+      [id_event, id_user],
     );
 
-    return rows as EventUserJoin[];
+    return result.affectedRows;
   }
 }
 

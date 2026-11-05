@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import type { RowDataPacket } from "mysql2";
 import type { Result, Rows } from "../../../database/client";
 import databaseClient from "../../../database/client";
@@ -7,32 +7,46 @@ import type EventData from "../../types/event";
 const generateLinkKey = (): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   return Array.from({ length: 6 }, () =>
-    chars.charAt(Math.floor(Math.random() * chars.length)),
+    chars.charAt(randomInt(chars.length)),
   ).join("");
+};
+
+const MAX_LINK_KEY_ATTEMPTS = 5;
+
+const isDuplicateLinkKey = (error: unknown) => {
+  const { code, sqlMessage } = error as { code?: string; sqlMessage?: string };
+  return code === "ER_DUP_ENTRY" && Boolean(sqlMessage?.includes("link_key"));
 };
 
 class EventRepository {
   async create(
     event: Omit<EventData, "event_id" | "event_uuid" | "event_link_key">,
   ) {
-    const linkKey = generateLinkKey();
-    const eventUuid = randomUUID();
+    let eventId: number | undefined;
 
-    const [result] = await databaseClient.query<Result>(
-      "INSERT INTO event (event_name, event_date_start, event_date_end, event_id_host, event_picture, event_description, event_location, event_link_key, event_uuid) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        event.event_name,
-        event.event_date_start,
-        event.event_date_end,
-        event.event_id_host,
-        event.event_picture,
-        event.event_description,
-        event.event_location,
-        linkKey,
-        eventUuid,
-      ],
-    );
-    const eventId = result.insertId;
+    for (let attempt = 1; eventId === undefined; attempt++) {
+      try {
+        const [result] = await databaseClient.query<Result>(
+          "INSERT INTO event (event_name, event_date_start, event_date_end, event_id_host, event_picture, event_description, event_location, event_link_key, event_uuid) VALUES (?,?, ?, ?, ?, ?, ?, ?, ?)",
+          [
+            event.event_name,
+            event.event_date_start,
+            event.event_date_end,
+            event.event_id_host,
+            event.event_picture,
+            event.event_description,
+            event.event_location,
+            generateLinkKey(),
+            randomUUID(),
+          ],
+        );
+        eventId = result.insertId;
+      } catch (error) {
+        if (!isDuplicateLinkKey(error) || attempt >= MAX_LINK_KEY_ATTEMPTS) {
+          throw error;
+        }
+      }
+    }
 
     await this.joinEvent(eventId, event.event_id_host);
 
@@ -212,7 +226,18 @@ class EventRepository {
     return rows[0] as EventData | undefined;
   }
 
-  async readIdByUuid(uuid: string) {
+  async readUuidById(eventId: number) {
+    const [rows] = await databaseClient.query<RowDataPacket[]>(
+      "SELECT event_uuid FROM event WHERE event_id = ?",
+      [eventId],
+    );
+
+    return rows[0]?.event_uuid as string | undefined;
+  }
+
+  async readIdByUuid(uuid: unknown) {
+    if (typeof uuid !== "string") return undefined;
+
     const [rows] = await databaseClient.query<RowDataPacket[]>(
       "SELECT event_id FROM event WHERE event_uuid = ?",
       [uuid],
