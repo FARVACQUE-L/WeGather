@@ -57,11 +57,20 @@ function ReservationCard({
   return (
     <article className={isPast ? "WalletCard is-past" : "WalletCard"}>
       <div className="WalletCard-ImageDate">
-        <img
-          className="WalletCard-Image"
-          src={`${import.meta.env.VITE_API_URL}${reservation.reservation_picture}`}
-          alt={reservation.reservation_name}
-        />
+        {reservation.reservation_picture ? (
+          <img
+            className="WalletCard-Image"
+            src={`${import.meta.env.VITE_API_URL}${reservation.reservation_picture}`}
+            alt={reservation.reservation_name}
+          />
+        ) : (
+          // Sans image : l'icône du type sur un dégradé à sa couleur.
+          <div
+            className={`WalletCard-Image WalletCard-Cover WalletCard-Cover--${reservation.reservation_type}`}
+          >
+            <Icon size={56} strokeWidth={1.5} aria-hidden="true" />
+          </div>
+        )}
         <time
           className="WalletCard-Date"
           dateTime={reservation.reservation_date_start.slice(0, 10)}

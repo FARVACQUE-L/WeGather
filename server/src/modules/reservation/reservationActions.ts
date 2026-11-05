@@ -217,24 +217,26 @@ const addReservation: RequestHandler = async (req, res, next) => {
       reservation_description,
     } = req.body;
 
-    // L'image est obligatoire à la création (colonne NOT NULL), comme dans le
-    // formulaire du client.
+    // multer a déjà écrit l'image sur disque : on ne la garde pas si la
+    // réservation est refusée.
+    const discardFile = () => {
+      if (req.file) fs.rmSync(req.file.path, { force: true });
+    };
+
     if (
       !reservation_name ||
       !reservation_date_start ||
       !reservation_location ||
-      !reservation_description ||
-      !req.file
+      !reservation_description
     ) {
-      // multer a déjà écrit l'image sur disque : on ne la garde pas.
-      if (req.file) fs.rmSync(req.file.path, { force: true });
-      res.status(400).json({
-        message: "Veuillez remplir tous les champs et ajouter une image.",
-      });
+      discardFile();
+      res.status(400).json({ message: "Veuillez remplir tous les champs." });
       return;
     }
 
-    const reservation_picture = `/uploads/${req.file.filename}`;
+    // L'image est facultative : sans elle, la carte affiche l'icône du type
+    // de réservation. Chaîne vide plutôt que NULL, la colonne est NOT NULL.
+    const reservation_picture = req.file ? `/uploads/${req.file.filename}` : "";
     const eventId = await readMemberEventId(
       req,
       res,
@@ -242,13 +244,13 @@ const addReservation: RequestHandler = async (req, res, next) => {
     );
 
     if (!eventId) {
-      fs.rmSync(req.file.path, { force: true });
+      discardFile();
       return;
     }
 
     const validation = await validateReservationFields(eventId, req.body);
     if ("message" in validation) {
-      fs.rmSync(req.file.path, { force: true });
+      discardFile();
       res.status(400).json({ message: validation.message });
       return;
     }
@@ -257,7 +259,7 @@ const addReservation: RequestHandler = async (req, res, next) => {
     if (
       (await reservationRepository.countByEvent(eventId)) >= maxReservations
     ) {
-      fs.rmSync(req.file.path, { force: true });
+      discardFile();
       res.status(403).json({
         message: `Un événement est limité à ${maxReservations} réservations.`,
       });
@@ -349,9 +351,14 @@ const updateReservation: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    // Nouvelle image, image retirée (chaîne vide, voir addReservation) ou
+    // null pour garder l'actuelle.
+    const removePicture = req.body.remove_picture === "true";
     const reservation_picture = req.file
       ? `/uploads/${req.file.filename}`
-      : null;
+      : removePicture
+        ? ""
+        : null;
 
     const result = await reservationRepository.updateReservation(
       reservation.reservation_id,
@@ -365,8 +372,10 @@ const updateReservation: RequestHandler = async (req, res, next) => {
         ...validation.fields,
       },
     );
-    // L'ancienne image n'est effacée que si une nouvelle la remplace.
-    if (req.file) await removeUpload(reservation.reservation_picture);
+    // L'ancienne image n'est effacée que si elle est remplacée ou retirée.
+    if (req.file || removePicture) {
+      await removeUpload(reservation.reservation_picture);
+    }
 
     res.json(result);
   } catch (error) {

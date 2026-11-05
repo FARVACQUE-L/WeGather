@@ -270,6 +270,20 @@
           border-radius: 1rem;
           object-fit: cover;
         }
+
+        .ReservationModal-ImageHint {
+          margin: 0;
+          color: var(--font-grey);
+          font-size: 0.8rem;
+          text-align: center;
+        }
+
+        .ReservationModal-ImageButtons {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+        }
       }
 
       .ReservationModal-ImageButton,
@@ -583,6 +597,41 @@
     object-position: top;
     display: block;
     background: var(--bg-composant-dash);
+  }
+
+  /* Réservation sans image : icône du type sur un dégradé de gauche à
+     droite, aux couleurs de son étiquette (comme sur la page de
+     présentation). */
+  .WalletCard-Cover {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--font-darkBrown);
+  }
+
+  .WalletCard-Cover--hebergement {
+    background: linear-gradient(90deg, #cde5ff, #7fb3e6);
+    color: #0b4a7a;
+  }
+
+  .WalletCard-Cover--transport {
+    background: linear-gradient(90deg, #ffd6bf, #ff9d76);
+    color: #8a3a1c;
+  }
+
+  .WalletCard-Cover--restaurant {
+    background: linear-gradient(90deg, #ffe0e6, #f59ab0);
+    color: #9f1239;
+  }
+
+  .WalletCard-Cover--activite {
+    background: linear-gradient(90deg, #d1fae5, #7fd8b0);
+    color: #047857;
+  }
+
+  .WalletCard-Cover--autre {
+    background: linear-gradient(90deg, #fbf2ed, #e3c9bc);
+    color: var(--font-darkBrown);
   }
 
   .WalletCard-Body {
