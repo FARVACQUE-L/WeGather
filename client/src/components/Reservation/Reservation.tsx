@@ -276,7 +276,9 @@ function Reservation() {
     setReservationPicture(null);
     setPendingDocuments([]);
     setPreview(
-      `${import.meta.env.VITE_API_URL}${reservation.reservation_picture}`,
+      reservation.reservation_picture
+        ? `${import.meta.env.VITE_API_URL}${reservation.reservation_picture}`
+        : "",
     );
     setEditingReservationId(reservation.reservation_id);
     setIsModalOpen(true);
@@ -412,7 +414,6 @@ function Reservation() {
       !reservationDateStart && "la date",
       !reservationLocation && "la localisation",
       !reservationDescription && "une description",
-      !isEditing && !reservationPicture && "une image",
     ].filter(Boolean);
 
     if (missingFields.length > 0) {
@@ -486,6 +487,9 @@ function Reservation() {
         "reservation_picture",
         await cropImage(preview, crop, reservationPicture.name),
       );
+    } else if (isEditing && !preview) {
+      // Image retirée dans la modale : la carte reprend l'icône du type.
+      formData.append("remove_picture", "true");
     }
 
     const url = isEditing
@@ -549,6 +553,13 @@ function Reservation() {
       setPreview(URL.createObjectURL(file));
       setCrop(DEFAULT_CROP);
     }
+  }
+
+  function handleRemovePicture() {
+    setReservationPicture(null);
+    setPreview("");
+    // Permet de rechoisir ensuite la même image.
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function handlePendingDocumentsChange(
@@ -944,7 +955,7 @@ function Reservation() {
                     className="ReservationModal-Label"
                     htmlFor="photo-upload"
                   >
-                    Image
+                    Image (facultative)
                   </label>
                   <div className="ReservationModal-Image">
                     {/* Recadrage seulement pour une nouvelle image : l'image
@@ -965,13 +976,30 @@ function Reservation() {
                         />
                       )
                     )}
-                    <button
-                      type="button"
-                      className="ReservationModal-ImageButton"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      {preview ? "Changer l'image" : "Choisir une image"}
-                    </button>
+                    {!preview && (
+                      <p className="ReservationModal-ImageHint">
+                        Sans image, la carte affiche l'icône du type de
+                        réservation.
+                      </p>
+                    )}
+                    <div className="ReservationModal-ImageButtons">
+                      <button
+                        type="button"
+                        className="ReservationModal-ImageButton"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        {preview ? "Changer l'image" : "Choisir une image"}
+                      </button>
+                      {preview && (
+                        <button
+                          type="button"
+                          className="ReservationModal-ImageButton"
+                          onClick={handleRemovePicture}
+                        >
+                          Retirer l'image
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <input
                     ref={fileInputRef}
