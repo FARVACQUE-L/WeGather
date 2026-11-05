@@ -212,6 +212,15 @@ class EventRepository {
     return rows[0] as EventData | undefined;
   }
 
+  async readUuidById(eventId: number) {
+    const [rows] = await databaseClient.query<RowDataPacket[]>(
+      "SELECT event_uuid FROM event WHERE event_id = ?",
+      [eventId],
+    );
+
+    return rows[0]?.event_uuid as string | undefined;
+  }
+
   async readIdByUuid(uuid: string) {
     const [rows] = await databaseClient.query<RowDataPacket[]>(
       "SELECT event_id FROM event WHERE event_uuid = ?",

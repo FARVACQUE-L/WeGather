@@ -30,9 +30,9 @@ eventUserJoiningRoutes.delete(
   eventUserJoiningActions.unban,
 );
 eventUserJoiningRoutes.delete(
-  "/api/euj/delete/:id",
+  "/api/events/:eventUuid/leave",
   authorization,
-  eventUserJoiningActions.deleteAll,
+  eventUserJoiningActions.leave,
 );
 
 export default eventUserJoiningRoutes;

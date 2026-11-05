@@ -1,9 +1,11 @@
 import crypto from "node:crypto";
+import fs from "node:fs";
 import argon2 from "argon2";
 import type { RequestHandler } from "express";
 import nodemailer from "nodemailer";
 import { readMemberEventId } from "../../helper/eventMembership";
 import { encodeJWT } from "../../helper/jwtHelper";
+import { removeUpload } from "../../helper/removeUpload";
 import userRepository from "./userRepository";
 
 const authVerif: RequestHandler = async (req, res, next) => {
@@ -334,16 +336,25 @@ const changePassword: RequestHandler = async (req, res, next) => {
 
 const uploadPhoto: RequestHandler = async (req, res, next) => {
   try {
-    const userId = Number(req.params.id);
-
     if (!req.file) {
       res.status(400).json({ message: "Aucune image envoyée" });
       return;
     }
 
+    if (!req.user || Number(req.params.id) !== req.user.id) {
+      fs.rmSync(req.file.path, { force: true });
+      res
+        .status(403)
+        .json({ message: "Vous ne pouvez modifier que votre photo." });
+      return;
+    }
+
+    const userId = req.user.id;
     const photoUrl = `/uploads/${req.file.filename}`;
+    const previous = await userRepository.readUserPhoto(userId);
 
     await userRepository.updatePhoto(userId, photoUrl);
+    await removeUpload(previous?.user_profile_picture);
 
     res.status(200).json({
       message: "Photo mise à jour",

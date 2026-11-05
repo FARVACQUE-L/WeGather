@@ -1,17 +1,15 @@
 import type { RequestHandler } from "express";
 
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { getStatus } from "../../presence";
+import { removeFromEventRoom } from "../../socket";
 import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "./eventUserJoiningRepository";
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const euj = await eventUserJoiningRepository.readAll(eventId);
 
@@ -23,18 +21,20 @@ const browse: RequestHandler = async (req, res, next) => {
 
 const browseUserEvent: RequestHandler = async (req, res, next) => {
   try {
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const event = await eventRepository.readIdByUuid(req.params.eventUuid);
-    const user = Number(req.params.user);
 
     if (!event) {
       res.sendStatus(404);
       return;
     }
 
-    const rows = await eventUserJoiningRepository.readBy(event, user);
-
     res.status(200).json({
-      joined: rows.length > 0,
+      joined: await isEventMember(event, req.user.id),
     });
   } catch (err) {
     next(err);
@@ -55,12 +55,7 @@ const browseGroup: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const membership = await eventUserJoiningRepository.readBy(
-      event.event_id,
-      req.user.id,
-    );
-
-    if (membership.length === 0) {
+    if (!(await isEventMember(event.event_id, req.user.id))) {
       res
         .status(403)
         .json({ message: "Vous ne participez pas à cet événement." });
@@ -122,7 +117,9 @@ const ban: RequestHandler = async (req, res, next) => {
     const eventId = await resolveHostAction(req, res);
     if (eventId === null) return;
 
-    await eventUserJoiningRepository.ban(eventId, Number(req.params.userId));
+    const userId = Number(req.params.userId);
+    await eventUserJoiningRepository.ban(eventId, userId);
+    removeFromEventRoom(userId, req.params.eventUuid);
 
     res.sendStatus(204);
   } catch (err) {
@@ -151,11 +148,40 @@ const unban: RequestHandler = async (req, res, next) => {
   }
 };
 
-const deleteAll: RequestHandler = async (req, res, next) => {
+const leave: RequestHandler = async (req, res, next) => {
   try {
-    const UserId = Number(req.params.id);
-    const euj = await eventUserJoiningRepository.deleteAll(UserId);
-    res.json(euj);
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const event = await eventRepository.readByUuid(req.params.eventUuid);
+
+    if (!event) {
+      res.sendStatus(404);
+      return;
+    }
+
+    if (event.event_id_host === req.user.id) {
+      res.status(400).json({
+        message:
+          "L'hôte ne peut pas quitter son événement, il peut le supprimer.",
+      });
+      return;
+    }
+
+    const affectedRows = await eventUserJoiningRepository.leave(
+      event.event_id,
+      req.user.id,
+    );
+
+    if (affectedRows === 0) {
+      res.sendStatus(404);
+      return;
+    }
+
+    removeFromEventRoom(req.user.id, req.params.eventUuid);
+    res.sendStatus(204);
   } catch (err) {
     next(err);
   }
@@ -167,5 +193,5 @@ export default {
   browseGroup,
   ban,
   unban,
-  deleteAll,
+  leave,
 };

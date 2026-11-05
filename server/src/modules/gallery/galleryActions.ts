@@ -3,6 +3,7 @@ import path from "node:path";
 import { ZipArchive } from "archiver";
 import type { RequestHandler } from "express";
 
+import { readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeUpload } from "../../helper/removeUpload";
 import { detectMimeType, UPLOADS_DIRECTORY } from "../../middleware/upload";
@@ -14,12 +15,8 @@ const readPhotoLimit = async (eventId: number) =>
 
 const readLimit: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     res.json({ limit: await readPhotoLimit(eventId) });
   } catch (err) {
@@ -29,12 +26,8 @@ const readLimit: RequestHandler = async (req, res, next) => {
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const gallery = await galleryRepository.readAll(eventId);
 
@@ -288,17 +281,12 @@ const downloadAll: RequestHandler = async (req, res, next) => {
 
 const getLikedPhotos: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    const userId = Number(req.params.userId);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId || !req.user) return;
 
     const likedRows = (await galleryRepository.getLikesByEventAndUser(
       eventId,
-      userId,
+      req.user.id,
     )) as { gallery_like_id_gallery: number }[];
 
     const likedPhotoIds = likedRows.map((row) => row.gallery_like_id_gallery);

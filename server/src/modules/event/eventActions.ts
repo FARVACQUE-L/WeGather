@@ -231,12 +231,8 @@ const deleteEvent: RequestHandler = async (req, res, next) => {
 };
 const readEventHostId: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const rows = await eventRepository.readEventHostId(eventId);
 
@@ -247,12 +243,8 @@ const readEventHostId: RequestHandler = async (req, res, next) => {
 };
 const readEventName: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.status(404).json({ message: "eventUuid invalide" });
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const event = await eventRepository.readEventName(eventId);
 

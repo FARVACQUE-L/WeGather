@@ -24,5 +24,9 @@ export const removeSocket = (userId: number, socketId: string): void => {
   }
 };
 
+export const getSocketIds = (userId: number): string[] => [
+  ...(sockets.get(userId) ?? []),
+];
+
 export const getStatus = (userId: number): PresenceStatus =>
   sockets.has(userId) ? "online" : "offline";

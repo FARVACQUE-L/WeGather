@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { RequestHandler } from "express";
+import { readMemberEventId } from "../../helper/eventMembership";
 import { removeUpload } from "../../helper/removeUpload";
 import { UPLOADS_DIRECTORY } from "../../middleware/upload";
 import { getIo } from "../../socket";
@@ -94,12 +95,8 @@ const addMessage: RequestHandler = async (req, res, next) => {
 };
 const browseMessagesByEventId: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const messages = await messageRepository.getMessagesByEventId(eventId);
 
@@ -111,17 +108,8 @@ const browseMessagesByEventId: RequestHandler = async (req, res, next) => {
 };
 const notificationMessage: RequestHandler = async (req, res, next) => {
   try {
-    if (!req.user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId || !req.user) return;
 
     await messageRepository.notificationMessage(eventId, req.user.id);
 
@@ -135,17 +123,8 @@ const notificationMessage: RequestHandler = async (req, res, next) => {
 };
 const getUnreadMessages: RequestHandler = async (req, res, next) => {
   try {
-    if (!req.user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId || !req.user) return;
 
     const count = await messageRepository.getUnreadMessages(
       eventId,

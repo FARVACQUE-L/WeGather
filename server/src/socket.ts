@@ -1,7 +1,9 @@
 import type { Server as HttpServer } from "node:http";
 import { Server as SocketServer } from "socket.io";
+import { isEventMember } from "./helper/eventMembership";
 import { decodeJWT } from "./helper/jwtHelper";
-import { addSocket, getStatus, removeSocket } from "./presence";
+import eventRepository from "./modules/event/eventRepository";
+import { addSocket, getSocketIds, getStatus, removeSocket } from "./presence";
 
 let io: SocketServer | null = null;
 
@@ -33,6 +35,13 @@ const readUserId = (cookieHeader: string | undefined): number | null => {
   }
 };
 
+const canJoinEvent = async (userId: number | null, eventUuid: unknown) => {
+  if (userId === null || typeof eventUuid !== "string") return false;
+
+  const eventId = await eventRepository.readIdByUuid(eventUuid);
+  return eventId !== undefined && (await isEventMember(eventId, userId));
+};
+
 export const initSocket = (server: HttpServer): SocketServer => {
   io = new SocketServer(server, {
     cors: {
@@ -51,12 +60,20 @@ export const initSocket = (server: HttpServer): SocketServer => {
       updatePresence(userId, () => addSocket(userId, socket.id));
     }
 
-    socket.on("join-event", (eventUuid: string) => {
-      socket.join(`event-${eventUuid}`);
-      console.log(`${socket.id} a rejoint event-${eventUuid}`);
+    socket.on("join-event", async (eventUuid: unknown) => {
+      try {
+        if (!(await canJoinEvent(userId, eventUuid))) return;
+
+        socket.join(`event-${eventUuid}`);
+        console.log(`${socket.id} a rejoint event-${eventUuid}`);
+      } catch (error) {
+        console.error("join-event :", error);
+      }
     });
 
-    socket.on("leave-event", (eventUuid: string) => {
+    socket.on("leave-event", (eventUuid: unknown) => {
+      if (typeof eventUuid !== "string") return;
+
       socket.leave(`event-${eventUuid}`);
       console.log(`${socket.id} a quitté event-${eventUuid}`);
     });
@@ -79,4 +96,11 @@ export const getIo = (): SocketServer => {
   }
 
   return io;
+};
+
+export const removeFromEventRoom = (userId: number, eventUuid: string) => {
+  const socketIds = getSocketIds(userId);
+  if (!io || socketIds.length === 0) return;
+
+  io.in(socketIds).socketsLeave(`event-${eventUuid}`);
 };
