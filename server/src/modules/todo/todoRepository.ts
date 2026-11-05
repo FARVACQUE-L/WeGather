@@ -21,6 +21,15 @@ class TodoRepository {
     return rows as Todo[];
   }
 
+  async read(todo_id: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "select * from todo where todo_id = ?",
+      [todo_id],
+    );
+
+    return rows[0] as Todo | undefined;
+  }
+
   async create(todo: Omit<Todo, "todo_id" | "todo_creation_date">) {
     const [result] = await databaseClient.query<Result>(
       "insert into todo (todo_id_event, todo_id_user, todo_name, todo_deadline, todo_is_done) values (?, ?, ?, ?, ?)",

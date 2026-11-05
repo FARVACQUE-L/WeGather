@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 import argon2 from "argon2";
 import type { RequestHandler } from "express";
 import nodemailer from "nodemailer";
+import { readMemberEventId } from "../../helper/eventMembership";
 import { encodeJWT } from "../../helper/jwtHelper";
-import eventRepository from "../event/eventRepository";
 import userRepository from "./userRepository";
 
 const authVerif: RequestHandler = async (req, res, next) => {
@@ -33,33 +33,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
-
-const browseInscription: RequestHandler = async (_req, res, next) => {
-  try {
-    const users = await userRepository.readAll();
-
-    res.json(users);
-  } catch (err) {
-    next(err);
-  }
-};
-
-const read: RequestHandler = async (req, res, next) => {
-  try {
-    const userId = Number(req.params.id);
-
-    const user = await userRepository.read(userId);
-
-    if (!user) {
-      res.sendStatus(404);
-      return;
-    }
-
-    res.json(user);
-  } catch (err) {
-    next(err);
-  }
-};
 
 const readUserName: RequestHandler = async (req, res, next) => {
   try {
@@ -198,12 +171,8 @@ const logout: RequestHandler = (_req, res) => {
 };
 const readUserDescriptionEvent: RequestHandler = async (req, res, next) => {
   try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
 
     const event = await userRepository.readUserDescriptionEvent(eventId);
 
@@ -441,9 +410,7 @@ const editUserName: RequestHandler = async (req, res, next) => {
 export default {
   authVerif,
   readUserDescriptionEvent,
-  browseInscription,
   browsePhoto,
-  read,
   add,
   login,
   logout,

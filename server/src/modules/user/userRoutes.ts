@@ -7,7 +7,6 @@ const userRoutes = express.Router();
 
 userRoutes.get("/api/auth/authVerif", authorization, userActions.authVerif);
 
-userRoutes.get("/api/users", authorization, userActions.browseInscription);
 userRoutes.get("/api/username/:id", authorization, userActions.readUserName);
 
 userRoutes.get(
@@ -15,8 +14,6 @@ userRoutes.get(
   authorization,
   userActions.readUserDescriptionEvent,
 );
-
-userRoutes.get("/api/users/:id", authorization, userActions.read);
 
 userRoutes.post("/api/users", userActions.add);
 userRoutes.get("/api/users/:id/photo", authorization, userActions.browsePhoto);

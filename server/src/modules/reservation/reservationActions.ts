@@ -1,38 +1,15 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
+import { readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeReservationDocument } from "../../helper/removeReservationDocument";
 import { removeUpload } from "../../helper/removeUpload";
 import eventRepository from "../event/eventRepository";
-import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import reservationDocumentRepository from "./reservationDocumentRepository";
 import reservationRepository from "./reservationRepository";
 
 type Req = Parameters<RequestHandler>[0];
 type Res = Parameters<RequestHandler>[1];
-
-const readMemberEventId = async (req: Req, res: Res, eventUuid: string) => {
-  if (!req.user) {
-    res.status(401).json({ message: "Unauthorized" });
-    return undefined;
-  }
-
-  const eventId = await eventRepository.readIdByUuid(eventUuid);
-  if (!eventId) {
-    res.sendStatus(404);
-    return undefined;
-  }
-
-  const joined = await eventUserJoiningRepository.readBy(eventId, req.user.id);
-  if (joined.length === 0) {
-    res
-      .status(403)
-      .json({ message: "Vous n'êtes pas inscrit à cet événement." });
-    return undefined;
-  }
-
-  return eventId;
-};
 
 const RESERVATION_TYPES = [
   "hebergement",

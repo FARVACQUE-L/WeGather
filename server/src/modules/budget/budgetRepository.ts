@@ -83,6 +83,17 @@ class budgetRepository {
     return rows as BudgetTotalEvent[];
   }
 
+  async read(id_budget: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT budget_id, budget_id_event, budget_id_user FROM budget WHERE budget_id = ?",
+      [id_budget],
+    );
+
+    return rows[0] as
+      | Pick<Budget, "budget_id" | "budget_id_event" | "budget_id_user">
+      | undefined;
+  }
+
   async create(id_event: number, id_user: number, name: string, price: number) {
     const [result] = await databaseClient.query<Result>(
       `INSERT INTO budget 

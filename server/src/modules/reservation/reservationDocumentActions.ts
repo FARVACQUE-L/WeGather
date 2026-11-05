@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
+import { isEventMember as isMember } from "../../helper/eventMembership";
 import {
   DOCUMENT_FILENAME,
   readDocumentPath,
@@ -7,14 +8,10 @@ import {
 } from "../../helper/removeReservationDocument";
 import { detectMimeType } from "../../middleware/upload";
 import eventRepository from "../event/eventRepository";
-import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import reservationDocumentRepository from "./reservationDocumentRepository";
 import reservationRepository from "./reservationRepository";
 
 const MAX_DOCUMENTS_PER_RESERVATION = 5;
-
-const isMember = async (eventId: number, userId: number) =>
-  (await eventUserJoiningRepository.readBy(eventId, userId)).length > 0;
 
 const readOriginalName = (file: Express.Multer.File) =>
   Buffer.from(file.originalname, "latin1").toString("utf8").slice(0, 255);

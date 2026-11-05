@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
+import { readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeReservationDocument } from "../../helper/removeReservationDocument";
 import { removeUpload } from "../../helper/removeUpload";
@@ -9,8 +10,12 @@ import eventRepository from "./eventRepository";
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const userId = Number(req.query.userId);
-    const events = await eventRepository.readAll(userId);
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const events = await eventRepository.readAll(req.user.id);
     res.json(events);
   } catch (error) {
     next(error);
@@ -129,6 +134,9 @@ const join: RequestHandler = async (req, res, next) => {
 
 const read: RequestHandler = async (req, res, next) => {
   try {
+    const eventId = await readMemberEventId(req, res, req.params.eventUuid);
+    if (!eventId) return;
+
     const event = await eventRepository.readByUuid(req.params.eventUuid);
 
     if (!event) {
