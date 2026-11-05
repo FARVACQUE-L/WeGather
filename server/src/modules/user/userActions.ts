@@ -169,6 +169,11 @@ const add: RequestHandler = async (req, res, next) => {
   }
 };
 
+const RESET_TOKEN_DURATION_MS = 1000 * 60 * 30;
+
+const hashResetToken = (token: string) =>
+  crypto.createHash("sha256").update(token).digest("hex");
+
 let dummyHash: Promise<string> | null = null;
 
 const verifyAgainstDummy = async (password: string) => {
@@ -253,8 +258,12 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
     const token = crypto.randomBytes(32).toString("hex");
 
     if (user) {
-      const expires = Date.now() + 1000 * 60 * 3;
-      await userRepository.saveResetToken(user.user_id, token, expires);
+      const expires = Date.now() + RESET_TOKEN_DURATION_MS;
+      await userRepository.saveResetToken(
+        user.user_id,
+        hashResetToken(token),
+        expires,
+      );
     }
 
     res.json({
@@ -298,7 +307,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const user = await userRepository.findByResetToken(token);
+    const user = await userRepository.findByResetToken(hashResetToken(token));
 
     if (!user) {
       res.status(401).json({ message: "Token invalide" });

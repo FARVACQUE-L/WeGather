@@ -1,8 +1,11 @@
 import cookieParser from "cookie-parser";
 import express from "express";
+import securityHeaders from "./middleware/securityHeaders";
 
 const app = express();
 
+app.disable("x-powered-by");
+app.use(securityHeaders);
 app.use(cookieParser());
 app.use(
   cors({

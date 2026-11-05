@@ -202,12 +202,30 @@ const banUser: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
 
+    if (id === req.user?.id) {
+      res.status(400).json({ message: "Vous ne pouvez pas vous bannir." });
+      return;
+    }
+
     const roles = await adminRepository.readRoles(id);
     if (roles?.user_is_superadmin) {
       res.status(403).json({
         message: "Un superadmin ne peut pas être banni définitivement",
       });
       return;
+    }
+
+    if (roles?.user_is_admin) {
+      const requester = req.user
+        ? await adminRepository.readRoles(req.user.id)
+        : undefined;
+
+      if (!requester?.user_is_superadmin) {
+        res.status(403).json({
+          message: "Seul un superadmin peut bannir un administrateur",
+        });
+        return;
+      }
     }
 
     const user = await adminRepository.banUser(id);

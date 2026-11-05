@@ -1,9 +1,12 @@
 import type { RequestHandler } from "express";
+import { discardUploadedFiles } from "../../helper/discardUploadedFiles";
 import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import reportUserRepository from "./reportUserRepository";
 
 const add: RequestHandler = async (req, res, next) => {
+  let filesKept = false;
+
   try {
     if (!req.user) {
       res.status(401).json({ message: "Unauthorized" });
@@ -61,10 +64,13 @@ const add: RequestHandler = async (req, res, next) => {
       newReportUser,
       imagePaths,
     );
+    filesKept = true;
 
     res.status(201).json({ insertId });
   } catch (err) {
     next(err);
+  } finally {
+    if (!filesKept) await discardUploadedFiles(req);
   }
 };
 

@@ -82,7 +82,7 @@ const RETENTION = [
   },
   {
     data: "Lien de réinitialisation du mot de passe",
-    duration: "3 minutes, ou jusqu'à son utilisation.",
+    duration: "30 minutes, ou jusqu'à son utilisation.",
   },
   {
     data: "Cookie de connexion",
@@ -129,7 +129,7 @@ function Confidentialite() {
             Politique de confidentialité — We<i>G</i>ather
           </motion.h1>
           <motion.p className="cgv-Updated" {...fadeIn}>
-            Dernière mise à jour : 3 novembre 2026
+            Dernière mise à jour : 5 novembre 2026
           </motion.p>
 
           <motion.section {...revealOnScroll} className="cgv-Intro">
