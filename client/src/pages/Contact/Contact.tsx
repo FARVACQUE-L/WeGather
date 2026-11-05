@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import NavBar from "../../components/NavBar/NavBar";
 import Profil from "../../components/Profil/Profil";
-// Même mise en page que les pages légales, plus les styles du formulaire.
 import "../PageCGV/PageCGV.css";
 import "./Contact.css";
 
@@ -17,7 +16,6 @@ const CONTACT_EMAIL = "wedoop3@gmail.com";
 const MESSAGE_MAX = 2000;
 const MESSAGE_MIN = 10;
 
-// Mêmes valeurs que CONTACT_SUBJECTS (server/src/modules/contact).
 const SUBJECTS = [
   "Question",
   "Problème technique",
@@ -26,8 +24,6 @@ const SUBJECTS = [
   "Autre",
 ];
 
-// Animations dans le style du reste du site : le titre descend, puis les
-// champs du formulaire arrivent les uns après les autres.
 const formVariants: Variants = {
   hidden: {},
   visible: { transition: { delayChildren: 0.2, staggerChildren: 0.08 } },
@@ -39,15 +35,12 @@ const fieldVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
 };
 
-// Page publique : le menu du profil n'apparaît que pour un utilisateur
-// connecté.
 function Contact() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState(SUBJECTS[0]);
   const [message, setMessage] = useState("");
-  // Champ piège : invisible pour un visiteur, rempli par les robots.
   const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState("");
@@ -60,8 +53,6 @@ function Contact() {
       .catch(() => setIsLoggedIn(false));
   }, []);
 
-  // Le navigateur vérifie déjà les champs (required, type="email",
-  // minLength, maxLength) avant d'arriver ici.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -222,7 +213,6 @@ function Contact() {
                   </span>
                 </motion.div>
 
-                {/* Hors écran et ignoré au clavier et par les lecteurs d'écran. */}
                 <div className="Contact-Trap" aria-hidden="true">
                   <label htmlFor="contact-website">Site web</label>
                   <input
@@ -261,8 +251,6 @@ function Contact() {
                   .
                 </motion.p>
 
-                {/* L'animation est sur l'enveloppe : sur le bouton, elle
-                    écraserait l'effet de survol (transform) de Contact.css. */}
                 <motion.div
                   className="Contact-Actions"
                   variants={fieldVariants}

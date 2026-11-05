@@ -1,7 +1,6 @@
 import type { Rows } from "../../../database/client";
 import mysql from "../../../database/client";
 
-// Champs du wallet, tous facultatifs sauf le type ('autre' par défaut).
 type ReservationSchedule = {
   reservation_type: string;
   reservation_time_start: string | null;

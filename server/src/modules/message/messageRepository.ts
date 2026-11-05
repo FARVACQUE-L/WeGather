@@ -12,8 +12,6 @@ type MessageOwnerRow = RowDataPacket & {
   message_image: string | null;
 };
 
-// Emojis proposés pour réagir à un message, dans leur ordre d'affichage.
-// Aucun autre emoji n'est accepté.
 export const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
 type ReactionRow = RowDataPacket & {
@@ -23,15 +21,11 @@ type ReactionRow = RowDataPacket & {
   user_username: string;
 };
 
-// Réactions d'un message, regroupées par emoji avec les personnes qui l'ont
-// mis.
 export type Reaction = {
   emoji: string;
   users: { user_id: number; user_username: string }[];
 };
 
-// Colonnes renvoyées pour chaque message, avec la citation éventuelle : le
-// texte et le pseudo du message auquel il répond.
 const MESSAGE_SELECT = `SELECT
   m.message_id,
   m.message_text,
@@ -91,8 +85,6 @@ class MessageRepository {
     return message;
   }
 
-  // Réactions de plusieurs messages, regroupées par message puis par emoji,
-  // dans l'ordre de REACTION_EMOJIS.
   async readReactions(messageIds: number[]) {
     const reactions = new Map<number, Reaction[]>();
     if (messageIds.length === 0) return reactions;
@@ -148,8 +140,6 @@ class MessageRepository {
     }));
   }
 
-  // Ajoute la réaction si l'utilisateur ne l'avait pas mise, la retire
-  // sinon. Renvoie les réactions à jour du message.
   async toggleReaction(messageId: number, userId: number, emoji: string) {
     const [deleted] = await mysql.query<ResultSetHeader>(
       `DELETE FROM message_reaction
@@ -175,8 +165,6 @@ class MessageRepository {
     return reactions.get(messageId) ?? [];
   }
 
-  // Événement et auteur d'un message, pour vérifier les droits avant une
-  // réponse, une modification ou une suppression.
   async readOwner(messageId: number) {
     const [rows] = await mysql.query<MessageOwnerRow[]>(
       `SELECT message_id, message_id_event, message_id_user, message_image

@@ -61,8 +61,6 @@ adminRoutes.get(
   adminActions.readAllUsers,
 );
 
-// Gestion des rôles : la liste des admins est visible par tous les admins,
-// la recherche, l'ajout et le retrait sont réservés aux superadmins.
 adminRoutes.get(
   "/api/admin/users/search",
   authorization,

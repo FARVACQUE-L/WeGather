@@ -42,19 +42,14 @@ type EventInfo = {
   event_date_end: string;
 };
 
-// Suppression en attente de confirmation dans la modale.
 type PendingDelete =
   | { kind: "reservation"; id: number; name: string }
   | { kind: "document"; id: number; name: string };
 
-// 8 Mo, comme la limite de multer (upload.ts) : on prévient avant l'envoi.
 const MAX_DOCUMENT_SIZE = 8 * 1024 * 1024;
 
 const STARTS_WITH_URL = /^https?:\/\//i;
 
-// La capitalisation s'applique à chaque frappe : au moment où l'on tape « h »,
-// le champ contient déjà « H ». Dès que le schéma est reconnaissable, on le
-// remet donc en minuscules au lieu de simplement s'abstenir.
 const capitalize = (str = "") => {
   if (STARTS_WITH_URL.test(str)) {
     return str.replace(/^https?/i, (scheme) => scheme.toLowerCase());
@@ -67,12 +62,8 @@ function Reservation() {
   const canHover = useCanHover();
   const { eventUuid } = useParams();
   const [userId, setUserId] = useState<number | null>(null);
-  // L'hôte peut modifier et supprimer toutes les réservations de l'événement.
   const [hostId, setHostId] = useState<number | null>(null);
   const [reservations, setReservations] = useState<WalletReservation[]>([]);
-  // Limite de réservations selon la formule de l'organisateur, donnée par le
-  // serveur. null quand elle n'est pas encore connue ou que la formule n'en
-  // a pas : seul le serveur bloque alors l'ajout.
   const [reservationLimit, setReservationLimit] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reservationName, setReservationName] = useState("");
@@ -88,8 +79,6 @@ function Reservation() {
   const [reservationPicture, setReservationPicture] = useState<File | null>(
     null,
   );
-  // Documents choisis dans la modale, envoyés une fois la réservation
-  // enregistrée (il faut son id).
   const [pendingDocuments, setPendingDocuments] = useState<File[]>([]);
   const [userInEvent, setUserInEvent] = useState<boolean | null>(null);
   const [preview, setPreview] = useState("");
@@ -102,20 +91,14 @@ function Reservation() {
   const [isSaving, setIsSaving] = useState(false);
   const [activeType, setActiveType] = useState<ReservationType | "all">("all");
   const [showPast, setShowPast] = useState(false);
-  // Réservation dont un document est en cours d'envoi depuis sa carte.
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(
     null,
   );
-  // Document cliqué sur une carte : la modale propose de l'ouvrir ou de le
-  // télécharger.
   const [selectedDocument, setSelectedDocument] =
     useState<ReservationDocument | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentsInputRef = useRef<HTMLInputElement>(null);
-  // Comme dans la galerie, le bouton d'ajout passe en icône quand il touche
-  // le titre. L'en-tête n'est rendu qu'une fois l'inscription vérifiée :
-  // userInEvent relance la mesure à ce moment-là.
   const headerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const addReservationRef = useRef<HTMLButtonElement>(null);
@@ -158,7 +141,6 @@ function Reservation() {
       },
     );
     const data = await res.json();
-    // 403 pour un non-inscrit : le serveur renvoie un message, pas une liste.
     setReservations(Array.isArray(data) ? data : []);
   }, [eventUuid]);
 
@@ -284,7 +266,6 @@ function Reservation() {
     setIsModalOpen(true);
   }
 
-  // Renvoie le message d'erreur du serveur, ou null si l'envoi a réussi.
   async function uploadDocument(reservationId: number, file: File) {
     if (file.size > MAX_DOCUMENT_SIZE) {
       return `${file.name} dépasse 8 Mo.`;
@@ -318,9 +299,6 @@ function Reservation() {
     toastSuccess("Document ajouté");
   }
 
-  // L'API est sur une autre origine en dev, où l'attribut download d'un lien
-  // vers elle est ignoré, et la route demande le cookie de session : on
-  // récupère le fichier en blob, comme dans la galerie.
   async function fetchDocumentUrl(document: ReservationDocument) {
     const response = await fetch(
       `${API_URL}/api/reservations/documents/${document.document_id}/download`,
@@ -346,9 +324,6 @@ function Reservation() {
     }
   }
 
-  // Ouvre le document dans un nouvel onglet (lecteur PDF ou image du
-  // navigateur). L'onglet est ouvert tout de suite, pendant le clic : ouvert
-  // après le téléchargement, il serait bloqué comme une popup.
   async function handleOpenDocument(document: ReservationDocument) {
     setSelectedDocument(null);
     const tab = window.open("", "_blank");
@@ -359,8 +334,6 @@ function Reservation() {
       } else {
         window.open(blobUrl, "_blank");
       }
-      // Laisse le temps à l'onglet de charger le fichier avant de libérer
-      // la mémoire.
       setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
     } catch (error) {
       console.error(error);
@@ -406,8 +379,6 @@ function Reservation() {
     }
   }
 
-  // Mêmes règles que le serveur (validateReservationFields) : on prévient
-  // avant l'envoi. Renvoie le message d'erreur, ou null.
   function validateForm(isEditing: boolean) {
     const missingFields = [
       !reservationName && "le titre",
@@ -488,7 +459,6 @@ function Reservation() {
         await cropImage(preview, crop, reservationPicture.name),
       );
     } else if (isEditing && !preview) {
-      // Image retirée dans la modale : la carte reprend l'icône du type.
       formData.append("remove_picture", "true");
     }
 
@@ -515,7 +485,6 @@ function Reservation() {
         return;
       }
 
-      // À la création, le serveur renvoie le résultat de l'INSERT.
       const reservationId = isEditing ? editingReservationId : data?.insertId;
       const failedUploads: string[] = [];
 
@@ -558,7 +527,6 @@ function Reservation() {
   function handleRemovePicture() {
     setReservationPicture(null);
     setPreview("");
-    // Permet de rechoisir ensuite la même image.
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -566,7 +534,6 @@ function Reservation() {
     e: React.ChangeEvent<HTMLInputElement>,
   ) {
     const files = Array.from(e.target.files ?? []);
-    // Un même fichier choisi deux fois n'est gardé qu'une fois.
     setPendingDocuments((prev) => [
       ...prev,
       ...files.filter(
@@ -607,10 +574,7 @@ function Reservation() {
   const pastReservations = filteredReservations.filter((r) =>
     isPastReservation(r),
   );
-  // Mise en avant indépendante du filtre : c'est toujours la prochaine étape
-  // du séjour.
   const nextReservation = reservations.find((r) => !isPastReservation(r));
-  // Filtres limités aux types présents dans l'événement.
   const presentTypes = RESERVATION_TYPES.filter((type) =>
     reservations.some((r) => r.reservation_type === type),
   );
@@ -618,7 +582,6 @@ function Reservation() {
     reservations.find((r) => r.reservation_id === editingReservationId)
       ?.documents.length ?? 0;
 
-  // Cartes à la suite, dans l'ordre chronologique donné par le serveur.
   const renderCards = (items: WalletReservation[], isPast: boolean) =>
     items.map((reservation) => (
       <div
@@ -684,8 +647,6 @@ function Reservation() {
           className="reservation-button"
           aria-label="Ajouter une réservation"
           onClick={() => {
-            // Limite atteinte : on le dit tout de suite au lieu d'ouvrir une
-            // modale dont l'envoi serait refusé.
             if (
               reservationLimit !== null &&
               reservations.length >= reservationLimit
@@ -701,7 +662,6 @@ function Reservation() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          // Même survol que Créer / Rejoindre un événement.
           whileHover={
             canHover
               ? { scale: 0.95, transition: { duration: 0.2 } }
@@ -721,9 +681,6 @@ function Reservation() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onKeyDown={(e) => {
-                // Entrée enregistre depuis un champ de saisie. Dans la
-                // description elle va à la ligne, et sur un bouton (type,
-                // fichiers) elle l'active sans enregistrer.
                 if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
                   handleSubmitReservation(e);
                 }
@@ -742,9 +699,6 @@ function Reservation() {
                     : "Nouvelle réservation"}
                 </h2>
 
-                {/* Titres, champs et boutons calqués sur la modale de
-                    modification d'événement. Classes préfixées : les règles
-                    globales .modal de GalleryModal.css s'appliquaient ici. */}
                 <div className="ReservationModal-Field">
                   <label
                     className="ReservationModal-Label"
@@ -874,14 +828,11 @@ function Reservation() {
                     }
                     maxLength={255}
                   />
-                  {/* 255 : taille de la colonne reservation_description. */}
                   <span className="ReservationModal-Counter">
                     {reservationDescription.length}/255
                   </span>
                 </div>
 
-                {/* Facultatif. Alimente le bouton « Voir le site » de la
-                    carte ; le serveur n'accepte que http et https. */}
                 <div className="ReservationModal-Field">
                   <label
                     className="ReservationModal-Label"
@@ -958,9 +909,6 @@ function Reservation() {
                     Image (facultative)
                   </label>
                   <div className="ReservationModal-Image">
-                    {/* Recadrage seulement pour une nouvelle image : l'image
-                        actuelle d'une réservation modifiée est déjà
-                        enregistrée telle quelle. */}
                     {reservationPicture ? (
                       <ImageCropper
                         src={preview}

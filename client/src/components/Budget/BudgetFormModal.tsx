@@ -10,9 +10,6 @@ type BudgetFormModalProps = {
   onSubmit: (name: string, price: number) => void;
 };
 
-// Modale commune à l'ajout et à la modification d'une dépense, calquée sur
-// la modale de modification d'événement. Préfixe BudgetForm-* : les règles
-// globales .modal de GalleryModal.css ne doivent pas s'y appliquer.
 function BudgetFormModal({
   title,
   submitLabel,
@@ -29,8 +26,6 @@ function BudgetFormModal({
 
   const isEditing = initialPrice !== undefined;
 
-  // Le formulaire est soumis pour de vrai : required, min et step="0.01"
-  // sont vérifiés par le navigateur avant d'arriver ici.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 

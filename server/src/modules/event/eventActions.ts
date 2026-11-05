@@ -41,23 +41,17 @@ const add: RequestHandler = async (req, res, next) => {
     !event_description ||
     !event_location
   ) {
-    // multer a déjà écrit la photo sur disque : on ne la garde pas pour un
-    // événement qui ne sera pas créé.
     if (req.file) fs.rmSync(req.file.path, { force: true });
     res.status(400).json({ message: "Veuillez remplir tous les champs." });
     return;
   }
 
-  // Photo facultative : sans fichier, l'événement prend le logo WeGather.
   const baseUrl = `${req.protocol}://${req.get("host")}`;
   const event_picture = req.file
     ? `${baseUrl}/uploads/${req.file.filename}`
     : `${baseUrl}/assets/images/logo-wegather.png`;
 
   try {
-    // Nombre d'événements créés selon la formule du compte. Un événement
-    // supprimé libère sa place ; un événement banni la garde, pour que le
-    // bannissement ne rende pas un créneau.
     const { hostedEvents: maxHostedEvents } = getPlanLimits(
       await userRepository.readUserPlan(event_id_host),
     );
@@ -167,9 +161,6 @@ const read: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Seul l'hôte, identifié par le cookie de session, peut modifier ou supprimer
-// son événement. Renvoie l'événement, ou null si la réponse d'erreur a déjà
-// été envoyée.
 const readHostedEvent = async (
   req: Parameters<RequestHandler>[0],
   res: Parameters<RequestHandler>[1],
@@ -211,7 +202,6 @@ const edit: RequestHandler = async (req, res, next) => {
     const event = await readHostedEvent(req, res);
 
     if (!event) {
-      // multer a déjà écrit la photo sur disque : on ne la garde pas.
       if (req.file) fs.rmSync(req.file.path, { force: true });
       return;
     }
@@ -224,8 +214,6 @@ const edit: RequestHandler = async (req, res, next) => {
       event_location,
       event_picture,
     });
-    // L'ancienne photo n'est effacée que si une nouvelle la remplace. Le logo
-    // par défaut (sous /assets) est ignoré par removeUpload.
     if (req.file) await removeUpload(event.event_picture);
 
     const updatedEvent = await eventRepository.read(event.event_id);
@@ -239,7 +227,6 @@ const deleteEvent: RequestHandler = async (req, res, next) => {
     const event = await readHostedEvent(req, res);
     if (!event) return;
 
-    // Les fichiers ne sont effacés qu'une fois la suppression en base réussie.
     const images = await eventRepository.readImages(event.event_id);
     const documentFiles = await reservationDocumentRepository.readFilesByEvent(
       event.event_id,

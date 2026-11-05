@@ -41,8 +41,6 @@ const browseUserEvent: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Membres de l'événement, visibles par tous ses membres. La liste des bannis
-// n'est envoyée qu'à l'hôte, seul à pouvoir les débannir.
 const browseGroup: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -75,7 +73,6 @@ const browseGroup: RequestHandler = async (req, res, next) => {
       ? await eventUserJoiningRepository.readBanned(event.event_id)
       : [];
 
-    // Statut de présence de chaque membre (en ligne, inactif, hors ligne).
     const membersWithStatus = members.map((member) => ({
       ...member,
       status: getStatus(member.euj_id_user),
@@ -91,9 +88,6 @@ const browseGroup: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Vérifie que l'utilisateur connecté est l'hôte et que la cible n'est pas
-// l'hôte lui-même. Renvoie l'id de l'événement, ou null si la réponse
-// d'erreur a déjà été envoyée.
 const resolveHostAction = async (
   req: Parameters<RequestHandler>[0],
   res: Parameters<RequestHandler>[1],

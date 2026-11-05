@@ -20,8 +20,6 @@
     flex-shrink: 0;
     width: var(--arrow-width);
     height: auto;
-    /* Centre la pointe (x=500 sur 600 dans le viewBox) sur le bouton
-       "Créer / Rejoindre" : 17rem de large, 2rem de padding à droite. */
     margin-right: calc(2rem + 17rem / 2 - var(--arrow-width) / 6);
     color: var(--color-arrow);
     transform: translateY(-8rem);

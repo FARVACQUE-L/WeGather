@@ -3,7 +3,6 @@
   --presentation-rose: #f4e1d9;
   --presentation-gradient: linear-gradient(13.68deg, #ff7e5f 25%, #a53b22 75%);
   --presentation-shadow: 0 12px 32px rgba(87, 51, 40, 0.07);
-  /* Contenu limité à 1280px, centré sur les grands écrans */
   --presentation-gutter: max(80px, calc((100% - 1280px) / 2));
 
   background-color: var(--bg-color);
@@ -70,7 +69,6 @@
     }
   }
 
-  /* Navigation */
   .navbar-presentation {
     display: flex;
     justify-content: space-between;
@@ -97,7 +95,6 @@
     }
   }
 
-  /* Hero */
   .hero-presentation {
     display: flex;
     justify-content: space-between;
@@ -192,7 +189,6 @@
     }
   }
 
-  /* Bandeau des fonctionnalités */
   .features-strip-presentation {
     display: flex;
     flex-wrap: wrap;
@@ -217,7 +213,6 @@
     }
   }
 
-  /* Toutes les occasions */
   .occasions-presentation {
     display: flex;
     flex-direction: column;
@@ -301,7 +296,6 @@
     }
   }
 
-  /* Comment ça marche */
   .steps-presentation {
     display: flex;
     flex-direction: column;
@@ -360,7 +354,6 @@
     }
   }
 
-  /* Votre espace événement */
   .space-presentation {
     display: flex;
     flex-direction: column;
@@ -476,8 +469,6 @@
       }
     }
 
-    /* Collé en bas de la carte, pour que les aperçus d'une même ligne
-       restent alignés. */
     .tool-preview-presentation {
       display: flex;
       flex-direction: column;
@@ -490,9 +481,6 @@
     }
   }
 
-  /* Aperçus : des maquettes qui reprennent le style de l'application
-     (couleurs, cartes, boutons), en plus petit. Purement décoratives :
-     chacune est décrite par son aria-label. */
   .mock-presentation {
     overflow: hidden;
     background-color: var(--bg-color);
@@ -572,7 +560,6 @@
     }
   }
 
-  /* Tableau de bord */
   .dashboard-preview-presentation {
     .mock-sidebar {
       display: flex;
@@ -794,7 +781,6 @@
     }
   }
 
-  /* Messagerie */
   .mock-chat {
     background-color: var(--bg-composant-dash);
 
@@ -868,7 +854,6 @@
     }
   }
 
-  /* Réservations */
   .mock-bookings {
     .mock-next {
       display: flex;
@@ -1029,7 +1014,6 @@
     }
   }
 
-  /* Budget */
   .mock-budget {
     gap: 8px;
 
@@ -1133,7 +1117,6 @@
     }
   }
 
-  /* Galerie */
   .mock-gallery {
     .mock-gallery-actions {
       display: flex;
@@ -1163,7 +1146,6 @@
     }
   }
 
-  /* Questions fréquentes */
   .faq-presentation {
     display: flex;
     gap: 96px;
@@ -1223,8 +1205,6 @@
         flex-shrink: 0;
       }
 
-      /* Hauteur animée à l'ouverture : le texte est rogné pendant le
-         déroulé, et la marge est dans le paragraphe pour suivre la hauteur. */
       .faq-answer-presentation {
         overflow: hidden;
       }
@@ -1247,7 +1227,6 @@
     }
   }
 
-  /* Appel à l'action final */
   .cta-presentation {
     display: flex;
     flex-direction: column;
@@ -1269,7 +1248,6 @@
     }
   }
 
-  /* Pied de page */
   .footer-presentation {
     display: flex;
     flex-direction: column;
@@ -1345,7 +1323,6 @@
   }
 }
 
-/* Tablette : les colonnes passent les unes sous les autres */
 @media screen and (max-width: 1024px) {
   .presentation-content {
     --presentation-gutter: 40px;
@@ -1410,7 +1387,6 @@
   }
 }
 
-/* Mobile */
 @media screen and (max-width: 428px) {
   .presentation-content {
     --presentation-gutter: 20px;
@@ -1487,7 +1463,6 @@
       }
     }
 
-    /* Aperçus : comme dans l'application sur mobile, sans barre latérale */
     .dashboard-preview-presentation {
       .mock-sidebar,
       .mock-todo,

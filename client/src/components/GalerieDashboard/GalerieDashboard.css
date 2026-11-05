@@ -14,7 +14,6 @@
     }
   }
 
-  /* Les 3 dernières photos, en carrés de même taille. */
   .galerie-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

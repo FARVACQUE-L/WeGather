@@ -6,8 +6,6 @@ import connexionImg from "../../assets/images/Connexion-img.png";
 import logo from "../../assets/images/logo-wegather.png";
 
 function ForgetPassword() {
-  // Le premier champ reçoit le focus à l'ouverture : on peut taper
-  // directement, sans cliquer dans le formulaire.
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

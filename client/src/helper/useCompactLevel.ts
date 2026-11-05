@@ -6,26 +6,12 @@ import {
   useState,
 } from "react";
 
-// Taille des boutons réduits à leur icône (rond de 40px, voir Galerie.css et
-// Reservation.css).
 const COMPACT_BUTTON_WIDTH = 40;
-// Sous 428px, la mise en page mobile décide seule : le bouton d'ajout y
-// devient un bouton flottant hors de l'en-tête.
 const MOBILE_QUERY = "(max-width: 428px)";
 
-// Un gap non défini vaut « normal », que parseFloat lit comme NaN.
 const readGap = (element: Element) =>
   Number.parseFloat(getComputedStyle(element).columnGap) || 0;
 
-// Nombre de boutons de l'en-tête à réduire à leur icône pour qu'ils ne
-// touchent pas le titre, dans l'ordre de `buttonRefs` : d'abord le premier,
-// puis le suivant s'il manque encore de la place. Le titre doit garder sa
-// largeur naturelle dans scrollWidth (white-space: nowrap, overflow: hidden).
-// Sur mobile, le niveau vaut `mobileLevel`, quelle que soit la place.
-//
-// La largeur d'un bouton avec son libellé ne se mesure que quand il est
-// affiché en entier : elle est mémorisée, sinon le bouton réduit paraîtrait
-// tenir, s'élargirait, retoucherait le titre et clignoterait.
 export function useCompactLevel(
   headerRef: RefObject<HTMLElement | null>,
   titleRef: RefObject<HTMLElement | null>,
@@ -55,8 +41,6 @@ export function useCompactLevel(
         }
       });
 
-      // Un bouton apparu pendant qu'il était réduit n'a jamais été mesuré en
-      // entier : on réaffiche tout pour le mesurer au rendu suivant.
       if (
         buttons.some(
           (button, index) => button && fullWidths.current[index] === undefined,

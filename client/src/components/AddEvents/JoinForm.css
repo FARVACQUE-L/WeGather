@@ -43,9 +43,6 @@
   display: flex;
   justify-content: space-evenly;
   margin-bottom: 2rem;
-  /* Mêmes boutons que le formulaire de création d'événement : Annuler garde
-     le gris par défaut des boutons, ombre et survol de la modale de
-     modification. */
   .JoinForm-ButtonCancel {
     width: 5rem;
     height: 2rem;
@@ -80,8 +77,6 @@
     }
   }
 }
-/* Marges resserrées : la modale ne fait plus 30rem de haut au minimum sur
-   mobile (ModalAddEvent.css). */
 @media screen and (max-width: 428px) {
   .JoinForm-Body {
     margin: 2rem 1.25rem 1.5rem;

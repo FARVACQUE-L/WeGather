@@ -73,12 +73,9 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
   const [isHost, setIsHost] = useState<number | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
-  // Sur mobile, la flèche au-dessus de la barre affiche les icônes masquées.
   const [isExpanded, setIsExpanded] = useState(false);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Glisser vers le haut sur la barre l'agrandit, vers le bas la replie. Un
-  // geste surtout horizontal, ou trop court (un appui), est ignoré.
   const handleTouchStart = (event: React.TouchEvent) => {
     const touch = event.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
@@ -97,7 +94,6 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
     setIsExpanded(deltaY < 0);
   };
 
-  // Une fois une section choisie, la barre se replie.
   // biome-ignore lint/correctness/useExhaustiveDependencies: activeComponent ne sert qu'à déclencher le repli.
   useEffect(() => {
     setIsExpanded(false);
@@ -182,7 +178,6 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
 
   useEffect(() => {
     if (!eventUuid || !userId) return;
-    // L'utilisateur est lu dans le cookie de session par le serveur.
     fetch(`${import.meta.env.VITE_API_URL}/api/messages/unread/${eventUuid}`, {
       credentials: "include",
     })
@@ -230,7 +225,6 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Affichée seulement sous 428px (voir SideBar.css). */}
       <button
         type="button"
         className="sidebar-toggle"
@@ -424,8 +418,6 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
                 <span>Supprimer l'évenement</span>
               </motion.button>
 
-              {/* Rendue dans body : la sidebar (position: fixed, z-index: 1)
-                  enfermait la modale sous le bouton du profil (z-index: 3). */}
               {isDeleteModalOpen &&
                 createPortal(
                   <div className="SideBarModal-Overlay">

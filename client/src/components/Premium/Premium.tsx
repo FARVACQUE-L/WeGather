@@ -8,11 +8,9 @@ type Plan = {
   galleryPhotos: number;
   reservations: number;
   price: string;
-  // Libellé du bouton d'abonnement ; absent pour la formule gratuite.
   cta?: string;
 };
 
-// Mêmes valeurs que server/src/helper/planLimits.ts.
 const PLANS: Plan[] = [
   {
     name: "Free",
@@ -26,7 +24,6 @@ const PLANS: Plan[] = [
     hostedEvents: 5,
     galleryPhotos: 30,
     reservations: 10,
-    // Paiement pas encore en place : ni tarif ni abonnement pour l'instant.
     price: "-",
     cta: "Passer au Premium",
   },
@@ -40,11 +37,9 @@ const PLANS: Plan[] = [
   },
 ];
 
-// Infinity : pas de limite.
 const formatLimit = (limit: number) =>
   limit === Infinity ? "Illimité" : limit;
 
-// true : fonctionnalité incluse, affichée par une coche.
 const FEATURES: {
   label: string;
   value: (plan: Plan) => string | number | true;
@@ -74,7 +69,6 @@ const FEATURES: {
   },
 ];
 
-// Bouton d'abonnement désactivé tant que le paiement n'existe pas.
 function SubscribeButton({ plan }: { plan: Plan }) {
   return (
     <button
@@ -158,8 +152,6 @@ function Premium() {
         </table>
       </div>
 
-      {/* Sous 428px, le tableau est remplacé par une card par formule
-          (Premium.css). Le tarif passe sous le nom de la formule. */}
       <div className="premium-cards">
         {PLANS.map((plan) => (
           <article

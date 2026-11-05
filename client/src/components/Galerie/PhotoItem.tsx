@@ -4,8 +4,6 @@ import { createPortal } from "react-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Appui long sur mobile : durée avant l'ouverture du menu, et déplacement
-// au-delà duquel le doigt fait défiler la page au lieu d'appuyer.
 const LONG_PRESS_DELAY = 500;
 const LONG_PRESS_TOLERANCE = 10;
 
@@ -23,7 +21,6 @@ type Gallery = {
 type PhotoItemProps = {
   photo: Gallery;
   isLiked: boolean;
-  // Auteur de la photo ou hôte : modifier et supprimer.
   canManage: boolean;
   onPreview: (url: string) => void;
   onLike: (id: number) => void;
@@ -40,11 +37,6 @@ export function PhotoItem({
   onEdit,
   onDelete,
 }: PhotoItemProps) {
-  // /uploads sert les photos sans extension ni Content-Type : la route de
-  // téléchargement renvoie le vrai type. L'API est sur une autre origine en
-  // dev, où l'attribut download d'un lien est ignoré : on passe par un blob.
-  // Sans no-store, un 304 réutilise la réponse en cache, Content-Type compris,
-  // et une ancienne réponse sans le bon type donnait un fichier sans extension.
   const handleDownload = async () => {
     try {
       const response = await fetch(
@@ -71,13 +63,9 @@ export function PhotoItem({
     }
   };
 
-  // Sous 428px, les boutons sur la photo sont masqués (Galerie.css) : un appui
-  // court l'agrandit, un appui long ouvre un menu avec les mêmes actions.
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pressTimerRef = useRef<number | null>(null);
   const pressStartRef = useRef<{ x: number; y: number } | null>(null);
-  // Le relâchement qui suit un appui long déclenche aussi un clic : il ne
-  // doit pas agrandir la photo.
   const isLongPressRef = useRef(false);
 
   const cancelPress = () => {
@@ -110,9 +98,6 @@ export function PhotoItem({
     }
   };
 
-  // Le menu s'ouvre sous le doigt encore posé : selon le navigateur, le clic
-  // du relâchement arrive sur le menu et le fermerait ou lancerait une
-  // action. Il est ignoré ; un nouvel appui, lui, remet le drapeau à zéro.
   const resetLongPress = () => {
     isLongPressRef.current = false;
   };
@@ -123,7 +108,6 @@ export function PhotoItem({
     return true;
   };
 
-  // Ferme le menu avant de lancer l'action choisie.
   const runMenuAction = (action: () => void) => {
     setIsMenuOpen(false);
     action();
@@ -142,8 +126,6 @@ export function PhotoItem({
         onPointerUp={cancelPress}
         onPointerLeave={cancelPress}
         onPointerCancel={cancelPress}
-        // Sans ça, l'appui long ouvre aussi le menu du navigateur sur
-        // l'image (enregistrer, partager).
         onContextMenu={(e) => {
           if (window.matchMedia("(max-width: 428px)").matches) {
             e.preventDefault();
@@ -211,13 +193,9 @@ export function PhotoItem({
         )}
       </div>
 
-      {/* Rendu dans body : la case de la photo est en overflow: hidden et la
-          barre de navigation passerait au-dessus. */}
       {isMenuOpen &&
         createPortal(
           <div className="PhotoMenu-Overlay">
-            {/* Toute la surface autour du menu : un appui ferme le menu,
-                comme sur l'aperçu d'une photo (.overlay-close). */}
             <button
               type="button"
               className="PhotoMenu-Close"

@@ -1,7 +1,3 @@
-// Présence des utilisateurs, en mémoire : sockets ouverts par utilisateur.
-// Un utilisateur est « online » tant qu'il a au moins un onglet ouvert sur le
-// site, « offline » sinon.
-
 export type PresenceStatus = "online" | "offline";
 
 const sockets = new Map<number, Set<string>>();

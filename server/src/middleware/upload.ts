@@ -4,16 +4,10 @@ import multer from "multer";
 
 const DESTINATION = "public/uploads/";
 
-// Les pièces jointes d'un signalement contiennent souvent des captures de
-// conversations privées : elles sont stockées hors de public/, donc hors de
-// portée d'express.static, et servies par une route réservée aux admins.
 const REPORTS_DESTINATION = "private/reports/";
 
-// Même principe pour les billets et confirmations des réservations : noms,
-// adresses et numéros de réservation n'ont pas à être publics.
 const RESERVATION_DOCUMENTS_DESTINATION = "private/reservations/";
 
-// 8 Mo : une photo prise au téléphone passe, un envoi abusif est coupé.
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 const MAX_FILES = 5;
 
@@ -25,8 +19,6 @@ const IMAGE_MIME_TYPES = [
   "image/avif",
 ];
 
-// Les pièces jointes d'un signalement acceptent aussi le PDF, comme le
-// champ correspondant côté client (ReportEvidence).
 const EVIDENCE_MIME_TYPES = [...IMAGE_MIME_TYPES, "application/pdf"];
 
 const unsupportedFormat = (allowed: string[]) => {
@@ -83,22 +75,16 @@ export const uploadReservationDocument = multer({
   },
 });
 
-// Le fileFilter ne peut se fier qu'au Content-Type annoncé par le client,
-// lui-même déduit de l'extension : un .txt renommé .jpg le franchit. On
-// vérifie donc les premiers octets du fichier écrit sur disque.
-// Chaque entrée liste des motifs qui doivent TOUS correspondre.
 const SIGNATURES: Record<string, { offset: number; bytes: number[] }[]> = {
   "image/jpeg": [{ offset: 0, bytes: [0xff, 0xd8, 0xff] }],
   "image/png": [
     { offset: 0, bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] },
   ],
   "image/gif": [{ offset: 0, bytes: [0x47, 0x49, 0x46, 0x38] }],
-  // RIFF....WEBP : la taille occupe les octets 4 à 7.
   "image/webp": [
     { offset: 0, bytes: [0x52, 0x49, 0x46, 0x46] },
     { offset: 8, bytes: [0x57, 0x45, 0x42, 0x50] },
   ],
-  // Conteneur ISO-BMFF : boîte "ftyp" juste après la taille.
   "image/avif": [{ offset: 4, bytes: [0x66, 0x74, 0x79, 0x70] }],
   "application/pdf": [{ offset: 0, bytes: [0x25, 0x50, 0x44, 0x46] }],
 };
@@ -154,8 +140,6 @@ const verifyFileSignatures: RequestHandler = async (req, res, next) => {
     );
 
     if (invalid) {
-      // Aucun fichier de la requête n'est conservé : le signalement est
-      // rejeté en bloc, autant ne pas laisser de pièces orphelines.
       await Promise.all(
         files.map((file) => fs.unlink(file.path).catch(() => {})),
       );
@@ -174,8 +158,6 @@ const verifyFileSignatures: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Les fichiers sont stockés sans extension : pour les servir avec un vrai
-// Content-Type, on relit leur signature plutôt que de deviner.
 const detectMimeType = async (filePath: string) => {
   const header = await readHeader(filePath);
 

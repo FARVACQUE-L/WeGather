@@ -22,15 +22,12 @@ import {
 type ReservationCardProps = {
   reservation: WalletReservation;
   isPast: boolean;
-  // Auteur de la réservation ou hôte : modifier et supprimer la réservation.
   canManage: boolean;
-  // Auteur du document ou hôte.
   canDeleteDocument: (document: ReservationDocument) => boolean;
   isUploading: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onAddDocument: (file: File) => void;
-  // Ouvre la modale « Ouvrir / Télécharger ».
   onSelectDocument: (document: ReservationDocument) => void;
   onDeleteDocument: (document: ReservationDocument) => void;
 };
@@ -64,7 +61,6 @@ function ReservationCard({
             alt={reservation.reservation_name}
           />
         ) : (
-          // Sans image : l'icône du type sur un dégradé à sa couleur.
           <div
             className={`WalletCard-Image WalletCard-Cover WalletCard-Cover--${reservation.reservation_type}`}
           >
@@ -88,8 +84,6 @@ function ReservationCard({
             <Icon size={14} />
             {label}
           </span>
-          {/* Ligne gardée même sans horaires : les documents restent alignés
-              d'une carte à l'autre. */}
           <span className="WalletCard-Schedule">
             {schedule && (
               <>
@@ -142,9 +136,6 @@ function ReservationCard({
         )}
 
         <div className="WalletCard-Actions">
-          {/* « Voir le site » au-dessus de « Ajouter un billet », tous deux
-              calés en bas de la carte : les « Ajouter un billet » d'une même
-              ligne de cartes sont alignés, avec ou sans lien. */}
           <div className="WalletCard-Links">
             {reservation.reservation_link && (
               <a
@@ -178,7 +169,6 @@ function ReservationCard({
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) onAddDocument(file);
-              // Permet de renvoyer le même fichier après une erreur.
               e.target.value = "";
             }}
           />

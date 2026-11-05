@@ -8,8 +8,6 @@ import hide from "../../assets/images/hide.png";
 import logo from "../../assets/images/logo-wegather.png";
 
 function ChangePassword() {
-  // Le premier champ reçoit le focus à l'ouverture : on peut taper
-  // directement, sans cliquer dans le formulaire.
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

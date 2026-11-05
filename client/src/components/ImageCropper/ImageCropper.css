@@ -4,7 +4,6 @@
   align-items: center;
   gap: 0.5rem;
 
-  /* Même taille que l'image des cartes d'événement et de réservation. */
   .ImageCropper-Frame {
     position: relative;
     width: 16rem;
@@ -14,8 +13,6 @@
     overflow: hidden;
     background: var(--bg-composant-dash);
     cursor: grab;
-    /* Le glisser au doigt déplace l'image au lieu de faire défiler la
-       modale. */
     touch-action: none;
 
     &:active {

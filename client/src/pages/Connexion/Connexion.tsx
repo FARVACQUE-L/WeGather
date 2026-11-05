@@ -8,8 +8,6 @@ import logo from "../../assets/images/logo-wegather.png";
 import { reconnectSocket } from "../../socket/socket";
 
 function Connexion() {
-  // Le premier champ reçoit le focus à l'ouverture : on peut taper
-  // directement, sans cliquer dans le formulaire.
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

@@ -151,8 +151,6 @@ function Profil() {
       );
 
       if (!response.ok) {
-        // 409 : pseudo déjà pris, 400 : pseudo vide. Le serveur renvoie le
-        // message à afficher.
         const data = await response.json().catch(() => null);
         setErrorMessage(
           response.status === 409 || response.status === 400
@@ -162,8 +160,6 @@ function Profil() {
         return;
       }
 
-      // Le pseudo est affiché à plusieurs endroits (dashboard, budget,
-      // réservations…) : on recharge la page pour tout mettre à jour.
       window.location.reload();
     } catch (error) {
       console.error(error);

@@ -22,8 +22,6 @@ const API_URL = import.meta.env.VITE_API_URL;
 function AdminReport() {
   const { id, type } = useParams();
   const navigate = useNavigate();
-  // L'onglet actif de /admin n'est pas dans l'historique : navigate(-1)
-  // ramenait au tableau de bord. On rouvre explicitement les signalements.
   const backToReports = () =>
     navigate("/admin", { state: { tab: "signalement" } });
 
@@ -53,8 +51,6 @@ function AdminReport() {
   const capitalize = (str = "") => str.charAt(0).toUpperCase() + str.slice(1);
 
   const isTargetBanned = Boolean(report?.target_is_ban);
-  // Signalement d'événement : l'événement est banni. Signalement
-  // d'utilisateur : il est exclu de l'événement où il a été signalé.
   const isEventBanned = Boolean(
     type === "event" ? report?.event_is_ban : report?.target_is_event_ban,
   );
@@ -71,7 +67,6 @@ function AdminReport() {
       },
     });
 
-    // Cible déjà bannie : l'option choisie annule le bannissement.
     const isUnban = action === "user" ? isTargetBanned : isEventBanned;
     const prefix = isUnban ? "unban" : "ban";
 
@@ -117,11 +112,7 @@ function AdminReport() {
       }
 
       if (!response.ok) {
-        // Message du serveur quand il y en a un, par exemple pour un
-        // superadmin, qui ne peut pas être banni.
         const data = await response.json().catch(() => null);
-        // La modale, ouverte avec showModal, passe au-dessus de tout : le
-        // toast restait caché derrière elle.
         setIsModalOpen(false);
         toast.fire({
           icon: "error",
@@ -243,7 +234,6 @@ function AdminReport() {
 
   const getImages = (): string[] => report?.images ?? [];
 
-  // Événement supprimé par son créateur : le signalement reste, sans cible.
   const isEventDeleted =
     type === "event"
       ? report?.reported_event_id_event == null
@@ -291,8 +281,6 @@ function AdminReport() {
         <NavBar />
         <Profil />
       </header>
-      {/* Barre du bas de l'admin, affichée seulement sous 428px
-          (AdminReport.css). Un onglet ramène à la page admin sur cet onglet. */}
       <div className="adminReport-SideBar">
         <SideBarAdmin
           activeComponent="signalement"

@@ -5,10 +5,6 @@ import { addSocket, getStatus, removeSocket } from "./presence";
 
 let io: SocketServer | null = null;
 
-// Applique l'ajout ou le retrait d'un socket, et signale le changement de
-// statut s'il y en a un (premier onglet ouvert, dernier onglet fermé). Signal
-// sans données : les clients rechargent la liste des membres par l'API, qui
-// ne renvoie que les membres de leurs propres événements.
 const updatePresence = (userId: number, update: () => void): void => {
   const previousStatus = getStatus(userId);
   update();
@@ -18,8 +14,6 @@ const updatePresence = (userId: number, update: () => void): void => {
   }
 };
 
-// Le socket s'identifie par le cookie de session, envoyé avec la poignée de
-// main. Sans cookie valide (visiteur non connecté), il n'est pas suivi.
 const readUserId = (cookieHeader: string | undefined): number | null => {
   const cookie = cookieHeader
     ?.split(";")

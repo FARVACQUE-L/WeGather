@@ -13,7 +13,6 @@ type Member = {
   euj_id_user: number;
   user_username: string;
   user_profile_picture: string | null;
-  // Absent pour les bannis : leur présence n'est pas affichée.
   status?: PresenceStatus;
 };
 
@@ -73,8 +72,6 @@ function GroupInfo() {
     fetchGroup();
   }, [fetchGroup]);
 
-  // Le serveur signale chaque changement de présence (premier onglet ouvert,
-  // dernier onglet fermé) : on recharge les statuts des membres.
   useEffect(() => {
     socket.on("presence-changed", fetchGroup);
 
@@ -153,7 +150,6 @@ function GroupInfo() {
           Membres <span>({group.members.length})</span>
         </h2>
         <ul className="group-info-list">
-          {/* L'hôte en tête de liste, les autres dans l'ordre reçu. */}
           {[...group.members]
             .sort(
               (a, b) =>
@@ -236,8 +232,6 @@ function GroupInfo() {
         </section>
       )}
 
-      {/* Rendue dans body, comme les modales de la sidebar : le voile couvre
-          aussi le bouton du profil. */}
       {memberToBan &&
         createPortal(
           <div className="GroupInfoModal-Overlay">

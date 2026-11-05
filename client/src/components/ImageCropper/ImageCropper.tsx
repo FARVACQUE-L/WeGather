@@ -2,14 +2,10 @@ import { ZoomIn, ZoomOut } from "lucide-react";
 import { useRef, useState } from "react";
 import "./ImageCropper.css";
 
-// Cadrage choisi dans le cadre : position horizontale et verticale de 0 (bord
-// gauche / haut de l'image) à 1 (bord droit / bas), et zoom à partir de 1
-// (image entière qui couvre juste le cadre).
 export type Crop = { x: number; y: number; zoom: number };
 
 export const DEFAULT_CROP: Crop = { x: 0.5, y: 0.5, zoom: 1 };
 
-// Même proportion que l'image des cartes (16rem × 12rem, CardEvents.css).
 const RATIO_W = 4;
 const RATIO_H = 3;
 const MAX_ZOOM = 3;
@@ -18,7 +14,6 @@ const OUTPUT_HEIGHT = (OUTPUT_WIDTH * RATIO_H) / RATIO_W;
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 
-// Partie de l'image visible dans le cadre, en pixels de l'image d'origine.
 const cropArea = (width: number, height: number, crop: Crop) => {
   const scale = Math.max(RATIO_W / width, RATIO_H / height) * crop.zoom;
   const cropWidth = RATIO_W / scale;
@@ -32,8 +27,6 @@ const cropArea = (width: number, height: number, crop: Crop) => {
   };
 };
 
-// Découpe l'image au cadrage choisi : c'est ce fichier qui est envoyé au
-// serveur, les cartes l'affichent donc telles quelles, sans déformation.
 export async function cropImage(
   src: string,
   crop: Crop,
@@ -72,8 +65,6 @@ type ImageCropperProps = {
   onCropChange: (crop: Crop) => void;
 };
 
-// Cadre aux proportions des cartes : on glisse l'image pour choisir la partie
-// affichée et on zoome avec le curseur, comme une photo de profil.
 function ImageCropper({ src, crop, onCropChange }: ImageCropperProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ x: number; y: number; crop: Crop } | null>(null);
@@ -81,7 +72,6 @@ function ImageCropper({ src, crop, onCropChange }: ImageCropperProps) {
     null,
   );
 
-  // Taille de l'image en % du cadre, et marge de déplacement qui en découle.
   const scale = size
     ? Math.max(RATIO_W / size.width, RATIO_H / size.height) * crop.zoom
     : 1;
@@ -98,7 +88,6 @@ function ImageCropper({ src, crop, onCropChange }: ImageCropperProps) {
     const frame = frameRef.current;
     if (!drag || !frame) return;
 
-    // Débord de l'image hors du cadre, en pixels à l'écran.
     const overflowX = (frame.clientWidth * (widthPct - 100)) / 100;
     const overflowY = (frame.clientHeight * (heightPct - 100)) / 100;
 

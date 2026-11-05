@@ -83,12 +83,7 @@
     .sidebar-end-menu {
       list-style: none;
       padding: 0;
-      /* Poussé en bas dans le flux plutôt qu'en position absolue : quand la
-         fenêtre est basse, il agrandit la sidebar au lieu de remonter sur
-         le menu du haut. */
       margin-top: auto;
-      /* Toute la largeur de la sidebar, pour que le surlignage d'Info du
-         groupe fasse 90 % de large comme celui des onglets du haut. */
       width: 100%;
       .sidebar-premium,
       .sidebar-group,
@@ -114,8 +109,6 @@
           cursor: pointer;
         }
       }
-      /* Même surlignage que les onglets du menu principal (li.active) :
-         barre à 90 %, bordure gauche et icône à 20px après la bordure. */
       .sidebar-premium.active,
       .sidebar-group.active {
         margin-left: 0;
@@ -142,39 +135,28 @@
     }
   }
 }
-/* Au-delà de 1920px, la sidebar garde la largeur qu'elle a à 1920px
-   (14vw). */
 @media screen and (min-width: 1921px) {
   .sidebar {
     width: 268.8px;
   }
 }
-/* Sous 1500px, la sidebar garde la largeur qu'elle a à 1500px (14vw). */
 @media screen and (min-width: 876px) and (max-width: 1500px) {
   .sidebar {
     width: 210px;
   }
 }
-/* Sous 600px de haut, les deux menus ne tiennent plus dans la fenêtre : la
-   sidebar reste fixe, à la hauteur de la fenêtre, et défile sur elle-même.
-   Elle reste visible quand on fait défiler la page, et le bas du menu reste
-   accessible. */
 @media screen and (min-width: 876px) and (max-height: 599px) {
   .sidebar {
     margin-top: 16px;
-    /* min-height l'emporterait sur une hauteur plus petite. */
     min-height: 0;
     height: calc(100vh - 32px);
     overflow-y: auto;
-    /* Barre de défilement masquée : la sidebar défile à la molette, au doigt
-       ou au clavier. */
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
       display: none;
     }
 
-    /* Le contenu garde sa hauteur au lieu d'être écrasé pour tenir. */
     > * {
       flex-shrink: 0;
     }
@@ -196,7 +178,6 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    /* Espacements resserrés pour que les 8 icônes tiennent dès 360px. */
     gap: 8px;
 
     z-index: 1000;
@@ -223,14 +204,11 @@
 
       position: static;
 
-      /* Premium masqué par défaut : il réapparaît entre 429px et 875px, et
-         sous 428px à la place d'autres icônes (voir plus bas). */
       .sidebar-events,
       .sidebar-premium {
         display: none;
       }
 
-      /* Liens : sans ça, la couleur des liens visités (violet). */
       .sidebar-events,
       .sidebar-signal {
         a {
@@ -278,28 +256,18 @@
     }
   }
 }
-/* Entre 429px et 875px, la barre du bas a la place pour l'icône Premium. */
 @media screen and (min-width: 429px) and (max-width: 875px) {
   .sidebar .sidebar-end-menu .sidebar-premium {
     display: flex;
   }
 }
-/* Flèche d'ouverture de la barre du bas : seulement sur mobile. */
 .sidebar .sidebar-toggle {
   display: none;
 }
-/* Sur mobile, la barre du bas ne garde que Tableau de bord, Messagerie,
-   Réservation, Budget, Galerie et Premium. La flèche au-dessus de la barre
-   l'agrandit pour afficher les autres icônes sur une ligne en dessous. */
 @media screen and (max-width: 428px) {
   .sidebar {
-    /* Le glissé vertical ouvre ou ferme la barre (SideBar.tsx) : il ne doit
-       pas faire défiler la page en même temps. Les appuis restent actifs. */
     touch-action: none;
 
-    /* Onglet posé sur le bord haut de la barre, de même fond et même ombre :
-       le contour de la barre fait le tour de la flèche. Il recouvre l'ombre
-       de la barre, et clip-path coupe la sienne côté barre. */
     .sidebar-toggle {
       position: absolute;
       top: -22px;
@@ -324,11 +292,6 @@
       }
     }
 
-    /* Toutes les icônes forment une grille de 6 colonnes : une ligne de 70px
-       (la barre repliée), puis les 4 autres sous les colonnes 2 à 5, donc
-       centrées sous les 6 du haut. Repliée, la barre fixée en bas ne montre
-       que la première ligne : la seconde est sous le bas de l'écran. En
-       s'agrandissant, la barre monte et la fait glisser à l'écran. */
     display: grid;
     grid-template-columns: repeat(6, auto);
     grid-template-rows: 70px 56px;
@@ -350,8 +313,6 @@
         display: flex;
       }
 
-      /* Masquées hors de l'écran mais toujours là : visibility les retire
-         du clavier et des lecteurs d'écran, une fois la barre repliée. */
       .sidebar-group,
       .sidebar-events,
       .sidebar-signal,
@@ -366,7 +327,6 @@
       }
     }
 
-    /* 70px + la seconde ligne de 56px (la hauteur d'une icône active). */
     &.is-expanded {
       height: 126px;
 
@@ -386,9 +346,6 @@
     }
   }
 }
-/* Modales Supprimer / Quitter l'évenement, rendues dans body (voir
-   SideBar.tsx), sur toutes les largeurs : mêmes fond, titre et boutons que
-   les modales de suppression de CardEvents.css. */
 .SideBarModal-Overlay {
   position: fixed;
   inset: 0;
@@ -428,8 +385,6 @@
       gap: 1rem;
       margin-top: 0.5rem;
 
-      /* Annuler garde le gris par défaut des boutons, comme dans les
-         autres modales. */
       button {
         flex: 1;
         max-width: 12rem;

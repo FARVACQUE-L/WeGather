@@ -4,13 +4,10 @@ import { Link } from "react-router";
 import NavBar from "../../components/NavBar/NavBar";
 import Profil from "../../components/Profil/Profil";
 import { fadeIn, revealOnScroll, titleIn } from "../PageCGV/legalMotion";
-// Même mise en page que les CGU / CGV et les mentions légales.
 import "../PageCGV/PageCGV.css";
 
 const CONTACT_EMAIL = "wedoop3@gmail.com";
 
-// Données traitées, par catégorie. Reflète le schéma de la base
-// (server/database/schema.sql) : à mettre à jour si une table change.
 const DATA_CATEGORIES = [
   {
     category: "Compte",
@@ -107,8 +104,6 @@ const RETENTION = [
   },
 ];
 
-// Page publique, comme les CGU / CGV : le menu du profil n'apparaît que pour
-// un utilisateur connecté.
 function Confidentialite() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 

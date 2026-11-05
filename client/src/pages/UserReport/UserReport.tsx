@@ -56,9 +56,6 @@ function UserReport() {
       .catch((error) => console.error(error));
   }, [eventUuid]);
 
-  // Vers le tableau de bord de l'événement, comme Annuler : navigate(-1) ne
-  // faisait rien quand la page était la première de l'historique (lien
-  // ouvert directement, page rechargée sur mobile).
   const handleGoBack = () => {
     navigate(`/tableaudebord/${eventUuid}`);
   };
@@ -160,8 +157,6 @@ function UserReport() {
       if (!response.ok) {
         if (response.status === 400 || response.status === 409) {
           const data = await response.json().catch(() => null);
-          // Les validations métier répondent { message }, le handler
-          // d'erreurs et les refus d'upload répondent { error }.
           const serverMessage = data?.message ?? data?.error;
 
           if (serverMessage) {

@@ -4,7 +4,6 @@ import { Link, useLocation } from "react-router";
 
 function NavBar() {
   const location = useLocation();
-  // React Router ignore la casse : "/CGV" et "/cgv" mènent à la même page.
   const pathname = location.pathname.toLowerCase();
   const navbarDesktop =
     pathname.startsWith("/homeevents") ||

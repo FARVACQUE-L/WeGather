@@ -1,8 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import userRepository from "../modules/user/userRepository";
 
-// Réserve une route aux superadmins, seuls autorisés à gérer les rôles
-// administrateur. À placer après authorization et isAdmin.
 const isSuperAdmin = async (
   req: Request,
   res: Response,

@@ -114,8 +114,6 @@ function ModalEditEvent({
     }
   };
 
-  // Pas de fermeture au clic sur le fond : un clic à côté ferait perdre les
-  // modifications en cours. On ferme avec Annuler ou la touche Échap.
   return (
     <dialog
       ref={dialogRef}
@@ -231,8 +229,6 @@ function ModalEditEvent({
               Image
             </label>
             <div className="ModalEditEvent-ImageGlobal">
-              {/* Le recadrage ne s'applique qu'à une nouvelle image : l'image
-                  actuelle est déjà enregistrée telle quelle. */}
               {selectedFile ? (
                 <ImageCropper
                   src={previewImage}

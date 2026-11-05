@@ -8,7 +8,6 @@ import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import messageRepository, { REACTION_EMOJIS } from "./messageRepository";
 
-// Extension de chaque format accepté, déjà vérifié par sa signature.
 const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
@@ -17,10 +16,6 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/avif": ".avif",
 };
 
-// multer enregistre le fichier sans extension : servi ainsi, il part sans
-// type d'image, et le navigateur le télécharge au lieu de l'afficher. On le
-// renomme avec l'extension de son format pour qu'express.static envoie le
-// bon Content-Type. req.file.path suit le nouveau nom, pour le nettoyage.
 const addImageExtension = async (file: Express.Multer.File) => {
   const filename = `${file.filename}${IMAGE_EXTENSIONS[file.mimetype] ?? ""}`;
   const newPath = path.join(UPLOADS_DIRECTORY, filename);
@@ -31,13 +26,7 @@ const addImageExtension = async (file: Express.Multer.File) => {
   return `/uploads/${filename}`;
 };
 
-// L'auteur est l'utilisateur du cookie de session, jamais un id envoyé par
-// le client : sans ça, n'importe qui pouvait écrire au nom d'un autre. Seuls
-// les membres de l'événement peuvent y écrire. Le message peut porter une
-// image (champ « image »), et n'a alors pas besoin de texte.
 const addMessage: RequestHandler = async (req, res, next) => {
-  // L'image est déjà écrite sur le disque par multer : elle est supprimée si
-  // le message est refusé, pour ne pas laisser de fichier orphelin.
   let imageKept = false;
 
   try {
@@ -70,8 +59,6 @@ const addMessage: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Une réponse ne peut citer qu'un message du même événement. En
-    // multipart, l'absence de réponse arrive en chaîne vide.
     let replyToId: number | null = null;
     if (replyTo !== undefined && replyTo !== null && replyTo !== "") {
       const repliedMessage = await messageRepository.readOwner(Number(replyTo));
@@ -122,8 +109,6 @@ const browseMessagesByEventId: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-// Marque comme lus les messages de l'utilisateur du cookie de session, et
-// non d'un id envoyé par le client.
 const notificationMessage: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -148,8 +133,6 @@ const notificationMessage: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-// Nombre de messages non lus de l'utilisateur du cookie de session : l'id
-// n'est plus dans l'URL, où n'importe qui pouvait lire celui d'un autre.
 const getUnreadMessages: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -174,8 +157,6 @@ const getUnreadMessages: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-// Retrouve le message ciblé dans l'événement de l'URL. Renvoie null si la
-// réponse d'erreur est déjà envoyée.
 const findEventMessage = async (
   eventUuid: string,
   messageId: number,
@@ -192,7 +173,6 @@ const findEventMessage = async (
   return { event, message };
 };
 
-// Seul l'auteur peut modifier son message.
 const editMessage: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -216,7 +196,6 @@ const editMessage: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Seul le texte se modifie. Il peut être vidé si le message a une image.
     if (!messageText && !found.message.message_image) {
       res.status(400).json({ message: "Le message est vide." });
       return;
@@ -236,8 +215,6 @@ const editMessage: RequestHandler = async (req, res, next) => {
   }
 };
 
-// L'auteur peut supprimer son message, l'hôte n'importe quel message de son
-// événement. Les réponses qui le citaient perdent leur citation.
 const deleteMessage: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -274,8 +251,6 @@ const deleteMessage: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Ajoute ou retire la réaction de l'utilisateur sur un message. Seuls les
-// emojis prédéfinis sont acceptés, et seuls les membres peuvent réagir.
 const toggleReaction: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {

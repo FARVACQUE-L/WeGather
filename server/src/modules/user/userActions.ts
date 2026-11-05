@@ -13,8 +13,6 @@ const authVerif: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Le rôle est relu en base : le JWT vit 30 jours, il porterait un isAdmin
-    // périmé si les droits de l'utilisateur ont changé depuis sa connexion.
     const user = await userRepository.readUserAdmin(req.user.id);
 
     res.status(200).json({
@@ -134,8 +132,6 @@ const login: RequestHandler = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Connexion par email uniquement : le pseudo est public, affiché à tous
-    // les participants.
     const user =
       typeof email === "string"
         ? await userRepository.findByEmail(email.trim())
@@ -243,7 +239,6 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Comme pour la connexion : email uniquement.
     const user = await userRepository.findByEmail(email.trim());
 
     if (!user) {
@@ -431,8 +426,6 @@ const editUserName: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // L'id vient du token, pas de l'URL : on ne peut modifier que son
-    // propre pseudo.
     const userId = req.user.id;
     const userName =
       typeof req.body.user_name === "string" ? req.body.user_name.trim() : "";
@@ -442,8 +435,6 @@ const editUserName: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Même vérification qu'à l'inscription : le pseudo sert aussi à se
-    // connecter, il ne doit correspondre ni au pseudo ni à l'email d'un autre.
     const existingUser = await userRepository.findByEmailOrUsername(userName);
 
     if (existingUser && existingUser.user_id !== userId) {
@@ -457,8 +448,6 @@ const editUserName: RequestHandler = async (req, res, next) => {
       message: "Nom modifié",
     });
   } catch (err) {
-    // Deux changements simultanés vers le même pseudo : la contrainte UNIQUE
-    // de la base refuse le second.
     if ((err as { code?: string }).code === "ER_DUP_ENTRY") {
       res.status(409).json({ message: "Ce pseudo est déjà utilisé" });
       return;

@@ -254,8 +254,6 @@
           border-radius: 16px;
           padding: 24px;
 
-          /* Même forme que les boutons du site (voir Profil.css) : pilule
-             de 15rem avec ombre. */
           button {
             width: 15rem;
             max-width: 100%;
@@ -280,8 +278,6 @@
             }
           }
 
-          /* Rejeter, toujours en dernier (seul bouton pour un bug), en rouge
-             comme les actions dangereuses du profil. */
           button:last-of-type {
             background: var(--bg-negative);
             color: var(--font-red);
@@ -291,10 +287,6 @@
     }
   }
 }
-/* Sous 800px, une seule colonne : le titre, puis l'auteur et les actions
-   côte à côte, puis la nature du signalement et la suite. Les deux colonnes
-   s'effacent (display: contents) pour que leurs sections se placent
-   directement dans la grille. */
 @media (max-width: 800px) {
   .adminReport-Layout main .adminReport-Global {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -318,23 +310,18 @@
       order: 2;
     }
 
-    /* La carte de l'auteur garde son aspect du dessus de 800px ; seul un
-       mail trop long passe à la ligne au lieu de déborder. */
     .adminReport-Rightside .adminReport-User p {
       overflow-wrap: anywhere;
     }
   }
 }
 
-/* Sous 470px, une demi-largeur est plus étroite que la carte de l'auteur
-   (photo de 160px et son padding) : les actions passent sous l'auteur. */
 @media (max-width: 470px) {
   .adminReport-Layout main .adminReport-Global {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* La barre du bas de l'admin n'apparaît que sous 428px. */
 .adminReport-SideBar {
   display: none;
 }
@@ -344,7 +331,6 @@
     display: contents;
   }
 
-  /* Dégage la barre du bas (70px). */
   .adminReport-Layout main {
     padding-bottom: 90px;
   }

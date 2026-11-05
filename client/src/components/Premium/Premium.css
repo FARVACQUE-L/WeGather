@@ -1,5 +1,4 @@
 .premium {
-  /* Mêmes marges que la page Info du groupe. */
   padding: 3rem 3rem 2rem 0;
   width: 70.5vw;
 
@@ -8,8 +7,6 @@
     margin-bottom: 1.5rem;
   }
 
-  /* Le tableau défile horizontalement plutôt que de déborder sur petit
-     écran. */
   .premium-table-wrapper {
     overflow-x: auto;
     background: var(--bg-neutral);
@@ -27,8 +24,6 @@
       padding: 1rem;
     }
 
-    /* Même largeur pour les trois offres : sinon les colonnes suivent la
-       longueur de leur bouton et celle de Premium n'est plus centrée. */
     thead th:not(:first-child) {
       width: 22%;
     }
@@ -68,24 +63,17 @@
     .premium-price td {
       font-weight: 700;
       color: var(--font-title);
-      /* Respecte les retours à la ligne des tarifs (« tarif unique » sous
-         le prix). */
       white-space: pre-line;
     }
   }
 
-  /* Partagés par le tableau et les cards. */
   .premium-included {
     color: var(--font-green);
     vertical-align: middle;
   }
 
-  /* Même style que le bouton de création d'événement
-     (.CreateForm-ButtonSubmit), sans sa largeur fixe. */
   .premium-cta {
     height: 2rem;
-    /* Assez large pour « Passer au Premium » : « Passer au Gold », plus
-       court, prend la même taille. */
     min-width: 10rem;
     padding: 0 1rem;
     border-radius: 1rem;
@@ -97,8 +85,6 @@
     cursor: pointer;
     transition: transform 0.2s;
 
-    /* Abonnements pas encore disponibles : bouton grisé, sans effet au
-       survol. */
     &:disabled {
       background: #d6d3d1;
       color: #78716c;
@@ -113,13 +99,11 @@
     }
   }
 
-  /* Cards : seulement sous 428px, à la place du tableau. */
   .premium-cards {
     display: none;
   }
 }
 
-/* Sidebar en barre du bas : mêmes marges que la page Info du groupe. */
 @media screen and (min-width: 429px) and (max-width: 875px) {
   .premium {
     width: 100%;
@@ -153,7 +137,6 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
       overflow: hidden;
 
-      /* Même en-tête que celui des colonnes du tableau. */
       header {
         padding: 1rem;
         text-align: center;
@@ -176,7 +159,6 @@
         color: var(--font-brown);
       }
 
-      /* Respecte le retour à la ligne de « tarif unique ». */
       .premium-card-price {
         margin: 0.4rem 0 0;
         font-weight: 700;

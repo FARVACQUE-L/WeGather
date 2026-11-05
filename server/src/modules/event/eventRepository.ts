@@ -58,8 +58,6 @@ class EventRepository {
     );
     return Number(rows[0].total);
   }
-  // Les limites d'un événement (photos de la galerie, réservations) suivent
-  // la formule de l'organisateur, pas celle de qui ajoute l'élément.
   async readHostPlan(eventId: number) {
     const [rows] = await databaseClient.query<Rows>(
       `SELECT u.user_plan
@@ -160,8 +158,6 @@ class EventRepository {
       ],
     );
   }
-  // Toutes les images liées à l'événement, à lire avant sa suppression pour
-  // effacer les fichiers ensuite.
   async readImages(eventId: number) {
     const [rows] = await databaseClient.query<Rows>(
       `SELECT event_picture AS image FROM event WHERE event_id = ?
@@ -176,8 +172,6 @@ class EventRepository {
     return rows.map((row) => row.image as string | null);
   }
 
-  // Les tables liées sont vidées par les ON DELETE CASCADE du schéma ; les
-  // signalements sont conservés avec reported_event_id_event à NULL.
   async deleteEvent(eventId: number) {
     const [result] = await databaseClient.query(
       "DELETE FROM event WHERE event_id = ?",
@@ -186,7 +180,6 @@ class EventRepository {
 
     return result;
   }
-  // Événements bannis depuis plus d'un mois sans avoir été débannis.
   async readExpiredBannedIds() {
     const [rows] = await databaseClient.query<Rows>(
       `SELECT event_id FROM event

@@ -22,7 +22,6 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
   const today = new Date().toISOString().split("T")[0];
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Photo facultative : sans photo, le serveur utilise le logo WeGather.
   const [picture, setPicture] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>(DEFAULT_CROP);
@@ -39,7 +38,6 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
   const handleRemovePicture = () => {
     setPicture(null);
     setPreview(null);
-    // Permet de rechoisir le même fichier juste après l'avoir retiré.
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -79,8 +77,6 @@ function CreateForm({ onClose, onEventCreated }: CreateFormProps) {
       });
 
       if (!res.ok) {
-        // Message du serveur quand il y en a un, par exemple la limite
-        // d'événements créés atteinte.
         const data = await res.json().catch(() => null);
         setError(
           data?.message ?? "Une erreur est survenue, veuillez réessayer.",

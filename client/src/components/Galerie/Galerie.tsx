@@ -32,14 +32,8 @@ function Galerie() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [likedPhotos, setLikedPhotos] = useState<number[]>([]);
-  // Limite de photos selon la formule de l'organisateur, donnée par le
-  // serveur. Tant qu'elle n'est pas connue, seul le serveur bloque l'envoi.
   const [photoLimit, setPhotoLimit] = useState<number | null>(null);
-  // Le serveur assemble le zip avant le téléchargement : le bouton l'indique
-  // et ne relance pas une archive en cours.
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
-  // Les boutons de l'en-tête passent en icône quand ils touchent le titre :
-  // d'abord Tout télécharger, puis Ajouter une photo.
   const headerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const downloadAllRef = useRef<HTMLButtonElement>(null);
@@ -51,8 +45,6 @@ function Galerie() {
   };
   const [userId, setUserId] = useState<number | null>(null);
 
-  // L'en-tête n'est rendu qu'une fois l'utilisateur connu : userId relance la
-  // mesure à ce moment-là. Sur mobile, Tout télécharger reste en icône.
   const compactLevel = useCompactLevel(
     headerRef,
     titleRef,
@@ -250,12 +242,6 @@ function Galerie() {
     }
   };
 
-  // Motif répété tous les 10 photos, sur quatre lignes, chaque ligne
-  // commençant à gauche : la 1re en grand à gauche des lignes 1-2 et les 4
-  // suivantes en petit à droite, puis les 6e à 9e en petit à gauche des
-  // lignes 3-4 et la 10e en grand à droite. Les 2e à 5e se rangent seules
-  // dans les cases libres (grid-auto-flow: dense) ; les 6e à 9e sont placées
-  // pour rester à gauche tant que la 10e n'est pas là.
   function getCellLayout(index: number) {
     const position = index % 10;
     const blockRow = Math.floor(index / 10) * 4;
@@ -284,9 +270,6 @@ function Galerie() {
     return {};
   }
 
-  // Même principe que le téléchargement d'une photo (PhotoItem) : blob, car
-  // l'attribut download est ignoré sur l'origine de l'API, et no-store pour
-  // ne pas réutiliser une réponse en cache.
   const handleDownloadAll = async () => {
     setIsDownloadingAll(true);
     try {
@@ -352,8 +335,6 @@ function Galerie() {
             type="button"
             className="galerie-button"
             aria-label="Ajouter une photo"
-            // Galerie pleine : le bandeau d'erreur l'explique au lieu d'ouvrir
-            // une modale dont l'envoi serait refusé.
             onClick={() =>
               photoLimit !== null && photos.length >= photoLimit
                 ? setError(
@@ -458,8 +439,6 @@ function Galerie() {
                   gallery_link: formatImageUrl(photo.gallery_link),
                 }}
                 isLiked={likedPhotos.includes(photo.gallery_id)}
-                // Mêmes règles que le serveur (readManagedPhoto) : l'auteur
-                // ou l'hôte de l'événement.
                 canManage={
                   photo.gallery_id_user === userId ||
                   photo.event_host_id === userId

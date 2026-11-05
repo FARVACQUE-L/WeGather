@@ -81,8 +81,6 @@ function GalleryModal({
     }
   };
 
-  // Classes GalleryForm-* : champs et boutons calqués sur la modale de
-  // modification d'événement, à l'écart des règles globales .modal.
   return (
     <div className="GalleryForm-Overlay">
       <div className="GalleryForm">

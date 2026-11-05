@@ -8,8 +8,6 @@ import hide from "../../assets/images/hide.png";
 import logo from "../../assets/images/logo-wegather.png";
 
 function Register() {
-  // Le premier champ reçoit le focus à l'ouverture : on peut taper
-  // directement, sans cliquer dans le formulaire.
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -255,7 +253,6 @@ function Register() {
             />
             <label htmlFor="terms">
               J'accepte les{" "}
-              {/* Nouvel onglet : la saisie du formulaire n'est pas perdue. */}
               <Link to="/CGV" target="_blank" rel="noopener noreferrer">
                 conditions générales d'utilisation
               </Link>{" "}
