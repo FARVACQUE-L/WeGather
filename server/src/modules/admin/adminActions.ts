@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { RequestHandler } from "express";
 import { detectMimeType, REPORTS_DESTINATION } from "../../middleware/upload";
-import { removeFromEventRoom } from "../../socket";
+import { disconnectUser, removeFromEventRoom } from "../../socket";
 import eventRepository from "../event/eventRepository";
 import transporter from "../services/mailer";
 import adminRepository from "./adminRepository";
@@ -234,6 +234,8 @@ const banUser: RequestHandler = async (req, res, next) => {
       res.status(404).json({ message: "Utilisateur introuvable" });
       return;
     }
+
+    disconnectUser(id);
 
     try {
       await transporter.sendMail({

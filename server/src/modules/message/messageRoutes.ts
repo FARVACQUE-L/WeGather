@@ -1,5 +1,6 @@
 import express from "express";
 import authorization from "../../middleware/auth";
+import { messageLimit } from "../../middleware/rateLimit";
 import upload, { verifyFileSignatures } from "../../middleware/upload";
 import messageActions from "./messageActions";
 
@@ -13,6 +14,7 @@ messageRoutes.get(
 messageRoutes.post(
   "/api/messages/:eventUuid",
   authorization,
+  messageLimit,
   upload.single("image"),
   verifyFileSignatures,
   messageActions.addMessage,

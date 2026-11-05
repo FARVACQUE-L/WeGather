@@ -134,7 +134,9 @@ const deleteDocument: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const isAuthor = document.document_id_user === req.user.id;
+    const isAuthor =
+      document.document_id_user === req.user.id &&
+      (await isMember(document.reservation_id_event, req.user.id));
     const [event] = await eventRepository.readEventHostId(
       document.reservation_id_event,
     );

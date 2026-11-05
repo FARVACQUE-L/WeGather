@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { RequestHandler } from "express";
-import { readMemberEventId } from "../../helper/eventMembership";
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { removeUpload } from "../../helper/removeUpload";
 import { UPLOADS_DIRECTORY } from "../../middleware/upload";
 import { getIo } from "../../socket";
@@ -168,7 +168,10 @@ const editMessage: RequestHandler = async (req, res, next) => {
     );
     if (!found) return;
 
-    if (found.message.message_id_user !== req.user.id) {
+    if (
+      found.message.message_id_user !== req.user.id ||
+      !(await isEventMember(found.event.event_id, req.user.id))
+    ) {
       res
         .status(403)
         .json({ message: "Vous ne pouvez modifier que vos messages." });
@@ -208,7 +211,9 @@ const deleteMessage: RequestHandler = async (req, res, next) => {
     );
     if (!found) return;
 
-    const isAuthor = found.message.message_id_user === req.user.id;
+    const isAuthor =
+      found.message.message_id_user === req.user.id &&
+      (await isEventMember(found.event.event_id, req.user.id));
     const isHost = found.event.event_id_host === req.user.id;
 
     if (!isAuthor && !isHost) {

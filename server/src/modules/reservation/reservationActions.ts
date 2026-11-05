@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import type { RequestHandler } from "express";
-import { readMemberEventId } from "../../helper/eventMembership";
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeReservationDocument } from "../../helper/removeReservationDocument";
 import { removeUpload } from "../../helper/removeUpload";
@@ -247,7 +247,9 @@ const readManagedReservation = async (req: Req, res: Res) => {
     return undefined;
   }
 
-  const isAuthor = reservation.reservation_id_user === req.user.id;
+  const isAuthor =
+    reservation.reservation_id_user === req.user.id &&
+    (await isEventMember(reservation.reservation_id_event, req.user.id));
   const [event] = await eventRepository.readEventHostId(
     reservation.reservation_id_event,
   );

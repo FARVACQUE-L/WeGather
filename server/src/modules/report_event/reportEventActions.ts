@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { discardUploadedFiles } from "../../helper/discardUploadedFiles";
+import { isEventMember } from "../../helper/eventMembership";
 import eventRepository from "../event/eventRepository";
 import reportEventRepository from "./reportEventRepository";
 
@@ -18,6 +19,13 @@ const add: RequestHandler = async (req, res, next) => {
 
     if (!eventId) {
       res.sendStatus(404);
+      return;
+    }
+
+    if (!(await isEventMember(eventId, req.user.id))) {
+      res
+        .status(403)
+        .json({ message: "Vous n'êtes pas inscrit à cet événement." });
       return;
     }
 

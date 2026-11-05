@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import { readMemberEventId } from "../../helper/eventMembership";
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import eventRepository from "../event/eventRepository";
 import budgetRepository from "./budgetRepository";
 
@@ -79,7 +79,9 @@ const readManagedBudget = async (
     return undefined;
   }
 
-  const isAuthor = budget.budget_id_user === req.user.id;
+  const isAuthor =
+    budget.budget_id_user === req.user.id &&
+    (await isEventMember(budget.budget_id_event, req.user.id));
   const [event] = await eventRepository.readEventHostId(budget.budget_id_event);
   const isHost = event?.event_id_host === req.user.id;
 

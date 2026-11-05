@@ -116,7 +116,9 @@ const readManagedPhoto = async (
     return undefined;
   }
 
-  const isAuthor = photo.gallery_id_user === req.user.id;
+  const isAuthor =
+    photo.gallery_id_user === req.user.id &&
+    (await isEventMember(photo.gallery_id_event, req.user.id));
   const [event] = await eventRepository.readEventHostId(photo.gallery_id_event);
   const isHost = event?.event_id_host === req.user.id;
 

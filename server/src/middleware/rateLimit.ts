@@ -111,6 +111,20 @@ export const changePasswordLimit = rateLimit({
   key: userId,
 });
 
+export const messageLimit = rateLimit({
+  windowMs: MINUTE,
+  max: 30,
+  message: "Vous envoyez trop de messages. Patientez un instant.",
+  key: userId,
+});
+
+export const reportLimit = rateLimit({
+  windowMs: 60 * MINUTE,
+  max: 10,
+  message: "Trop de signalements envoyés. Réessayez plus tard.",
+  key: userId,
+});
+
 export const joinEventLimit = rateLimit({
   windowMs: 15 * MINUTE,
   max: 20,

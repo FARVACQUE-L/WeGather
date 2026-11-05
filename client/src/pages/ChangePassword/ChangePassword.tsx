@@ -6,6 +6,7 @@ import connexionImg from "../../assets/images/Connexion-img.png";
 import eye from "../../assets/images/eye.png";
 import hide from "../../assets/images/hide.png";
 import logo from "../../assets/images/logo-wegather.png";
+import { reconnectSocket } from "../../socket/socket";
 
 function ChangePassword() {
   const firstInputRef = useRef<HTMLInputElement>(null);
@@ -90,6 +91,7 @@ function ChangePassword() {
           popup: "toast-success-popup",
         },
       });
+      reconnectSocket();
       navigate("/connexion");
     } catch (error) {
       console.error("CHANGE PASSWORD ERROR :", error);

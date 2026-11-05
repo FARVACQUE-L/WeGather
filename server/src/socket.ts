@@ -102,6 +102,13 @@ export const getIo = (): SocketServer => {
   return io;
 };
 
+export const disconnectUser = (userId: number) => {
+  const socketIds = getSocketIds(userId);
+  if (!io || socketIds.length === 0) return;
+
+  io.in(socketIds).disconnectSockets(true);
+};
+
 export const removeFromEventRoom = (userId: number, eventUuid: string) => {
   const socketIds = getSocketIds(userId);
   if (!io || socketIds.length === 0) return;

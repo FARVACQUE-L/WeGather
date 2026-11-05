@@ -17,6 +17,7 @@ import {
   sessionCookieOptions,
 } from "../../helper/jwtHelper";
 import { removeUpload } from "../../helper/removeUpload";
+import { disconnectUser } from "../../socket";
 import userRepository from "./userRepository";
 
 const authVerif: RequestHandler = async (req, res, next) => {
@@ -51,7 +52,12 @@ const transporter = nodemailer.createTransport({
 
 const readUserName: RequestHandler = async (req, res, next) => {
   try {
-    const userId = Number(req.params.id);
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
+    const userId = req.user.id;
 
     const userName = await userRepository.readUserName(userId);
 
@@ -329,6 +335,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
     }
     const hashedPassword = await argon2.hash(password);
     await userRepository.resetPassword(user.user_id, hashedPassword);
+    disconnectUser(user.user_id);
 
     res.json({
       message: "Mot de passe modifié avec succès",
@@ -400,6 +407,7 @@ const changePassword: RequestHandler = async (req, res, next) => {
     const hashedPassword = await argon2.hash(newPassword);
 
     await userRepository.resetPassword(userId, hashedPassword);
+    disconnectUser(userId);
 
     createSession(res, { ...user, user_password: hashedPassword });
 
@@ -456,16 +464,12 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
 };
 const browsePhoto: RequestHandler = async (req, res, next) => {
   try {
-    const userId = Number(req.params.id);
-
-    if (Number.isNaN(userId)) {
-      res.status(400).json({
-        message: "ID invalide",
-      });
+    if (!req.user) {
+      res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
-    const photo = await userRepository.readUserPhoto(userId);
+    const photo = await userRepository.readUserPhoto(req.user.id);
 
     res.json(photo);
   } catch (error) {

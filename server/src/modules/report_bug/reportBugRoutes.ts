@@ -1,5 +1,6 @@
 import express from "express";
 import authorization from "../../middleware/auth";
+import { reportLimit } from "../../middleware/rateLimit";
 import {
   MAX_FILES,
   uploadEvidence,
@@ -12,6 +13,7 @@ const reportBugRoutes = express.Router();
 reportBugRoutes.post(
   "/api/userreport-bug",
   authorization,
+  reportLimit,
   uploadEvidence.array("reported_bug_image", MAX_FILES),
   verifyFileSignatures,
   reportBugActions.add,
