@@ -1,3 +1,9 @@
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  type Variants,
+} from "framer-motion";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import ButtonAddEvent from "../../components/AddEvents/ButtonAddEvent";
@@ -14,9 +20,30 @@ import "./HomeEvents.css";
 type User = {
   id: number;
 };
+
+// Les cartes arrivent l'une après l'autre, dans le style du reste du site
+// (fondu en glissant vers le haut).
+const listVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
+};
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" },
+  },
+  exit: { opacity: 0, scale: 0.9, transition: { duration: 0.25 } },
+};
+
 function HomeEvents() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Évite d'afficher « aucun événement » (et de lancer sa flèche animée)
+  // le temps que la liste arrive.
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [activeFilter, setActiveFilter] = useState<FilterType>("ongoing");
   const [user, setUser] = useState<User | null>(null);
@@ -25,8 +52,14 @@ function HomeEvents() {
       credentials: "include",
     })
       .then((res) => res.json())
-      .then(setUser)
-      .catch(() => setUser(null));
+      .then((data) => {
+        setUser(data);
+        if (!data?.id) setIsLoaded(true);
+      })
+      .catch(() => {
+        setUser(null);
+        setIsLoaded(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -37,7 +70,8 @@ function HomeEvents() {
     })
       .then((res) => res.json())
       .then((data) => setEvents(data))
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setIsLoaded(true));
   }, [user?.id]);
 
   const today = new Date();
@@ -92,55 +126,94 @@ function HomeEvents() {
   };
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <header className="HomeEvents-NavBar">
         <NavBar />
         <Profil />
       </header>
       <main className="HomeEvents-Global">
-        <div className="HomeEvents-Title">
+        <motion.div
+          className="HomeEvents-Title"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <h1>Mes Evénements</h1>
-        </div>
-        <div className="HomeEvents-FilterAdd">
+        </motion.div>
+        <motion.div
+          className="HomeEvents-FilterAdd"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
           <Filter
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
           />
           <ButtonAddEvent onClick={() => setIsModalOpen(true)} />
-        </div>
-        {filteredEvents.length === 0 ? (
-          <EventEmpty />
-        ) : (
-          <ul className="HomeEvents-CardGlobal">
-            {filteredEvents.map((event) => (
-              <li key={event.event_id} className="HomeEvents-Card">
-                <CardEvents
-                  key={event.event_id}
-                  user_id={user?.id ?? 0}
-                  event_id={event.event_id}
-                  event_uuid={event.event_uuid}
-                  event_id_host={event.event_id_host}
-                  image={event.event_picture}
-                  imageAlt={event.event_name}
-                  dateStart={event.event_date_start}
-                  dateEnd={event.event_date_end}
-                  title={event.event_name}
-                  description={event.event_description}
-                  location={event.event_location}
-                  onEventDeleted={handleEventDeleted}
-                  onEventUpdated={handleEventUpdated}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
+        </motion.div>
+        {/* Au changement de filtre, l'ancienne liste s'efface puis la
+            nouvelle arrive carte par carte. */}
+        <AnimatePresence mode="wait">
+          {!isLoaded ? null : filteredEvents.length === 0 ? (
+            <motion.div
+              key={`empty-${activeFilter}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <EventEmpty />
+            </motion.div>
+          ) : (
+            <motion.ul
+              key={`list-${activeFilter}`}
+              className="HomeEvents-CardGlobal"
+              variants={listVariants}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            >
+              {/* Une carte supprimée rétrécit, les autres glissent à sa
+                  place. */}
+              <AnimatePresence mode="popLayout">
+                {filteredEvents.map((event) => (
+                  <motion.li
+                    key={event.event_id}
+                    className="HomeEvents-Card"
+                    variants={cardVariants}
+                    exit="exit"
+                    layout
+                  >
+                    <CardEvents
+                      key={event.event_id}
+                      user_id={user?.id ?? 0}
+                      event_id={event.event_id}
+                      event_uuid={event.event_uuid}
+                      event_id_host={event.event_id_host}
+                      image={event.event_picture}
+                      imageAlt={event.event_name}
+                      dateStart={event.event_date_start}
+                      dateEnd={event.event_date_end}
+                      title={event.event_name}
+                      description={event.event_description}
+                      location={event.event_location}
+                      onEventDeleted={handleEventDeleted}
+                      onEventUpdated={handleEventUpdated}
+                    />
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </motion.ul>
+          )}
+        </AnimatePresence>
         <ModalAddEvent
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onEventCreated={handleEventCreated}
         />
       </main>
-    </>
+    </MotionConfig>
   );
 }
 
