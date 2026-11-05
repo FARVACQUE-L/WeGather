@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import path from "node:path";
 import type { RequestHandler } from "express";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeReservationDocument } from "../../helper/removeReservationDocument";
@@ -124,24 +123,6 @@ const join: RequestHandler = async (req, res, next) => {
         .json({ message: "Vous participez déjà à cet événement." });
       return;
     }
-    next(error);
-  }
-};
-
-const browseImages: RequestHandler = (_req, res, next) => {
-  try {
-    const dir = path.join(process.cwd(), "public/assets/images");
-    const files = fs
-      .readdirSync(dir)
-      .filter((f) => /\.(jpg|jpeg|png|webp|gif)$/i.test(f));
-
-    if (!files.length) {
-      res.status(404).json({ message: "Aucune image disponible." });
-      return;
-    }
-
-    res.json(files.map((f) => `/assets/images/${f}`));
-  } catch (error) {
     next(error);
   }
 };
@@ -272,29 +253,13 @@ const readEventName: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-const readByUuid: RequestHandler = async (req, res, next) => {
-  try {
-    const event = await eventRepository.readByUuid(req.params.uuid);
-
-    if (!event) {
-      res.sendStatus(404);
-      return;
-    }
-
-    res.json(event);
-  } catch (error) {
-    next(error);
-  }
-};
 export default {
   browse,
   read,
   add,
   join,
-  browseImages,
   edit,
   deleteEvent,
   readEventHostId,
   readEventName,
-  readByUuid,
 };

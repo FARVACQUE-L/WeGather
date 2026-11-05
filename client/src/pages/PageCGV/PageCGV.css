@@ -4,13 +4,6 @@
   min-height: 100vh;
   background: var(--bg-color);
 
-  .cgv-HeaderNav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 32px;
-  }
-
   .cgv-Page {
     max-width: 780px;
     margin: 0 auto;
@@ -153,10 +146,6 @@
 }
 
 @media (max-width: 428px) {
-  .cgv-Layout .cgv-HeaderNav {
-    padding: 12px 16px;
-  }
-
   .cgv-Layout .cgv-Page {
     padding: 100px 32px 64px;
 

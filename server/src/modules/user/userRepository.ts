@@ -78,15 +78,6 @@ class UserRepository {
     };
   }
 
-  async isBanned(userId: number) {
-    const [rows] = await databaseClient.query<Rows>(
-      "SELECT user_is_ban FROM user WHERE user_id = ?",
-      [userId],
-    );
-
-    return rows[0];
-  }
-
   async readAll() {
     const [rows] = await databaseClient.query<Rows>("SELECT * FROM user");
 
@@ -142,32 +133,6 @@ class UserRepository {
 
     return rows;
   }
-  async readUserAndBudgetOnDashboard(eventId: number) {
-    const [rows] = await databaseClient.query(
-      `
-        SELECT 
-        user_name, 
-        budget_price, 
-        event_id
-
-        FROM user AS u
-
-        JOIN budget AS b 
-
-        ON u.user_id = b.budget_id_user
-
-        JOIN event AS e
-
-        ON e.event_id = b.budget_id_event
-
-        WHERE e.event_id = ?
-      `,
-      [eventId],
-    );
-
-    return rows;
-  }
-
   async findByResetToken(token: string) {
     const [rows] = await databaseClient.query<Rows>(
       "SELECT * FROM user WHERE user_reset_token = ?",
@@ -243,19 +208,6 @@ class UserRepository {
     );
 
     return rows[0]?.user_plan as string | undefined;
-  }
-  async readUserJoinEvent(eventId: number) {
-    const [rows] = await databaseClient.query(
-      `
-      SELECT user_username, user_profile_picture, user_joining_date FROM user
-      JOIN event_user_joining
-      ON user_id = euj_id_user
-      WHERE euj_id_event = ?;
-      `,
-      [eventId],
-    );
-
-    return rows;
   }
 }
 

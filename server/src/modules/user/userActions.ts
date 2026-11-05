@@ -213,23 +213,6 @@ const readUserDescriptionEvent: RequestHandler = async (req, res, next) => {
   }
 };
 
-const browseUserAndBudget: RequestHandler = async (req, res, next) => {
-  try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
-
-    const event = await userRepository.readUserAndBudgetOnDashboard(eventId);
-
-    res.json(event);
-  } catch (error) {
-    next(error);
-  }
-};
-
 const forgotPassword: RequestHandler = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -455,27 +438,6 @@ const editUserName: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
-const readUserJoinEvent: RequestHandler = async (req, res, next) => {
-  try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
-
-    const userName = await userRepository.readUserJoinEvent(eventId);
-
-    if (!userName) {
-      res.sendStatus(404);
-      return;
-    }
-
-    res.json(userName);
-  } catch (err) {
-    next(err);
-  }
-};
 export default {
   authVerif,
   readUserDescriptionEvent,
@@ -485,12 +447,10 @@ export default {
   add,
   login,
   logout,
-  browseUserAndBudget,
   forgotPassword,
   resetPassword,
   changePassword,
   uploadPhoto,
   editUserName,
   readUserName,
-  readUserJoinEvent,
 };

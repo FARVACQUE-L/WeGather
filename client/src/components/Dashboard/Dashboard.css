@@ -541,8 +541,7 @@
         }
       }
 
-      .component-todo,
-      .component-galerie {
+      .component-todo {
         width: 100%;
       }
     }

@@ -17,11 +17,6 @@ userRoutes.get(
 );
 
 userRoutes.get("/api/users/:id", authorization, userActions.read);
-userRoutes.get(
-  "/api/users/:eventUuid/userAndBudget",
-  authorization,
-  userActions.browseUserAndBudget,
-);
 
 userRoutes.post("/api/users", userActions.add);
 userRoutes.get("/api/users/:id/photo", authorization, userActions.browsePhoto);
@@ -42,15 +37,5 @@ userRoutes.put(
   userActions.changePassword,
 );
 userRoutes.put("/api/users/:id", authorization, userActions.editUserName);
-userRoutes.put(
-  "/api/users/change-password",
-  authorization,
-  userActions.forgotPassword,
-);
-userRoutes.get(
-  "/api/user/event/:eventUuid",
-  authorization,
-  userActions.readUserJoinEvent,
-);
 
 export default userRoutes;

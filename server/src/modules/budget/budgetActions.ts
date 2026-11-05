@@ -32,22 +32,6 @@ const browseTotalUser: RequestHandler = async (req, res, next) => {
   }
 };
 
-const browseUser: RequestHandler = async (req, res, next) => {
-  try {
-    const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
-    const userId = Number(req.params.id_user);
-    if (!eventId) {
-      res.sendStatus(404);
-      return;
-    }
-    const budget = await budgetRepository.readBudgetInfoByUser(eventId, userId);
-
-    res.json(budget);
-  } catch (err) {
-    next(err);
-  }
-};
-
 const browseEvent: RequestHandler = async (req, res, next) => {
   try {
     const eventId = await eventRepository.readIdByUuid(req.params.eventUuid);
@@ -112,7 +96,6 @@ const destroy: RequestHandler = async (req, res, next) => {
 export default {
   browse,
   browseTotalUser,
-  browseUser,
   browseEvent,
   create,
   update,

@@ -12,11 +12,6 @@ budgetRoutes.get(
 );
 
 budgetRoutes.get(
-  "/api/budget/user/:eventUuid/:id_user",
-  authorization,
-  budgetActions.browseUser,
-);
-budgetRoutes.get(
   "/api/budget/event/:eventUuid",
   authorization,
   budgetActions.browseEvent,
