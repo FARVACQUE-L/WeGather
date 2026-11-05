@@ -21,7 +21,7 @@ if (process.env.CLIENT_URL != null) {
 }
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.text());
 app.use(express.raw());
 app.use(

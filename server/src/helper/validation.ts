@@ -14,6 +14,13 @@ export const MAX_PRICE = 99_999_999.99;
 
 const DATE_FORMAT = /^\d{4}-\d{2}-\d{2}$/;
 
+const MAX_ID = 2_147_483_647;
+
+export const isId = (value: unknown) =>
+  /^\d{1,10}$/.test(String(value)) &&
+  Number(value) >= 1 &&
+  Number(value) <= MAX_ID;
+
 export const asText = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
 

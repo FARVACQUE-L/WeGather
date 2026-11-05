@@ -3,7 +3,7 @@ import path from "node:path";
 import type { RequestHandler } from "express";
 import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { removeUpload } from "../../helper/removeUpload";
-import { LIMITS } from "../../helper/validation";
+import { isId, LIMITS } from "../../helper/validation";
 import { UPLOADS_DIRECTORY } from "../../middleware/upload";
 import { getIo } from "../../socket";
 import eventRepository from "../event/eventRepository";
@@ -70,7 +70,9 @@ const addMessage: RequestHandler = async (req, res, next) => {
 
     let replyToId: number | null = null;
     if (replyTo !== undefined && replyTo !== null && replyTo !== "") {
-      const repliedMessage = await messageRepository.readOwner(Number(replyTo));
+      const repliedMessage = isId(replyTo)
+        ? await messageRepository.readOwner(Number(replyTo))
+        : undefined;
 
       if (!repliedMessage || repliedMessage.message_id_event !== eventId) {
         res.status(400).json({ message: "Message cité introuvable." });

@@ -128,10 +128,10 @@ const join: RequestHandler = async (req, res, next) => {
   }
 
   const user_id = req.user.id;
-  const { event_link_key } = req.body;
+  const event_link_key = asText(req.body.event_link_key).toUpperCase();
 
-  if (!event_link_key || !user_id) {
-    res.status(400).json({ message: "Code et utilisateur requis." });
+  if (!/^[A-Z0-9]{6}$/.test(event_link_key)) {
+    res.status(400).json({ message: "Le code doit contenir 6 caractères." });
     return;
   }
 

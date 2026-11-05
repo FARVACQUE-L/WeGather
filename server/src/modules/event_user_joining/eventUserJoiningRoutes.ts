@@ -1,8 +1,11 @@
 import express from "express";
 import authorization from "../../middleware/auth";
+import { validateIds } from "../../middleware/validateIds";
 import eventUserJoiningActions from "./eventUserJoiningActions";
 
 const eventUserJoiningRoutes = express.Router();
+
+validateIds(eventUserJoiningRoutes, "userId");
 
 eventUserJoiningRoutes.get(
   "/api/events/:eventUuid/users",

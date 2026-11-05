@@ -235,7 +235,9 @@ class EventRepository {
     return rows[0]?.event_uuid as string | undefined;
   }
 
-  async readIdByUuid(uuid: string) {
+  async readIdByUuid(uuid: unknown) {
+    if (typeof uuid !== "string") return undefined;
+
     const [rows] = await databaseClient.query<RowDataPacket[]>(
       "SELECT event_id FROM event WHERE event_uuid = ?",
       [uuid],

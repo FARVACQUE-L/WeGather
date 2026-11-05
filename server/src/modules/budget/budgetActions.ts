@@ -3,6 +3,7 @@ import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import {
   asPrice,
   asText,
+  isId,
   isText,
   LIMITS,
   MAX_PRICE,
@@ -100,6 +101,11 @@ const readManagedBudget = async (
 ) => {
   if (!req.user) {
     res.status(401).json({ message: "Unauthorized" });
+    return undefined;
+  }
+
+  if (!isId(budgetId)) {
+    res.status(400).json({ message: "Identifiant invalide." });
     return undefined;
   }
 

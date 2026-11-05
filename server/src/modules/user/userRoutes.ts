@@ -8,9 +8,12 @@ import {
   resetPasswordLimit,
 } from "../../middleware/rateLimit";
 import upload, { verifyFileSignatures } from "../../middleware/upload";
+import { validateIds } from "../../middleware/validateIds";
 import userActions from "./userActions";
 
 const userRoutes = express.Router();
+
+validateIds(userRoutes, "id");
 
 userRoutes.get("/api/auth/authVerif", authorization, userActions.authVerif);
 

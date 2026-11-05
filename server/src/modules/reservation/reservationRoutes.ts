@@ -4,10 +4,13 @@ import upload, {
   uploadReservationDocument,
   verifyFileSignatures,
 } from "../../middleware/upload";
+import { validateIds } from "../../middleware/validateIds";
 import reservationActions from "./reservationActions";
 import reservationDocumentActions from "./reservationDocumentActions";
 
 const reservationRoutes = express.Router();
+
+validateIds(reservationRoutes, "id", "documentId");
 
 reservationRoutes.get(
   "/api/reservations/:eventUuid",
