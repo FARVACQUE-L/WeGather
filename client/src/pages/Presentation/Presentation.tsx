@@ -62,10 +62,6 @@ const iconProps = {
   absoluteStrokeWidth: true,
 };
 
-// Animations dans le style du reste du site (fondu et léger glissement).
-// Le haut de page s'anime au chargement ; le reste au fil du défilement, une
-// seule fois, quand chaque bloc entre à l'écran. Les éléments « pop » d'un
-// bloc arrivent les uns après les autres.
 const ease = "easeOut";
 
 const reveal: Variants = {
@@ -183,8 +179,6 @@ const steps: {
   },
 ];
 
-// Données des aperçus de la section « Tout au même endroit » : des maquettes
-// en HTML qui reprennent le style de l'application, pour un événement fictif.
 const sidebarMenu: { icon: LucideIcon; label: string }[] = [
   { icon: LayoutDashboard, label: "Tableau de bord" },
   { icon: MessageCircle, label: "Messagerie" },

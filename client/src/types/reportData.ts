@@ -25,15 +25,10 @@ export type ReportData = {
   author_picture?: string;
   target_username?: string;
   target_picture?: string;
-  // Utilisateur signalé, ou organisateur de l'événement signalé, superadmin :
-  // son compte ne peut pas être banni.
   target_is_superadmin?: number;
-  // État actuel des cibles : la modale propose l'action inverse de ce qui a
-  // déjà été appliqué.
   target_is_ban?: number;
   target_is_event_ban?: number;
   event_is_ban?: number | null;
-  // Signalement d'utilisateur dont l'événement a été supprimé.
   event_is_deleted?: number;
 
   reported_event_id_event?: number | null;

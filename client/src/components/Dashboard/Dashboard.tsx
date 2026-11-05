@@ -39,7 +39,6 @@ type UserBudget = {
   total_price: number | string;
 };
 
-// « 12-15 sept. » dans le même mois, « 28 juin - 14 juil. » à cheval sur deux.
 function formatStayDates(start: string, end: string) {
   const startDate = new Date(start);
   const endDate = new Date(end);
@@ -59,8 +58,6 @@ function formatStayDates(start: string, end: string) {
   return `${startDate.getDate()} ${month(startDate)} - ${endDate.getDate()} ${month(endDate)}`;
 }
 
-// Même calcul que les « Equilibres » de l'onglet Budget : ce que j'ai payé
-// moins ma part des dépenses. Positif, on me doit ; négatif, je dois.
 function getMyBalance(budgets: UserBudget[], userId: number) {
   if (budgets.length === 0) return 0;
 
@@ -82,8 +79,6 @@ function formatBalance(balance: number) {
   return "0 €";
 }
 
-// Couleurs des pastilles d'initiales : chaque organisateur garde la sienne,
-// choisie à partir de son id pour qu'elle ne change pas avec son pseudo.
 const initialsColors = [
   "#0080005c",
   "#fa985f8c",
@@ -100,7 +95,6 @@ function getInitialsColor(userId: number) {
 }
 
 type DashboardProps = {
-  // Ouvre l'onglet Réservation (bouton « Voir tout »).
   onSeeAllReservations: () => void;
 };
 
@@ -267,9 +261,6 @@ function Dashboard({ onSeeAllReservations }: DashboardProps) {
             }}
           />
         </motion.h1>
-        {/* Le code s'affiche dans le même conteneur que le bouton, en
-            position absolue sur toute sa surface : les deux se superposent
-            exactement, quelle que soit la largeur d'écran. */}
         <motion.div
           className="code-wrapper"
           initial={{ opacity: 0, height: 0, y: -10 }}

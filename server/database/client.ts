@@ -4,7 +4,7 @@ import mysql from "mysql2/promise";
 
 const client = mysql.createPool({
   host: DB_HOST,
-  port: Number.parseInt(DB_PORT as string),
+  port: Number.parseInt(DB_PORT as string, 10),
   user: DB_USER,
   password: DB_PASSWORD,
   database: DB_NAME,

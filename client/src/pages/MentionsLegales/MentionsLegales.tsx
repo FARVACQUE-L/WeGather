@@ -4,22 +4,16 @@ import { Link } from "react-router";
 import NavBar from "../../components/NavBar/NavBar";
 import Profil from "../../components/Profil/Profil";
 import { fadeIn, revealOnScroll, titleIn } from "../PageCGV/legalMotion";
-// Même mise en page que les CGU / CGV.
 import "../PageCGV/PageCGV.css";
 
 const CONTACT_EMAIL = "wedoop3@gmail.com";
 
-// À compléter avec les coordonnées du fournisseur du VPS (nom ou raison
-// sociale, adresse, téléphone). Tant que le nom est vide, la page l'indique
-// comme « à venir ».
 const HOSTING = {
   name: "",
   address: "",
   phone: "",
 };
 
-// Page publique, comme les CGU / CGV : le menu du profil n'apparaît que pour
-// un utilisateur connecté.
 function MentionsLegales() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 

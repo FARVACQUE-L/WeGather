@@ -12,9 +12,6 @@ type ActiveComponent = "tableau" | "signalement" | "roles";
 
 function Admin() {
   const location = useLocation();
-  // Volontairement non persisté : on entre toujours par le tableau de bord,
-  // sauf depuis la barre du bas du détail d'un signalement, qui transmet
-  // l'onglet cliqué.
   const [activeComponent, setActiveComponent] = useState<ActiveComponent>(
     (location.state as { tab?: ActiveComponent } | null)?.tab ?? "tableau",
   );

@@ -10,16 +10,12 @@ export type ReservationDocument = {
   document_creation_date: string;
 };
 
-// Document avec l'événement et l'auteur de sa réservation, pour vérifier les
-// droits sans requête supplémentaire.
 type ReservationDocumentWithOwner = ReservationDocument & {
   reservation_id_event: number;
   reservation_id_user: number;
 };
 
 class reservationDocumentRepository {
-  // Tous les documents des réservations d'un événement, sans le nom du
-  // fichier sur disque : le client n'en a pas besoin.
   async readByEvent(eventId: number) {
     const [rows] = await mysql.query<Rows>(
       `
@@ -65,8 +61,6 @@ class reservationDocumentRepository {
     return Number(rows[0].total);
   }
 
-  // Fichiers à effacer du disque avant que l'ON DELETE CASCADE ne vide la
-  // table, à la suppression d'une réservation ou d'un événement.
   async readFilesByReservation(reservationId: number) {
     const [rows] = await mysql.query<Rows>(
       "SELECT document_file FROM reservation_document WHERE document_id_reservation = ?",

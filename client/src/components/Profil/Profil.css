@@ -2,9 +2,6 @@
   position: absolute;
   z-index: 3;
   right: 30px;
-  /* S'aligne sur le logo de la navbar : même top, et le ::before reprend
-     la hauteur de ligne du h2 "WeGather" (1.5em, sans marge via le reset
-     global), dans laquelle l'avatar est centré. */
   top: 26px;
   display: flex;
   align-items: center;
@@ -17,13 +14,9 @@
     font-weight: bold;
   }
 
-  /* Avatar compact façon Gmail : 32px dans un bouton rond de 40px qui se
-     grise au survol. */
   .button {
     display: flex;
     padding: 4px;
-    /* Marges négatives : le bouton ne grandit pas la boîte du ::before,
-       il reste centré dessus. */
     margin: -20px 0;
     cursor: pointer;
     border: none;
@@ -45,10 +38,6 @@
     }
   }
 
-  /* Classes préfixées : GalleryModal.css déclare des règles globales
-     .modal et .modal-overlay qui s'appliquaient aussi à cette modale. Mêmes
-     styles que la modale d'ajout de réservation : voile, fond, arrondis,
-     champs et boutons en pilule qui rétrécissent au survol. */
   .Profil-Overlay {
     position: fixed;
     inset: 0;
@@ -61,12 +50,9 @@
   }
 
   .Profil-Modal {
-    /* Juste assez pour les panneaux de 17rem, avec les 2rem de padding. */
     width: min(90vw, 340px);
     max-height: 90vh;
     overflow-y: auto;
-    /* Barre de défilement masquée : la modale reste défilable quand un
-       panneau ouvert la rend plus haute que l'écran. */
     scrollbar-width: none;
     padding: 2rem;
     background: var(--bg-color);
@@ -81,9 +67,6 @@
       display: none;
     }
 
-    /* Quand la modale atteint sa hauteur maximale, la colonne flex
-       rétrécissait ses enfants au lieu de défiler : la photo s'écrasait et
-       le panneau de la photo, en overflow: hidden, coupait ses boutons. */
     > * {
       flex-shrink: 0;
     }
@@ -109,7 +92,6 @@
   .Profil-Upload,
   .Profil-Submit,
   .Profil-Close {
-    /* 15rem comme le bouton d'image de la modale de réservation. */
     width: 15rem;
     max-width: 100%;
     min-height: 2.5rem;
@@ -147,13 +129,7 @@
     color: var(--font-red);
   }
 
-  /* Fermer garde le gris par défaut des boutons, comme Annuler dans la
-     modale de réservation. */
-
-  /* overflow: hidden : le contenu ne déborde pas pendant l'animation de
-     hauteur à l'ouverture et à la fermeture. */
   .Profil-Panel {
-    /* Les boutons de 15rem plus 1rem de padding de chaque côté. */
     width: 17rem;
     max-width: 100%;
     display: flex;
@@ -195,8 +171,6 @@
   }
 }
 
-/* Barre de navigation fixée en bas (70px) : la modale, centrée, s'arrête
-   au-dessus d'elle. */
 @media screen and (max-width: 875px) {
   .profil .Profil-Modal {
     max-height: calc(100vh - 140px);

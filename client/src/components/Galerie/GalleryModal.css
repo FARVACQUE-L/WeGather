@@ -1,5 +1,3 @@
-/* Confirmation de suppression d'une photo : mêmes fond, titre et boutons que
-   les modales de suppression d'événement et de réservation (CardEvents.css). */
 .GalleryDelete-Overlay {
   position: fixed;
   inset: 0;
@@ -39,8 +37,6 @@
       gap: 1rem;
       margin-top: 0.5rem;
 
-      /* Annuler garde le gris par défaut des boutons, comme dans les
-         autres modales. */
       button {
         flex: 1;
         max-width: 12rem;
@@ -78,8 +74,6 @@
   }
 }
 
-/* Formulaires « Ajouter une photo » et « Modifier la description » : champs
-   et boutons calqués sur la modale de modification d'événement. */
 .GalleryForm-Overlay {
   position: fixed;
   inset: 0;
@@ -92,7 +86,6 @@
   backdrop-filter: blur(6px);
 
   .GalleryForm {
-    /* Réinitialise le style par défaut de <dialog> (modale de description). */
     position: static;
     margin: 0;
     border: none;
@@ -146,7 +139,6 @@
     display: none;
   }
 
-  /* Aperçu au-dessus du bouton, à la taille des cartes. */
   .GalleryForm-Image {
     display: flex;
     flex-direction: column;
@@ -204,9 +196,6 @@
     margin-top: 0.5rem;
   }
 
-  /* 12rem comme dans la modale de modification, partagés ici entre les deux
-     boutons car la modale est plus étroite. Annuler garde le gris par
-     défaut des boutons, comme là-bas. */
   .GalleryForm-ButtonCancel,
   .GalleryForm-ButtonSubmit {
     flex: 1;

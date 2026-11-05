@@ -10,8 +10,6 @@ messageRoutes.get(
   authorization,
   messageActions.browseMessagesByEventId,
 );
-// Image jointe facultative, vérifiée comme celles de la galerie (type
-// déclaré puis signature du fichier).
 messageRoutes.post(
   "/api/messages/:eventUuid",
   authorization,

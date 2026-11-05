@@ -45,7 +45,6 @@ function CardEvents({
 }: CardEventsProps) {
   const uselocation = useLocation();
   const isHomeEvents = uselocation.pathname === "/homeevents";
-  // const { id: user_id } = JSON.parse(localStorage.getItem("user") || "{}");
   const isHost = user_id === event_id_host;
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentDescription, setCurrentDescription] = useState(description);

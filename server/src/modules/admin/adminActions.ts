@@ -5,9 +5,6 @@ import { detectMimeType, REPORTS_DESTINATION } from "../../middleware/upload";
 import transporter from "../services/mailer";
 import adminRepository from "./adminRepository";
 
-// multer nomme ses fichiers avec un hash hexadécimal de 32 caractères. Tout
-// autre nom est refusé, ce qui ferme la traversée de répertoire sans avoir à
-// raisonner sur des « ../ » normalisés.
 const REPORT_FILENAME = /^[a-f0-9]{32}$/;
 
 const readReportImage: RequestHandler = async (req, res, next) => {
@@ -203,8 +200,6 @@ const banUser: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
 
-    // Un superadmin ne peut pas être banni définitivement : il peut seulement
-    // être retiré d'un événement (banUserFromEvent).
     const roles = await adminRepository.readRoles(id);
     if (roles?.user_is_superadmin) {
       res.status(403).json({
@@ -241,8 +236,6 @@ const searchUsers: RequestHandler = async (req, res, next) => {
   try {
     const query = String(req.query.q ?? "").trim();
 
-    // En dessous de 2 caractères, la recherche renverrait presque toute la
-    // base sans aider à trouver quelqu'un.
     if (query.length < 2) {
       res.json([]);
       return;
@@ -290,8 +283,6 @@ const revokeAdmin: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Un superadmin garde toujours le rôle admin : sans lui, il n'aurait plus
-    // accès à l'espace admin. Ça évite aussi de se retirer soi-même.
     if (roles.user_is_superadmin) {
       res
         .status(403)
@@ -316,8 +307,6 @@ const promoteSuperAdmin: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Seul un admin peut devenir superadmin : le rôle admin donne l'accès à
-    // l'espace admin, le rôle superadmin seulement la gestion des rôles.
     if (!roles.user_is_admin) {
       res
         .status(400)
@@ -347,7 +336,6 @@ const demoteSuperAdmin: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Sans superadmin, plus personne ne pourrait gérer les rôles.
     if ((await adminRepository.countSuperAdmins()) <= 1) {
       res
         .status(403)

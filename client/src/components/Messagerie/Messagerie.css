@@ -29,15 +29,10 @@
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
 
-        /* Les bulles des contacts portent l'heure à l'intérieur : sans
-           ligne d'heure dessous, le dernier message collait à la barre de
-           saisie. */
         > :last-child .messagerie-box-messages-friends {
           padding-bottom: 12px;
         }
 
-        /* Bouton « ... » à côté de la bulle, visible au survol du message.
-           Sur écran tactile, sans survol, il reste affiché. */
         .message-actions {
           position: relative;
           flex-shrink: 0;
@@ -73,9 +68,6 @@
           }
         }
 
-        /* Liens dans les messages : couleur du texte de la bulle (blanc sur
-           les siens), soulignés. Une longue adresse sans espace est coupée
-           pour ne pas déborder de la bulle. */
         .message-link {
           color: inherit;
           text-decoration: underline;
@@ -83,8 +75,6 @@
           overflow-wrap: anywhere;
         }
 
-        /* Image jointe, au-dessus du texte de la bulle. Hauteur limitée pour
-           ne pas occuper tout l'écran ; un clic l'ouvre en grand. */
         .message-image-button {
           display: block;
           margin-bottom: 4px;
@@ -94,9 +84,6 @@
           cursor: zoom-in;
         }
 
-        /* Largeur limitée en px/vw et non en % : la bulle prend la largeur
-           de son contenu, et une image en max-width: 100% n'y compte pas.
-           Chez le contact, elle rétrécissait à la largeur du pseudo. */
         .message-image {
           display: block;
           max-width: min(280px, 40vw);
@@ -105,7 +92,6 @@
           object-fit: cover;
         }
 
-        /* La bulle et son « ... », centré sur elle. */
         .message-bubble-row {
           display: flex;
           align-items: center;
@@ -116,8 +102,6 @@
           }
         }
 
-        /* Pastilles de réactions sous la bulle, qui chevauchent légèrement
-           son bas, décalées du coin. Au-dessus de la bulle. */
         .message-reactions {
           position: relative;
           z-index: 1;
@@ -128,8 +112,6 @@
           padding: 0 8px;
         }
 
-        /* Mêmes fond et contour que la bulle du message (voir plus bas pour
-           ses propres messages). */
         .reaction-chip {
           display: inline-flex;
           align-items: center;
@@ -148,7 +130,6 @@
             line-height: 1;
           }
 
-          /* Sa propre réaction, en gras : un clic la retire. */
           &.is-mine {
             font-weight: 700;
           }
@@ -159,7 +140,6 @@
           color: white;
         }
 
-        /* Citation du message auquel on répond, en haut de la bulle. */
         .message-reply {
           display: block;
           margin-bottom: 4px;
@@ -174,7 +154,6 @@
             font-weight: 600;
           }
 
-          /* Une seule ligne : le message cité complet est plus haut. */
           .message-reply-text {
             display: block;
             max-width: 40ch;
@@ -185,8 +164,6 @@
           }
         }
 
-        /* Les emojis sont isolés dans un span au rendu, pour être agrandis
-           sans toucher à la taille du texte qui les entoure. */
         .message-emoji {
           font-size: 1.6em;
           line-height: 1;
@@ -208,16 +185,11 @@
           justify-content: flex-start;
           gap: 5px;
           padding: 2px 0 2px 0;
-          /* Photo de profil seulement (enfant direct) : appliquée à toutes
-             les img, cette règle réduisait aussi l'image jointe à un rond de
-             30px. */
           > img {
             flex-shrink: 0;
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            /* Recadrée comme la photo du menu profil (Profil.css) plutôt
-               qu'aplatie dans le rond. */
             object-fit: cover;
           }
           .avatar-spacer {
@@ -228,10 +200,8 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            /* Retour à la ligne à la moitié de la boîte de messagerie. */
             min-width: 0;
             max-width: 50%;
-            /* Sur sa propre ligne, en haut de la bulle. */
             .message-author {
               display: block;
               margin-bottom: 2px;
@@ -248,9 +218,6 @@
               word-break: break-word;
               font-size: 15px;
             }
-            /* Dans la bulle, à droite de la dernière ligne du message : le
-               flottant se place sur la ligne où il arrive, et passe à la
-               ligne suivante si le texte la remplit déjà. */
             .message-hour {
               float: right;
               margin: 1em 0 0 8px;
@@ -270,7 +237,6 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            /* Retour à la ligne à la moitié de la boîte de messagerie. */
             min-width: 0;
             max-width: 50%;
             .message-text {
@@ -283,8 +249,6 @@
               font-size: 15px;
               color: white;
             }
-            /* Hauteur de ligne fixe : le « ... » la compense pour rester
-               centré sur la bulle (voir .message-actions plus bas). */
             .hour-text {
               font-size: 10px;
               line-height: 12px;
@@ -294,7 +258,6 @@
             }
           }
 
-          /* Bulle et réactions calées à droite, comme le message. */
           .message-bubble-row,
           .message-reactions {
             justify-content: flex-end;
@@ -302,7 +265,6 @@
         }
       }
 
-      /* Image en attente d'envoi, avec sa croix pour la retirer. */
       .messagerie-attachment {
         position: relative;
         flex-shrink: 0;
@@ -336,7 +298,6 @@
         }
       }
 
-      /* Réponse ou modification en cours, juste au-dessus de la barre. */
       .messagerie-compose-context {
         flex-shrink: 0;
         display: flex;
@@ -387,11 +348,6 @@
         border: 1px solid #ff7e5f;
         border-radius: 21px;
         margin-bottom: 10px;
-        /* Enfant direct uniquement : sans ça, ces règles s'appliquaient aussi
-           au champ de recherche du sélecteur d'emoji, imbriqué plus bas — il
-           perdait son fond, sa bordure, et son texte passait sous la loupe. */
-        /* min-width: 0 : c'est le champ qui rétrécit sur un écran étroit,
-           pas les boutons à côté. */
         > input {
           padding-left: 10px;
           width: 94%;
@@ -417,10 +373,6 @@
           right: 0;
           z-index: 1000;
 
-          /* La bibliothèque expose toutes ses couleurs en variables CSS :
-             on les branche sur les jetons du projet plutôt que de lutter
-             contre ses styles. La taille, elle, se règle par les props du
-             composant, posées en style en ligne. */
           .EmojiPickerReact {
             --epr-bg-color: var(--bg-neutral);
             --epr-text-color: var(--font-darkBrown);
@@ -450,17 +402,12 @@
             font-family: "Be Vietnam Pro", sans-serif;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 
-            /* La barre de catégories est dans l'en-tête, sous la recherche.
-               display: contents sort l'en-tête du flux : la recherche et la
-               barre deviennent des enfants directs du panneau, et order les
-               replace — recherche, emojis, catégories. */
             .epr-header {
               display: contents;
             }
 
             .epr-body {
               order: 1;
-              /* Le défilement reste actif, seule la barre est masquée. */
               scrollbar-width: none;
 
               &::-webkit-scrollbar {
@@ -474,23 +421,18 @@
             }
           }
         }
-        /* Nos boutons uniquement. Appliquée à tous les descendants, cette
-           règle effaçait aussi l'image de fond des boutons de catégorie du
-           sélecteur d'emoji, qui devenaient invisibles. */
         > button,
         .emoji-wrapper > button {
           border-style: none;
           font-size: 20px;
           background: none;
         }
-        /* Le bouton d'accès aux emojis, plus grand que le reste de la barre. */
         .emoji-wrapper > button {
           font-size: 26px;
           line-height: 1;
           padding: 0;
           cursor: pointer;
         }
-        /* + pour joindre une image, au début de la barre. */
         .attach-button {
           display: flex;
           align-items: center;
@@ -500,8 +442,6 @@
           color: var(--font-brown);
           cursor: pointer;
         }
-        /* flex-shrink: 0 : sur mobile, la barre manquait de place et le
-           bouton se resserrait en ovale. */
         .send-button {
           flex-shrink: 0;
           border-radius: 21px;
@@ -525,12 +465,6 @@
 }
 @media screen and (max-width: 428px) {
   .messagerie {
-    /* Avec les 2vh du titre, il commence à 4vh + 3rem comme sur le
-       dashboard. */
-    /* La page fait la hauteur de l'écran (dvh : sans la barre d'adresse du
-       navigateur) et la conversation prend la place sous le titre. Le
-       padding bas l'arrête juste au-dessus de la flèche de la sidebar :
-       70px de barre, 22px de flèche, 8px d'écart. */
     padding: calc(2vh + 3rem) 1rem 100px 1rem;
     height: 100dvh;
     display: flex;
@@ -554,8 +488,6 @@
         .messagerie-box-messages {
           .messagerie-box-messages-friends,
           .messagerie-box-messages-user {
-            /* Sur mobile, la moitié de l'écran serait trop étroite : la
-               bulle est limitée à 70vw à la place. */
             section {
               max-width: none;
 
@@ -566,7 +498,6 @@
             }
           }
 
-          /* Sur mobile, l'image peut occuper presque toute la bulle. */
           .message-image {
             max-width: min(280px, 60vw);
           }
@@ -575,8 +506,6 @@
         .messagerie-input {
           height: 44px;
           margin-bottom: 0;
-          /* Le sélecteur s'aligne sur toute la barre et non sur le bouton,
-             qui est trop près du bord droit pour le contenir. */
           position: relative;
 
           .emoji-wrapper {
@@ -591,35 +520,25 @@
     }
   }
 }
-/* Au-dessus de 1475px, la conversation occupe la largeur qu'elle partageait
-   avec l'ancien panneau des contacts, comme les autres onglets (70.5vw). */
 @media screen and (min-width: 1476px) {
   .messagerie {
     width: 70.5vw;
   }
 }
-/* Même largeur que les composants du dashboard, qui font 91 % de sa largeur
-   (calc(94vw - 300px)). La conversation, en flex: 1, remplit cette largeur. */
 @media screen and (min-width: 876px) and (max-width: 1475px) {
   .messagerie {
     width: calc((94vw - 300px) * 0.91);
   }
 }
-/* Sidebar en barre du bas : même largeur et mêmes marges que le dashboard. */
 @media screen and (min-width: 429px) and (max-width: 875px) {
   .messagerie {
     width: 100%;
-    /* Même hauteur que le dashboard (4vh, le h1 garde ses 3rem). */
     padding: 4vh 4vw 10vh;
     .global-messagerie .messagerie-box {
       height: 74vh;
     }
   }
 }
-/* Menu « ... » d'un message. Rendu dans body en position fixe, hors de la
-   liste qui défile, et placé par le composant à côté du bouton : il ne
-   recouvre plus les messages et n'est plus coupé par les bords de la liste.
-   Au-dessus de la barre de navigation fixée en bas. */
 .message-menu {
   position: fixed;
   z-index: 1100;
@@ -656,7 +575,6 @@
     color: var(--font-red);
   }
 
-  /* Rangée d'emojis en haut du menu, séparée des actions. */
   .message-menu-reactions {
     display: flex;
     gap: 2px;
@@ -676,8 +594,6 @@
   }
 }
 
-/* Visionneuse d'une image de message : plein écran sur fond sombre, au-dessus
-   de tout (barre du bas, menus). Rendue dans body, hors de .messagerie. */
 .image-viewer {
   position: fixed;
   inset: 0;

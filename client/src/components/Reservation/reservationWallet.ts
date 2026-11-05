@@ -7,7 +7,6 @@ import {
   Utensils,
 } from "lucide-react";
 
-// Valeurs de la colonne reservation_type, dans l'ordre des filtres.
 export const RESERVATION_TYPES = [
   "hebergement",
   "transport",
@@ -57,14 +56,10 @@ export type WalletReservation = {
   documents: ReservationDocument[];
 };
 
-// Mêmes limites que le serveur (reservationDocumentActions.ts, upload.ts).
 export const MAX_DOCUMENTS_PER_RESERVATION = 5;
 export const ACCEPTED_DOCUMENTS =
   "application/pdf,image/jpeg,image/png,image/webp,image/gif,image/avif";
 
-// Les dates arrivent en « AAAA-MM-JJ ». new Date("2026-06-28") les lirait en
-// UTC et afficherait la veille à l'ouest de Greenwich : on construit la date
-// en heure locale.
 export const parseDay = (day: string) => {
   const [year, month, date] = day.slice(0, 10).split("-").map(Number);
   return new Date(year, month - 1, date);
@@ -77,10 +72,8 @@ const toDayString = (date: Date) =>
     String(date.getDate()).padStart(2, "0"),
   ].join("-");
 
-// « 14:00:00 » (MySQL) → « 14:00 ».
 export const shortTime = (time: string | null) => time?.slice(0, 5) ?? null;
 
-// « Sam. 28 juin », en-tête d'une journée du wallet.
 export const formatDayHeader = (day: string) => {
   const label = parseDay(day).toLocaleDateString("fr-FR", {
     weekday: "short",
@@ -90,8 +83,6 @@ export const formatDayHeader = (day: string) => {
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
-// Pastille de date sur l'image, comme celle des cartes d'événement
-// (CardEvents.tsx) : « 28 » et « Juin ».
 const SHORT_MONTHS = [
   "Jan",
   "Fév",
@@ -112,13 +103,9 @@ export const formatBadgeDate = (day: string) => {
   return { day: date.getDate(), month: SHORT_MONTHS[date.getMonth()] };
 };
 
-// « 30 juin ».
 export const formatShortDate = (day: string) =>
   parseDay(day).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
 
-// Horaires sous le nom de la réservation, null s'il n'y a rien à ajouter à
-// l'en-tête de la journée : « 14:00 → 16:00 », « À 20:30 »,
-// « 15:00 → 11:00 le 30 juin », « Jusqu'au 30 juin ».
 export const formatSchedule = (reservation: WalletReservation) => {
   const start = shortTime(reservation.reservation_time_start);
   const end = shortTime(reservation.reservation_time_end);
@@ -136,8 +123,6 @@ export const formatSchedule = (reservation: WalletReservation) => {
   return null;
 };
 
-// Une réservation est passée une fois sa fin dépassée : la fin de sa
-// journée de fin si aucune heure n'est donnée.
 export const isPastReservation = (
   reservation: WalletReservation,
   now = new Date(),
@@ -150,7 +135,6 @@ export const isPastReservation = (
   return `${endDay.slice(0, 10)} ${endTime}` < nowKey;
 };
 
-// « Aujourd'hui », « Demain », « Dans 3 jours ».
 export const formatCountdown = (day: string, now = new Date()) => {
   const today = parseDay(toDayString(now));
   const days = Math.round(

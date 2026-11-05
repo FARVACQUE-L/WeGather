@@ -15,8 +15,6 @@ import { useParams } from "react-router";
 import Swal from "sweetalert2";
 import { socket } from "../../socket/socket";
 
-// La bibliothèque n'est pas traduite : on redéfinit les catégories pour
-// imposer leur nom. L'ordre de ce tableau est celui du sélecteur.
 const EMOJI_CATEGORIES = [
   { category: Categories.SUGGESTED, name: "Récemment utilisés" },
   { category: Categories.SMILEYS_PEOPLE, name: "Émojis et personnes" },
@@ -29,32 +27,21 @@ const EMOJI_CATEGORIES = [
   { category: Categories.FLAGS, name: "Drapeaux" },
 ];
 
-// Une suite emoji peut combiner plusieurs caractères : sélecteur de variante,
-// teinte de peau, ou liaison par ZWJ (👨‍👩‍👧). On les capture d'un bloc pour ne
-// pas couper une famille en trois bonshommes.
 const EMOJI_RUN =
   /(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*)/gu;
 const EMOJI_ONLY =
   /^\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*$/u;
 
-// Liens commençant par http://, https:// ou www. Seuls ces schémas sont
-// rendus cliquables : un « javascript: » reste du texte.
 const URL_RUN = /((?:https?:\/\/|www\.)[^\s<]+)/gi;
-// Ponctuation collée à la fin d'un lien dans une phrase (« voir x.com. »),
-// laissée hors du lien.
 const URL_TRAILING_PUNCTUATION = /[.,;:!?)\]}'"»]+$/;
 
 type MessagePart = {
   key: string;
   value: string;
   kind: "text" | "emoji" | "link";
-  // Adresse du lien, avec https:// ajouté devant un « www. ».
   href?: string;
 };
 
-// Découpe un message en fragments texte, emoji et lien. La clé vient de la
-// position dans la chaîne, pour rester stable sans dépendre de l'index de la
-// boucle.
 const splitMessageText = (text: string): MessagePart[] => {
   const parts: MessagePart[] = [];
   let offset = 0;
@@ -73,7 +60,6 @@ const splitMessageText = (text: string): MessagePart[] => {
   };
 
   for (const [index, chunk] of text.split(URL_RUN).entries()) {
-    // split avec un groupe capturant : les liens sont aux index impairs.
     if (index % 2 === 0) {
       pushText(chunk);
       continue;
@@ -100,12 +86,10 @@ type ReceptionMessagesUser = {
   message_text: string;
   message_date: string;
   message_edited_at: string | null;
-  // Message cité par une réponse, avec son texte et le pseudo de son auteur.
   message_reply_to: number | null;
   reply_text: string | null;
   reply_image: string | null;
   reply_username: string | null;
-  // Image jointe (chemin sous /uploads), null sans image.
   message_image: string | null;
   user_name: string;
   user_username: string;
@@ -115,29 +99,21 @@ type ReceptionMessagesUser = {
   reactions: Reaction[];
 };
 
-// Réactions d'un message, regroupées par emoji avec les personnes qui l'ont
-// mis.
 type Reaction = {
   emoji: string;
   users: { user_id: number; user_username: string }[];
 };
 
-// Emojis proposés pour réagir, les mêmes que ceux acceptés par le serveur.
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
-// Menu « ... » ouvert : le message visé, la position du bouton, et le côté
-// où ouvrir le menu, dans l'espace libre à côté du bouton (à droite pour les
-// messages des autres, à gauche pour les siens).
 type OpenMenu = {
   message: ReceptionMessagesUser;
   anchor: DOMRect;
   side: "left" | "right";
 };
 
-// Écart entre le bouton « ... » et le menu.
 const MENU_GAP = 4;
 
-// Images acceptées en pièce jointe, comme côté serveur.
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -147,8 +123,6 @@ const ACCEPTED_IMAGE_TYPES = [
 ];
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
 
-// Texte affiché pour un message cité : son texte, ou « Photo » s'il n'a
-// qu'une image.
 const quoteText = (text: string | null, image: string | null) =>
   text || (image ? "📷 Photo" : "");
 
@@ -162,13 +136,11 @@ function Messagerie() {
   const [openMenu, setOpenMenu] = useState<OpenMenu | null>(null);
   const [replyTo, setReplyTo] = useState<ReceptionMessagesUser | null>(null);
   const [editing, setEditing] = useState<ReceptionMessagesUser | null>(null);
-  // Image en attente d'envoi, choisie avec le + ou collée, et son aperçu.
   const [attachment, setAttachment] = useState<File | null>(null);
   const [attachmentPreview, setAttachmentPreview] = useState<string | null>(
     null,
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  // Image affichée en grand dans la visionneuse, null si elle est fermée.
   const [viewerImage, setViewerImage] = useState<string | null>(null);
   const [hostId, setHostId] = useState<number | null>(null);
   const { eventUuid } = useParams();
@@ -196,10 +168,6 @@ function Messagerie() {
     if (!messagesElement || messagesCount === 0) return;
     messagesElement.scrollTop = messagesElement.scrollHeight;
   }, [receptionMessagesUser]);
-  // Écran tactile ou mobile (sous 428px, comme le reste du site) : donner le
-  // focus à un champ ouvre le clavier, qui recouvrirait le sélecteur
-  // d'emoji. La largeur seule ne suffit pas : un téléphone en paysage la
-  // dépasse.
   const isTouchScreen = window.matchMedia(
     "(pointer: coarse), (max-width: 428px)",
   ).matches;
@@ -207,8 +175,6 @@ function Messagerie() {
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setMessagesUser((prev) => prev + emojiData.emoji);
     setShowPicker(false);
-    // Le focus revient au champ pour enchaîner la saisie sans cliquer. Pas
-    // sur mobile, où il rouvrirait le clavier.
     if (!isTouchScreen) messageInputRef.current?.focus();
   };
 
@@ -244,7 +210,6 @@ function Messagerie() {
     if (!eventUuid || !userId) return;
     fetch(
       `${import.meta.env.VITE_API_URL}/api/messages/notification/${eventUuid}`,
-      // L'utilisateur est lu dans le cookie de session par le serveur.
       { method: "POST", credentials: "include" },
     ).catch((error) => {
       console.error("Erreur lecture messages :", error);
@@ -286,8 +251,6 @@ function Messagerie() {
       setReceptionMessagesUser((prev) => [...prev, newMessage]);
     };
 
-    // Un message modifié remplace l'ancien, et les réponses qui le citent
-    // affichent son nouveau texte.
     const handleMessageUpdated = (updated: ReceptionMessagesUser) => {
       setReceptionMessagesUser((prev) =>
         prev.map((message) => {
@@ -300,8 +263,6 @@ function Messagerie() {
       );
     };
 
-    // Un message supprimé disparaît, et les réponses qui le citaient perdent
-    // leur citation, comme en base.
     const handleMessageDeleted = ({ message_id }: { message_id: number }) => {
       setReceptionMessagesUser((prev) =>
         prev
@@ -348,8 +309,6 @@ function Messagerie() {
     };
   }, [eventUuid]);
 
-  // Si le message auquel on répond, ou qu'on modifie, est supprimé entre-temps,
-  // la réponse ou la modification est annulée.
   useEffect(() => {
     const exists = (message: ReceptionMessagesUser | null) =>
       message !== null &&
@@ -365,7 +324,6 @@ function Messagerie() {
     if (openMenu && !exists(openMenu.message)) setOpenMenu(null);
   }, [receptionMessagesUser, replyTo, editing, openMenu]);
 
-  // Aperçu de l'image en attente, libéré quand elle change ou est retirée.
   useEffect(() => {
     if (!attachment) {
       setAttachmentPreview(null);
@@ -377,7 +335,6 @@ function Messagerie() {
     return () => URL.revokeObjectURL(url);
   }, [attachment]);
 
-  // Échap ferme la visionneuse.
   useEffect(() => {
     if (!viewerImage) return;
 
@@ -389,7 +346,6 @@ function Messagerie() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [viewerImage]);
 
-  // L'hôte peut supprimer tous les messages de son événement.
   useEffect(() => {
     if (!eventUuid) return;
     fetch(`${import.meta.env.VITE_API_URL}/api/event/host/${eventUuid}`, {
@@ -400,9 +356,6 @@ function Messagerie() {
       .catch(console.error);
   }, [eventUuid]);
 
-  // Un clic en dehors du menu « ... » le referme, comme le défilement de la
-  // liste ou un redimensionnement : le menu, fixé à l'écran, ne suivrait
-  // plus son message.
   useEffect(() => {
     if (!openMenu) return;
 
@@ -426,8 +379,6 @@ function Messagerie() {
     };
   }, [openMenu]);
 
-  // Place le menu à côté du bouton, centré sur lui en hauteur, sans sortir
-  // de la boîte de messagerie : décalé vers l'intérieur s'il touche un bord.
   useLayoutEffect(() => {
     const menu = menuRef.current;
     const box = messagesRef.current?.getBoundingClientRect();
@@ -469,8 +420,6 @@ function Messagerie() {
     });
   }
 
-  // Ajoute la réaction, ou la retire si on l'avait déjà mise. Tous les
-  // participants, soi compris, reçoivent le résultat par le socket.
   async function toggleReaction(messageId: number, emoji: string) {
     setOpenMenu(null);
 
@@ -500,7 +449,6 @@ function Messagerie() {
   function startEdit(message: ReceptionMessagesUser) {
     setOpenMenu(null);
     setReplyTo(null);
-    // Seul le texte se modifie : une image en attente est retirée.
     setAttachment(null);
     setEditing(message);
     setMessagesUser(message.message_text);
@@ -536,8 +484,6 @@ function Messagerie() {
     }
   }
 
-  // Vérifie et met en attente l'image choisie ou collée. Mêmes limites que le
-  // serveur : 8 Mo, formats image courants.
   function attachImage(file: File) {
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
       Swal.fire({
@@ -551,8 +497,6 @@ function Messagerie() {
       return;
     }
 
-    // Une modification ne porte que sur le texte : joindre une image
-    // l'annule et repart sur un nouveau message.
     if (editing) {
       setEditing(null);
       setMessagesUser("");
@@ -561,8 +505,6 @@ function Messagerie() {
     messageInputRef.current?.focus();
   }
 
-  // Une image copiée (capture d'écran, image d'une page) est jointe au
-  // message ; un texte collé garde son comportement normal.
   function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
     const image = Array.from(e.clipboardData.files).find((file) =>
       file.type.startsWith("image/"),
@@ -573,8 +515,6 @@ function Messagerie() {
     attachImage(image);
   }
 
-  // Envoi possible avec du texte, une image, ou un texte vidé lors de la
-  // modification d'un message qui a une image.
   const canSend = editing
     ? Boolean(messagesUser.trim() || editing.message_image)
     : Boolean(messagesUser.trim() || attachment);
@@ -584,16 +524,12 @@ function Messagerie() {
       return;
     }
 
-    // Multipart pour porter l'image : le navigateur pose lui-même le
-    // Content-Type avec sa délimitation.
     const formData = new FormData();
     formData.append("messagesUser", messagesUser);
     formData.append("replyTo", replyTo ? String(replyTo.message_id) : "");
     if (attachment) formData.append("image", attachment);
 
     try {
-      // En modification, le texte remplace celui du message ; sinon c'est
-      // un nouveau message, éventuellement en réponse à un autre.
       const response = editing
         ? await fetch(
             `${import.meta.env.VITE_API_URL}/api/messages/${eventUuid}/${editing.message_id}`,
@@ -696,9 +632,6 @@ function Messagerie() {
 
               const isNewDay = currentDay !== previousDay;
 
-              // Pseudo et photo seulement en tête d'une suite de messages du
-              // même auteur : ils reviennent après le message d'un autre, ou
-              // après le séparateur d'un nouveau jour.
               const isOwn = reception.user_id === userId;
               const showAuthor =
                 !isOwn &&
@@ -707,8 +640,6 @@ function Messagerie() {
                 openMenu?.message.message_id === reception.message_id;
               const hour = `${reception.message_edited_at ? "modifié · " : ""}${formatHour(reception.message_date)}`;
 
-              // Bouton « ... » : à droite de la bulle pour les messages des
-              // autres, à gauche pour les siens. Le menu est rendu à part.
               const actions = (
                 <div className="message-actions">
                   <button
@@ -748,28 +679,19 @@ function Messagerie() {
                         alt="profil_ami"
                       />
                     )}
-                    {/* Même largeur que la photo : les bulles suivantes de
-                        la suite restent alignées sur la première. */}
                     {!isOwn && !showAuthor && (
                       <span className="avatar-spacer" />
                     )}
 
                     <section>
-                      {/* Le « ... » est dans la même ligne que la bulle :
-                          il reste centré sur elle, quoi qu'il y ait dessous
-                          (heure, réactions). */}
                       <div className="message-bubble-row">
                         {isOwn && actions}
                         <p className="message-text">
-                          {/* Pseudo en haut de la bulle, pour les messages des
-                            autres seulement : les siens n'ont pas besoin
-                            d'être signés. */}
                           {showAuthor && (
                             <span className="message-author">
                               {reception.user_username}
                             </span>
                           )}
-                          {/* Citation du message auquel celui-ci répond. */}
                           {reception.message_reply_to !== null && (
                             <span className="message-reply">
                               <span className="message-reply-author">
@@ -783,8 +705,6 @@ function Messagerie() {
                               </span>
                             </span>
                           )}
-                          {/* Image jointe : un clic l'ouvre en grand dans la
-                              visionneuse, sans quitter la page. */}
                           {reception.message_image && (
                             <button
                               type="button"
@@ -816,7 +736,6 @@ function Messagerie() {
                                   </span>
                                 );
                               }
-                              // Nouvel onglet, sans accès à la page d'origine.
                               if (part.kind === "link") {
                                 return (
                                   <a
@@ -833,8 +752,6 @@ function Messagerie() {
                               return part.value;
                             },
                           )}
-                          {/* Messages des autres : l'heure est dans la bulle,
-                            à droite de la dernière ligne. */}
                           {!isOwn && (
                             <span className="message-hour">{hour}</span>
                           )}
@@ -842,9 +759,6 @@ function Messagerie() {
                         {!isOwn && actions}
                       </div>
 
-                      {/* Une pastille par emoji, avec le nombre de réactions.
-                          Un clic ajoute ou retire la sienne ; le survol donne
-                          les pseudos. */}
                       {reception.reactions.length > 0 && (
                         <div className="message-reactions">
                           {reception.reactions.map((reaction) => {
@@ -888,8 +802,6 @@ function Messagerie() {
             })}
           </div>
 
-          {/* Rappel de la réponse ou de la modification en cours, au-dessus
-              de la barre de saisie. Échap ou la croix l'annule. */}
           {(replyTo || editing) && (
             <div className="messagerie-compose-context">
               {replyTo ? <Reply size={16} /> : <Pencil size={16} />}
@@ -918,7 +830,6 @@ function Messagerie() {
             </div>
           )}
 
-          {/* Image en attente d'envoi, retirable avant l'envoi. */}
           {attachmentPreview && (
             <div className="messagerie-attachment">
               <img src={attachmentPreview} alt="Pièce jointe à envoyer" />
@@ -933,8 +844,6 @@ function Messagerie() {
           )}
 
           <div className="messagerie-input">
-            {/* Joindre une image. Masqué pendant une modification, qui ne
-                porte que sur le texte. */}
             {!editing && (
               <>
                 <button
@@ -953,7 +862,6 @@ function Messagerie() {
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) attachImage(file);
-                    // Permet de rechoisir le même fichier ensuite.
                     e.target.value = "";
                   }}
                 />
@@ -968,17 +876,12 @@ function Messagerie() {
               onPaste={handlePaste}
               placeholder="Écrire un message..."
             />
-            {/* Le sélecteur est ancré à son bouton via ce conteneur en
-                position relative : il s'ouvre juste au-dessus, quelle que
-                soit la largeur d'écran. */}
             <div className="emoji-wrapper">
               <button
                 type="button"
                 aria-label="Ouvrir le sélecteur d'emoji"
                 aria-expanded={showPicker}
                 onClick={() => {
-                  // Ferme le clavier s'il était ouvert : Safari ne donne pas
-                  // le focus au bouton, le champ le garderait.
                   if (isTouchScreen) messageInputRef.current?.blur();
                   setShowPicker(!showPicker);
                 }}
@@ -988,19 +891,11 @@ function Messagerie() {
 
               {showPicker && (
                 <div className="emoji-picker">
-                  {/* NATIVE : les emojis sont rendus avec la police du
-                      système. Par défaut la bibliothèque télécharge une image
-                      par emoji depuis un CDN, soit 128 requêtes à l'ouverture. */}
-                  {/* La taille passe par les props : la bibliothèque la pose
-                      en style en ligne, qu'aucune règle CSS ne peut battre. */}
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
                     emojiStyle={EmojiStyle.NATIVE}
                     previewConfig={{ showPreview: false }}
                     skinTonesDisabled
-                    // Par défaut, la recherche prend le focus à l'ouverture
-                    // et le clavier s'ouvre sur mobile : un appui sur la
-                    // recherche l'ouvre quand on en a besoin.
                     autoFocusSearch={!isTouchScreen}
                     width="min(320px, 80vw)"
                     height="min(350px, 45vh)"
@@ -1022,8 +917,6 @@ function Messagerie() {
         </motion.div>
       </section>
 
-      {/* Visionneuse : l'image en grand sur un fond sombre, dans la page.
-          Un clic à côté de l'image, la croix ou Échap la ferme. */}
       {viewerImage &&
         createPortal(
           <div
@@ -1051,8 +944,6 @@ function Messagerie() {
           document.body,
         )}
 
-      {/* Rendu dans body, en position fixe : dans la liste qui défile, il
-          était coupé par ses bords. Invisible jusqu'à son placement. */}
       {openMenu &&
         createPortal(
           <div
@@ -1061,8 +952,6 @@ function Messagerie() {
             role="menu"
             style={{ visibility: "hidden" }}
           >
-            {/* Réactions rapides, en haut du menu. Celles déjà mises sont
-                mises en évidence ; un clic les retire. */}
             <div className="message-menu-reactions">
               {REACTION_EMOJIS.map((emoji) => {
                 const isMine = openMenu.message.reactions.some(

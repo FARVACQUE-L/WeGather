@@ -11,9 +11,6 @@ import reservationRepository from "./reservationRepository";
 type Req = Parameters<RequestHandler>[0];
 type Res = Parameters<RequestHandler>[1];
 
-// Seuls les participants de l'événement (l'hôte en fait partie) voient et
-// ajoutent ses réservations. Renvoie l'id de l'événement, ou undefined si la
-// réponse d'erreur a déjà été envoyée.
 const readMemberEventId = async (req: Req, res: Res, eventUuid: string) => {
   if (!req.user) {
     res.status(401).json({ message: "Unauthorized" });
@@ -37,7 +34,6 @@ const readMemberEventId = async (req: Req, res: Res, eventUuid: string) => {
   return eventId;
 };
 
-// Valeurs de la colonne reservation_type.
 const RESERVATION_TYPES = [
   "hebergement",
   "transport",
@@ -47,11 +43,8 @@ const RESERVATION_TYPES = [
 ];
 
 const DATE_FORMAT = /^\d{4}-\d{2}-\d{2}$/;
-// « 14:00 » depuis un <input type="time">, « 14:00:00 » tel que le renvoie
-// MySQL.
 const TIME_FORMAT = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
-// Champ facultatif : une chaîne vide du formulaire devient null.
 const optionalValue = (value: unknown) =>
   typeof value === "string" && value.trim() ? value.trim() : null;
 
@@ -62,9 +55,6 @@ type ReservationExtraFields = {
   reservation_time_end: string | null;
 };
 
-// Renvoie les champs du wallet normalisés, ou le message d'erreur à afficher.
-// Les dates arrivent en « AAAA-MM-JJ » (dateStrings) et les heures en
-// « HH:MM » : la comparaison de chaînes suit l'ordre chronologique.
 const validateReservationFields = async (
   eventId: number,
   body: Record<string, unknown>,
@@ -72,7 +62,6 @@ const validateReservationFields = async (
   const { reservation_name, reservation_date_start, reservation_location } =
     body;
 
-  // 255 : taille des colonnes reservation_name et reservation_location.
   if (
     String(reservation_name).length > 255 ||
     String(reservation_location).length > 255
@@ -112,7 +101,6 @@ const validateReservationFields = async (
     return { message: "Heure invalide." };
   }
 
-  // Sans date de fin, la réservation finit le jour même.
   const endDay = dateEnd ?? dateStart;
   const endsBeforeStart =
     endDay < dateStart ||
@@ -129,15 +117,12 @@ const validateReservationFields = async (
     fields: {
       reservation_type: type,
       reservation_time_start: timeStart,
-      // Une date de fin égale au début n'apporte rien : on ne la garde pas.
       reservation_date_end: dateEnd && dateEnd !== dateStart ? dateEnd : null,
       reservation_time_end: timeEnd,
     },
   };
 };
 
-// Champ facultatif. Seuls http et https sont acceptés : le lien est rendu
-// cliquable côté client, et un « javascript: » y serait exécutable.
 const sanitizeLink = (value: unknown): string | null => {
   if (typeof value !== "string" || !value.trim()) return null;
 
@@ -159,8 +144,6 @@ const browse: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-// Nombre de réservations d'un événement selon la formule de l'organisateur.
-// Infinity (sans limite) est envoyé en JSON comme null.
 const readReservationLimit = async (eventId: number) =>
   getPlanLimits(await eventRepository.readHostPlan(eventId)).reservations;
 
@@ -184,8 +167,6 @@ const readAllReservation: RequestHandler = async (req, res, next) => {
     )) as { reservation_id: number }[];
     const documents = await reservationDocumentRepository.readByEvent(eventId);
 
-    // Chaque réservation arrive avec ses documents : une seule requête pour
-    // tout le wallet.
     res.json(
       reservations.map((reservation) => ({
         ...reservation,
@@ -207,8 +188,6 @@ const addReservation: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // L'auteur est l'utilisateur du cookie de session, jamais un id envoyé
-    // par le client.
     const reservation_id_user = req.user.id;
     const {
       reservation_name,
@@ -217,8 +196,6 @@ const addReservation: RequestHandler = async (req, res, next) => {
       reservation_description,
     } = req.body;
 
-    // multer a déjà écrit l'image sur disque : on ne la garde pas si la
-    // réservation est refusée.
     const discardFile = () => {
       if (req.file) fs.rmSync(req.file.path, { force: true });
     };
@@ -234,8 +211,6 @@ const addReservation: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // L'image est facultative : sans elle, la carte affiche l'icône du type
-    // de réservation. Chaîne vide plutôt que NULL, la colonne est NOT NULL.
     const reservation_picture = req.file ? `/uploads/${req.file.filename}` : "";
     const eventId = await readMemberEventId(
       req,
@@ -283,9 +258,6 @@ const addReservation: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-// L'auteur peut gérer sa réservation, l'hôte n'importe quelle réservation de
-// son événement. Renvoie la réservation, ou undefined si la réponse d'erreur
-// a déjà été envoyée.
 const readManagedReservation = async (req: Req, res: Res) => {
   if (!req.user) {
     res.status(401).json({ message: "Unauthorized" });
@@ -329,7 +301,6 @@ const updateReservation: RequestHandler = async (req, res, next) => {
       !reservation_location ||
       !reservation_description
     ) {
-      // multer a déjà écrit l'image sur disque : on ne la garde pas.
       if (req.file) fs.rmSync(req.file.path, { force: true });
       res.status(400).json({ message: "Veuillez remplir tous les champs." });
       return;
@@ -351,8 +322,6 @@ const updateReservation: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Nouvelle image, image retirée (chaîne vide, voir addReservation) ou
-    // null pour garder l'actuelle.
     const removePicture = req.body.remove_picture === "true";
     const reservation_picture = req.file
       ? `/uploads/${req.file.filename}`
@@ -372,7 +341,6 @@ const updateReservation: RequestHandler = async (req, res, next) => {
         ...validation.fields,
       },
     );
-    // L'ancienne image n'est effacée que si elle est remplacée ou retirée.
     if (req.file || removePicture) {
       await removeUpload(reservation.reservation_picture);
     }
@@ -388,7 +356,6 @@ const deleteReservation: RequestHandler = async (req, res, next) => {
     const reservation = await readManagedReservation(req, res);
     if (!reservation) return;
 
-    // Les fichiers ne sont effacés qu'une fois la suppression en base réussie.
     const documentFiles =
       await reservationDocumentRepository.readFilesByReservation(
         reservation.reservation_id,

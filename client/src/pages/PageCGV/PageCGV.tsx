@@ -8,7 +8,6 @@ import "./PageCGV.css";
 
 const CONTACT_EMAIL = "wedoop3@gmail.com";
 
-// Mêmes valeurs que server/src/helper/planLimits.ts et la page Premium.
 const PLANS = [
   {
     name: "Free",
@@ -33,8 +32,6 @@ const PLANS = [
   },
 ];
 
-// Page publique : les conditions se lisent avant de créer un compte. Le menu
-// du profil n'apparaît que pour un utilisateur connecté.
 function PageCGV() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -90,7 +87,6 @@ function PageCGV() {
             </nav>
           </motion.section>
 
-          {/* ---------------------------------------------------------------- */}
           <motion.h2 {...revealOnScroll} id="cgu" className="cgv-Part">
             Partie 1 — Conditions Générales d'Utilisation
           </motion.h2>
@@ -450,7 +446,6 @@ function PageCGV() {
             </p>
           </motion.section>
 
-          {/* ---------------------------------------------------------------- */}
           <motion.h2 {...revealOnScroll} id="cgv" className="cgv-Part">
             Partie 2 — Conditions Générales de Vente
           </motion.h2>
@@ -613,7 +608,6 @@ function PageCGV() {
             </p>
           </motion.section>
 
-          {/* ---------------------------------------------------------------- */}
           <motion.h2 {...revealOnScroll} id="dispositions" className="cgv-Part">
             Partie 3 — Dispositions communes
           </motion.h2>
@@ -661,7 +655,6 @@ function PageCGV() {
             </p>
           </motion.section>
 
-          {/* ---------------------------------------------------------------- */}
           <motion.section {...revealOnScroll} id="annexe" className="cgv-Annex">
             <h3>Annexe — Formulaire de rétractation</h3>
             <p>

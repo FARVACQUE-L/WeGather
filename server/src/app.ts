@@ -21,9 +21,6 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.text());
 app.use(express.raw());
-// Les fichiers envoyés sont stockés sans extension, donc servis sans
-// Content-Type : sans nosniff, un navigateur devine le type et pourrait
-// exécuter un HTML déguisé en image sur l'origine de l'API.
 app.use(
   "/uploads",
   express.static("public/uploads", {
@@ -67,8 +64,6 @@ const uploadErrorMessages: Record<string, string> = {
   LIMIT_UNEXPECTED_FILE: "Champ de fichier inattendu",
 };
 
-// Les erreurs de multer ne portent pas de statusCode : sans ce filtre, un
-// fichier trop lourd remonterait en 500 au lieu de 400.
 const handleUploadErrors: ErrorRequestHandler = (err, _req, res, next) => {
   if (!(err instanceof multer.MulterError)) {
     next(err);

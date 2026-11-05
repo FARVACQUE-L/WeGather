@@ -7,14 +7,8 @@ export type BanAction = "event" | "user";
 interface ReportAdminModalProps {
   open: boolean;
   type?: string;
-  // Événement supprimé (par son créateur, ou un mois après son ban) : seul le
-  // compte visé peut être banni.
   isEventDeleted?: boolean;
-  // Cible superadmin : son compte ne peut pas être banni (refusé aussi par le
-  // serveur), seulement retiré de l'événement.
   isTargetSuperAdmin?: boolean;
-  // Cible déjà bannie (compte, ou événement / exclusion de l'événement) :
-  // l'option propose l'action inverse.
   isTargetBanned?: boolean;
   isEventBanned?: boolean;
   onClose: () => void;

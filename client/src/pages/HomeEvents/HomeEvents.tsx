@@ -21,10 +21,6 @@ type User = {
   id: number;
 };
 
-// Les cartes arrivent l'une après l'autre, dans le style du reste du site
-// (fondu en glissant vers le haut). Le décalage vient de l'index de la carte
-// (custom) : les variantes de la liste ne traversent pas l'AnimatePresence
-// qui gère les suppressions.
 const cardVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: (index: number) => ({
@@ -38,8 +34,6 @@ const cardVariants: Variants = {
 function HomeEvents() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Évite d'afficher « aucun événement » (et de lancer sa flèche animée)
-  // le temps que la liste arrive.
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [activeFilter, setActiveFilter] = useState<FilterType>("ongoing");
@@ -149,8 +143,6 @@ function HomeEvents() {
           />
           <ButtonAddEvent onClick={() => setIsModalOpen(true)} />
         </motion.div>
-        {/* Au changement de filtre, l'ancienne liste s'efface puis la
-            nouvelle arrive carte par carte. */}
         <AnimatePresence mode="wait">
           {!isLoaded ? null : filteredEvents.length === 0 ? (
             <motion.div
@@ -168,8 +160,6 @@ function HomeEvents() {
               className="HomeEvents-CardGlobal"
               exit={{ opacity: 0, transition: { duration: 0.2 } }}
             >
-              {/* Une carte supprimée rétrécit, les autres glissent à sa
-                  place. */}
               <AnimatePresence mode="popLayout">
                 {filteredEvents.map((event, index) => (
                   <motion.li

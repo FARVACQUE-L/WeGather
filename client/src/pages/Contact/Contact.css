@@ -1,5 +1,3 @@
-/* Champs et bouton repris des modales du site (BudgetFormModal,
-   ReservationModal) ; la mise en page vient de PageCGV.css. */
 .cgv-Layout .cgv-Page {
   .Contact-Form {
     display: flex;
@@ -64,7 +62,6 @@
     font-weight: 200;
   }
 
-  /* Hors écran plutôt que display: none, que certains robots repèrent. */
   .Contact-Trap {
     position: absolute;
     left: -10000px;
@@ -140,7 +137,6 @@
   }
 }
 
-/* Nom et e-mail l'un sous l'autre sur mobile. */
 @media (max-width: 428px) {
   .cgv-Layout .cgv-Page .Contact-Row {
     flex-direction: column;

@@ -1,10 +1,5 @@
 import type { RequestHandler } from "express";
 
-// Formulaire de contact public : le message est transmis au salon Discord de
-// l'équipe par un webhook. L'adresse du webhook reste côté serveur (variable
-// d'environnement) : exposée dans le client, n'importe qui pourrait écrire
-// dans le salon.
-
 export const CONTACT_SUBJECTS = [
   "Question",
   "Problème technique",
@@ -17,8 +12,6 @@ const LIMITS = { name: 100, email: 100, message: 2000 };
 const MIN_MESSAGE_LENGTH = 10;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Limite d'envois, en mémoire : par adresse IP, plus un plafond global qui
-// protège le salon si l'IP est contournée.
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_PER_IP = 3;
 const MAX_GLOBAL = 30;
@@ -28,9 +21,6 @@ let sentGlobal: number[] = [];
 const recent = (timestamps: number[], now: number) =>
   timestamps.filter((time) => now - time < WINDOW_MS);
 
-// Derrière Traefik, req.ip est celle du proxy. La dernière adresse de
-// X-Forwarded-For est celle que Traefik a vue ; les précédentes peuvent être
-// inventées par le visiteur.
 const clientIp: (req: Parameters<RequestHandler>[0]) => string = (req) => {
   const forwarded = req.headers["x-forwarded-for"];
   const last = (Array.isArray(forwarded) ? forwarded.join(",") : forwarded)
@@ -40,8 +30,6 @@ const clientIp: (req: Parameters<RequestHandler>[0]) => string = (req) => {
   return last || req.ip || "unknown";
 };
 
-// Retire les adresses sans envoi récent, pour que la table ne grossisse pas
-// indéfiniment.
 const pruneIps = (now: number) => {
   for (const [ip, timestamps] of sentByIp) {
     if (recent(timestamps, now).length === 0) sentByIp.delete(ip);
@@ -53,8 +41,6 @@ const asText = (value: unknown) =>
 
 const send: RequestHandler = async (req, res, next) => {
   try {
-    // Champ caché, rempli seulement par les robots : on fait comme si
-    // l'envoi avait réussi, sans rien transmettre.
     if (asText(req.body.website) !== "") {
       res.status(201).json({ message: "Message envoyé" });
       return;
@@ -111,8 +97,6 @@ const send: RequestHandler = async (req, res, next) => {
       signal: AbortSignal.timeout(5000),
       body: JSON.stringify({
         username: "WeGather · Contact",
-        // Aucune mention (@everyone, @here, rôles) ne peut partir d'un
-        // message saisi par un visiteur.
         allowed_mentions: { parse: [] },
         embeds: [
           {

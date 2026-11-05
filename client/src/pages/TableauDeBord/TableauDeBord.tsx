@@ -23,8 +23,6 @@ type ActiveComponent =
   | "groupe";
 
 function TableauDeBord() {
-  // Volontairement non persisté : on entre toujours dans un événement par son
-  // tableau de bord, quel que soit l'onglet quitté la fois précédente.
   const [activeComponent, setActiveComponent] =
     useState<ActiveComponent>("tableau");
 

@@ -1,5 +1,4 @@
 import "./GalerieDashboard.css";
-// Styles de l'aperçu en grand (.image-modal-overlay), partagés avec la galerie.
 import "../Galerie/Galerie.css";
 import { motion } from "framer-motion";
 import { Images, X } from "lucide-react";
@@ -35,7 +34,6 @@ function GalerieDashboard() {
       credentials: "include",
     })
       .then((res) => res.json())
-      // L'API trie déjà de la plus récente à la plus ancienne.
       .then((data) => setPhotos(Array.isArray(data) ? data.slice(0, 3) : []))
       .catch((error) => console.error(error));
   }, [eventUuid]);

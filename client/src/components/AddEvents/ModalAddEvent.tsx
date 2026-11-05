@@ -28,8 +28,6 @@ function ModalAddEvent({
     }
   }, [isOpen]);
 
-  // Pas de fermeture au clic sur le fond : un clic à côté ferait perdre le
-  // formulaire en cours. On ferme avec Annuler ou la touche Échap.
   return (
     <dialog
       ref={dialogRef}

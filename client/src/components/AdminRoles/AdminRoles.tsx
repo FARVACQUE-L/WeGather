@@ -38,17 +38,11 @@ const toast = Swal.mixin({
   customClass: { popup: "toast-error-popup" },
 });
 
-// Confirmations des changements de rôle : mêmes fond, titre et boutons que
-// les modales de suppression du site (voir AdminRoles.css). Sans
-// buttonsStyling, SweetAlert ne remet pas ses couleurs en style inline.
 const confirmModal = Swal.mixin({
   showCancelButton: true,
   cancelButtonText: "Annuler",
   reverseButtons: true,
   buttonsStyling: false,
-  // Animation d'entrée par une classe retirée à la fermeture : posée sur la
-  // popup, elle masquait celle de sortie, dont SweetAlert attend la fin pour
-  // retirer la modale.
   showClass: { popup: "AdminRolesModal-Show" },
   customClass: {
     container: "AdminRolesModal-Backdrop",
@@ -66,12 +60,8 @@ function AdminRoles() {
   const [results, setResults] = useState<UserResult[]>([]);
   const [selected, setSelected] = useState<UserResult | null>(null);
   const [admins, setAdmins] = useState<Admin[]>([]);
-  // Seuls les superadmins peuvent ajouter ou retirer des admins ; les autres
-  // admins voient la liste en lecture seule. Le serveur applique la même règle.
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
-  // Relu après chaque changement de rôle : un superadmin qui se rétrograde
-  // perd aussitôt ses boutons de gestion.
   const fetchCurrentUser = useCallback(() => {
     fetch(`${API_URL}/api/auth/authVerif`, { credentials: "include" })
       .then((res) => res.json())
@@ -94,8 +84,6 @@ function AdminRoles() {
     fetchAdmins();
   }, [fetchAdmins]);
 
-  // Recherche lancée 300 ms après la dernière frappe, pour ne pas envoyer
-  // une requête par caractère tapé.
   useEffect(() => {
     const trimmed = query.trim();
 
@@ -227,8 +215,6 @@ function AdminRoles() {
 
   function renderAdmin(admin: Admin) {
     const isSuper = Boolean(admin.user_is_superadmin);
-    // Le serveur refuse de rétrograder le dernier superadmin : la flèche est
-    // désactivée pour ne pas proposer une action vouée à l'échec.
     const isLastSuperAdmin = isSuper && superAdmins.length <= 1;
 
     return (

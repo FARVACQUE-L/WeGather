@@ -16,7 +16,6 @@
   .userReport-Header {
     display: flex;
     align-items: flex-start;
-    /* Même marge que le formulaire : 1.5rem de chaque côté. */
     width: calc(100% - 3rem);
     max-width: 700px;
     gap: 24px;
@@ -60,7 +59,6 @@
     border: 1.5px solid var(--border-color);
     border-radius: 25px;
     padding: 40px;
-    /* Centré par .userReport-Main : 1.5rem de marge de chaque côté. */
     width: calc(100% - 3rem);
     max-width: 700px;
 
@@ -127,14 +125,10 @@
     .userReport-Header {
       position: relative;
       justify-content: center;
-      /* La flèche est alignée sur le bord gauche du formulaire (left: 0) ;
-         44px gardent le titre à la même distance d'elle qu'avant. */
       padding: 0 44px;
 
       .userReport-Back {
         position: absolute;
-        /* Au-dessus du titre, qui passe sous la flèche de 64px (le padding
-           n'en réserve que 44). */
         z-index: 1;
         left: 0;
         top: 50%;
@@ -148,9 +142,6 @@
       }
     }
 
-    /* Les 40px de padding du formulaire et les 16px de chaque bloc
-       laissaient peu de place aux trois blocs : ils prennent presque toute
-       la largeur du formulaire. */
     .userReport-Form {
       padding: 24px 12px;
 

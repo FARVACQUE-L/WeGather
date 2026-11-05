@@ -44,7 +44,6 @@ reservationRoutes.delete(
   reservationActions.deleteReservation,
 );
 
-// Billets et confirmations (PDF ou image) d'une réservation.
 reservationRoutes.post(
   "/api/reservations/:id/documents",
   authorization,

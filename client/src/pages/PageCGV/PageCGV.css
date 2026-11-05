@@ -43,7 +43,6 @@
       }
     }
 
-    /* Titre de partie (CGU, CGV, dispositions communes). */
     .cgv-Part {
       margin: 48px 0 24px;
       padding: 12px 16px;
@@ -52,13 +51,9 @@
       color: var(--font-brown);
       font-size: 20px;
       font-weight: 700;
-      /* L'en-tête ne recouvre pas le titre quand on y arrive par le
-         sommaire. */
       scroll-margin-top: 24px;
     }
 
-    /* Section ciblée par une ancre (/confidentialite#cookies) : un peu
-       d'air au-dessus du titre à l'arrivée. */
     .cgv-Anchor {
       scroll-margin-top: 24px;
     }
@@ -74,7 +69,6 @@
       margin-bottom: 0;
     }
 
-    /* Le tableau défile seul sur petit écran, sans élargir la page. */
     .cgv-TableWrapper {
       margin-bottom: 12px;
       overflow-x: auto;
@@ -203,8 +197,6 @@
   }
 }
 
-/* Les sections s'affichent au défilement : à l'impression (formulaire de
-   rétractation par exemple), celles pas encore vues resteraient invisibles. */
 @media print {
   .cgv-Layout .cgv-Page :is(h1, h2, p, section) {
     /* biome-ignore lint/complexity/noImportantStyles: seul moyen de passer devant les styles en ligne de framer-motion */

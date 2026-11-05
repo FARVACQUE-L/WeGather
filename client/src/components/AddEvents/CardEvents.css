@@ -24,8 +24,6 @@
       .CardEvents-Image {
         width: 100%;
         height: 100%;
-        /* Les images recadrées dans les modales sont déjà au format de la
-           carte ; cover évite que les anciennes soient aplaties. */
         object-fit: cover;
         object-position: top;
         display: block;
@@ -58,12 +56,6 @@
     .CardEvents-Container {
       display: flex;
       flex-direction: column;
-      /* Occupe la hauteur restante de la carte, pour que la localisation
-         puisse être poussée en bas quelle que soit la longueur du texte.
-         La marge basse réserve la place des boutons modifier et supprimer,
-         posés en absolu à 0.5rem du bas et hauts de 36px. La place est
-         réservée même sans bouton, pour que les cartes d'une même ligne
-         restent alignées, que la réservation soit la sienne ou non. */
       flex: 1;
       padding: 2rem 1rem 3rem 1rem;
       gap: 0.5rem;
@@ -75,10 +67,6 @@
         color: var(--font-input);
         font-size: 0.8rem;
 
-        /* Exactement 3 lignes, ni plus ni moins : la troncature évite qu'une
-           description longue allonge toute la ligne de cartes, et la hauteur
-           minimale évite qu'une description courte laisse un vide entre elle
-           et la localisation. Le texte entier reste sur la page de détail. */
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
@@ -87,8 +75,6 @@
         line-height: 1.4;
       }
       .CardEvents-Location {
-        /* Alignée en bas : toutes les cartes d'une ligne l'affichent à la
-           même hauteur, même avec des descriptions de longueurs différentes. */
         margin-top: auto;
         font-size: 0.8rem;
         font-weight: bold;
@@ -134,9 +120,6 @@
       opacity: 1;
     }
   }
-  /* Modales de suppression (événement et réservation) : fond, titre et
-     boutons calqués sur la modale d'ajout de réservation et celle de
-     modification d'événement. */
   .delete-modal-overlay {
     position: fixed;
     inset: 0;
@@ -176,8 +159,6 @@
         gap: 1rem;
         margin-top: 0.5rem;
 
-        /* Annuler garde le gris par défaut des boutons, comme dans les
-           autres modales. */
         button {
           flex: 1;
           max-width: 12rem;

@@ -72,13 +72,11 @@
     }
   }
 }
-/* Sous 1750px, la sidebar garde la largeur qu'elle a à 1750px (14vw). */
 @media screen and (min-width: 1000px) and (max-width: 1750px) {
   .sidebar-admin {
     width: 245px;
   }
 }
-/* Sous 1000px, la sidebar passe en barre du bas. */
 @media screen and (max-width: 999px) {
   .sidebar-admin {
     position: fixed;

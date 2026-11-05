@@ -296,8 +296,6 @@ FROM user
     return result.affectedRows;
   }
 
-  // Recherche par pseudo ou par adresse mail. Les jokers LIKE (% et _) tapés
-  // par l'admin sont échappés pour être cherchés tels quels.
   async searchUsers(query: string) {
     const pattern = `%${query.replace(/[\\%_]/g, "\\$&")}%`;
     const [rows] = await databaseClient.query<Rows>(
@@ -371,17 +369,11 @@ FROM user
       [id],
     );
 
-    // Sans son hôte, plus personne ne pourrait gérer ses événements : ils
-    // sont bannis avec lui. Ceux qu'il a seulement rejoints restent actifs.
-    // Un événement déjà banni garde sa date de ban : son délai avant
-    // suppression ne repart pas de zéro.
     await databaseClient.query<Result>(
       "UPDATE event SET event_is_ban = TRUE, event_ban_date = COALESCE(event_ban_date, NOW()) WHERE event_id_host = ?",
       [id],
     );
 
-    // Les autres signalements visant ce compte, ou les événements qu'il
-    // organise, sont réglés par ce ban.
     await databaseClient.query<Result>(
       "UPDATE reported_user SET reported_user_is_done = TRUE WHERE reported_user_id_user = ?",
       [id],
@@ -412,8 +404,6 @@ FROM user
       [eventId, userId],
     );
 
-    // Les autres signalements de cet utilisateur dans cet événement sont
-    // réglés par son retrait.
     await databaseClient.query<Result>(
       "UPDATE reported_user SET reported_user_is_done = TRUE WHERE reported_user_id_user = ? AND reported_user_id_event = ?",
       [userId, eventId],
@@ -438,7 +428,6 @@ FROM user
       [id],
     );
 
-    // Les autres signalements de cet événement sont réglés par ce ban.
     await databaseClient.query<Result>(
       "UPDATE reported_event SET reported_event_is_done = TRUE WHERE reported_event_id_event = ?",
       [id],
@@ -460,8 +449,6 @@ FROM user
       [id],
     );
 
-    // Inverse de banUser : les événements qu'il organise sont rétablis avec
-    // lui, y compris ceux bannis séparément par un signalement d'événement.
     await databaseClient.query<Result>(
       "UPDATE event SET event_is_ban = FALSE, event_ban_date = NULL WHERE event_id_host = ?",
       [id],

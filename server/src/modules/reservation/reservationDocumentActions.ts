@@ -11,14 +11,11 @@ import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRe
 import reservationDocumentRepository from "./reservationDocumentRepository";
 import reservationRepository from "./reservationRepository";
 
-// Billets aller et retour, confirmation, QR codes : 5 suffisent pour une
-// réservation sans transformer le wallet en espace de stockage.
 const MAX_DOCUMENTS_PER_RESERVATION = 5;
 
 const isMember = async (eventId: number, userId: number) =>
   (await eventUserJoiningRepository.readBy(eventId, userId)).length > 0;
 
-// multer décode le nom d'origine en latin1 : « é » arrive en « Ã© ».
 const readOriginalName = (file: Express.Multer.File) =>
   Buffer.from(file.originalname, "latin1").toString("utf8").slice(0, 255);
 
@@ -42,7 +39,6 @@ const addDocument: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Comme pour les réservations : tout participant peut ajouter un billet.
     if (!(await isMember(reservation.reservation_id_event, req.user.id))) {
       fs.rmSync(req.file.path, { force: true });
       res
@@ -83,9 +79,6 @@ const addDocument: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Réservé aux participants de l'événement. Le fichier est stocké sans
-// extension : on renvoie son vrai type, relu dans sa signature, et son nom
-// d'origine.
 const downloadDocument: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -129,7 +122,6 @@ const downloadDocument: RequestHandler = async (req, res, next) => {
   }
 };
 
-// L'auteur du document et l'hôte de l'événement peuvent le supprimer.
 const deleteDocument: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {

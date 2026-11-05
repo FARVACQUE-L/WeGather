@@ -41,9 +41,6 @@ const add: RequestHandler = async (req, res, next) => {
     const newReportUser = {
       reported_user_id_user: reportedUserId,
       reported_user_description: req.body.reported_user_description,
-      // Le signaleur vient de la session, jamais du corps de la requête :
-      // sinon n'importe qui peut signaler au nom d'un autre utilisateur et
-      // contourner l'anti-spam de exists(), qui est indexé sur cet id.
       reported_user_by_id_user: req.user.id,
       reported_user_id_event: eventId,
     };

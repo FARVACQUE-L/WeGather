@@ -59,9 +59,7 @@ function getBalancePrice(array: BudgetByUser[]) {
     let result_line = array[i].total_price;
 
     for (let j = 0; j < array.length; j++) {
-      // if (j !== i) {
       result_line -= array[j].total_price / array.length;
-      // }
     }
 
     const test = {
@@ -82,8 +80,6 @@ type Settlement = {
   amount: number;
 };
 
-// On rembourse le plus gros débiteur au plus gros créancier, puis on recommence
-// avec ce qu'il reste : ça équilibre tout le monde en un minimum de virements.
 function getSettlements(balances: BudgetByUser[]) {
   const debtors = balances
     .filter((user) => user.total_price < 0)
@@ -114,7 +110,6 @@ function getSettlements(balances: BudgetByUser[]) {
     debtor.total_price += amount;
     creditor.total_price -= amount;
 
-    // Les soldes sont arrondis au centime, donc on ignore les restes plus petits.
     if (Math.abs(debtor.total_price) < 0.01) debtorIndex++;
     if (Math.abs(creditor.total_price) < 0.01) creditorIndex++;
   }
@@ -161,8 +156,6 @@ function returnDateString(dateString: string) {
   return date.toLocaleDateString("fr-FR");
 }
 
-// Notification en haut de l'écran après l'ajout ou la modification d'une
-// dépense.
 const budgetToast = Swal.mixin({
   toast: true,
   position: "top",
@@ -198,7 +191,6 @@ function Budget() {
   const [budgetEvent, setBudgetEvent] = useState<BudgetTotalEvent>();
   const [listUserBudget, setListUserBudget] = useState<BudgetByUser[]>([]);
   const [listBudget, setListBudget] = useState<Budget[]>([]);
-  // Modale ouverte : ajout, ou modification de la dépense indiquée.
   const [budgetForm, setBudgetForm] = useState<
     { mode: "add" } | { mode: "edit"; budget: Budget } | null
   >(null);
@@ -207,8 +199,6 @@ function Budget() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const addBudgetRef = useRef<HTMLButtonElement>(null);
 
-  // L'en-tête n'est rendu qu'une fois l'inscription connue : userInEvent
-  // relance la mesure à ce moment-là.
   const compactLevel = useCompactLevel(
     headerRef,
     titleRef,
@@ -308,8 +298,6 @@ function Budget() {
         });
   }
 
-  // Remplace l'ancienne modale SweetAlert, qui insérait le nom de la dépense
-  // tel quel dans son HTML.
   async function updateBudget(budget: Budget, name: string, price: number) {
     const answer = await fetch(`${apiUrl}/api/budget/update`, {
       method: "PUT",
@@ -360,11 +348,6 @@ function Budget() {
       timerProgressBar: true,
     });
 
-    // Mêmes fond, titre et boutons que les modales de suppression du site
-    // (voir Budget.css). Sans buttonsStyling, SweetAlert ne remet pas ses
-    // couleurs en style inline. L'animation d'entrée passe par showClass :
-    // posée sur la popup, elle bloquait celle de sortie, dont SweetAlert
-    // attend la fin pour retirer la modale.
     const result = await Swal.fire({
       title: "Supprimer la dépense",
       text: "Êtes-vous sûr de vouloir supprimer cette dépense ?",
@@ -459,7 +442,6 @@ function Budget() {
       html,
 
       confirmButtonText: "Fermer",
-      // Mêmes réglages que la modale de suppression (voir confirmDelete).
       buttonsStyling: false,
       showClass: { popup: "BudgetModal-Show" },
 
@@ -499,7 +481,6 @@ function Budget() {
             className="button-header"
             aria-label="Ajouter une dépense"
             onClick={() => setBudgetForm({ mode: "add" })}
-            // Même survol que Créer / Rejoindre un événement.
             whileHover={
               canHover
                 ? { scale: 0.95, transition: { duration: 0.2 } }
@@ -545,7 +526,6 @@ function Budget() {
             {userBalance > 0 && <span>On te doit</span>}
             {userBalance < 0 && <span>Tu dois</span>}
             {userBalance === 0 && <span>Comptes équilibrés</span>}
-            {/* Sans signe : « On te doit » / « Tu dois » donne déjà le sens. */}
             <h2>{Math.abs(userBalance)}€</h2>
             {listBudget.length > 0 && (
               <small>
@@ -621,8 +601,6 @@ function Budget() {
                           : `+${row.budget_price}`}
                         €
                       </span>
-                      {/* Vide sur les dépenses des autres : la largeur
-                          réservée garde les prix alignés. */}
                       <div className="expenseManage">
                         {isMine && (
                           <>

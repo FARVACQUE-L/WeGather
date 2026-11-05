@@ -239,19 +239,13 @@ function DashboardAdmin() {
         </div>
 
         <div className="chart-container">
-          {/* La hauteur vient de .chart-container (DashboardAdmin.css), plus
-              basse sous 428px. */}
           <ResponsiveContainer width="100%" height="100%">
-            {/* Pas de marge à gauche : l'axe y colle au bord de la carte. */}
             <LineChart
               data={graphic}
               margin={{ top: 5, right: 5, bottom: 5, left: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="month" axisLine={false} tickLine={false} />
-              {/* 30px au lieu des 60px par défaut : la courbe se rapproche
-                  du bord gauche de la carte. Pas de width="auto", qui
-                  faisait disparaître les chiffres sous 428px. */}
               <YAxis axisLine={false} tickLine={false} width={30} />
               <Tooltip wrapperStyle={{ zIndex: 100 }} />
               <Legend />
@@ -319,8 +313,6 @@ function DashboardAdmin() {
                   transition={{ duration: 0.25 }}
                 >
                   <p>{report.user_username}</p>
-                  {/* Sous 428px, le type devient une pastille U, E ou B aux
-                      couleurs des stats de la page Signalements. */}
                   <p className="report-ticket">
                     <span className="report-ticket-label">
                       {report.report_type}

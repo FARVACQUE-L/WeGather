@@ -9,9 +9,6 @@ import { detectMimeType, UPLOADS_DIRECTORY } from "../../middleware/upload";
 import eventRepository from "../event/eventRepository";
 import galleryRepository from "./galleryRepository";
 
-// Nombre de photos dans la galerie d'un événement, tous participants
-// confondus, selon la formule de l'organisateur. Supprimer une photo libère
-// sa place.
 const readPhotoLimit = async (eventId: number) =>
   getPlanLimits(await eventRepository.readHostPlan(eventId)).galleryPhotos;
 
@@ -61,8 +58,6 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
     }
 
     const eventId = await eventRepository.readIdByUuid(req.body.event_uuid);
-    // L'auteur est l'utilisateur du cookie de session, jamais un id envoyé
-    // par le client.
     const userId = req.user.id;
 
     if (!eventId) {
@@ -86,7 +81,6 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
     const photoLimit = await readPhotoLimit(eventId);
     const photoCount = await galleryRepository.countByEvent(eventId);
     if (photoCount >= photoLimit) {
-      // multer a déjà écrit la photo sur disque : on ne la garde pas.
       fs.rmSync(req.file.path, { force: true });
       res.status(403).json({
         message: `La galerie est limitée à ${photoLimit} photos.`,
@@ -114,10 +108,6 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
   }
 };
 
-// L'auteur peut gérer sa photo, l'hôte n'importe quelle photo de son
-// événement. L'utilisateur est celui du cookie de session, jamais le userId
-// de l'URL. Renvoie la photo, ou undefined si la réponse d'erreur a déjà été
-// envoyée.
 const readManagedPhoto = async (
   req: Parameters<RequestHandler>[0],
   res: Parameters<RequestHandler>[1],
@@ -182,7 +172,6 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/avif": ".avif",
 };
 
-// path.basename garde le fichier dans le dossier des envois.
 const readUploadPath = (link: string) =>
   path.join(
     path.resolve(process.cwd(), UPLOADS_DIRECTORY),
@@ -192,10 +181,6 @@ const readUploadPath = (link: string) =>
 const photoFileName = (galleryId: number, mimeType: string | null) =>
   `photo-${galleryId}${(mimeType && IMAGE_EXTENSIONS[mimeType]) ?? ""}`;
 
-// Les photos sont stockées sans extension et servies sans Content-Type par
-// /uploads : téléchargées telles quelles, l'OS ne les reconnaît pas comme
-// des images. On relit leur signature pour les envoyer avec le bon type et un
-// nom de fichier qui porte l'extension. Réservé aux participants.
 const download: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -232,8 +217,6 @@ const download: RequestHandler = async (req, res, next) => {
     const mimeType = await detectMimeType(filePath);
 
     res.setHeader("X-Content-Type-Options", "nosniff");
-    // res.download déduit le type du fichier sur disque, sans extension, et
-    // enverrait application/octet-stream : on le fixe avant.
     if (mimeType) {
       res.type(mimeType);
     }
@@ -243,11 +226,6 @@ const download: RequestHandler = async (req, res, next) => {
   }
 };
 
-// Toutes les photos de l'événement dans un zip, avec les mêmes noms que le
-// téléchargement d'une photo. Réservé aux participants. Les photos sont déjà
-// compressées : store les range telles quelles, sans perdre de temps à les
-// recompresser. Une photo absente du disque est sautée plutôt que de faire
-// échouer toute l'archive.
 const downloadAll: RequestHandler = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -285,8 +263,6 @@ const downloadAll: RequestHandler = async (req, res, next) => {
     res.attachment(`${event?.event_name || "galerie"}.zip`);
 
     const archive = new ZipArchive({ store: true });
-    // Une fois l'archive commencée, on ne peut plus envoyer d'erreur JSON :
-    // on coupe la connexion pour que le téléchargement échoue franchement.
     archive.on("error", (error) => res.destroy(error));
     archive.pipe(res);
 
@@ -297,9 +273,7 @@ const downloadAll: RequestHandler = async (req, res, next) => {
         archive.file(filePath, {
           name: photoFileName(photo.gallery_id, mimeType),
         });
-      } catch {
-        // Fichier absent du disque : la photo est sautée.
-      }
+      } catch {}
     }
 
     await archive.finalize();

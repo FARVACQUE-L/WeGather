@@ -1,4 +1,3 @@
-/* Champs et boutons calqués sur la modale de modification d'événement. */
 .BudgetForm-Overlay {
   position: fixed;
   inset: 0;
@@ -68,9 +67,6 @@
     margin-top: 0.5rem;
   }
 
-  /* 12rem comme dans la modale de modification, partagés ici entre les deux
-     boutons car la modale est plus étroite. Annuler garde le gris par
-     défaut des boutons, comme là-bas. */
   .BudgetForm-ButtonCancel,
   .BudgetForm-ButtonSubmit {
     flex: 1;

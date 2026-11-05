@@ -7,15 +7,12 @@
     margin-bottom: 1.5rem;
   }
 
-  /* Ajout à gauche, liste des administrateurs à droite. Les cartes gardent
-     chacune leur hauteur : la liste ne s'étire pas avec les résultats. */
   .admin-roles-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 22px;
     align-items: start;
 
-    /* Admin simple : seule la liste est affichée, sur toute la largeur. */
     &.is-read-only {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -176,7 +173,6 @@
     }
   }
 
-  /* Titre de la seconde catégorie, sous la liste des super administrateurs. */
   .admin-roles-subtitle {
     margin-top: 1.5rem;
   }
@@ -268,10 +264,6 @@
   }
 }
 
-/* Confirmations SweetAlert des changements de rôle (confirmModal dans
-   AdminRoles.tsx) : mêmes fond, titre et boutons que les modales de
-   suppression de CardEvents.css. Rendues dans body, d'où les règles hors de
-   .admin-roles ; body l'emporte sur les styles par défaut de SweetAlert. */
 body .AdminRolesModal-Backdrop.swal2-backdrop-show {
   background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(6px);
@@ -285,8 +277,6 @@ body .AdminRolesModal {
   border-radius: 2rem;
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
 
-  /* Classe d'entrée (showClass), retirée à la fermeture pour laisser jouer
-     l'animation de sortie de SweetAlert. */
   &.AdminRolesModal-Show {
     animation: AdminRolesModal-Appear 0.25s ease;
   }
@@ -315,8 +305,6 @@ body .AdminRolesModal {
     margin: 0.5rem 0 0;
     padding: 0;
 
-    /* Annuler garde le gris par défaut des boutons, comme dans les
-       autres modales. */
     button {
       flex: 1;
       max-width: 12rem;
@@ -354,7 +342,6 @@ body .AdminRolesModal {
   }
 }
 
-/* Sous 1400px, la liste des administrateurs passe sous l'ajout. */
 @media screen and (max-width: 1400px) {
   .admin-roles .admin-roles-grid {
     grid-template-columns: minmax(0, 1fr);

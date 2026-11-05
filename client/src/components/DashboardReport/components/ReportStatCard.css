@@ -1,8 +1,6 @@
 .ReportStatCard-Global {
   display: flex;
   flex-direction: column;
-  /* Suit la largeur de sa colonne de grille : en 25rem fixes, les cartes
-     ne rétrécissaient pas avec la fenêtre. */
   width: 100%;
   gap: 0.1rem;
   padding: 1.5rem;
@@ -46,8 +44,6 @@
     border-radius: 0.5rem;
   }
 }
-/* Version compacte dès que les cartes s'empilent (1230px, voir
-   DashboardReport.css). */
 @media (max-width: 1230px) {
   .ReportStatCard-Global {
     padding: 0.75rem;
