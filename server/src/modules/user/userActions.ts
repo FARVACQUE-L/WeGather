@@ -492,6 +492,13 @@ const editUserName: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    if (!isValidUsername(userName)) {
+      res
+        .status(400)
+        .json({ message: "Le pseudo doit contenir entre 3 et 45 caractères." });
+      return;
+    }
+
     const existingUser = await userRepository.findByEmailOrUsername(userName);
 
     if (existingUser && existingUser.user_id !== userId) {

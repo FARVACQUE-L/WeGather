@@ -1,7 +1,12 @@
 import type { RequestHandler } from "express";
 
 import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
+import { asText, isDate, isText, LIMITS } from "../../helper/validation";
 import todoRepository from "./todoRepository";
+
+const INVALID_TODO = `La tâche doit contenir entre 1 et ${LIMITS.todoName} caractères.`;
+
+const isTodoName = (value: unknown) => isText(value, LIMITS.todoName);
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
@@ -21,12 +26,21 @@ const add: RequestHandler = async (req, res, next) => {
     const eventId = await readMemberEventId(req, res, req.body.event_uuid);
     if (!eventId || !req.user) return;
 
+    const deadline = req.body.todo_deadline;
+    const hasDeadline =
+      deadline !== undefined && deadline !== null && deadline !== "";
+
+    if (!isTodoName(req.body.todo_name) || (hasDeadline && !isDate(deadline))) {
+      res.status(400).json({ message: INVALID_TODO });
+      return;
+    }
+
     const newTodo = {
       todo_id_event: eventId,
       todo_id_user: req.user.id,
-      todo_name: req.body.todo_name,
-      todo_deadline: req.body.todo_deadline,
-      todo_is_done: req.body.todo_is_done,
+      todo_name: asText(req.body.todo_name),
+      todo_deadline: hasDeadline ? deadline : null,
+      todo_is_done: Boolean(req.body.todo_is_done),
     };
 
     const insertId = await todoRepository.create(newTodo);
@@ -67,10 +81,15 @@ const edit: RequestHandler = async (req, res, next) => {
     const todo = await readMemberTodo(req, res);
     if (!todo) return;
 
+    if (!isTodoName(req.body.todo_name)) {
+      res.status(400).json({ message: INVALID_TODO });
+      return;
+    }
+
     const resultAffectedRows = await todoRepository.update({
       todo_id: todo.todo_id,
-      todo_name: req.body.todo_name,
-      todo_is_done: req.body.todo_is_done,
+      todo_name: asText(req.body.todo_name),
+      todo_is_done: Boolean(req.body.todo_is_done),
     });
 
     res.status(200).json({ resultAffectedRows });

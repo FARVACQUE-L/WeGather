@@ -3,6 +3,7 @@ import path from "node:path";
 import type { RequestHandler } from "express";
 import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { removeUpload } from "../../helper/removeUpload";
+import { LIMITS } from "../../helper/validation";
 import { UPLOADS_DIRECTORY } from "../../middleware/upload";
 import { getIo } from "../../socket";
 import eventRepository from "../event/eventRepository";
@@ -16,6 +17,8 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
   "image/gif": ".gif",
   "image/avif": ".avif",
 };
+
+const MESSAGE_TOO_LONG = `Le message ne doit pas dépasser ${LIMITS.messageText} caractères.`;
 
 const addImageExtension = async (file: Express.Multer.File) => {
   const filename = `${file.filename}${IMAGE_EXTENSIONS[file.mimetype] ?? ""}`;
@@ -57,6 +60,11 @@ const addMessage: RequestHandler = async (req, res, next) => {
 
     if (!messageText && !image) {
       res.status(400).json({ message: "Le message est vide." });
+      return;
+    }
+
+    if (messageText.length > LIMITS.messageText) {
+      res.status(400).json({ message: MESSAGE_TOO_LONG });
       return;
     }
 
@@ -180,6 +188,11 @@ const editMessage: RequestHandler = async (req, res, next) => {
 
     if (!messageText && !found.message.message_image) {
       res.status(400).json({ message: "Le message est vide." });
+      return;
+    }
+
+    if (messageText.length > LIMITS.messageText) {
+      res.status(400).json({ message: MESSAGE_TOO_LONG });
       return;
     }
 

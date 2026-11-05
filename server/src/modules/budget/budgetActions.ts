@@ -1,7 +1,33 @@
 import type { RequestHandler } from "express";
 import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
+import {
+  asPrice,
+  asText,
+  isText,
+  LIMITS,
+  MAX_PRICE,
+} from "../../helper/validation";
 import eventRepository from "../event/eventRepository";
 import budgetRepository from "./budgetRepository";
+
+const readExpense = (
+  body: Record<string, unknown>,
+): { message: string } | { name: string; price: number } => {
+  if (!isText(body.name, LIMITS.budgetName)) {
+    return {
+      message: `Le nom de la dépense doit contenir entre 1 et ${LIMITS.budgetName} caractères.`,
+    };
+  }
+
+  const price = asPrice(body.price);
+  if (price === null) {
+    return {
+      message: `Le montant doit être un nombre entre 0 et ${MAX_PRICE.toLocaleString("fr-FR")} €.`,
+    };
+  }
+
+  return { name: asText(body.name), price };
+};
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
@@ -47,8 +73,12 @@ const create: RequestHandler = async (req, res, next) => {
     const eventId = await readMemberEventId(req, res, req.body.event_uuid);
     if (!eventId || !req.user) return;
 
-    const name = String(req.body.name);
-    const price = Number(req.body.price);
+    const expense = readExpense(req.body);
+    if ("message" in expense) {
+      res.status(400).json({ message: expense.message });
+      return;
+    }
+    const { name, price } = expense;
 
     const budget = await budgetRepository.create(
       eventId,
@@ -104,8 +134,12 @@ const update: RequestHandler = async (req, res, next) => {
     );
     if (!budget) return;
 
-    const name = String(req.body.name);
-    const price = Number(req.body.price);
+    const expense = readExpense(req.body);
+    if ("message" in expense) {
+      res.status(400).json({ message: expense.message });
+      return;
+    }
+    const { name, price } = expense;
 
     const result = await budgetRepository.update(budget.budget_id, name, price);
 

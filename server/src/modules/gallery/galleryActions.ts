@@ -6,9 +6,12 @@ import type { RequestHandler } from "express";
 import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeUpload } from "../../helper/removeUpload";
+import { asText, isText, LIMITS } from "../../helper/validation";
 import { detectMimeType, UPLOADS_DIRECTORY } from "../../middleware/upload";
 import eventRepository from "../event/eventRepository";
 import galleryRepository from "./galleryRepository";
+
+const DESCRIPTION_TOO_LONG = `La description ne doit pas dépasser ${LIMITS.galleryDescription} caractères.`;
 
 const readPhotoLimit = async (eventId: number) =>
   getPlanLimits(await eventRepository.readHostPlan(eventId)).galleryPhotos;
@@ -59,6 +62,12 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    if (!isText(req.body.gallery_description, LIMITS.galleryDescription, 0)) {
+      fs.rmSync(req.file.path, { force: true });
+      res.status(400).json({ message: DESCRIPTION_TOO_LONG });
+      return;
+    }
+
     const permissions = await galleryRepository.checkUserPermissions(
       eventId,
       userId,
@@ -87,7 +96,7 @@ const uploadPhoto: RequestHandler = async (req, res, next) => {
       gallery_id_event: eventId,
       gallery_id_user: userId,
       gallery_link: photoUrl,
-      gallery_description: req.body.gallery_description ?? null,
+      gallery_description: asText(req.body.gallery_description) || null,
     };
 
     const insertId = await galleryRepository.create(newGallery);
@@ -148,9 +157,14 @@ const edit: RequestHandler = async (req, res, next) => {
     const photo = await readManagedPhoto(req, res);
     if (!photo) return;
 
+    if (!isText(req.body.gallery_description, LIMITS.galleryDescription, 0)) {
+      res.status(400).json({ message: DESCRIPTION_TOO_LONG });
+      return;
+    }
+
     await galleryRepository.updateDescription(
       photo.gallery_id,
-      req.body.gallery_description,
+      asText(req.body.gallery_description),
     );
 
     res.status(200).json({ message: "Description modifiée avec succès !" });

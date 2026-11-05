@@ -4,6 +4,7 @@ import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeReservationDocument } from "../../helper/removeReservationDocument";
 import { removeUpload } from "../../helper/removeUpload";
+import { LIMITS } from "../../helper/validation";
 import eventRepository from "../event/eventRepository";
 import reservationDocumentRepository from "./reservationDocumentRepository";
 import reservationRepository from "./reservationRepository";
@@ -41,10 +42,12 @@ const validateReservationFields = async (
 
   if (
     String(reservation_name).length > 255 ||
-    String(reservation_location).length > 255
+    String(reservation_location).length > 255 ||
+    String(body.reservation_description).length > LIMITS.reservationDescription
   ) {
     return {
-      message: "Le nom et le lieu ne doivent pas dépasser 255 caractères.",
+      message:
+        "Le nom, le lieu et la description ne doivent pas dépasser 255 caractères.",
     };
   }
 
