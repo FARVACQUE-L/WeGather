@@ -1,5 +1,12 @@
 import express from "express";
 import authorization from "../../middleware/auth";
+import {
+  changePasswordLimit,
+  forgotPasswordLimits,
+  loginLimits,
+  registerLimit,
+  resetPasswordLimit,
+} from "../../middleware/rateLimit";
 import upload, { verifyFileSignatures } from "../../middleware/upload";
 import userActions from "./userActions";
 
@@ -15,7 +22,7 @@ userRoutes.get(
   userActions.readUserDescriptionEvent,
 );
 
-userRoutes.post("/api/users", userActions.add);
+userRoutes.post("/api/users", registerLimit, userActions.add);
 userRoutes.get("/api/users/:id/photo", authorization, userActions.browsePhoto);
 userRoutes.post(
   "/api/users/:id/photo",
@@ -24,13 +31,22 @@ userRoutes.post(
   verifyFileSignatures,
   userActions.uploadPhoto,
 );
-userRoutes.post("/api/login", userActions.login);
+userRoutes.post("/api/login", loginLimits, userActions.login);
 userRoutes.post("/api/logout", userActions.logout);
-userRoutes.post("/api/auth/forgot-password", userActions.forgotPassword);
-userRoutes.post("/api/auth/reset-password", userActions.resetPassword);
+userRoutes.post(
+  "/api/auth/forgot-password",
+  forgotPasswordLimits,
+  userActions.forgotPassword,
+);
+userRoutes.post(
+  "/api/auth/reset-password",
+  resetPasswordLimit,
+  userActions.resetPassword,
+);
 userRoutes.put(
   "/api/auth/change-password",
   authorization,
+  changePasswordLimit,
   userActions.changePassword,
 );
 userRoutes.put("/api/users/:id", authorization, userActions.editUserName);

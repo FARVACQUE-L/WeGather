@@ -3,7 +3,7 @@ import path from "node:path";
 import { ZipArchive } from "archiver";
 import type { RequestHandler } from "express";
 
-import { readMemberEventId } from "../../helper/eventMembership";
+import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
 import { getPlanLimits } from "../../helper/planLimits";
 import { removeUpload } from "../../helper/removeUpload";
 import { detectMimeType, UPLOADS_DIRECTORY } from "../../middleware/upload";
@@ -297,25 +297,57 @@ const getLikedPhotos: RequestHandler = async (req, res, next) => {
   }
 };
 
+const readLikeablePhoto = async (
+  req: Parameters<RequestHandler>[0],
+  res: Parameters<RequestHandler>[1],
+) => {
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return undefined;
+  }
+
+  const photo = await galleryRepository.read(Number(req.params.id));
+  if (!photo) {
+    res.status(404).json({ message: "Photo introuvable" });
+    return undefined;
+  }
+
+  if (!(await isEventMember(photo.gallery_id_event, req.user.id))) {
+    res.status(403).json({
+      message: "Action interdite : vous devez participer à l'événement.",
+    });
+    return undefined;
+  }
+
+  return { photo, userId: req.user.id };
+};
+
 const addLike: RequestHandler = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
-    const { user_id } = req.body;
+    const found = await readLikeablePhoto(req, res);
+    if (!found) return;
 
-    const newLike = await galleryRepository.insertLike(id, Number(user_id));
+    const newLike = await galleryRepository.insertLike(
+      found.photo.gallery_id,
+      found.userId,
+    );
 
     res.status(201).json(newLike);
   } catch (error) {
+    if ((error as { code?: string }).code === "ER_DUP_ENTRY") {
+      res.status(409).json({ message: "Photo déjà likée." });
+      return;
+    }
     next(error);
   }
 };
 
 const removeLike: RequestHandler = async (req, res, next) => {
   try {
-    const id = Number(req.params.id);
-    const userId = Number(req.params.userId);
+    const found = await readLikeablePhoto(req, res);
+    if (!found) return;
 
-    await galleryRepository.deleteLike(id, userId);
+    await galleryRepository.deleteLike(found.photo.gallery_id, found.userId);
 
     res.sendStatus(204);
   } catch (error) {

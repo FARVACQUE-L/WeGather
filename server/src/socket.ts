@@ -1,7 +1,7 @@
 import type { Server as HttpServer } from "node:http";
 import { Server as SocketServer } from "socket.io";
 import { isEventMember } from "./helper/eventMembership";
-import { decodeJWT } from "./helper/jwtHelper";
+import { readSession } from "./middleware/auth";
 import eventRepository from "./modules/event/eventRepository";
 import { addSocket, getSocketIds, getStatus, removeSocket } from "./presence";
 
@@ -16,7 +16,9 @@ const updatePresence = (userId: number, update: () => void): void => {
   }
 };
 
-const readUserId = (cookieHeader: string | undefined): number | null => {
+const readUserId = async (
+  cookieHeader: string | undefined,
+): Promise<number | null> => {
   const cookie = cookieHeader
     ?.split(";")
     .map((part) => part.trim())
@@ -24,12 +26,11 @@ const readUserId = (cookieHeader: string | undefined): number | null => {
 
   if (!cookie) return null;
 
-  const [, token] = decodeURIComponent(
-    cookie.slice("auth_token=".length),
-  ).split(" ");
-
   try {
-    return decodeJWT(token).id;
+    const session = await readSession(
+      decodeURIComponent(cookie.slice("auth_token=".length)),
+    );
+    return session.status === "valid" ? session.user.id : null;
   } catch {
     return null;
   }
@@ -54,15 +55,17 @@ export const initSocket = (server: HttpServer): SocketServer => {
   io.on("connection", (socket) => {
     console.log("Utilisateur connecté :", socket.id);
 
-    const userId = readUserId(socket.handshake.headers.cookie);
+    const userIdPromise = readUserId(socket.handshake.headers.cookie);
 
-    if (userId !== null) {
-      updatePresence(userId, () => addSocket(userId, socket.id));
-    }
+    userIdPromise.then((userId) => {
+      if (userId !== null && socket.connected) {
+        updatePresence(userId, () => addSocket(userId, socket.id));
+      }
+    });
 
     socket.on("join-event", async (eventUuid: unknown) => {
       try {
-        if (!(await canJoinEvent(userId, eventUuid))) return;
+        if (!(await canJoinEvent(await userIdPromise, eventUuid))) return;
 
         socket.join(`event-${eventUuid}`);
         console.log(`${socket.id} a rejoint event-${eventUuid}`);
@@ -78,9 +81,10 @@ export const initSocket = (server: HttpServer): SocketServer => {
       console.log(`${socket.id} a quitté event-${eventUuid}`);
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log("Utilisateur déconnecté :", socket.id);
 
+      const userId = await userIdPromise;
       if (userId !== null) {
         updatePresence(userId, () => removeSocket(userId, socket.id));
       }
