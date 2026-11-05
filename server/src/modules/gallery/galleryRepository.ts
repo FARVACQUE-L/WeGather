@@ -103,14 +103,6 @@ class GalleryRepository {
     };
   }
 
-  async checkIfUserLiked(galleryId: number, userId: number) {
-    const [rows] = await databaseClient.query<Rows>(
-      "SELECT * FROM gallery_like WHERE gallery_like_id_gallery = ? AND gallery_like_id_user = ?",
-      [galleryId, userId],
-    );
-    return rows.length > 0;
-  }
-
   async insertLike(galleryId: number, userId: number) {
     const [result] = await databaseClient.query<Result>(
       "INSERT INTO gallery_like (gallery_like_id_gallery, gallery_like_id_user) VALUES (?, ?)",

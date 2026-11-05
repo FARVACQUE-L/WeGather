@@ -11,13 +11,6 @@ eventRoutes.get(
   authorization,
   eventActions.readEventName,
 );
-eventRoutes.get("/api/events/images", authorization, eventActions.browseImages);
-eventRoutes.get(
-  "/api/events/uuid/:uuid",
-  authorization,
-  eventActions.readByUuid,
-);
-eventRoutes.get("/events/uuid/:uuid", authorization, eventActions.readByUuid);
 eventRoutes.get("/api/events/:eventUuid", authorization, eventActions.read);
 eventRoutes.post("/api/events/join", authorization, eventActions.join);
 eventRoutes.post(

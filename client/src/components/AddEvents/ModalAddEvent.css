@@ -27,9 +27,6 @@
   .ModalAddEvent-Tab--active {
     border-bottom: 3px solid var(--icon-color);
   }
-  .ModalAddEvent-Header {
-    margin: 3rem;
-  }
 }
 @media screen and (max-width: 428px) {
   .ModalAddEvent-Backdrop {
