@@ -22,19 +22,16 @@ type User = {
 };
 
 // Les cartes arrivent l'une après l'autre, dans le style du reste du site
-// (fondu en glissant vers le haut).
-const listVariants: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
-};
-
+// (fondu en glissant vers le haut). Le décalage vient de l'index de la carte
+// (custom) : les variantes de la liste ne traversent pas l'AnimatePresence
+// qui gère les suppressions.
 const cardVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
-  visible: {
+  visible: (index: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: "easeOut" },
-  },
+    transition: { duration: 0.4, ease: "easeOut", delay: 0.15 + index * 0.08 },
+  }),
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.25 } },
 };
 
@@ -169,19 +166,19 @@ function HomeEvents() {
             <motion.ul
               key={`list-${activeFilter}`}
               className="HomeEvents-CardGlobal"
-              variants={listVariants}
-              initial="hidden"
-              animate="visible"
               exit={{ opacity: 0, transition: { duration: 0.2 } }}
             >
               {/* Une carte supprimée rétrécit, les autres glissent à sa
                   place. */}
               <AnimatePresence mode="popLayout">
-                {filteredEvents.map((event) => (
+                {filteredEvents.map((event, index) => (
                   <motion.li
                     key={event.event_id}
                     className="HomeEvents-Card"
                     variants={cardVariants}
+                    custom={index}
+                    initial="hidden"
+                    animate="visible"
                     exit="exit"
                     layout
                   >
