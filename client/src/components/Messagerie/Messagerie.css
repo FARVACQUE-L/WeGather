@@ -212,9 +212,13 @@
              les img, cette règle réduisait aussi l'image jointe à un rond de
              30px. */
           > img {
+            flex-shrink: 0;
             width: 30px;
             height: 30px;
             border-radius: 50%;
+            /* Recadrée comme la photo du menu profil (Profil.css) plutôt
+               qu'aplatie dans le rond. */
+            object-fit: cover;
           }
           .avatar-spacer {
             flex-shrink: 0;
