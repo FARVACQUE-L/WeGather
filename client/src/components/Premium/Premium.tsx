@@ -26,7 +26,8 @@ const PLANS: Plan[] = [
     hostedEvents: 5,
     galleryPhotos: 30,
     reservations: 10,
-    price: "4,90 €\n(tarif unique)",
+    // Paiement pas encore en place : ni tarif ni abonnement pour l'instant.
+    price: "-",
     cta: "Passer au Premium",
   },
   {
@@ -34,7 +35,7 @@ const PLANS: Plan[] = [
     hostedEvents: Infinity,
     galleryPhotos: 50,
     reservations: Infinity,
-    price: "9,90 € / mois",
+    price: "-",
     cta: "Passer au Gold",
   },
 ];
@@ -72,6 +73,20 @@ const FEATURES: {
     className: "premium-price",
   },
 ];
+
+// Bouton d'abonnement désactivé tant que le paiement n'existe pas.
+function SubscribeButton({ plan }: { plan: Plan }) {
+  return (
+    <button
+      type="button"
+      className="premium-cta"
+      disabled
+      aria-label={`${plan.cta} : bientôt disponible`}
+    >
+      Bientôt disponible
+    </button>
+  );
+}
 
 function Premium() {
   return (
@@ -135,11 +150,7 @@ function Premium() {
               <td />
               {PLANS.map((plan) => (
                 <td key={plan.name}>
-                  {plan.cta && (
-                    <button type="button" className="premium-cta">
-                      {plan.cta}
-                    </button>
-                  )}
+                  {plan.cta && <SubscribeButton plan={plan} />}
                 </td>
               ))}
             </tr>
@@ -186,11 +197,7 @@ function Premium() {
               })}
             </ul>
 
-            {plan.cta && (
-              <button type="button" className="premium-cta">
-                {plan.cta}
-              </button>
-            )}
+            {plan.cta && <SubscribeButton plan={plan} />}
           </article>
         ))}
       </div>

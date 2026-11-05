@@ -96,10 +96,19 @@
     white-space: nowrap;
     cursor: pointer;
     transition: transform 0.2s;
+
+    /* Abonnements pas encore disponibles : bouton grisé, sans effet au
+       survol. */
+    &:disabled {
+      background: #d6d3d1;
+      color: #78716c;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
   }
 
   @media (hover: hover) and (min-width: 429px) {
-    .premium-cta:hover {
+    .premium-cta:hover:not(:disabled) {
       transform: scale(0.95);
     }
   }
