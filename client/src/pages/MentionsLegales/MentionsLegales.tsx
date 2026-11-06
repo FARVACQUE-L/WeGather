@@ -6,12 +6,12 @@ import Profil from "../../components/Profil/Profil";
 import { fadeIn, revealOnScroll, titleIn } from "../PageCGV/legalMotion";
 import "../PageCGV/PageCGV.css";
 
-const CONTACT_EMAIL = "wedoop3@gmail.com";
+const CONTACT_EMAIL = "contact@wegather.fr";
 
 const HOSTING = {
-  name: "",
-  address: "",
-  phone: "",
+  name: "IONOS SARL",
+  address: "7, place de la Gare, BP 70109, 57200 Sarreguemines Cedex, France",
+  phone: "09 70 80 89 11",
 };
 
 function MentionsLegales() {
@@ -39,7 +39,7 @@ function MentionsLegales() {
             Mentions légales — We<i>G</i>ather
           </motion.h1>
           <motion.p className="cgv-Updated" {...fadeIn}>
-            Dernière mise à jour : 3 novembre 2026
+            Dernière mise à jour : 6 novembre 2026
           </motion.p>
 
           <motion.section {...revealOnScroll}>

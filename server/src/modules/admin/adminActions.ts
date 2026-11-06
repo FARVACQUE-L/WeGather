@@ -4,7 +4,7 @@ import type { RequestHandler } from "express";
 import { detectMimeType, REPORTS_DESTINATION } from "../../middleware/upload";
 import { disconnectUser, removeFromEventRoom } from "../../socket";
 import eventRepository from "../event/eventRepository";
-import transporter from "../services/mailer";
+import transporter, { MAIL_FROM } from "../services/mailer";
 import adminRepository from "./adminRepository";
 
 const REPORT_FILENAME = /^[a-f0-9]{32}$/;
@@ -239,7 +239,7 @@ const banUser: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        from: MAIL_FROM,
         to: user.user_mail,
         subject: "Votre compte WeGather a été suspendu",
         text: `Bonjour ${user.user_username},\n\nVotre compte WeGather a été suspendu suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
@@ -388,7 +388,7 @@ const banUserFromEvent: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        from: MAIL_FROM,
         to: user.user_mail,
         subject: "Vous avez été retiré d'un événement WeGather",
         text: `Bonjour ${user.user_username},\n\nVous avez été retiré d'un événement suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
@@ -415,7 +415,7 @@ const banEvent: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        from: MAIL_FROM,
         to: data.user_mail,
         subject: "Votre événement WeGather a été retiré",
         text: `Bonjour ${data.user_username},\n\nVotre événement "${data.event_name}" a été retiré des listes publiques suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
@@ -442,7 +442,7 @@ const unbanUser: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        from: MAIL_FROM,
         to: user.user_mail,
         subject: "Votre compte WeGather a été réactivé",
         text: `Bonjour ${user.user_username},\n\nVotre compte WeGather a été réactivé, ainsi que les événements que vous organisez.\n\nL'équipe WeGather.`,
@@ -470,7 +470,7 @@ const unbanUserFromEvent: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        from: MAIL_FROM,
         to: user.user_mail,
         subject: "Vous avez été réintégré à un événement WeGather",
         text: `Bonjour ${user.user_username},\n\nVous avez été réintégré à l'événement dont vous aviez été retiré.\n\nL'équipe WeGather.`,
@@ -497,7 +497,7 @@ const unbanEvent: RequestHandler = async (req, res, next) => {
 
     try {
       await transporter.sendMail({
-        from: `"Équipe WeGather" <${process.env.EMAIL_USER}>`,
+        from: MAIL_FROM,
         to: data.user_mail,
         subject: "Votre événement WeGather a été rétabli",
         text: `Bonjour ${data.user_username},\n\nVotre événement "${data.event_name}" a été rétabli.\n\nL'équipe WeGather.`,

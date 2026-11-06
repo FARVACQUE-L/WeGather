@@ -80,7 +80,7 @@ flowchart LR
 
 - Node.js 20 ou plus récent
 - MySQL 8
-- Un compte Gmail avec un [mot de passe d'application](https://myaccount.google.com/apppasswords), pour les e-mails (facultatif en local)
+- Une boîte e-mail avec accès SMTP pour l'envoi des e-mails (facultatif en local)
 
 ### Étapes
 
@@ -122,7 +122,8 @@ UPDATE user SET user_is_admin = 1, user_is_superadmin = 1 WHERE user_mail = 'vou
 | `DB_NAME` | Nom de la base. Doit valoir `wegather`, le nom utilisé par `schema.sql`. | `wegather` |
 | `CLIENT_URL` | Adresse du client, utilisée pour CORS, les liens des e-mails et les cookies `Secure` (en `https`) | `http://localhost:3000` |
 | `TOKEN_SECRET` | Secret de signature des JWT : une longue chaîne aléatoire | |
-| `EMAIL_USER`, `EMAIL_PASS` | Adresse Gmail et mot de passe d'application, pour les e-mails de bienvenue et de réinitialisation | |
+| `EMAIL_HOST`, `EMAIL_PORT` | Serveur SMTP d'envoi des e-mails (facultatif, IONOS par défaut) | `smtp.ionos.fr`, `465` |
+| `EMAIL_USER`, `EMAIL_PASS` | Boîte qui envoie les e-mails automatiques (bienvenue, mot de passe, modération) | `nepasrepondre@wegather.fr` |
 | `DISCORD_CONTACT_WEBHOOK_URL` | Webhook Discord qui reçoit le formulaire de contact | |
 
 Pour générer un `TOKEN_SECRET` :

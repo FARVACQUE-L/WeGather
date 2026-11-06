@@ -6,7 +6,7 @@ import Profil from "../../components/Profil/Profil";
 import { fadeIn, revealOnScroll, titleIn } from "./legalMotion";
 import "./PageCGV.css";
 
-const CONTACT_EMAIL = "wedoop3@gmail.com";
+const CONTACT_EMAIL = "contact@wegather.fr";
 
 const PLANS = [
   {

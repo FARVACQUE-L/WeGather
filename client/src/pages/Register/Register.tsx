@@ -159,7 +159,7 @@ function Register() {
             <input
               type="email"
               id="email"
-              placeholder="nom@wegather.com"
+              placeholder="nom@exemple.fr"
               required
               className="input-focus"
               value={email}

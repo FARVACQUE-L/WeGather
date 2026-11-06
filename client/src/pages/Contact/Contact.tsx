@@ -12,7 +12,7 @@ import Profil from "../../components/Profil/Profil";
 import "../PageCGV/PageCGV.css";
 import "./Contact.css";
 
-const CONTACT_EMAIL = "wedoop3@gmail.com";
+const CONTACT_EMAIL = "contact@wegather.fr";
 const MESSAGE_MAX = 2000;
 const MESSAGE_MIN = 10;
 

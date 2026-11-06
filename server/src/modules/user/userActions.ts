@@ -2,7 +2,6 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import argon2 from "argon2";
 import type { RequestHandler } from "express";
-import nodemailer from "nodemailer";
 import {
   isValidEmail,
   isValidPassword,
@@ -18,6 +17,7 @@ import {
 } from "../../helper/jwtHelper";
 import { removeUpload } from "../../helper/removeUpload";
 import { disconnectUser } from "../../socket";
+import transporter, { MAIL_FROM } from "../services/mailer";
 import userRepository from "./userRepository";
 
 const authVerif: RequestHandler = async (req, res, next) => {
@@ -41,14 +41,6 @@ const authVerif: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 const readUserName: RequestHandler = async (req, res, next) => {
   try {
@@ -159,7 +151,7 @@ const add: RequestHandler = async (req, res, next) => {
 
     transporter
       .sendMail({
-        from: process.env.EMAIL_USER,
+        from: MAIL_FROM,
         to: newUser.email,
         subject: "Bienvenue sur WeGather",
         html: `
@@ -283,7 +275,7 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
 
     transporter
       .sendMail({
-        from: process.env.EMAIL_USER,
+        from: MAIL_FROM,
         to: user.user_mail,
         subject: "Réinitialisation du mot de passe",
         html: `
@@ -343,7 +335,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
 
     transporter
       .sendMail({
-        from: process.env.EMAIL_USER,
+        from: MAIL_FROM,
         to: user.user_mail,
         subject: "Mot de passe modifié",
         html: `
@@ -413,7 +405,7 @@ const changePassword: RequestHandler = async (req, res, next) => {
 
     transporter
       .sendMail({
-        from: process.env.EMAIL_USER,
+        from: MAIL_FROM,
         to: user.user_mail,
         subject: "Mot de passe modifié",
         html: `
