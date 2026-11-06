@@ -1,391 +1,253 @@
 # WeGather
 
-Ce projet est un monorepo JS, suivant l'architecture React-Express-MySQL telle qu'enseignée à la Wild Code School (v7.2.4) :
+**Organisez vos événements à plusieurs, au même endroit.**
+
+WeGather est une plateforme collaborative pour préparer un événement entre amis, en famille ou entre collègues : un week-end, un mariage, un séminaire… Chaque événement a son propre espace avec une messagerie en direct, un budget partagé, une liste de tâches, une galerie photo et les réservations du groupe.
+
+🌐 [wegather.fr](https://wegather.fr)
+
+---
+
+## Sommaire
+
+- [Fonctionnalités](#fonctionnalités)
+- [Stack technique](#stack-technique)
+- [Architecture](#architecture)
+- [Installation en local](#installation-en-local)
+- [Variables d'environnement](#variables-denvironnement)
+- [Commandes](#commandes)
+- [Structure du projet](#structure-du-projet)
+- [Sécurité](#sécurité)
+- [Mise en production](#mise-en-production)
+- [Contribuer](#contribuer)
+- [Licence](#licence)
+
+## Fonctionnalités
+
+**Événements**
+- Création d'un événement avec nom, dates, lieu, description et image recadrable.
+- Invitation des participants grâce à un code à 6 caractères.
+- Quitter un événement ; l'hôte peut le modifier, le supprimer et bannir un participant.
+
+**Espace de l'événement**
+- 💬 **Messagerie en direct** (Socket.IO) : réponses, réactions, images, modification et suppression des messages, compteur de messages non lus.
+- 💶 **Budget partagé** : dépenses de chacun et total par participant.
+- ✅ **Liste de tâches** avec échéances.
+- 🖼️ **Galerie photo** : descriptions, « j'aime », téléchargement de toutes les photos en un fichier zip.
+- 🧳 **Réservations** (transport, logement, activités…) avec documents joints.
+
+**Compte**
+- Inscription, connexion, mot de passe oublié (lien valable 30 minutes), changement de mot de passe.
+- Photo de profil.
+
+**Modération et administration**
+- Signalement d'un utilisateur, d'un événement ou d'un bug, avec captures d'écran.
+- Tableau de bord administrateur : statistiques, traitement des signalements, bannissement d'utilisateurs ou d'événements, gestion des rôles (admin et superadmin).
+
+**Pages publiques** : présentation, contact (transmis sur Discord), CGV, mentions légales, politique de confidentialité.
+
+## Stack technique
+
+| Partie | Technologies |
+|---|---|
+| Client | React 19, TypeScript, Vite, React Router, Socket.IO client, Framer Motion, Recharts, SweetAlert2 |
+| Serveur | Node.js, Express 4, TypeScript (exécuté avec tsx), Socket.IO, mysql2, argon2, JSON Web Token, Multer, Nodemailer |
+| Base de données | MySQL 8 |
+| Outillage | npm workspaces (monorepo), Biome (lint et formatage), Concurrently |
+
+## Architecture
 
 ```mermaid
-sequenceDiagram
-    box Web Client
-    participant React as React
-    participant Fetcher as Fetcher
+flowchart LR
+    Navigateur["Navigateur<br/>(React)"] -- "HTTP /api" --> Express
+    Navigateur <-- "WebSocket" --> SocketIO["Socket.IO"]
+    subgraph Serveur Node
+        Express --> Modules["Modules<br/>(actions + repositories)"]
+        SocketIO
     end
-    box Web Server
-    participant Express as Express
-    participant Module as Module
-    end
-    box DB Server
-    participant DB as MySQL Server
-    end
-
-    React-)Fetcher: event
-    activate Fetcher
-    Fetcher-)Express: requête (HTTP)
-    activate Express
-    Express-)Module: appel
-    activate Module
-    Module-)DB: requête SQL
-    activate DB
-    DB--)Module: données
-    deactivate DB
-    Module--)Express: json
-    deactivate Module
-    Express--)Fetcher: réponse HTTP
-    deactivate Express
-    Fetcher--)React: render
-    deactivate Fetcher
+    Modules --> MySQL[(MySQL)]
+    Modules --> Fichiers["public/uploads<br/>private/"]
 ```
 
-Il est pré-configuré avec un ensemble d'outils pour aider les étudiants à produire du code de qualité industrielle, tout en restant un outil pédagogique :
+- Le serveur est découpé en **modules** (`user`, `event`, `message`, `budget`, `todo`, `gallery`, `reservation`, `admin`…). Chaque module a des **actions**, qui gèrent la requête HTTP, et un **repository**, qui contient les requêtes SQL.
+- La session est un **JWT** stocké dans un cookie `httpOnly`.
+- **Socket.IO** diffuse les nouveaux messages aux membres de l'événement, chacun dans la « room » de son événement.
+- **En production**, le serveur Express sert aussi le client compilé (`client/dist`) : tout passe par le même domaine.
 
-- **Concurrently** : Permet d'exécuter plusieurs commandes simultanément dans le même terminal.
-- **Vite** : Alternative à _Create-React-App_, offrant une expérience plus fluide avec moins d'outils.
-- **Biome** : Alternative à _ESlint_ et _Prettier_, assurant la qualité du code selon des règles choisies.
-- **Supertest** : Bibliothèque pour tester les serveurs HTTP en node.js.
+## Installation en local
 
-## Table des Matières
+### Prérequis
 
-- [WeGather](#wegather)
-  - [Table des Matières](#table-des-matières)
-  - [Installation \& Utilisation](#installation--utilisation)
-  - [Les choses à retenir](#les-choses-à-retenir)
-    - [Commandes de Base](#commandes-de-base)
-    - [Structure des Dossiers](#structure-des-dossiers)
-    - [Mettre en place la base de données](#mettre-en-place-la-base-de-données)
-    - [Développer la partie back-end](#développer-la-partie-back-end)
-    - [REST](#rest)
-    - [Autres Bonnes Pratiques](#autres-bonnes-pratiques)
-  - [FAQ](#faq)
-    - [Installation avec Docker](#installation-avec-docker)
-      - [Mode développement](#mode-développement)
-      - [Installation de nouvelles dépendances](#installation-de-nouvelles-dépendances)
-      - [Accéder à la base de données](#accéder-à-la-base-de-données)
-    - [Déploiement avec Traefik](#déploiement-avec-traefik)
-    - [Variables d'environnement spécifiques](#variables-denvironnement-spécifiques)
-    - [Logs](#logs)
-    - [Contribution](#contribution)
+- Node.js 20 ou plus récent
+- MySQL 8
+- Une boîte e-mail avec accès SMTP pour l'envoi des e-mails (facultatif en local)
 
-## Installation & Utilisation
+### Étapes
 
-1. Installez le plugin **Biome** dans VSCode et configurez-le.
-2. Clonez ce dépôt, puis accédez au répertoire cloné.
-3. Exécutez la commande `npm install`.
-4. Créez des fichiers d'environnement (`.env`) dans les répertoires `server` et `client` : vous pouvez copier les fichiers `.env.sample` comme modèles (**ne les supprimez pas**).
-
-## Les choses à retenir
-
-### Commandes de Base
-
-| Commande               | Description                                                                 |
-|------------------------|-----------------------------------------------------------------------------|
-| `npm install`          | Installe les dépendances pour le client et le serveur                       |
-| `npm run db:migrate`   | Met à jour la base de données à partir d'un schéma défini                   |
-| `npm run dev`          | Démarre les deux serveurs (client et serveur) dans un seul terminal         |
-| `npm run check`        | Exécute les outils de validation (linting et formatage)                     |
-| `npm run test`         | Exécute les tests unitaires et d'intégration                                |
-
-### Structure des Dossiers
-
-```plaintext
-my-project/
-│
-├── server/
-│   ├── app/
-│   │   ├── modules/
-│   │   │   ├── item/
-│   │   │   │   ├── itemActions.ts
-│   │   │   │   └── itemRepository.ts
-│   │   │   └── ...
-│   │   ├── app.ts
-│   │   ├── main.ts
-│   │   └── router.ts
-│   ├── database/
-│   │   ├── client.ts
-│   │   └── schema.sql
-│   ├── tests/
-│   ├── .env
-│   └── .env.sample
-│
-└── client/
-    ├── src/
-    │   ├── components/
-    │   ├── pages/
-    │   └── App.tsx
-    ├── .env
-    └── .env.sample
-```
-
-### Mettre en place la base de données
-
-**Créer et remplir le fichier `.env`** dans le dossier `server` :
-
-```plaintext
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=not_root
-DB_PASSWORD=password
-DB_NAME=my_database
-```
-
-**Les variables sont utilisés** dans `server/database/client.ts` :
-
-```typescript
-const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
-
-import mysql from "mysql2/promise";
-
-const client = mysql.createPool({
-  host: DB_HOST,
-  port: DB_PORT as number | undefined,
-  user: DB_USER,
-  password: DB_PASSWORD,
-  database: DB_NAME,
-});
-
-export default client;
-```
-
-**Créer une table** dans `server/database/schema.sql` :
-
-```sql
-CREATE TABLE item (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  user_id INT NOT NULL,
-  FOREIGN KEY(user_id) REFERENCES user(id)
-);
-```
-
-**Insérer des données** dans `server/database/schema.sql` :
-
-```sql
-INSERT INTO item (title, user_id) VALUES
-  ('Sample Item 1', 1),
-  ('Sample Item 2', 2);
-```
-
-**Synchroniser la BDD avec le schema** :
-
-```sh
-npm run db:migrate
-```
-
-### Développer la partie back-end
-
-**Créer une route** dans `server/app/router.ts` :
-
-```typescript
-// ...
-
-/* ************************************************************************* */
-// Define Your API Routes Here
-/* ************************************************************************* */
-
-// Define item-related routes
-import itemActions from "./modules/item/itemActions";
-
-router.get("/api/items", itemActions.browse);
-
-/* ************************************************************************* */
-
-// ...
-```
-
-**Définir une action** dans `server/app/modules/item/itemActions.ts` :
-
-```typescript
-import type { RequestHandler } from "express";
-
-import itemRepository from "./itemRepository";
-
-const browse: RequestHandler = async (req, res, next) => {
-  try {
-    const items = await itemRepository.readAll();
-
-    res.json(items);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export default { browse };
-```
-
-**Accéder aux données** dans `server/app/modules/item/itemRepository.ts` :
-
-```typescript
-import databaseClient from "../../../database/client";
-
-import type { Result, Rows } from "../../../database/client";
-
-interface Item {
-  id: number;
-  title: string;
-  user_id: number;
-}
-
-class ItemRepository {
-  async readAll() {
-    const [rows] = await databaseClient.query<Rows>("select * from item");
-
-    return rows as Item[];
-  }
-}
-
-export default new ItemRepository();
-```
-
-**Ajouter un middleware** 
-
-```typescript
-// ...
-
-/* ************************************************************************* */
-// Define Your API Routes Here
-/* ************************************************************************* */
-
-// Define item-related routes
-import itemActions from "./modules/item/itemActions";
-
-const foo: RequestHandler = (req, res, next) => {
-  req.message = "hello middleware";
-
-  next();
-}
-
-router.get("/api/items", foo, itemActions.browse);
-
-/* ************************************************************************* */
-
-// ...
-```
-
-`req.message` sera disponible dans `itemActions.browse`.
-
-⚠️ La propriété `message` doit être ajoutée dans `src/types/express/index.d.ts` :
-
-```diff
-// to make the file a module and avoid the TypeScript error
-export type {};
-
-declare global {
-  namespace Express {
-    export interface Request {
-      /* ************************************************************************* */
-      // Add your custom properties here, for example:
-      //
-      // user?: { ... };
-      /* ************************************************************************* */
-+      message: string;
-    }
-  }
-}
-```
-
-### REST
-
-| Opération | Méthode | Chemin d'URL | Corps de la requête | SQL    | Réponse (Succès)               | Réponse (Erreur)                                                       |
-|-----------|---------|--------------|---------------------|--------|--------------------------------|------------------------------------------------------------------------|
-| Browse    | GET     | /items       |                     | SELECT | 200 (OK), liste des items.     |                                                                        |
-| Read      | GET     | /items/:id   |                     | SELECT | 200 (OK), un item.             | 404 (Not Found), si id invalide.                                       |
-| Add       | POST    | /items       | Données de l'item   | INSERT | 201 (Created), id d'insertion. | 400 (Bad Request), si corps invalide.                                  |
-| Edit      | PUT     | /items/:id   | Données de l'item   | UPDATE | 204 (No Content).              | 400 (Bad Request), si corps invalide. 404 (Not Found), si id invalide. |
-| Destroy   | DELETE  | /items/:id   |                     | DELETE | 204 (No Content).              | 404 (Not Found), si id invalide.                                       |
-
-### Autres Bonnes Pratiques
-
-- **Sécurité** :
-  - Validez et échappez toujours les entrées des utilisateurs.
-  - Utilisez HTTPS pour toutes les communications réseau.
-  - Stockez les mots de passe de manière sécurisée en utilisant des hash forts (ex : argon2).
-  - Revoyez et mettez à jour régulièrement les dépendances.
-
-- **Code** :
-  - Suivez les principes SOLID pour une architecture de code propre et maintenable.
-  - Utilisez TypeScript pour bénéficier de la vérification statique des types.
-  - Adoptez un style de codage cohérent avec Biome.
-  - Écrivez des tests pour toutes les fonctionnalités critiques.
-
-## FAQ
-
-### Installation avec Docker
-> ⚠️ Prérequis : Vous devez avoir installé Docker et Docker Compose sur votre machine.  
-> Suivez les instructions ici : [Docker Installation](https://docs.docker.com/get-docker/).
-
-Lorsque Docker est installé et démarré, exécutez la commande suivante pour construire l'image Docker et démarrer les conteneurs :
 ```bash
-docker compose up -d --build
-```
-La partie _client_ de l'application sera accessible à l'adresse http://localhost:3000 et la partie _serveur_ à l'adresse http://localhost:3310.  
-Pour arrêter et supprimer les conteneurs, exécutez :
-```bash
-docker compose down
-```
-
-#### Mode développement
-Les dépendances (du dossier `node_modules`) sont installées dans le conteneur Docker et ne seront pas visibles directement. Si vous utilisez un IDE comme VSCode et que vous souhaitez modifier des fichiers de votre application, vous devez installer les dépendances localement pour prévenir toute erreur de fichiers manquants.  
-```bash
+git clone https://github.com/FARVACQUE-L/WeGather.git
+cd WeGather
 npm install
 ```
 
-#### Installation de nouvelles dépendances
-Pour installer de nouvelles dépendances, procédez en local comme d'habitude avec `npm install <package-name>`, puis, synchronisez les dépendances dans le conteneur Docker avec la commande suivante :
-```bash
-docker compose exec web sh -c "npm install"
+1. Copiez `server/.env.sample` en `server/.env` et `client/.env.sample` en `client/.env`, puis remplissez-les (voir [Variables d'environnement](#variables-denvironnement)).
+2. Créez la base de données :
+   ```bash
+   npm run db:migrate
+   ```
+   > ⚠️ Cette commande **supprime puis recrée** la base `wegather` à partir de `server/database/schema.sql`.
+3. Lancez le client et le serveur :
+   ```bash
+   npm run dev
+   ```
+   - Client : http://localhost:3000
+   - API : http://localhost:3310
+
+**Devenir administrateur** : créez un compte depuis le site, puis passez-le administrateur directement en base :
+
+```sql
+UPDATE user SET user_is_admin = 1, user_is_superadmin = 1 WHERE user_mail = 'vous@exemple.fr';
 ```
 
-#### Accéder à la base de données
-Pour vous connecter à la base de données avec votre terminal, exécutez la commande suivante :
+## Variables d'environnement
+
+### `server/.env`
+
+| Variable | Description | Exemple |
+|---|---|---|
+| `APP_PORT` | Port du serveur | `3310` |
+| `NODE_ENV` | `development` affiche le détail des erreurs 500. Mettre `production` sur le serveur. | `development` |
+| `DB_HOST`, `DB_PORT` | Adresse de MySQL | `localhost`, `3306` |
+| `DB_USER`, `DB_PASSWORD` | Identifiants MySQL | |
+| `DB_NAME` | Nom de la base. Doit valoir `wegather`, le nom utilisé par `schema.sql`. | `wegather` |
+| `CLIENT_URL` | Adresse du client, utilisée pour CORS, les liens des e-mails et les cookies `Secure` (en `https`) | `http://localhost:3000` |
+| `TOKEN_SECRET` | Secret de signature des JWT : une longue chaîne aléatoire | |
+| `EMAIL_HOST`, `EMAIL_PORT` | Serveur SMTP d'envoi des e-mails (facultatif, IONOS par défaut) | `smtp.ionos.fr`, `465` |
+| `EMAIL_USER`, `EMAIL_PASS` | Boîte qui envoie les e-mails automatiques (bienvenue, mot de passe, modération) | `nepasrepondre@wegather.fr` |
+| `DISCORD_CONTACT_WEBHOOK_URL` | Webhook Discord qui reçoit le formulaire de contact | |
+
+Pour générer un `TOKEN_SECRET` :
+
 ```bash
-docker compose exec database sh -c "mysql -uuser -ppassword js_template_fullstack"
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 ```
 
-### Déploiement avec Traefik
+### `client/.env`
 
-> ⚠️ Prérequis : Vous devez avoir installé et configuré Traefik sur votre VPS au préalable. Suivez les instructions ici : [VPS Traefik Starter Kit](https://github.com/WildCodeSchool/vps-traefik-starter-kit/).
+| Variable | Description | Exemple |
+|---|---|---|
+| `VITE_API_URL` | Adresse de l'API, intégrée au client au moment du build | `http://localhost:3310` |
 
-Pour le déploiement, ajoutez les secrets suivants dans la section `secrets` → `actions` du dépôt GitHub :
+## Commandes
 
-- `SSH_HOST` : Adresse IP de votre VPS
-- `SSH_USER` : Identifiant SSH pour votre VPS
-- `SSH_PASSWORD` : Mot de passe de connexion SSH pour votre VPS
+À lancer depuis la racine du dépôt.
 
-Et une variable publique dans `/settings/variables/actions` :
+| Commande | Description |
+|---|---|
+| `npm install` | Installe les dépendances du client et du serveur |
+| `npm run dev` | Lance le client (Vite) et le serveur (rechargement automatique) |
+| `npm run db:migrate` | Recrée la base depuis le schéma. ⚠️ **Efface toutes les données.** |
+| `npm run db:seed` | Remplit la base avec des données de test. ⚠️ Efface les données existantes. |
+| `npm run build` | Compile le client dans `client/dist` (ne touche pas à la base) |
+| `npm run start` | Démarre le serveur, qui sert aussi le client compilé |
+| `npm run check` | Vérifie le code (Biome et TypeScript) sur les fichiers indexés par git |
+| `npm run check:fix` | Corrige automatiquement le formatage des fichiers indexés par git |
 
-- `PROJECT_NAME` : Le nom du projet utilisé pour créer le sous-domaine.
+Avec `NODE_ENV=production`, `db:migrate` et `db:seed` refusent de s'exécuter, sauf avec `ALLOW_DB_RESET=yes`.
 
-> ⚠️ Avertissement : Les underscores ne sont pas autorisés car ils peuvent causer des problèmes avec le certificat Let's Encrypt.
+## Structure du projet
 
-L'URL de votre projet sera `https://${PROJECT-NAME}.${subdomain}.wilders.dev/`.
+```plaintext
+WeGather/
+├── client/                    # Application React (Vite)
+│   ├── public/
+│   └── src/
+│       ├── assets/            # Images et polices
+│       ├── components/        # Messagerie, Budget, ToDoList, Galerie, Reservation…
+│       ├── pages/             # Présentation, Connexion, HomeEvents, Admin…
+│       ├── helper/            # Garde d'authentification, imageUrl…
+│       ├── socket/            # Connexion Socket.IO
+│       ├── types/
+│       └── main.tsx           # Routes
+│
+├── server/                    # API Express
+│   ├── bin/                   # Scripts migrate et seed
+│   ├── database/
+│   │   ├── schema.sql         # Schéma complet de la base
+│   │   ├── client.ts          # Pool de connexions MySQL
+│   │   └── fixtures/          # Données de test
+│   ├── public/
+│   │   ├── assets/            # Images par défaut
+│   │   └── uploads/           # Photos envoyées (publiques)
+│   ├── private/               # Pièces de signalement et documents de réservation (non publics)
+│   └── src/
+│       ├── modules/           # Un dossier par domaine : actions, repository, routes
+│       ├── middleware/        # Authentification, upload, limites de requêtes, en-têtes de sécurité
+│       ├── helper/            # Validation, droits d'accès aux événements, JWT…
+│       ├── app.ts             # Configuration d'Express
+│       ├── router.ts          # Montage des routes
+│       ├── socket.ts          # Serveur Socket.IO
+│       └── main.ts            # Point d'entrée
+│
+└── package.json               # Workspaces et scripts communs
+```
 
-### Variables d'environnement spécifiques
+## Sécurité
 
-Les étudiants doivent utiliser le modèle fourni dans le fichier `*.env.sample*` en suivant la convention `<PROJECT_NAME><SPECIFIC_NAME>=<THE_VARIABLE>`.
+- **Mots de passe** : hachés avec argon2. Les règles (12 caractères minimum, majuscule, minuscule, chiffre, caractère spécial) sont vérifiées par le serveur.
+- **Sessions** : JWT dans un cookie `httpOnly`, `Secure` en HTTPS. Un changement de mot de passe déconnecte les autres sessions.
+- **Droits d'accès** :
+  - chaque route liée à un événement vérifie que l'utilisateur en est membre ;
+  - les modifications sont réservées à l'auteur ou à l'hôte.
+- **Limites de requêtes** sur la connexion, l'inscription, le mot de passe oublié, les messages et les signalements.
+- **Validation** des identifiants, longueurs, dates et montants. Les requêtes SQL sont toutes paramétrées.
+- **En-têtes de sécurité** HTTP. Le détail des erreurs internes est masqué en production.
 
-> ⚠️ **Avertissement:** Le `PROJECT_NAME` doit correspondre à celui utilisé dans la variable publique Git.
+## Mise en production
 
-Pour l'ajouter lors du déploiement, suivez ces deux étapes :
+L'application tourne sur un VPS Ubuntu :
+- **Nginx** gère le HTTPS (Let's Encrypt) et transmet toutes les requêtes, WebSocket compris, au serveur Node ;
+- **pm2** lance et relance le serveur Node ;
+- **MySQL** tourne sur la même machine.
 
-1. Ajoutez la variable correspondante dans le fichier `docker-compose.prod.yml` (comme montré dans l'exemple : `PROJECT_NAME_SPECIFIC_NAME: ${PROJECT_NAME_SPECIFIC_NAME}`).
-2. Connectez-vous à votre serveur via SSH. Ouvrez le fichier `.env` global dans Traefik (`nano ./traefik/data/.env`). Ajoutez la variable avec la valeur correcte et sauvegardez le fichier.
+1. **`server/.env`** :
+   ```plaintext
+   NODE_ENV=production
+   CLIENT_URL=https://wegather.fr
+   TOKEN_SECRET=<longue chaîne aléatoire>
+   ```
+2. **`client/.env`** : `VITE_API_URL=https://wegather.fr`
+3. **Installation, build et démarrage** :
+   ```bash
+   npm install
+   npm run build
+   pm2 start npm --name wegather -- start
+   pm2 save
+   ```
+4. **Création de la base**, à la **première installation uniquement** :
+   ```bash
+   NODE_ENV=production ALLOW_DB_RESET=yes npm run db:migrate
+   ```
 
-Après cela, vous pouvez lancer le déploiement automatique. Docker ne sera pas rafraîchi pendant ce processus.
+**Mise à jour du site** :
 
-### Logs
+```bash
+git pull && npm install && npm run build && pm2 restart wegather
+```
 
-Pour accéder aux logs de votre projet en ligne (pour suivre le déploiement ou surveiller les erreurs), connectez-vous à votre VPS (`ssh user@host`). Ensuite, allez dans votre projet spécifique et exécutez `docker compose logs -t -f`.
+> ⚠️ Lancez le serveur en **une seule instance** : n'utilisez pas le mode cluster de pm2. Les limites de requêtes et la présence dans le chat sont gardées en mémoire.
 
-### Contribution
+> 💾 Sauvegardez régulièrement la base MySQL ainsi que les dossiers `server/public/uploads` et `server/private`, sur une autre machine que le serveur.
 
-Nous accueillons avec plaisir les contributions ! Veuillez suivre ces étapes pour contribuer :
+**Logs** : `pm2 logs wegather`
 
-1. **Fork** le dépôt.
-2. **Clone** votre fork sur votre machine locale.
-3. Créez une nouvelle branche pour votre fonctionnalité ou bug fix (`git switch -c feature/your-feature-name`).
-4. **Commit** vos modifications (`git commit -m 'Add some feature'`).
-5. **Push** vers votre branche (`git push origin feature/your-feature-name`).
-6. Créez une **Pull Request** sur le dépôt principal.
+## Contribuer
 
-**Guide de Contribution** :
+1. Créez une branche depuis `dev`, numérotée : `0055-nom-de-la-fonctionnalite`.
+2. Vérifiez le code avant de committer : `npm run check`. Le hook de pré-commit le lance aussi.
+3. Écrivez des messages de commit au format [Conventional Commits](https://www.conventionalcommits.org/fr/) : `feat:`, `fix:`, `chore:`…
+4. Ouvrez une Pull Request vers `dev`. La CI GitHub lance Biome et TypeScript.
 
-- Assurez-vous que votre code respecte les standards de codage en exécutant `npm run check` avant de pousser vos modifications.
-- Ajoutez des tests pour toute nouvelle fonctionnalité ou correction de bug.
-- Documentez clairement vos modifications dans la description de la pull request.
+## Licence
+
+Distribué sous licence MIT. Voir [LICENSE.md](LICENSE.md).

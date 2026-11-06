@@ -6,7 +6,7 @@ import Profil from "../../components/Profil/Profil";
 import { fadeIn, revealOnScroll, titleIn } from "../PageCGV/legalMotion";
 import "../PageCGV/PageCGV.css";
 
-const CONTACT_EMAIL = "wedoop3@gmail.com";
+const CONTACT_EMAIL = "contact@wegather.fr";
 
 const DATA_CATEGORIES = [
   {
@@ -129,7 +129,7 @@ function Confidentialite() {
             Politique de confidentialité — We<i>G</i>ather
           </motion.h1>
           <motion.p className="cgv-Updated" {...fadeIn}>
-            Dernière mise à jour : 5 novembre 2026
+            Dernière mise à jour : 6 novembre 2026
           </motion.p>
 
           <motion.section {...revealOnScroll} className="cgv-Intro">
@@ -226,10 +226,10 @@ function Confidentialite() {
                 <strong>Les sous-traitants techniques</strong>, qui agissent sur
                 instruction de WeGather et uniquement pour les besoins du
                 Service : l'hébergeur du serveur (voir les{" "}
-                <Link to="/mentions-legales">mentions légales</Link>), Google
-                (service Gmail) pour l'envoi des e-mails, Discord pour la
-                réception des messages du formulaire de contact par l'équipe et,
-                à l'ouverture des formules payantes, le prestataire de paiement.
+                <Link to="/mentions-legales">mentions légales</Link>), qui
+                assure aussi l'envoi des e-mails, Discord pour la réception des
+                messages du formulaire de contact par l'équipe et, à l'ouverture
+                des formules payantes, le prestataire de paiement.
               </li>
               <li>
                 <strong>Les autorités</strong>, uniquement sur demande légale.
@@ -240,14 +240,14 @@ function Confidentialite() {
           <motion.section {...revealOnScroll}>
             <h3>5. Transferts hors de l'Union européenne</h3>
             <p>
-              L'envoi des e-mails par Gmail, le chargement des polices de
-              caractères par Google Fonts et la transmission des messages de
-              contact à Discord peuvent conduire Google et Discord à traiter
-              certaines données (nom, adresse e-mail, message, adresse IP) hors
-              de l'Union européenne, notamment aux États-Unis. Ces transferts
-              sont encadrés par le cadre de protection des données UE–États-Unis
-              (Data Privacy Framework) reconnu par la Commission européenne ou,
-              à défaut, par ses clauses contractuelles types.
+              Le chargement des polices de caractères par Google Fonts et la
+              transmission des messages de contact à Discord peuvent conduire
+              Google et Discord à traiter certaines données (nom, adresse
+              e-mail, message, adresse IP) hors de l'Union européenne, notamment
+              aux États-Unis. Ces transferts sont encadrés par le cadre de
+              protection des données UE–États-Unis (Data Privacy Framework)
+              reconnu par la Commission européenne ou, à défaut, par ses clauses
+              contractuelles types.
             </p>
           </motion.section>
 
