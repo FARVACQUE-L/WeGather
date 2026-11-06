@@ -1,4 +1,5 @@
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import express from "express";
 import securityHeaders from "./middleware/securityHeaders";
 
@@ -13,12 +14,6 @@ app.use(
     credentials: true,
   }),
 );
-
-import cors from "cors";
-
-if (process.env.CLIENT_URL != null) {
-  app.use(cors({ origin: [process.env.CLIENT_URL] }));
-}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

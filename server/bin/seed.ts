@@ -4,6 +4,9 @@ import path from "node:path";
 import database from "../database/client";
 
 import type { AbstractSeeder } from "../database/fixtures/AbstractSeeder";
+import { refuseInProduction } from "./refuseInProduction";
+
+refuseInProduction("db:seed");
 
 const fixturesPath = path.join(__dirname, "../database/fixtures");
 

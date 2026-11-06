@@ -6,6 +6,9 @@ const schema = path.join(__dirname, "../../server/database/schema.sql");
 const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
 
 import mysql from "mysql2/promise";
+import { refuseInProduction } from "./refuseInProduction";
+
+refuseInProduction("db:migrate");
 
 const migrate = async () => {
   try {
