@@ -177,6 +177,7 @@ function Profil() {
         return;
       }
 
+      window.alert("Votre pseudo a été modifié.");
       window.location.reload();
     } catch (error) {
       console.error(error);
