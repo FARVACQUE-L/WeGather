@@ -4,10 +4,52 @@ import type { RequestHandler } from "express";
 import { detectMimeType, REPORTS_DESTINATION } from "../../middleware/upload";
 import { disconnectUser, removeFromEventRoom } from "../../socket";
 import eventRepository from "../event/eventRepository";
-import transporter, { MAIL_FROM } from "../services/mailer";
+import transporter, {
+  CONTACT_LINK,
+  escapeHtml,
+  MAIL_FROM,
+  renderMail,
+} from "../services/mailer";
 import adminRepository from "./adminRepository";
 
 const REPORT_FILENAME = /^[a-f0-9]{32}$/;
+
+const APPEAL_NOTE = `Si vous estimez qu'il s'agit d'une erreur, écrivez-nous à ${CONTACT_LINK}.`;
+const APPEAL_TEXT =
+  "Si vous estimez qu'il s'agit d'une erreur, écrivez-nous à contact@wegather.fr.";
+
+// Envoie un mail de modération : version HTML aux couleurs du site et version
+// texte pour les messageries qui n'affichent pas le HTML.
+const sendModerationMail = async ({
+  to,
+  username,
+  subject,
+  message,
+  appeal,
+}: {
+  to: string;
+  username: string;
+  subject: string;
+  // Texte brut : il est échappé pour la version HTML.
+  message: string;
+  appeal: boolean;
+}) => {
+  try {
+    await transporter.sendMail({
+      from: MAIL_FROM,
+      to,
+      subject,
+      html: renderMail({
+        title: escapeHtml(subject),
+        paragraphs: [`Bonjour ${escapeHtml(username)},`, escapeHtml(message)],
+        note: appeal ? APPEAL_NOTE : undefined,
+      }),
+      text: `Bonjour ${username},\n\n${message}\n\n${appeal ? `${APPEAL_TEXT}\n\n` : ""}L'équipe WeGather.`,
+    });
+  } catch (mailErr) {
+    console.error("Échec de l'envoi du mail :", mailErr);
+  }
+};
 
 const readReportImage: RequestHandler = async (req, res, next) => {
   try {
@@ -237,16 +279,13 @@ const banUser: RequestHandler = async (req, res, next) => {
 
     disconnectUser(id);
 
-    try {
-      await transporter.sendMail({
-        from: MAIL_FROM,
-        to: user.user_mail,
-        subject: "Votre compte WeGather a été suspendu",
-        text: `Bonjour ${user.user_username},\n\nVotre compte WeGather a été suspendu suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
-      });
-    } catch (mailErr) {
-      console.error("Échec de l'envoi du mail :", mailErr);
-    }
+    await sendModerationMail({
+      to: user.user_mail,
+      username: user.user_username,
+      subject: "Votre compte WeGather a été suspendu",
+      message: "Votre compte WeGather a été suspendu suite à un signalement.",
+      appeal: true,
+    });
 
     res.json({ message: "Utilisateur banni" });
   } catch (err) {
@@ -386,16 +425,13 @@ const banUserFromEvent: RequestHandler = async (req, res, next) => {
     const eventUuid = await eventRepository.readUuidById(eventId);
     if (eventUuid) removeFromEventRoom(userId, eventUuid);
 
-    try {
-      await transporter.sendMail({
-        from: MAIL_FROM,
-        to: user.user_mail,
-        subject: "Vous avez été retiré d'un événement WeGather",
-        text: `Bonjour ${user.user_username},\n\nVous avez été retiré d'un événement suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
-      });
-    } catch (mailErr) {
-      console.error("Échec de l'envoi du mail :", mailErr);
-    }
+    await sendModerationMail({
+      to: user.user_mail,
+      username: user.user_username,
+      subject: "Vous avez été retiré d'un événement WeGather",
+      message: "Vous avez été retiré d'un événement suite à un signalement.",
+      appeal: true,
+    });
 
     res.json({ message: "Utilisateur retiré de l'événement" });
   } catch (err) {
@@ -413,16 +449,13 @@ const banEvent: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    try {
-      await transporter.sendMail({
-        from: MAIL_FROM,
-        to: data.user_mail,
-        subject: "Votre événement WeGather a été retiré",
-        text: `Bonjour ${data.user_username},\n\nVotre événement "${data.event_name}" a été retiré des listes publiques suite à un signalement.\n\nSi vous estimez qu'il s'agit d'une erreur, contactez notre support.\n\nL'équipe WeGather.`,
-      });
-    } catch (mailErr) {
-      console.error("Échec de l'envoi du mail :", mailErr);
-    }
+    await sendModerationMail({
+      to: data.user_mail,
+      username: data.user_username,
+      subject: "Votre événement WeGather a été retiré",
+      message: `Votre événement « ${data.event_name} » a été retiré des listes publiques suite à un signalement.`,
+      appeal: true,
+    });
 
     res.json({ message: "Événement banni" });
   } catch (err) {
@@ -440,16 +473,14 @@ const unbanUser: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    try {
-      await transporter.sendMail({
-        from: MAIL_FROM,
-        to: user.user_mail,
-        subject: "Votre compte WeGather a été réactivé",
-        text: `Bonjour ${user.user_username},\n\nVotre compte WeGather a été réactivé, ainsi que les événements que vous organisez.\n\nL'équipe WeGather.`,
-      });
-    } catch (mailErr) {
-      console.error("Échec de l'envoi du mail :", mailErr);
-    }
+    await sendModerationMail({
+      to: user.user_mail,
+      username: user.user_username,
+      subject: "Votre compte WeGather a été réactivé",
+      message:
+        "Votre compte WeGather a été réactivé, ainsi que les événements que vous organisez.",
+      appeal: false,
+    });
 
     res.json({ message: "Utilisateur débanni" });
   } catch (err) {
@@ -468,16 +499,14 @@ const unbanUserFromEvent: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    try {
-      await transporter.sendMail({
-        from: MAIL_FROM,
-        to: user.user_mail,
-        subject: "Vous avez été réintégré à un événement WeGather",
-        text: `Bonjour ${user.user_username},\n\nVous avez été réintégré à l'événement dont vous aviez été retiré.\n\nL'équipe WeGather.`,
-      });
-    } catch (mailErr) {
-      console.error("Échec de l'envoi du mail :", mailErr);
-    }
+    await sendModerationMail({
+      to: user.user_mail,
+      username: user.user_username,
+      subject: "Vous avez été réintégré à un événement WeGather",
+      message:
+        "Vous avez été réintégré à l'événement dont vous aviez été retiré.",
+      appeal: false,
+    });
 
     res.json({ message: "Utilisateur rajouté à l'événement" });
   } catch (err) {
@@ -495,16 +524,13 @@ const unbanEvent: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    try {
-      await transporter.sendMail({
-        from: MAIL_FROM,
-        to: data.user_mail,
-        subject: "Votre événement WeGather a été rétabli",
-        text: `Bonjour ${data.user_username},\n\nVotre événement "${data.event_name}" a été rétabli.\n\nL'équipe WeGather.`,
-      });
-    } catch (mailErr) {
-      console.error("Échec de l'envoi du mail :", mailErr);
-    }
+    await sendModerationMail({
+      to: data.user_mail,
+      username: data.user_username,
+      subject: "Votre événement WeGather a été rétabli",
+      message: `Votre événement « ${data.event_name} » a été rétabli.`,
+      appeal: false,
+    });
 
     res.json({ message: "Événement débanni" });
   } catch (err) {

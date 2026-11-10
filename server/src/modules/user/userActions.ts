@@ -17,7 +17,12 @@ import {
 } from "../../helper/jwtHelper";
 import { removeUpload } from "../../helper/removeUpload";
 import { disconnectUser } from "../../socket";
-import transporter, { MAIL_FROM, renderMail } from "../services/mailer";
+import transporter, {
+  CONTACT_LINK,
+  escapeHtml,
+  MAIL_FROM,
+  renderMail,
+} from "../services/mailer";
 import userRepository from "./userRepository";
 
 const authVerif: RequestHandler = async (req, res, next) => {
@@ -63,15 +68,6 @@ const readUserName: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
-
-const escapeHtml = (text: string) =>
-  text.replace(
-    /[&<>"']/g,
-    (char) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        char
-      ] as string,
-  );
 
 const createSession = (
   res: Parameters<RequestHandler>[1],
@@ -173,7 +169,7 @@ const passwordChangedMail = () =>
     paragraphs: [
       "Le mot de passe de votre compte WeGather vient d'être modifié.",
     ],
-    note: 'Si vous n\'êtes pas à l\'origine de ce changement, réinitialisez votre mot de passe avec « Mot de passe oublié » et écrivez-nous à <a href="mailto:contact@wegather.fr" style="color:#b44708;">contact@wegather.fr</a>.',
+    note: `Si vous n'êtes pas à l'origine de ce changement, réinitialisez votre mot de passe avec « Mot de passe oublié » et écrivez-nous à ${CONTACT_LINK}.`,
   });
 
 const sendVerificationMail = (

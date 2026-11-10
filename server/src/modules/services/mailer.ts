@@ -14,6 +14,18 @@ const transporter = nodemailer.createTransport({
 
 export const MAIL_FROM = `"Équipe WeGather" <${process.env.EMAIL_USER}>`;
 
+export const escapeHtml = (text: string) =>
+  text.replace(
+    /[&<>"']/g,
+    (char) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        char
+      ] as string,
+  );
+
+export const CONTACT_LINK =
+  '<a href="mailto:contact@wegather.fr" style="color:#b44708;">contact@wegather.fr</a>';
+
 const FONT = "'Be Vietnam Pro', Arial, Helvetica, sans-serif";
 
 type MailTemplate = {
