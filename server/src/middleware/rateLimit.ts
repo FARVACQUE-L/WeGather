@@ -98,6 +98,22 @@ export const forgotPasswordLimits = [
   }),
 ];
 
+export const resendVerificationLimits = [
+  rateLimit({ windowMs: 60 * MINUTE, max: 5, message: TOO_MANY }),
+  rateLimit({
+    windowMs: 60 * MINUTE,
+    max: 3,
+    message: TOO_MANY,
+    key: bodyEmail,
+  }),
+];
+
+export const verifyEmailLimit = rateLimit({
+  windowMs: 15 * MINUTE,
+  max: 10,
+  message: TOO_MANY,
+});
+
 export const resetPasswordLimit = rateLimit({
   windowMs: 15 * MINUTE,
   max: 10,

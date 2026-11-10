@@ -13,6 +13,7 @@ class UserSeeder extends AbstractSeeder {
         user_mail: this.faker.internet.email(),
         user_password: this.faker.internet.password(),
         user_profile_picture: this.faker.image.avatar(),
+        user_is_verified: 1,
         refName: `user_${i}`,
       };
 

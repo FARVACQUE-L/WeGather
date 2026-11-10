@@ -142,35 +142,124 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const insertId = await userRepository.create(newUser);
+    const token = crypto.randomBytes(32).toString("hex");
+
+    await userRepository.create(
+      newUser,
+      hashToken(token),
+      Date.now() + VERIFY_TOKEN_DURATION_MS,
+    );
 
     res.status(201).json({
-      message: "Inscription réussie 🎉",
-      insertId,
+      message:
+        "Inscription réussie 🎉 Un e-mail de confirmation vient de vous être envoyé.",
     });
 
-    transporter
-      .sendMail({
-        from: MAIL_FROM,
-        to: newUser.email,
-        subject: "Bienvenue sur WeGather",
-        html: `
-    <h1>Bienvenue sur WeGather 🎉</h1>
-    <p>Votre compte a été créé avec succès.</p>
-    <p>Pseudo : ${escapeHtml(newUser.username)}</p>
-  `,
-      })
-      .catch((err) => console.error("Échec de l'envoi du mail :", err));
-    return;
+    sendVerificationMail(newUser.email, newUser.username, token);
   } catch (err) {
     next(err);
   }
 };
 
 const RESET_TOKEN_DURATION_MS = 1000 * 60 * 30;
+const VERIFY_TOKEN_DURATION_MS = 1000 * 60 * 60 * 24;
 
-const hashResetToken = (token: string) =>
+const hashToken = (token: string) =>
   crypto.createHash("sha256").update(token).digest("hex");
+
+const sendVerificationMail = (
+  email: string,
+  username: string,
+  token: string,
+) => {
+  const link = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
+
+  transporter
+    .sendMail({
+      from: MAIL_FROM,
+      to: email,
+      subject: "Confirmez votre adresse e-mail",
+      html: `
+    <h1>Bienvenue sur WeGather, ${escapeHtml(username)} 🎉</h1>
+    <p>Pour activer votre compte, confirmez votre adresse e-mail en cliquant sur le lien suivant :</p>
+    <p><a href="${link}">${link}</a></p>
+    <p>Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail.</p>
+  `,
+    })
+    .catch((err) => console.error("Échec de l'envoi du mail :", err));
+};
+
+const verifyEmail: RequestHandler = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+
+    if (typeof token !== "string" || !token) {
+      res.status(400).json({ message: "Lien de confirmation invalide." });
+      return;
+    }
+
+    const user = await userRepository.findByVerifyToken(hashToken(token));
+
+    if (!user) {
+      res.status(400).json({
+        message: "Ce lien de confirmation est invalide ou a déjà été utilisé.",
+      });
+      return;
+    }
+
+    if (!user.user_verify_expires || Date.now() > user.user_verify_expires) {
+      res.status(400).json({
+        message:
+          "Ce lien de confirmation a expiré. Connectez-vous pour en recevoir un nouveau.",
+      });
+      return;
+    }
+
+    if (user.user_is_ban) {
+      res.status(403).json({ message: "Votre compte a été banni." });
+      return;
+    }
+
+    await userRepository.markVerified(user.user_id);
+
+    createSession(res, user);
+
+    res.status(200).json({ message: "Adresse e-mail confirmée 🎉" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resendVerification: RequestHandler = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (typeof email !== "string" || !email.trim()) {
+      res.status(400).json({ message: "Email manquant" });
+      return;
+    }
+
+    const user = await userRepository.findByEmail(email.trim());
+
+    res.json({
+      message:
+        "Si un compte non confirmé existe avec cette adresse, un nouveau lien vient d'être envoyé.",
+    });
+
+    if (!user || user.user_is_verified) return;
+
+    const token = crypto.randomBytes(32).toString("hex");
+    await userRepository.saveVerifyToken(
+      user.user_id,
+      hashToken(token),
+      Date.now() + VERIFY_TOKEN_DURATION_MS,
+    );
+
+    sendVerificationMail(user.user_mail, user.user_username, token);
+  } catch (err) {
+    next(err);
+  }
+};
 
 let dummyHash: Promise<string> | null = null;
 
@@ -204,6 +293,15 @@ const login: RequestHandler = async (req, res, next) => {
     if (user.user_is_ban) {
       res.status(403).json({
         message: "Votre compte a été banni.",
+      });
+      return;
+    }
+
+    if (!user.user_is_verified) {
+      res.status(403).json({
+        message:
+          "Confirmez votre adresse e-mail avant de vous connecter. Pensez à vérifier vos spams.",
+        unverified: true,
       });
       return;
     }
@@ -259,7 +357,7 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
       const expires = Date.now() + RESET_TOKEN_DURATION_MS;
       await userRepository.saveResetToken(
         user.user_id,
-        hashResetToken(token),
+        hashToken(token),
         expires,
       );
     }
@@ -305,7 +403,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const user = await userRepository.findByResetToken(hashResetToken(token));
+    const user = await userRepository.findByResetToken(hashToken(token));
 
     if (!user) {
       res.status(401).json({ message: "Token invalide" });
@@ -520,6 +618,8 @@ export default {
   logout,
   forgotPassword,
   resetPassword,
+  verifyEmail,
+  resendVerification,
   changePassword,
   uploadPhoto,
   editUserName,

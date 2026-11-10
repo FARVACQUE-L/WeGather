@@ -5,7 +5,9 @@ import {
   forgotPasswordLimits,
   loginLimits,
   registerLimit,
+  resendVerificationLimits,
   resetPasswordLimit,
+  verifyEmailLimit,
 } from "../../middleware/rateLimit";
 import upload, { verifyFileSignatures } from "../../middleware/upload";
 import { validateIds } from "../../middleware/validateIds";
@@ -45,6 +47,16 @@ userRoutes.post(
   "/api/auth/reset-password",
   resetPasswordLimit,
   userActions.resetPassword,
+);
+userRoutes.post(
+  "/api/auth/verify-email",
+  verifyEmailLimit,
+  userActions.verifyEmail,
+);
+userRoutes.post(
+  "/api/auth/resend-verification",
+  resendVerificationLimits,
+  userActions.resendVerification,
 );
 userRoutes.put(
   "/api/auth/change-password",

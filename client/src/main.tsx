@@ -21,6 +21,7 @@ import Register from "./pages/Register/Register";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import TableauDeBord from "./pages/TableauDeBord/TableauDeBord";
 import UserReport from "./pages/UserReport/UserReport";
+import VerifyEmail from "./pages/VerifyEmail/VerifyEmail";
 
 const router = createBrowserRouter([
   {
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
       {
         path: "/resetpassword",
         element: <ResetPassword />,
+      },
+      {
+        path: "/verify-email",
+        element: <VerifyEmail />,
       },
       {
         path: "/events/:eventUuid/report",

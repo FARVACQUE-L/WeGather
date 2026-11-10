@@ -84,13 +84,12 @@ function Register() {
         return;
       }
 
-      toast.fire({
+      await Swal.fire({
         icon: "success",
-        text: data.message || "Inscription réussie 🎉",
-
-        customClass: {
-          popup: "toast-success-popup",
-        },
+        title: "Vérifiez votre boîte mail",
+        text: `Un lien de confirmation a été envoyé à ${email.trim()}. Cliquez dessus pour activer votre compte (pensez à vérifier vos spams).`,
+        confirmButtonText: "OK",
+        confirmButtonColor: "#b44708",
       });
 
       navigate("/connexion");

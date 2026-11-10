@@ -19,8 +19,29 @@ function Connexion() {
   const [_submitted, setSubmitted] = useState(false);
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [unverified, setUnverified] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
 
   const navigate = useNavigate();
+
+  const handleResend = async () => {
+    setResendMessage("");
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/resend-verification`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim() }),
+        },
+      );
+      const data = await res.json();
+      setResendMessage(data.message || "Erreur serveur");
+    } catch {
+      setResendMessage("Erreur serveur");
+    }
+  };
 
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
@@ -37,6 +58,8 @@ function Connexion() {
     e.preventDefault();
     setSubmitted(true);
     setErrorMessage("");
+    setUnverified(false);
+    setResendMessage("");
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
@@ -50,6 +73,7 @@ function Connexion() {
 
       if (!res.ok) {
         setErrorMessage(data.message || "Erreur de connexion");
+        setUnverified(Boolean(data.unverified));
         return;
       }
 
@@ -137,6 +161,16 @@ function Connexion() {
             </div>
 
             {errorMessage && <p className="error">{errorMessage}</p>}
+            {unverified && (
+              <button
+                type="button"
+                className="resend-verification"
+                onClick={handleResend}
+              >
+                Renvoyer l'e-mail de confirmation
+              </button>
+            )}
+            {resendMessage && <p className="resend-message">{resendMessage}</p>}
           </div>
 
           <button
