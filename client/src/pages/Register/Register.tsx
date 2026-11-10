@@ -135,7 +135,7 @@ function Register() {
             <p>Inscrivez-vous à WeGather.</p>
           </div>
           <div className="input-group">
-            <label htmlFor="username">Identifiant</label>
+            <label htmlFor="username">Pseudo</label>
             <input
               type="text"
               ref={firstInputRef}
