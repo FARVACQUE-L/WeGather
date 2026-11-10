@@ -4,6 +4,7 @@ import "../database/checkConnection";
 import http from "node:http";
 import app from "./app";
 import { startBannedEventsPurge } from "./helper/purgeBannedEvents";
+import { startUnverifiedUsersPurge } from "./helper/purgeUnverifiedUsers";
 import { initSocket } from "./socket";
 
 const server = http.createServer(app);
@@ -12,6 +13,7 @@ const port = process.env.APP_PORT;
 
 initSocket(server);
 startBannedEventsPurge();
+startUnverifiedUsersPurge();
 
 server
   .listen(port, () => {

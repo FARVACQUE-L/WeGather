@@ -63,6 +63,23 @@ class UserRepository {
     return (rows[0] as UserRow) ?? null;
   }
 
+  async readExpiredUnverifiedIds() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT user_id FROM user
+       WHERE user_is_verified = 0 AND user_verify_expires < ?`,
+      [Date.now()],
+    );
+
+    return rows.map((row) => row.user_id as number);
+  }
+
+  async deleteUnverified(userId: number) {
+    await databaseClient.query(
+      "DELETE FROM user WHERE user_id = ? AND user_is_verified = 0",
+      [userId],
+    );
+  }
+
   async markVerified(userId: number) {
     await databaseClient.query(
       `UPDATE user

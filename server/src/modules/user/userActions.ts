@@ -15,6 +15,7 @@ import {
   sessionCookie,
   sessionCookieOptions,
 } from "../../helper/jwtHelper";
+import { purgeUnverifiedUsers } from "../../helper/purgeUnverifiedUsers";
 import { removeUpload } from "../../helper/removeUpload";
 import { disconnectUser } from "../../socket";
 import transporter, {
@@ -120,6 +121,10 @@ const add: RequestHandler = async (req, res, next) => {
       password: await argon2.hash(req.body.password),
     };
 
+    // Libère tout de suite le pseudo et l'adresse d'une inscription expirée,
+    // sans attendre la purge horaire.
+    await purgeUnverifiedUsers();
+
     const existingUsername = await userRepository.findByEmailOrUsername(
       newUser.username,
     );
@@ -190,7 +195,7 @@ const sendVerificationMail = (
           "Merci de votre inscription sur WeGather. Pour activer votre compte, confirmez votre adresse e-mail :",
         ],
         button: { label: "Confirmer mon adresse", url: link },
-        note: "Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail.",
+        note: "Ce lien est valable 24 heures à compter de votre inscription. Sans confirmation dans ce délai, l'inscription est annulée et le compte supprimé. Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail.",
       }),
     })
     .catch((err) => console.error("Échec de l'envoi du mail :", err));
@@ -209,7 +214,8 @@ const verifyEmail: RequestHandler = async (req, res, next) => {
 
     if (!user) {
       res.status(400).json({
-        message: "Ce lien de confirmation est invalide ou a déjà été utilisé.",
+        message:
+          "Ce lien de confirmation est invalide ou a déjà été utilisé. Si votre inscription date de plus de 24 heures, elle a été annulée : inscrivez-vous à nouveau.",
       });
       return;
     }
@@ -217,7 +223,7 @@ const verifyEmail: RequestHandler = async (req, res, next) => {
     if (!user.user_verify_expires || Date.now() > user.user_verify_expires) {
       res.status(400).json({
         message:
-          "Ce lien de confirmation a expiré. Connectez-vous pour en recevoir un nouveau.",
+          "Ce lien de confirmation a expiré et votre inscription a été annulée. Inscrivez-vous à nouveau.",
       });
       return;
     }
@@ -253,13 +259,22 @@ const resendVerification: RequestHandler = async (req, res, next) => {
         "Si un compte non confirmé existe avec cette adresse, un nouveau lien vient d'être envoyé.",
     });
 
-    if (!user || user.user_is_verified) return;
+    if (
+      !user ||
+      user.user_is_verified ||
+      !user.user_verify_expires ||
+      Date.now() > user.user_verify_expires
+    ) {
+      return;
+    }
 
+    // Le nouveau lien garde l'échéance de l'inscription : le compte est
+    // supprimé 24 h après l'inscription, même après un renvoi.
     const token = crypto.randomBytes(32).toString("hex");
     await userRepository.saveVerifyToken(
       user.user_id,
       hashToken(token),
-      Date.now() + VERIFY_TOKEN_DURATION_MS,
+      user.user_verify_expires,
     );
 
     sendVerificationMail(user.user_mail, user.user_username, token);
@@ -300,6 +315,17 @@ const login: RequestHandler = async (req, res, next) => {
     if (user.user_is_ban) {
       res.status(403).json({
         message: "Votre compte a été banni.",
+      });
+      return;
+    }
+
+    if (
+      !user.user_is_verified &&
+      (!user.user_verify_expires || Date.now() > user.user_verify_expires)
+    ) {
+      res.status(403).json({
+        message:
+          "Votre inscription a expiré faute de confirmation de l'adresse e-mail. Inscrivez-vous à nouveau.",
       });
       return;
     }
