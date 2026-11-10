@@ -5,7 +5,6 @@ import { detectMimeType, REPORTS_DESTINATION } from "../../middleware/upload";
 import { disconnectUser, removeFromEventRoom } from "../../socket";
 import eventRepository from "../event/eventRepository";
 import transporter, {
-  CONTACT_LINK,
   escapeHtml,
   MAIL_FROM,
   renderMail,
@@ -14,9 +13,8 @@ import adminRepository from "./adminRepository";
 
 const REPORT_FILENAME = /^[a-f0-9]{32}$/;
 
-const APPEAL_NOTE = `Si vous estimez qu'il s'agit d'une erreur, écrivez-nous à ${CONTACT_LINK}.`;
-const APPEAL_TEXT =
-  "Si vous estimez qu'il s'agit d'une erreur, écrivez-nous à contact@wegather.fr.";
+const APPEAL_MESSAGE =
+  "Si vous estimez qu'il s'agit d'une erreur, contactez-nous via notre formulaire de contact :";
 
 // Envoie un mail de modération : version HTML aux couleurs du site et version
 // texte pour les messageries qui n'affichent pas le HTML.
@@ -34,6 +32,8 @@ const sendModerationMail = async ({
   message: string;
   appeal: boolean;
 }) => {
+  const contactUrl = `${process.env.CLIENT_URL}/contact`;
+
   try {
     await transporter.sendMail({
       from: MAIL_FROM,
@@ -41,10 +41,16 @@ const sendModerationMail = async ({
       subject,
       html: renderMail({
         title: escapeHtml(subject),
-        paragraphs: [`Bonjour ${escapeHtml(username)},`, escapeHtml(message)],
-        note: appeal ? APPEAL_NOTE : undefined,
+        paragraphs: [
+          `Bonjour ${escapeHtml(username)},`,
+          escapeHtml(message),
+          ...(appeal ? [APPEAL_MESSAGE] : []),
+        ],
+        button: appeal
+          ? { label: "Nous contacter", url: contactUrl }
+          : undefined,
       }),
-      text: `Bonjour ${username},\n\n${message}\n\n${appeal ? `${APPEAL_TEXT}\n\n` : ""}L'équipe WeGather.`,
+      text: `Bonjour ${username},\n\n${message}\n\n${appeal ? `${APPEAL_MESSAGE}\n${contactUrl}\n\n` : ""}L'équipe WeGather.`,
     });
   } catch (mailErr) {
     console.error("Échec de l'envoi du mail :", mailErr);
