@@ -29,6 +29,7 @@ function Profil() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const isAdminPage = location.pathname.startsWith("/admin");
   const [userId, setUserId] = useState<number | null>(null);
+  const [currentUsername, setCurrentUsername] = useState("");
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/api/auth/authVerif`, {
@@ -61,6 +62,22 @@ function Profil() {
       })
       .then((data) => {
         setProfilePicture(data.user_profile_picture);
+      })
+      .catch((error) => console.error(error));
+
+    // Lu en base plutôt que dans la session : la session garde l'ancien
+    // pseudo après un changement.
+    fetch(`${import.meta.env.VITE_API_URL}/api/username/${userId}`, {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Erreur récupération pseudo");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setCurrentUsername(data.username);
       })
       .catch((error) => console.error(error));
   }, [userId]);
@@ -227,6 +244,10 @@ function Profil() {
                 src={`${import.meta.env.VITE_API_URL}${profilePicture}`}
                 alt="photo-profil"
               />
+
+              {currentUsername && (
+                <p className="Profil-Username">{currentUsername}</p>
+              )}
 
               <button
                 className="Profil-Action"
