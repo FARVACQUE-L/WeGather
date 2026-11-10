@@ -186,6 +186,30 @@ body {
         margin: 6px 0 0;
         line-height: 1.4;
       }
+
+      .resend-verification {
+        margin-top: 8px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: #b44708;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+
+        @media (hover: hover) and (min-width: 429px) {
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .resend-message {
+        color: #666;
+        font-size: 11px;
+        margin: 6px 0 0;
+        line-height: 1.4;
+      }
     }
     .button-connection-submit {
       width: 100%;

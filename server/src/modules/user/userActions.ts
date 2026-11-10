@@ -15,9 +15,15 @@ import {
   sessionCookie,
   sessionCookieOptions,
 } from "../../helper/jwtHelper";
+import { purgeUnverifiedUsers } from "../../helper/purgeUnverifiedUsers";
 import { removeUpload } from "../../helper/removeUpload";
 import { disconnectUser } from "../../socket";
-import transporter, { MAIL_FROM } from "../services/mailer";
+import transporter, {
+  CONTACT_URL,
+  escapeHtml,
+  MAIL_FROM,
+  renderMail,
+} from "../services/mailer";
 import userRepository from "./userRepository";
 
 const authVerif: RequestHandler = async (req, res, next) => {
@@ -63,15 +69,6 @@ const readUserName: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
-
-const escapeHtml = (text: string) =>
-  text.replace(
-    /[&<>"']/g,
-    (char) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        char
-      ] as string,
-  );
 
 const createSession = (
   res: Parameters<RequestHandler>[1],
@@ -124,6 +121,10 @@ const add: RequestHandler = async (req, res, next) => {
       password: await argon2.hash(req.body.password),
     };
 
+    // Libère tout de suite le pseudo et l'adresse d'une inscription expirée,
+    // sans attendre la purge horaire.
+    await purgeUnverifiedUsers();
+
     const existingUsername = await userRepository.findByEmailOrUsername(
       newUser.username,
     );
@@ -142,35 +143,145 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const insertId = await userRepository.create(newUser);
+    const token = crypto.randomBytes(32).toString("hex");
+
+    await userRepository.create(
+      newUser,
+      hashToken(token),
+      Date.now() + VERIFY_TOKEN_DURATION_MS,
+    );
 
     res.status(201).json({
-      message: "Inscription réussie 🎉",
-      insertId,
+      message:
+        "Inscription réussie 🎉 Un e-mail de confirmation vient de vous être envoyé.",
     });
 
-    transporter
-      .sendMail({
-        from: MAIL_FROM,
-        to: newUser.email,
-        subject: "Bienvenue sur WeGather",
-        html: `
-    <h1>Bienvenue sur WeGather 🎉</h1>
-    <p>Votre compte a été créé avec succès.</p>
-    <p>Pseudo : ${escapeHtml(newUser.username)}</p>
-  `,
-      })
-      .catch((err) => console.error("Échec de l'envoi du mail :", err));
-    return;
+    sendVerificationMail(newUser.email, newUser.username, token);
   } catch (err) {
     next(err);
   }
 };
 
 const RESET_TOKEN_DURATION_MS = 1000 * 60 * 30;
+const VERIFY_TOKEN_DURATION_MS = 1000 * 60 * 60 * 24;
 
-const hashResetToken = (token: string) =>
+const hashToken = (token: string) =>
   crypto.createHash("sha256").update(token).digest("hex");
+
+const passwordChangedMail = () =>
+  renderMail({
+    title: "Mot de passe modifié",
+    paragraphs: [
+      "Le mot de passe de votre compte WeGather vient d'être modifié.",
+    ],
+    note: `Si vous n'êtes pas à l'origine de ce changement, réinitialisez votre mot de passe avec « Mot de passe oublié » et prévenez-nous via <a href="${CONTACT_URL}" style="color:#b44708;">notre formulaire de contact</a>.`,
+  });
+
+const sendVerificationMail = (
+  email: string,
+  username: string,
+  token: string,
+) => {
+  const link = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
+
+  transporter
+    .sendMail({
+      from: MAIL_FROM,
+      to: email,
+      subject: "Confirmez votre adresse e-mail",
+      html: renderMail({
+        title: `Bienvenue, ${escapeHtml(username)} 🎉`,
+        paragraphs: [
+          "Merci de votre inscription sur WeGather. Pour activer votre compte, confirmez votre adresse e-mail :",
+        ],
+        button: { label: "Confirmer mon adresse", url: link },
+        note: "Ce lien est valable 24 heures à compter de votre inscription. Sans confirmation dans ce délai, l'inscription est annulée et le compte supprimé. Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail.",
+      }),
+    })
+    .catch((err) => console.error("Échec de l'envoi du mail :", err));
+};
+
+const verifyEmail: RequestHandler = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+
+    if (typeof token !== "string" || !token) {
+      res.status(400).json({ message: "Lien de confirmation invalide." });
+      return;
+    }
+
+    const user = await userRepository.findByVerifyToken(hashToken(token));
+
+    if (!user) {
+      res.status(400).json({
+        message:
+          "Ce lien de confirmation est invalide ou a déjà été utilisé. Si votre inscription date de plus de 24 heures, elle a été annulée : inscrivez-vous à nouveau.",
+      });
+      return;
+    }
+
+    if (!user.user_verify_expires || Date.now() > user.user_verify_expires) {
+      res.status(400).json({
+        message:
+          "Ce lien de confirmation a expiré et votre inscription a été annulée. Inscrivez-vous à nouveau.",
+      });
+      return;
+    }
+
+    if (user.user_is_ban) {
+      res.status(403).json({ message: "Votre compte a été banni." });
+      return;
+    }
+
+    await userRepository.markVerified(user.user_id);
+
+    createSession(res, user);
+
+    res.status(200).json({ message: "Adresse e-mail confirmée 🎉" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resendVerification: RequestHandler = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (typeof email !== "string" || !email.trim()) {
+      res.status(400).json({ message: "Email manquant" });
+      return;
+    }
+
+    const user = await userRepository.findByEmail(email.trim());
+
+    res.json({
+      message:
+        "Si un compte non confirmé existe avec cette adresse, un nouveau lien vient d'être envoyé.",
+    });
+
+    if (
+      !user ||
+      user.user_is_verified ||
+      !user.user_verify_expires ||
+      Date.now() > user.user_verify_expires
+    ) {
+      return;
+    }
+
+    // Le nouveau lien garde l'échéance de l'inscription : le compte est
+    // supprimé 24 h après l'inscription, même après un renvoi.
+    const token = crypto.randomBytes(32).toString("hex");
+    await userRepository.saveVerifyToken(
+      user.user_id,
+      hashToken(token),
+      user.user_verify_expires,
+    );
+
+    sendVerificationMail(user.user_mail, user.user_username, token);
+  } catch (err) {
+    next(err);
+  }
+};
 
 let dummyHash: Promise<string> | null = null;
 
@@ -204,6 +315,26 @@ const login: RequestHandler = async (req, res, next) => {
     if (user.user_is_ban) {
       res.status(403).json({
         message: "Votre compte a été banni.",
+      });
+      return;
+    }
+
+    if (
+      !user.user_is_verified &&
+      (!user.user_verify_expires || Date.now() > user.user_verify_expires)
+    ) {
+      res.status(403).json({
+        message:
+          "Votre inscription a expiré faute de confirmation de l'adresse e-mail. Inscrivez-vous à nouveau.",
+      });
+      return;
+    }
+
+    if (!user.user_is_verified) {
+      res.status(403).json({
+        message:
+          "Confirmez votre adresse e-mail avant de vous connecter. Pensez à vérifier vos spams.",
+        unverified: true,
       });
       return;
     }
@@ -259,7 +390,7 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
       const expires = Date.now() + RESET_TOKEN_DURATION_MS;
       await userRepository.saveResetToken(
         user.user_id,
-        hashResetToken(token),
+        hashToken(token),
         expires,
       );
     }
@@ -278,12 +409,14 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
         from: MAIL_FROM,
         to: user.user_mail,
         subject: "Réinitialisation du mot de passe",
-        html: `
-    <h1>WeGather</h1>
-    <h2>Réinitialisation du mot de passe</h2>
-    <p>Cliquez sur le lien suivant :</p>
-    <a href="${link}">${link}</a>
-  `,
+        html: renderMail({
+          title: "Réinitialisation du mot de passe",
+          paragraphs: [
+            "Vous avez demandé à réinitialiser le mot de passe de votre compte WeGather. Cliquez sur le bouton ci-dessous pour en choisir un nouveau :",
+          ],
+          button: { label: "Choisir un nouveau mot de passe", url: link },
+          note: "Ce lien est valable 30 minutes. Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : votre mot de passe reste inchangé.",
+        }),
       })
       .catch((err) => console.error("Échec de l'envoi du mail :", err));
   } catch (err) {
@@ -305,7 +438,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const user = await userRepository.findByResetToken(hashResetToken(token));
+    const user = await userRepository.findByResetToken(hashToken(token));
 
     if (!user) {
       res.status(401).json({ message: "Token invalide" });
@@ -338,10 +471,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
         from: MAIL_FROM,
         to: user.user_mail,
         subject: "Mot de passe modifié",
-        html: `
-    <h1>WeGather</h1>
-    <p>Votre mot de passe a été modifié avec succès.</p>
-  `,
+        html: passwordChangedMail(),
       })
       .catch((_err) => {});
     return;
@@ -408,11 +538,7 @@ const changePassword: RequestHandler = async (req, res, next) => {
         from: MAIL_FROM,
         to: user.user_mail,
         subject: "Mot de passe modifié",
-        html: `
-        <h1>WeGather</h1>
-        <p>Votre mot de passe a été modifié avec succès.</p>
-        <p>Si ce n’était pas vous, contactez le support client.</p>
-      `,
+        html: passwordChangedMail(),
       })
       .catch((_err) => {});
 
@@ -520,6 +646,8 @@ export default {
   logout,
   forgotPassword,
   resetPassword,
+  verifyEmail,
+  resendVerification,
   changePassword,
   uploadPhoto,
   editUserName,

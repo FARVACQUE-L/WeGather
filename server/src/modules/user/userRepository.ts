@@ -18,24 +18,75 @@ type UserRow = {
   user_reset_expires?: number | null;
   user_is_admin: number;
   user_is_ban: number;
+  user_is_verified: number;
+  user_verify_expires?: number | null;
 };
 
 class UserRepository {
-  async create(user: Omit<User, "id">) {
+  async create(
+    user: Omit<User, "id">,
+    verifyToken: string,
+    verifyExpires: number,
+  ) {
     const [result] = await databaseClient.query<Result>(
       `INSERT INTO user
-      (user_name, user_username, user_mail, user_password, user_profile_picture)
-      VALUES (?, ?, ?, ?, ?)`,
+      (user_name, user_username, user_mail, user_password, user_profile_picture,
+       user_verify_token, user_verify_expires)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         user.username,
         user.username,
         user.email,
         user.password,
         "/assets/images/default-pp.png",
+        verifyToken,
+        verifyExpires,
       ],
     );
 
     return result.insertId;
+  }
+
+  async saveVerifyToken(userId: number, token: string, expires: number) {
+    await databaseClient.query(
+      "UPDATE user SET user_verify_token = ?, user_verify_expires = ? WHERE user_id = ?",
+      [token, expires, userId],
+    );
+  }
+
+  async findByVerifyToken(token: string) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT * FROM user WHERE user_verify_token = ?",
+      [token],
+    );
+
+    return (rows[0] as UserRow) ?? null;
+  }
+
+  async readExpiredUnverifiedIds() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT user_id FROM user
+       WHERE user_is_verified = 0 AND user_verify_expires < ?`,
+      [Date.now()],
+    );
+
+    return rows.map((row) => row.user_id as number);
+  }
+
+  async deleteUnverified(userId: number) {
+    await databaseClient.query(
+      "DELETE FROM user WHERE user_id = ? AND user_is_verified = 0",
+      [userId],
+    );
+  }
+
+  async markVerified(userId: number) {
+    await databaseClient.query(
+      `UPDATE user
+       SET user_is_verified = 1, user_verify_token = NULL, user_verify_expires = NULL
+       WHERE user_id = ?`,
+      [userId],
+    );
   }
 
   async findByEmailOrUsername(identifier: string) {

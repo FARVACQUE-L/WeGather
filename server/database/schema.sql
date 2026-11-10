@@ -19,6 +19,11 @@ CREATE TABLE `user` (
   `user_joining_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_reset_token` VARCHAR(255) NULL,
   `user_reset_expires` BIGINT NULL,
+  -- Confirmation de l'adresse e-mail : la connexion est refusée tant que
+  -- user_is_verified vaut 0. Le jeton est stocké haché (SHA-256).
+  `user_is_verified` TINYINT(1) NOT NULL DEFAULT 0,
+  `user_verify_token` VARCHAR(64) NULL,
+  `user_verify_expires` BIGINT NULL,
 
   `user_is_admin` TINYINT(1) NOT NULL DEFAULT 0,
   `user_is_superadmin` TINYINT(1) NOT NULL DEFAULT 0,

@@ -258,3 +258,82 @@
     }
   }
 }
+
+body .RegisterModal-Backdrop.swal2-backdrop-show {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+body .RegisterModal {
+  width: min(90vw, 420px);
+  padding: 2rem;
+  row-gap: 1rem;
+  background: var(--bg-color);
+  border-radius: 2rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+
+  &.RegisterModal-Show {
+    animation: RegisterModal-Appear 0.25s ease;
+  }
+
+  .RegisterModal-Title {
+    padding: 0;
+    font-size: x-large;
+    text-align: start;
+    color: var(--font-title);
+  }
+
+  .RegisterModal-Text {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: start;
+    color: inherit;
+  }
+
+  .RegisterModal-Actions {
+    justify-content: center;
+    width: 100%;
+    margin: 0.5rem 0 0;
+    padding: 0;
+
+    .RegisterModal-Confirm {
+      flex: 1;
+      max-width: 12rem;
+      height: 2rem;
+      margin: 0;
+      border: none;
+      border-radius: 5rem;
+      box-shadow: 1px 1px 5px black;
+      background: var(--button-color);
+      color: var(--font-neutral);
+      cursor: pointer;
+      transition: transform 0.2s;
+
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: scale(0.95);
+        }
+      }
+    }
+  }
+}
+
+@keyframes RegisterModal-Appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media screen and (max-width: 429px) {
+  body .RegisterModal {
+    padding: 1.5rem;
+  }
+}
