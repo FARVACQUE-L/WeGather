@@ -18,7 +18,7 @@ import {
 import { removeUpload } from "../../helper/removeUpload";
 import { disconnectUser } from "../../socket";
 import transporter, {
-  CONTACT_LINK,
+  CONTACT_URL,
   escapeHtml,
   MAIL_FROM,
   renderMail,
@@ -169,7 +169,7 @@ const passwordChangedMail = () =>
     paragraphs: [
       "Le mot de passe de votre compte WeGather vient d'être modifié.",
     ],
-    note: `Si vous n'êtes pas à l'origine de ce changement, réinitialisez votre mot de passe avec « Mot de passe oublié » et écrivez-nous à ${CONTACT_LINK}.`,
+    note: `Si vous n'êtes pas à l'origine de ce changement, réinitialisez votre mot de passe avec « Mot de passe oublié » et prévenez-nous via <a href="${CONTACT_URL}" style="color:#b44708;">notre formulaire de contact</a>.`,
   });
 
 const sendVerificationMail = (

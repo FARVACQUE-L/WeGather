@@ -5,6 +5,7 @@ import { detectMimeType, REPORTS_DESTINATION } from "../../middleware/upload";
 import { disconnectUser, removeFromEventRoom } from "../../socket";
 import eventRepository from "../event/eventRepository";
 import transporter, {
+  CONTACT_URL,
   escapeHtml,
   MAIL_FROM,
   renderMail,
@@ -32,8 +33,6 @@ const sendModerationMail = async ({
   message: string;
   appeal: boolean;
 }) => {
-  const contactUrl = `${process.env.CLIENT_URL}/contact`;
-
   try {
     await transporter.sendMail({
       from: MAIL_FROM,
@@ -47,10 +46,10 @@ const sendModerationMail = async ({
           ...(appeal ? [APPEAL_MESSAGE] : []),
         ],
         button: appeal
-          ? { label: "Nous contacter", url: contactUrl }
+          ? { label: "Nous contacter", url: CONTACT_URL }
           : undefined,
       }),
-      text: `Bonjour ${username},\n\n${message}\n\n${appeal ? `${APPEAL_MESSAGE}\n${contactUrl}\n\n` : ""}L'équipe WeGather.`,
+      text: `Bonjour ${username},\n\n${message}\n\n${appeal ? `${APPEAL_MESSAGE}\n${CONTACT_URL}\n\n` : ""}L'équipe WeGather.`,
     });
   } catch (mailErr) {
     console.error("Échec de l'envoi du mail :", mailErr);
