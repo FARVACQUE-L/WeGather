@@ -85,11 +85,20 @@ function Register() {
       }
 
       await Swal.fire({
-        icon: "success",
         title: "Vérifiez votre boîte mail",
-        text: `Un lien de confirmation a été envoyé à ${email.trim()}. Cliquez dessus pour activer votre compte (pensez à vérifier vos spams).`,
-        confirmButtonText: "OK",
-        confirmButtonColor: "#b44708",
+        text: `Un lien de confirmation a été envoyé à ${email.trim()}. Cliquez dessus dans les 24 heures pour activer votre compte (pensez à vérifier vos spams).`,
+        confirmButtonText: "Compris",
+        buttonsStyling: false,
+        showClass: { popup: "RegisterModal-Show" },
+
+        customClass: {
+          container: "RegisterModal-Backdrop",
+          popup: "RegisterModal",
+          title: "RegisterModal-Title",
+          htmlContainer: "RegisterModal-Text",
+          actions: "RegisterModal-Actions",
+          confirmButton: "RegisterModal-Confirm",
+        },
       });
 
       navigate("/connexion");
