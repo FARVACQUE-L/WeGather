@@ -18,14 +18,14 @@ const PLANS = [
   },
   {
     name: "Premium",
-    price: "4,90 € TTC, paiement unique",
+    price: "Disponible prochainement",
     hostedEvents: "5",
     reservations: "10",
     galleryPhotos: "30",
   },
   {
     name: "Gold",
-    price: "9,90 € TTC par mois",
+    price: "Disponible prochainement",
     hostedEvents: "Illimité",
     reservations: "Illimité",
     galleryPhotos: "50",
@@ -465,8 +465,9 @@ function PageCGV() {
           <motion.section {...revealOnScroll}>
             <h3>Article 15 — Formules et prix</h3>
             <p>
-              Trois formules sont proposées. Les prix sont indiqués en euros,
-              toutes taxes comprises.
+              Trois formules sont prévues. Les formules payantes Premium et Gold
+              seront disponibles prochainement : leurs prix, en euros toutes
+              taxes comprises, seront indiqués ici à leur ouverture.
             </p>
             <div className="cgv-TableWrapper">
               <table className="cgv-Table">
@@ -534,13 +535,13 @@ function PageCGV() {
             </p>
             <ul>
               <li>
-                <strong>Formule Premium :</strong> paiement unique de 4,90 €,
-                débité à la commande. Les avantages de la formule restent acquis
-                tant que le compte existe.
+                <strong>Formule Premium :</strong> paiement unique, débité à la
+                commande. Les avantages de la formule restent acquis tant que le
+                compte existe.
               </li>
               <li>
-                <strong>Formule Gold :</strong> abonnement de 9,90 € par mois,
-                débité à la commande puis chaque mois à la même date.
+                <strong>Formule Gold :</strong> abonnement mensuel, débité à la
+                commande puis chaque mois à la même date.
               </li>
             </ul>
             <p>
