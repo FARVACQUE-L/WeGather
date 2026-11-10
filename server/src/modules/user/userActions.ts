@@ -17,7 +17,7 @@ import {
 } from "../../helper/jwtHelper";
 import { removeUpload } from "../../helper/removeUpload";
 import { disconnectUser } from "../../socket";
-import transporter, { MAIL_FROM } from "../services/mailer";
+import transporter, { MAIL_FROM, renderMail } from "../services/mailer";
 import userRepository from "./userRepository";
 
 const authVerif: RequestHandler = async (req, res, next) => {
@@ -167,6 +167,15 @@ const VERIFY_TOKEN_DURATION_MS = 1000 * 60 * 60 * 24;
 const hashToken = (token: string) =>
   crypto.createHash("sha256").update(token).digest("hex");
 
+const passwordChangedMail = () =>
+  renderMail({
+    title: "Mot de passe modifié",
+    paragraphs: [
+      "Le mot de passe de votre compte WeGather vient d'être modifié.",
+    ],
+    note: 'Si vous n\'êtes pas à l\'origine de ce changement, réinitialisez votre mot de passe avec « Mot de passe oublié » et écrivez-nous à <a href="mailto:contact@wegather.fr" style="color:#b44708;">contact@wegather.fr</a>.',
+  });
+
 const sendVerificationMail = (
   email: string,
   username: string,
@@ -179,12 +188,14 @@ const sendVerificationMail = (
       from: MAIL_FROM,
       to: email,
       subject: "Confirmez votre adresse e-mail",
-      html: `
-    <h1>Bienvenue sur WeGather, ${escapeHtml(username)} 🎉</h1>
-    <p>Pour activer votre compte, confirmez votre adresse e-mail en cliquant sur le lien suivant :</p>
-    <p><a href="${link}">${link}</a></p>
-    <p>Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail.</p>
-  `,
+      html: renderMail({
+        title: `Bienvenue, ${escapeHtml(username)} 🎉`,
+        paragraphs: [
+          "Merci de votre inscription sur WeGather. Pour activer votre compte, confirmez votre adresse e-mail :",
+        ],
+        button: { label: "Confirmer mon adresse", url: link },
+        note: "Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscription, ignorez cet e-mail.",
+      }),
     })
     .catch((err) => console.error("Échec de l'envoi du mail :", err));
 };
@@ -376,12 +387,14 @@ const forgotPassword: RequestHandler = async (req, res, next) => {
         from: MAIL_FROM,
         to: user.user_mail,
         subject: "Réinitialisation du mot de passe",
-        html: `
-    <h1>WeGather</h1>
-    <h2>Réinitialisation du mot de passe</h2>
-    <p>Cliquez sur le lien suivant :</p>
-    <a href="${link}">${link}</a>
-  `,
+        html: renderMail({
+          title: "Réinitialisation du mot de passe",
+          paragraphs: [
+            "Vous avez demandé à réinitialiser le mot de passe de votre compte WeGather. Cliquez sur le bouton ci-dessous pour en choisir un nouveau :",
+          ],
+          button: { label: "Choisir un nouveau mot de passe", url: link },
+          note: "Ce lien est valable 30 minutes. Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : votre mot de passe reste inchangé.",
+        }),
       })
       .catch((err) => console.error("Échec de l'envoi du mail :", err));
   } catch (err) {
@@ -436,10 +449,7 @@ const resetPassword: RequestHandler = async (req, res, next) => {
         from: MAIL_FROM,
         to: user.user_mail,
         subject: "Mot de passe modifié",
-        html: `
-    <h1>WeGather</h1>
-    <p>Votre mot de passe a été modifié avec succès.</p>
-  `,
+        html: passwordChangedMail(),
       })
       .catch((_err) => {});
     return;
@@ -506,11 +516,7 @@ const changePassword: RequestHandler = async (req, res, next) => {
         from: MAIL_FROM,
         to: user.user_mail,
         subject: "Mot de passe modifié",
-        html: `
-        <h1>WeGather</h1>
-        <p>Votre mot de passe a été modifié avec succès.</p>
-        <p>Si ce n’était pas vous, contactez le support client.</p>
-      `,
+        html: passwordChangedMail(),
       })
       .catch((_err) => {});
 
