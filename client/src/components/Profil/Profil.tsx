@@ -177,7 +177,16 @@ function Profil() {
         return;
       }
 
-      window.alert("Votre pseudo a été modifié.");
+      await Swal.fire({
+        toast: true,
+        position: "top",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        icon: "success",
+        text: "Votre pseudo a été modifié.",
+        customClass: { popup: "toast-success-popup" },
+      });
       window.location.reload();
     } catch (error) {
       console.error(error);
