@@ -465,9 +465,10 @@ function PageCGV() {
           <motion.section {...revealOnScroll}>
             <h3>Article 15 — Formules et prix</h3>
             <p>
-              Trois formules sont prévues. Les formules payantes Premium et Gold
-              seront disponibles prochainement : leurs prix, en euros toutes
-              taxes comprises, seront indiqués ici à leur ouverture.
+              Les formules payantes Premium et Gold ne sont pas encore ouvertes
+              à la souscription. Leurs prix et leurs modalités de paiement
+              (paiement unique ou abonnement mensuel ou annuel) seront précisés
+              dans les présentes CGV à leur ouverture.
             </p>
             <div className="cgv-TableWrapper">
               <table className="cgv-Table">
@@ -517,11 +518,11 @@ function PageCGV() {
             <p>
               L'utilisateur souscrit une formule depuis la page Premium de son
               compte. Avant de valider, il prend connaissance d'un récapitulatif
-              indiquant la formule choisie, son prix et, pour la formule Gold,
-              la périodicité du paiement. La commande est définitive après la
-              validation du paiement. WeGather confirme la souscription par
-              e-mail, en y joignant les présentes conditions ou un lien vers
-              celles-ci.
+              indiquant la formule choisie, son prix et sa modalité de paiement
+              (paiement unique ou abonnement, avec sa périodicité). La commande
+              est définitive après la validation du paiement. WeGather confirme
+              la souscription par e-mail, en y joignant les présentes conditions
+              ou un lien vers celles-ci.
             </p>
           </motion.section>
 
@@ -533,39 +534,32 @@ function PageCGV() {
               n'a jamais accès aux coordonnées bancaires complètes de
               l'utilisateur et ne les conserve pas.
             </p>
-            <ul>
-              <li>
-                <strong>Formule Premium :</strong> paiement unique, débité à la
-                commande. Les avantages de la formule restent acquis tant que le
-                compte existe.
-              </li>
-              <li>
-                <strong>Formule Gold :</strong> abonnement mensuel, débité à la
-                commande puis chaque mois à la même date.
-              </li>
-            </ul>
             <p>
-              En cas d'échec d'un paiement mensuel, l'abonnement Gold est
-              suspendu et le compte repasse à la formule Free jusqu'à la
-              régularisation du paiement.
+              Selon la formule, le paiement est unique et débité à la commande,
+              ou prend la forme d'un abonnement débité à la commande puis à
+              chaque échéance. Les avantages d'une formule acquise par paiement
+              unique restent acquis tant que le compte existe. En cas d'échec
+              d'un paiement d'abonnement, celui-ci est suspendu et le compte
+              repasse à la formule Free jusqu'à la régularisation du paiement.
             </p>
           </motion.section>
 
           <motion.section {...revealOnScroll}>
-            <h3>Article 19 — Durée et résiliation de l'abonnement Gold</h3>
+            <h3>Article 19 — Durée et résiliation des abonnements</h3>
             <p>
-              L'abonnement Gold est conclu pour une durée d'un mois, renouvelée
-              automatiquement chaque mois. L'utilisateur peut le résilier à tout
-              moment, sans frais, en écrivant à{" "}
+              Lorsqu'une formule est proposée sous forme d'abonnement, celui-ci
+              est conclu pour la période indiquée lors de la commande (mois ou
+              année) et renouvelé automatiquement. L'utilisateur peut le
+              résilier à tout moment, sans frais, en écrivant à{" "}
               <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. La
-              résiliation prend effet à la fin de la période mensuelle en cours,
-              déjà payée ; elle ne donne pas lieu à un remboursement au prorata.
+              résiliation prend effet à la fin de la période en cours, déjà
+              payée ; elle ne donne pas lieu à un remboursement au prorata.
             </p>
             <p>
               À la fin de l'abonnement, le compte repasse à la formule Free, ou
-              à la formule Premium si l'utilisateur l'avait achetée. Les
-              contenus existants sont conservés, dans les conditions de
-              l'article 16.
+              à une formule acquise par paiement unique si l'utilisateur en
+              dispose. Les contenus existants sont conservés, dans les
+              conditions de l'article 16.
             </p>
           </motion.section>
 
@@ -621,7 +615,7 @@ function PageCGV() {
               Les utilisateurs sont informés de toute modification importante
               par e-mail ou sur le Service, au moins 30 jours avant son entrée
               en vigueur. L'utilisateur qui refuse les nouvelles conditions peut
-              supprimer son compte et, s'il est abonné à la formule Gold,
+              supprimer son compte et, s'il est titulaire d'un abonnement,
               résilier son abonnement avant leur entrée en vigueur. Les
               conditions de vente applicables à une commande restent celles en
               vigueur à sa date.
