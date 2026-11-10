@@ -92,7 +92,7 @@ export const renderMail = ({
         <tr>
           <td align="center" style="padding:20px 8px 0;font-family:${FONT};font-size:12px;line-height:1.5;color:#999999;">
             Cet e-mail a été envoyé automatiquement, merci de ne pas y répondre.<br>
-            Une question ? <a href="mailto:contact@wegather.fr" style="color:#b44708;">contact@wegather.fr</a>
+            Une question ? <a href="${process.env.CLIENT_URL}/contact" style="color:#b44708;">Contactez-nous</a>
           </td>
         </tr>
       </table>
