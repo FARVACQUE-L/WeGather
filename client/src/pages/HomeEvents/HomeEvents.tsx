@@ -97,11 +97,11 @@ function HomeEvents() {
     customClass: { popup: "toast" },
   });
 
-  const handleEventCreated = (newEvent: EventData) => {
+  const handleEventCreated = (newEvent: EventData, joined = false) => {
     setEvents((prev) => [...prev, newEvent]);
     toast.fire({
       icon: "success",
-      text: "Événement créé",
+      text: joined ? "Événement rejoint" : "Événement créé",
       customClass: { popup: "toast-error-popup" },
     });
   };

@@ -34,17 +34,17 @@ export interface ButtonAddEventProps {
 export interface ModalAddEventProps {
   isOpen: boolean;
   onClose: () => void;
-  onEventCreated: (event: EventData) => void;
+  onEventCreated: (event: EventData, joined?: boolean) => void;
 }
 
 export interface CreateFormProps {
   onClose: () => void;
-  onEventCreated: (event: EventData) => void;
+  onEventCreated: (event: EventData, joined?: boolean) => void;
 }
 
 export interface JoinFormProps {
   onClose: () => void;
-  onEventCreated: (event: EventData) => void;
+  onEventCreated: (event: EventData, joined?: boolean) => void;
 }
 
 export type FilterType = "all" | "ongoing" | "finished";
