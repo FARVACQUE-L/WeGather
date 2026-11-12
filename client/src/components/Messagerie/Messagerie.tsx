@@ -914,15 +914,24 @@ function Messagerie() {
                             )}
                             {reception.message_reply_to !== null && (
                               <span className="message-reply">
-                                <span className="message-reply-author">
-                                  {reception.reply_username}
+                                <span className="message-reply-body">
+                                  <span className="message-reply-author">
+                                    {reception.reply_username}
+                                  </span>
+                                  <span className="message-reply-text">
+                                    {quoteText(
+                                      reception.reply_text,
+                                      reception.reply_image,
+                                    )}
+                                  </span>
                                 </span>
-                                <span className="message-reply-text">
-                                  {quoteText(
-                                    reception.reply_text,
-                                    reception.reply_image,
-                                  )}
-                                </span>
+                                {reception.reply_image && (
+                                  <img
+                                    className="message-reply-thumb"
+                                    src={`${import.meta.env.VITE_API_URL}${reception.reply_image}`}
+                                    alt=""
+                                  />
+                                )}
                               </span>
                             )}
                             {reception.message_image && (
@@ -1066,6 +1075,13 @@ function Messagerie() {
                   )}
                 </p>
               </div>
+              {(replyTo ?? editing)?.message_image && (
+                <img
+                  className="compose-context-thumb"
+                  src={`${import.meta.env.VITE_API_URL}${(replyTo ?? editing)?.message_image}`}
+                  alt=""
+                />
+              )}
               <button
                 type="button"
                 aria-label={

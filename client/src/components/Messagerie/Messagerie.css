@@ -170,7 +170,9 @@
         }
 
         .message-reply {
-          display: block;
+          display: flex;
+          align-items: center;
+          gap: 8px;
           margin-bottom: 4px;
           padding: 4px 8px;
           border-left: 3px solid currentColor;
@@ -178,9 +180,22 @@
           background: rgb(0 0 0 / 6%);
           font-size: 12px;
 
+          .message-reply-body {
+            flex: 1;
+            min-width: 0;
+          }
+
           .message-reply-author {
             display: block;
             font-weight: 600;
+          }
+
+          .message-reply-thumb {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            object-fit: cover;
           }
 
           .message-reply-text {
@@ -372,6 +387,14 @@
           text-overflow: ellipsis;
           white-space: nowrap;
           font-size: 13px;
+        }
+
+        .compose-context-thumb {
+          flex-shrink: 0;
+          width: 40px;
+          height: 40px;
+          border-radius: 6px;
+          object-fit: cover;
         }
 
         button {
