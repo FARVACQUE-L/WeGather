@@ -204,18 +204,120 @@ function Messagerie() {
     lastScrollTopRef.current = scrollTop;
   };
 
-  // En changeant d'événement, on repart en bas d'une nouvelle conversation.
+  // Nombre de messages non lus à l'arrivée (null tant qu'il n'est pas connu)
+  // et premier d'entre eux, où s'affiche la démarcation « Messages non lus ».
+  // firstUnreadId vaut undefined tant qu'il n'est pas calculé, null s'il n'y
+  // a rien de non lu.
+  const [unreadCountOnArrival, setUnreadCountOnArrival] = useState<
+    number | null
+  >(null);
+  const [firstUnreadId, setFirstUnreadId] = useState<number | null | undefined>(
+    undefined,
+  );
+  const initialPositionDoneRef = useRef(false);
+
+  // En changeant d'événement, on repart d'une nouvelle conversation.
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset à chaque événement
   useLayoutEffect(() => {
     isAtBottomRef.current = true;
     lastMessageIdRef.current = null;
+    initialPositionDoneRef.current = false;
     setNewMessagesCount(0);
+    setUnreadCountOnArrival(null);
+    setFirstUnreadId(undefined);
   }, [eventUuid]);
+
+  // Le compte des non-lus doit être lu AVANT de marquer les messages comme
+  // lus, sinon il vaut toujours 0.
+  useEffect(() => {
+    if (!eventUuid || !userId) return;
+    let cancelled = false;
+
+    const readAndMark = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/messages/unread/${eventUuid}`,
+          { credentials: "include" },
+        );
+        const data = res.ok ? await res.json() : { count: 0 };
+        if (cancelled) return;
+        setUnreadCountOnArrival(Number(data.count) || 0);
+      } catch (error) {
+        console.error("Erreur lecture non lus :", error);
+        if (cancelled) return;
+        setUnreadCountOnArrival(0);
+      }
+
+      fetch(
+        `${import.meta.env.VITE_API_URL}/api/messages/notification/${eventUuid}`,
+        { method: "POST", credentials: "include" },
+      ).catch((error) => {
+        console.error("Erreur lecture messages :", error);
+      });
+    };
+
+    readAndMark();
+    return () => {
+      cancelled = true;
+    };
+  }, [eventUuid, userId]);
+
+  // Les messages sont marqués lus tous ensemble : les non-lus sont donc les
+  // N derniers messages des autres participants.
+  useEffect(() => {
+    if (
+      firstUnreadId !== undefined ||
+      unreadCountOnArrival === null ||
+      userId === null ||
+      receptionMessagesUser.length === 0
+    ) {
+      return;
+    }
+    if (unreadCountOnArrival === 0) {
+      setFirstUnreadId(null);
+      return;
+    }
+    const othersMessages = receptionMessagesUser.filter(
+      (message) => message.user_id !== userId,
+    );
+    const firstUnread =
+      othersMessages[Math.max(0, othersMessages.length - unreadCountOnArrival)];
+    setFirstUnreadId(firstUnread?.message_id ?? null);
+  }, [firstUnreadId, unreadCountOnArrival, userId, receptionMessagesUser]);
 
   // Après le rendu mais avant l'affichage, pour éviter un saut visible.
   useLayoutEffect(() => {
     const lastMessage = receptionMessagesUser.at(-1);
     if (!lastMessage) return;
+
+    // Première ouverture : on attend de savoir où commencent les non-lus,
+    // puis on se place sur la démarcation au lieu du dernier message.
+    if (!initialPositionDoneRef.current) {
+      if (firstUnreadId === undefined) return;
+      initialPositionDoneRef.current = true;
+      lastMessageIdRef.current = lastMessage.message_id;
+
+      const messagesElement = messagesRef.current;
+      const separator = messagesElement?.querySelector(
+        ".message-unread-separator",
+      );
+      if (!messagesElement || !separator) {
+        scrollToBottom();
+        return;
+      }
+
+      messagesElement.scrollTop +=
+        separator.getBoundingClientRect().top -
+        messagesElement.getBoundingClientRect().top -
+        24;
+      const { scrollTop, scrollHeight, clientHeight } = messagesElement;
+      lastScrollTopRef.current = scrollTop;
+      isAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 80;
+      if (!isAtBottomRef.current && unreadCountOnArrival) {
+        setNewMessagesCount(unreadCountOnArrival);
+      }
+      return;
+    }
 
     // Les identifiants croissent : un identifiant plus petit signifie que le
     // dernier message a été supprimé, pas qu'un nouveau est arrivé.
@@ -230,7 +332,13 @@ function Messagerie() {
     } else if (isNewMessage) {
       setNewMessagesCount((count) => count + 1);
     }
-  }, [receptionMessagesUser, userId, scrollToBottom]);
+  }, [
+    receptionMessagesUser,
+    userId,
+    scrollToBottom,
+    firstUnreadId,
+    unreadCountOnArrival,
+  ]);
 
   // Redescend quand la hauteur change après coup :
   // - la zone visible rétrécit (réponse ou image en attente sous la liste,
@@ -242,7 +350,9 @@ function Messagerie() {
     if (!messagesElement || !contentElement) return;
 
     const observer = new ResizeObserver(() => {
-      if (isAtBottomRef.current) scrollToBottom();
+      if (initialPositionDoneRef.current && isAtBottomRef.current) {
+        scrollToBottom();
+      }
     });
     observer.observe(messagesElement);
     observer.observe(contentElement);
@@ -285,16 +395,6 @@ function Messagerie() {
     fetchUserEvent();
     fetchMessages();
   }, [eventUuid, userId, fetchUserEvent, fetchMessages]);
-
-  useEffect(() => {
-    if (!eventUuid || !userId) return;
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/messages/notification/${eventUuid}`,
-      { method: "POST", credentials: "include" },
-    ).catch((error) => {
-      console.error("Erreur lecture messages :", error);
-    });
-  }, [eventUuid, userId]);
 
   useEffect(() => {
     if (!eventUuid) return;
@@ -732,9 +832,12 @@ function Messagerie() {
                 const isNewDay = currentDay !== previousDay;
 
                 const isOwn = reception.user_id === userId;
+                const isFirstUnread = reception.message_id === firstUnreadId;
                 const showAuthor =
                   !isOwn &&
-                  (isNewDay || previousMessage?.user_id !== reception.user_id);
+                  (isNewDay ||
+                    isFirstUnread ||
+                    previousMessage?.user_id !== reception.user_id);
                 const isMenuOpen =
                   openMenu?.message.message_id === reception.message_id;
                 const hour = `${reception.message_edited_at ? "modifié · " : ""}${formatHour(reception.message_date)}`;
@@ -768,6 +871,11 @@ function Messagerie() {
                         0.03,
                     }}
                   >
+                    {isFirstUnread && (
+                      <div className="message-unread-separator">
+                        <span>Messages non lus</span>
+                      </div>
+                    )}
                     {isNewDay && (
                       <div className="message-date-separator">{currentDay}</div>
                     )}
