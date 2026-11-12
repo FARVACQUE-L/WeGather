@@ -213,6 +213,16 @@ CREATE TABLE `message` (
   -- Image jointe (chemin sous /uploads), NULL sans image. Un message avec
   -- image peut avoir un texte vide.
   `message_image` VARCHAR(255) NULL DEFAULT NULL,
+  -- Aperçu du premier lien du message (balises Open Graph du site), NULL
+  -- sans lien ou si le site n'en fournit pas.
+  `message_link_url` VARCHAR(2048) NULL DEFAULT NULL,
+  `message_link_site` VARCHAR(100)
+    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `message_link_title` VARCHAR(200)
+    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `message_link_description` VARCHAR(300)
+    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `message_link_image` VARCHAR(2048) NULL DEFAULT NULL,
 
   PRIMARY KEY (`message_id`),
 

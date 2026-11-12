@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { RequestHandler } from "express";
 import { isEventMember, readMemberEventId } from "../../helper/eventMembership";
+import { fetchLinkPreview, findFirstUrl } from "../../helper/linkPreview";
 import { removeUpload } from "../../helper/removeUpload";
 import { isId, LIMITS } from "../../helper/validation";
 import { UPLOADS_DIRECTORY } from "../../middleware/upload";
@@ -28,6 +29,30 @@ const addImageExtension = async (file: Express.Multer.File) => {
   file.path = newPath;
 
   return `/uploads/${filename}`;
+};
+
+// Récupère l'aperçu après coup pour ne pas retarder l'envoi : le message
+// apparaît tout de suite, puis l'aperçu arrive via « message-updated ».
+const refreshLinkPreview = async (
+  eventUuid: string,
+  messageId: number,
+  messageText: string,
+  currentUrl: string | null,
+) => {
+  const url = findFirstUrl(messageText);
+  if (url === currentUrl) return;
+
+  const preview = url ? await fetchLinkPreview(url) : null;
+  if (!preview && !currentUrl) return;
+
+  const updated = await messageRepository.saveLinkPreview(
+    messageId,
+    messageText,
+    preview,
+  );
+  if (updated) {
+    getIo().to(`event-${eventUuid}`).emit("message-updated", updated);
+  }
 };
 
 const addMessage: RequestHandler = async (req, res, next) => {
@@ -94,6 +119,13 @@ const addMessage: RequestHandler = async (req, res, next) => {
     const io = getIo();
     io.to(`event-${req.params.eventUuid}`).emit("new-message", result);
     res.status(201).json(result);
+
+    refreshLinkPreview(
+      req.params.eventUuid,
+      result.message_id,
+      messageText,
+      null,
+    ).catch((error) => console.error("Aperçu de lien :", error));
   } catch (error) {
     console.error("messageActions.addMessage erreur", error);
     next(error);
@@ -207,6 +239,13 @@ const editMessage: RequestHandler = async (req, res, next) => {
       .to(`event-${req.params.eventUuid}`)
       .emit("message-updated", updated);
     res.json(updated);
+
+    refreshLinkPreview(
+      req.params.eventUuid,
+      found.message.message_id,
+      messageText,
+      updated.message_link_url,
+    ).catch((error) => console.error("Aperçu de lien :", error));
   } catch (error) {
     next(error);
   }

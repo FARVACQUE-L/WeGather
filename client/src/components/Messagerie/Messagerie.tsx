@@ -1,8 +1,17 @@
 import "./Messagerie.css";
 import type { EmojiClickData } from "emoji-picker-react";
 import EmojiPicker, { Categories, EmojiStyle } from "emoji-picker-react";
-import { motion } from "framer-motion";
-import { Ellipsis, Pencil, Plus, Reply, Send, Trash2, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowDown,
+  Ellipsis,
+  Pencil,
+  Plus,
+  Reply,
+  Send,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -91,6 +100,11 @@ type ReceptionMessagesUser = {
   reply_image: string | null;
   reply_username: string | null;
   message_image: string | null;
+  message_link_url: string | null;
+  message_link_site: string | null;
+  message_link_title: string | null;
+  message_link_description: string | null;
+  message_link_image: string | null;
   user_name: string;
   user_username: string;
   user_id: number;
@@ -162,12 +176,199 @@ function Messagerie() {
       .catch(console.error);
   }, []);
 
+  // Vrai tant que l'utilisateur est en bas de la conversation : on le garde
+  // alors collé au dernier message, même si le contenu grandit ensuite.
+  const isAtBottomRef = useRef(true);
+  const lastScrollTopRef = useRef(0);
+  const lastMessageIdRef = useRef<number | null>(null);
+  const messagesContentRef = useRef<HTMLDivElement | null>(null);
+  // Messages reçus pendant que l'utilisateur lit plus haut dans l'historique.
+  const [newMessagesCount, setNewMessagesCount] = useState(0);
+
+  const scrollToBottom = useCallback(() => {
+    const messagesElement = messagesRef.current;
+    if (messagesElement) {
+      messagesElement.scrollTop = messagesElement.scrollHeight;
+    }
+  }, []);
+
+  // Seul un défilement vers le haut fait quitter le bas. Un contenu qui
+  // grandit (image qui se charge…) éloigne aussi du bas, mais sans faire
+  // remonter la liste : on reste donc collé au dernier message.
+  const handleMessagesScroll = () => {
+    const messagesElement = messagesRef.current;
+    if (!messagesElement) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesElement;
+
+    if (scrollHeight - scrollTop - clientHeight < 80) {
+      isAtBottomRef.current = true;
+      setNewMessagesCount(0);
+    } else if (scrollTop < lastScrollTopRef.current) {
+      isAtBottomRef.current = false;
+    }
+    lastScrollTopRef.current = scrollTop;
+  };
+
+  // Nombre de messages non lus à l'arrivée (null tant qu'il n'est pas connu)
+  // et premier d'entre eux, où s'affiche la démarcation « Messages non lus ».
+  // firstUnreadId vaut undefined tant qu'il n'est pas calculé, null s'il n'y
+  // a rien de non lu.
+  const [unreadCountOnArrival, setUnreadCountOnArrival] = useState<
+    number | null
+  >(null);
+  const [firstUnreadId, setFirstUnreadId] = useState<number | null | undefined>(
+    undefined,
+  );
+  const initialPositionDoneRef = useRef(false);
+
+  // En changeant d'événement, on repart d'une nouvelle conversation.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset à chaque événement
+  useLayoutEffect(() => {
+    isAtBottomRef.current = true;
+    lastMessageIdRef.current = null;
+    initialPositionDoneRef.current = false;
+    setNewMessagesCount(0);
+    setUnreadCountOnArrival(null);
+    setFirstUnreadId(undefined);
+  }, [eventUuid]);
+
+  // Le compte des non-lus doit être lu AVANT de marquer les messages comme
+  // lus, sinon il vaut toujours 0.
+  useEffect(() => {
+    if (!eventUuid || !userId) return;
+    let cancelled = false;
+
+    const readAndMark = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/messages/unread/${eventUuid}`,
+          { credentials: "include" },
+        );
+        const data = res.ok ? await res.json() : { count: 0 };
+        if (cancelled) return;
+        setUnreadCountOnArrival(Number(data.count) || 0);
+      } catch (error) {
+        console.error("Erreur lecture non lus :", error);
+        if (cancelled) return;
+        setUnreadCountOnArrival(0);
+      }
+
+      fetch(
+        `${import.meta.env.VITE_API_URL}/api/messages/notification/${eventUuid}`,
+        { method: "POST", credentials: "include" },
+      ).catch((error) => {
+        console.error("Erreur lecture messages :", error);
+      });
+    };
+
+    readAndMark();
+    return () => {
+      cancelled = true;
+    };
+  }, [eventUuid, userId]);
+
+  // Les messages sont marqués lus tous ensemble : les non-lus sont donc les
+  // N derniers messages des autres participants.
+  useEffect(() => {
+    if (
+      firstUnreadId !== undefined ||
+      unreadCountOnArrival === null ||
+      userId === null ||
+      receptionMessagesUser.length === 0
+    ) {
+      return;
+    }
+    if (unreadCountOnArrival === 0) {
+      setFirstUnreadId(null);
+      return;
+    }
+    const othersMessages = receptionMessagesUser.filter(
+      (message) => message.user_id !== userId,
+    );
+    const firstUnread =
+      othersMessages[Math.max(0, othersMessages.length - unreadCountOnArrival)];
+    setFirstUnreadId(firstUnread?.message_id ?? null);
+  }, [firstUnreadId, unreadCountOnArrival, userId, receptionMessagesUser]);
+
+  // Après le rendu mais avant l'affichage, pour éviter un saut visible.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: userInEvent conditionne l'existence de la liste
+  useLayoutEffect(() => {
+    const lastMessage = receptionMessagesUser.at(-1);
+    if (!lastMessage) return;
+
+    // Première ouverture : on attend de savoir où commencent les non-lus,
+    // puis on se place sur la démarcation au lieu du dernier message.
+    if (!initialPositionDoneRef.current) {
+      // La liste n'existe pas encore pendant l'écran « Chargement... ».
+      const messagesElement = messagesRef.current;
+      if (firstUnreadId === undefined || !messagesElement) return;
+      initialPositionDoneRef.current = true;
+      lastMessageIdRef.current = lastMessage.message_id;
+
+      const separator = messagesElement.querySelector(
+        ".message-unread-separator",
+      );
+      if (!separator) {
+        scrollToBottom();
+        return;
+      }
+
+      messagesElement.scrollTop +=
+        separator.getBoundingClientRect().top -
+        messagesElement.getBoundingClientRect().top -
+        24;
+      const { scrollTop, scrollHeight, clientHeight } = messagesElement;
+      lastScrollTopRef.current = scrollTop;
+      isAtBottomRef.current = scrollHeight - scrollTop - clientHeight < 80;
+      if (!isAtBottomRef.current && unreadCountOnArrival) {
+        setNewMessagesCount(unreadCountOnArrival);
+      }
+      return;
+    }
+
+    // Les identifiants croissent : un identifiant plus petit signifie que le
+    // dernier message a été supprimé, pas qu'un nouveau est arrivé.
+    const previousLastId = lastMessageIdRef.current;
+    const isNewMessage =
+      previousLastId !== null && lastMessage.message_id > previousLastId;
+    const isNewOwnMessage = isNewMessage && lastMessage.user_id === userId;
+    lastMessageIdRef.current = lastMessage.message_id;
+
+    if (isAtBottomRef.current || isNewOwnMessage) {
+      scrollToBottom();
+    } else if (isNewMessage) {
+      setNewMessagesCount((count) => count + 1);
+    }
+  }, [
+    receptionMessagesUser,
+    userId,
+    scrollToBottom,
+    firstUnreadId,
+    unreadCountOnArrival,
+    userInEvent,
+  ]);
+
+  // Redescend quand la hauteur change après coup :
+  // - la zone visible rétrécit (réponse ou image en attente sous la liste,
+  //   clavier mobile) ;
+  // - les messages grandissent (image qui finit de se charger, réaction).
+  // Relancé quand userInEvent change : au premier rendu, la page affiche
+  // « Chargement... » et la liste n'existe pas encore.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: userInEvent conditionne l'existence de la liste
   useEffect(() => {
     const messagesElement = messagesRef.current;
-    const messagesCount = receptionMessagesUser.length;
-    if (!messagesElement || messagesCount === 0) return;
-    messagesElement.scrollTop = messagesElement.scrollHeight;
-  }, [receptionMessagesUser]);
+    const contentElement = messagesContentRef.current;
+    if (!messagesElement || !contentElement) return;
+
+    const observer = new ResizeObserver(() => {
+      if (initialPositionDoneRef.current && isAtBottomRef.current) {
+        scrollToBottom();
+      }
+    });
+    observer.observe(messagesElement);
+    observer.observe(contentElement);
+    return () => observer.disconnect();
+  }, [scrollToBottom, userInEvent]);
   const isTouchScreen = window.matchMedia(
     "(pointer: coarse), (max-width: 428px)",
   ).matches;
@@ -205,16 +406,6 @@ function Messagerie() {
     fetchUserEvent();
     fetchMessages();
   }, [eventUuid, userId, fetchUserEvent, fetchMessages]);
-
-  useEffect(() => {
-    if (!eventUuid || !userId) return;
-    fetch(
-      `${import.meta.env.VITE_API_URL}/api/messages/notification/${eventUuid}`,
-      { method: "POST", credentials: "include" },
-    ).catch((error) => {
-      console.error("Erreur lecture messages :", error);
-    });
-  }, [eventUuid, userId]);
 
   useEffect(() => {
     if (!eventUuid) return;
@@ -470,7 +661,18 @@ function Messagerie() {
       showCancelButton: true,
       confirmButtonText: "Supprimer",
       cancelButtonText: "Annuler",
-      customClass: { popup: "toast-warning-popup" },
+      reverseButtons: true,
+      buttonsStyling: false,
+      showClass: { popup: "MessageModal-Show" },
+      customClass: {
+        container: "MessageModal-Backdrop",
+        popup: "MessageModal",
+        title: "MessageModal-Title",
+        htmlContainer: "MessageModal-Text",
+        actions: "MessageModal-Actions",
+        confirmButton: "MessageModal-Confirm",
+        cancelButton: "MessageModal-Cancel",
+      },
     });
     if (!isConfirmed) return;
 
@@ -621,185 +823,280 @@ function Messagerie() {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1 }}
         >
-          <div ref={messagesRef} className="messagerie-box-messages">
-            {receptionMessagesUser.map((reception, index) => {
-              const previousMessage = receptionMessagesUser[index - 1];
+          <div
+            ref={messagesRef}
+            className="messagerie-box-messages"
+            onScroll={handleMessagesScroll}
+          >
+            <div
+              ref={messagesContentRef}
+              className="messagerie-box-messages-content"
+            >
+              {receptionMessagesUser.map((reception, index) => {
+                const previousMessage = receptionMessagesUser[index - 1];
 
-              const currentDay = formatMessageDay(reception.message_date);
-              const previousDay = previousMessage
-                ? formatMessageDay(previousMessage.message_date)
-                : null;
+                const currentDay = formatMessageDay(reception.message_date);
+                const previousDay = previousMessage
+                  ? formatMessageDay(previousMessage.message_date)
+                  : null;
 
-              const isNewDay = currentDay !== previousDay;
+                const isNewDay = currentDay !== previousDay;
 
-              const isOwn = reception.user_id === userId;
-              const showAuthor =
-                !isOwn &&
-                (isNewDay || previousMessage?.user_id !== reception.user_id);
-              const isMenuOpen =
-                openMenu?.message.message_id === reception.message_id;
-              const hour = `${reception.message_edited_at ? "modifié · " : ""}${formatHour(reception.message_date)}`;
+                const isOwn = reception.user_id === userId;
+                const isFirstUnread = reception.message_id === firstUnreadId;
+                const showAuthor =
+                  !isOwn &&
+                  (isNewDay ||
+                    isFirstUnread ||
+                    previousMessage?.user_id !== reception.user_id);
+                const isMenuOpen =
+                  openMenu?.message.message_id === reception.message_id;
+                const hour = `${reception.message_edited_at ? "modifié · " : ""}${formatHour(reception.message_date)}`;
 
-              const actions = (
-                <div className="message-actions">
-                  <button
-                    type="button"
-                    className="message-menu-button"
-                    aria-label="Actions sur le message"
-                    aria-haspopup="menu"
-                    aria-expanded={isMenuOpen}
-                    onClick={(e) => toggleMenu(reception, e.currentTarget)}
+                const actions = (
+                  <div className="message-actions">
+                    <button
+                      type="button"
+                      className="message-menu-button"
+                      aria-label="Actions sur le message"
+                      aria-haspopup="menu"
+                      aria-expanded={isMenuOpen}
+                      onClick={(e) => toggleMenu(reception, e.currentTarget)}
+                    >
+                      <Ellipsis size={18} />
+                    </button>
+                  </div>
+                );
+
+                return (
+                  <motion.div
+                    key={reception.message_id}
+                    initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    // Décalage compté depuis le bas : un nouveau message
+                    // apparaît tout de suite, même dans une longue conversation.
+                    transition={{
+                      duration: 0.25,
+                      delay:
+                        Math.min(receptionMessagesUser.length - 1 - index, 10) *
+                        0.03,
+                    }}
                   >
-                    <Ellipsis size={18} />
-                  </button>
-                </div>
-              );
-
-              return (
-                <motion.div
-                  key={reception.message_id}
-                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.25, delay: index * 0.03 }}
-                >
-                  {isNewDay && (
-                    <div className="message-date-separator">{currentDay}</div>
-                  )}
-
-                  <div
-                    className={
-                      isOwn
-                        ? "messagerie-box-messages-user"
-                        : "messagerie-box-messages-friends"
-                    }
-                  >
-                    {showAuthor && (
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}${reception.user_profile_picture}`}
-                        alt="profil_ami"
-                      />
+                    {isFirstUnread && (
+                      <div className="message-unread-separator">
+                        <span>Messages non lus</span>
+                      </div>
                     )}
-                    {!isOwn && !showAuthor && (
-                      <span className="avatar-spacer" />
+                    {isNewDay && (
+                      <div className="message-date-separator">{currentDay}</div>
                     )}
 
-                    <section>
-                      <div className="message-bubble-row">
-                        {isOwn && actions}
-                        <p className="message-text">
-                          {showAuthor && (
-                            <span className="message-author">
-                              {reception.user_username}
-                            </span>
-                          )}
-                          {reception.message_reply_to !== null && (
-                            <span className="message-reply">
-                              <span className="message-reply-author">
-                                {reception.reply_username}
+                    <div
+                      className={
+                        isOwn
+                          ? "messagerie-box-messages-user"
+                          : "messagerie-box-messages-friends"
+                      }
+                    >
+                      {showAuthor && (
+                        <img
+                          src={`${import.meta.env.VITE_API_URL}${reception.user_profile_picture}`}
+                          alt="profil_ami"
+                        />
+                      )}
+                      {!isOwn && !showAuthor && (
+                        <span className="avatar-spacer" />
+                      )}
+
+                      <section>
+                        <div className="message-bubble-row">
+                          {isOwn && actions}
+                          <p className="message-text">
+                            {showAuthor && (
+                              <span className="message-author">
+                                {reception.user_username}
                               </span>
-                              <span className="message-reply-text">
-                                {quoteText(
-                                  reception.reply_text,
-                                  reception.reply_image,
+                            )}
+                            {reception.message_reply_to !== null && (
+                              <span className="message-reply">
+                                <span className="message-reply-body">
+                                  <span className="message-reply-author">
+                                    {reception.reply_username}
+                                  </span>
+                                  <span className="message-reply-text">
+                                    {quoteText(
+                                      reception.reply_text,
+                                      reception.reply_image,
+                                    )}
+                                  </span>
+                                </span>
+                                {reception.reply_image && (
+                                  <img
+                                    className="message-reply-thumb"
+                                    src={`${import.meta.env.VITE_API_URL}${reception.reply_image}`}
+                                    alt=""
+                                  />
                                 )}
                               </span>
-                            </span>
-                          )}
-                          {reception.message_image && (
-                            <button
-                              type="button"
-                              className="message-image-button"
-                              aria-label="Agrandir"
-                              onClick={() =>
-                                setViewerImage(
-                                  `${import.meta.env.VITE_API_URL}${reception.message_image}`,
-                                )
-                              }
-                            >
-                              <img
-                                className="message-image"
-                                src={`${import.meta.env.VITE_API_URL}${reception.message_image}`}
-                                alt={`Envoyée par ${reception.user_username}`}
-                                loading="lazy"
-                              />
-                            </button>
-                          )}
-                          {splitMessageText(reception.message_text).map(
-                            (part) => {
-                              if (part.kind === "emoji") {
-                                return (
-                                  <span
-                                    key={part.key}
-                                    className="message-emoji"
-                                  >
-                                    {part.value}
-                                  </span>
-                                );
-                              }
-                              if (part.kind === "link") {
-                                return (
-                                  <a
-                                    key={part.key}
-                                    className="message-link"
-                                    href={part.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    {part.value}
-                                  </a>
-                                );
-                              }
-                              return part.value;
-                            },
-                          )}
-                          {!isOwn && (
-                            <span className="message-hour">{hour}</span>
-                          )}
-                        </p>
-                        {!isOwn && actions}
-                      </div>
-
-                      {reception.reactions.length > 0 && (
-                        <div className="message-reactions">
-                          {reception.reactions.map((reaction) => {
-                            const isMine = reaction.users.some(
-                              (user) => user.user_id === userId,
-                            );
-                            const names = reaction.users
-                              .map((user) => user.user_username)
-                              .join(", ");
-
-                            return (
+                            )}
+                            {reception.message_image && (
                               <button
-                                key={reaction.emoji}
                                 type="button"
-                                className={`reaction-chip${isMine ? " is-mine" : ""}`}
-                                title={names}
-                                aria-label={`${reaction.emoji} ${reaction.users.length} : ${names}`}
-                                aria-pressed={isMine}
+                                className="message-image-button"
+                                aria-label="Agrandir"
                                 onClick={() =>
-                                  toggleReaction(
-                                    reception.message_id,
-                                    reaction.emoji,
+                                  setViewerImage(
+                                    `${import.meta.env.VITE_API_URL}${reception.message_image}`,
                                   )
                                 }
                               >
-                                <span className="reaction-emoji">
-                                  {reaction.emoji}
-                                </span>
-                                {reaction.users.length}
+                                <img
+                                  className="message-image"
+                                  src={`${import.meta.env.VITE_API_URL}${reception.message_image}`}
+                                  alt={`Envoyée par ${reception.user_username}`}
+                                  loading="lazy"
+                                />
                               </button>
-                            );
-                          })}
+                            )}
+                            {splitMessageText(reception.message_text).map(
+                              (part) => {
+                                if (part.kind === "emoji") {
+                                  return (
+                                    <span
+                                      key={part.key}
+                                      className="message-emoji"
+                                    >
+                                      {part.value}
+                                    </span>
+                                  );
+                                }
+                                if (part.kind === "link") {
+                                  return (
+                                    <a
+                                      key={part.key}
+                                      className="message-link"
+                                      href={part.href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      {part.value}
+                                    </a>
+                                  );
+                                }
+                                return part.value;
+                              },
+                            )}
+                            {reception.message_link_url &&
+                              reception.message_link_title && (
+                                <a
+                                  className="message-link-preview"
+                                  href={reception.message_link_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {reception.message_link_image && (
+                                    <img
+                                      className="message-link-preview-image"
+                                      src={reception.message_link_image}
+                                      alt=""
+                                      loading="lazy"
+                                      referrerPolicy="no-referrer"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = "none";
+                                      }}
+                                    />
+                                  )}
+                                  <span className="message-link-preview-body">
+                                    <span className="message-link-preview-site">
+                                      {reception.message_link_site}
+                                    </span>
+                                    <span className="message-link-preview-title">
+                                      {reception.message_link_title}
+                                    </span>
+                                    {reception.message_link_description && (
+                                      <span className="message-link-preview-description">
+                                        {reception.message_link_description}
+                                      </span>
+                                    )}
+                                  </span>
+                                </a>
+                              )}
+                            {!isOwn && (
+                              <span className="message-hour">{hour}</span>
+                            )}
+                          </p>
+                          {!isOwn && actions}
                         </div>
-                      )}
 
-                      {isOwn && <p className="hour-text">{hour}</p>}
-                    </section>
-                  </div>
-                </motion.div>
-              );
-            })}
+                        {reception.reactions.length > 0 && (
+                          <div className="message-reactions">
+                            {reception.reactions.map((reaction) => {
+                              const isMine = reaction.users.some(
+                                (user) => user.user_id === userId,
+                              );
+                              const names = reaction.users
+                                .map((user) => user.user_username)
+                                .join(", ");
+
+                              return (
+                                <button
+                                  key={reaction.emoji}
+                                  type="button"
+                                  className={`reaction-chip${isMine ? " is-mine" : ""}`}
+                                  title={names}
+                                  aria-label={`${reaction.emoji} ${reaction.users.length} : ${names}`}
+                                  aria-pressed={isMine}
+                                  onClick={() =>
+                                    toggleReaction(
+                                      reception.message_id,
+                                      reaction.emoji,
+                                    )
+                                  }
+                                >
+                                  <span className="reaction-emoji">
+                                    {reaction.emoji}
+                                  </span>
+                                  {reaction.users.length}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {isOwn && <p className="hour-text">{hour}</p>}
+                      </section>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Reste collé en bas de la zone visible sans occuper de place. */}
+            <div className="new-messages-anchor">
+              <AnimatePresence>
+                {newMessagesCount > 0 && (
+                  <motion.button
+                    type="button"
+                    className="new-messages-button"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() =>
+                      messagesRef.current?.scrollTo({
+                        top: messagesRef.current.scrollHeight,
+                        behavior: "smooth",
+                      })
+                    }
+                  >
+                    <ArrowDown size={16} />
+                    {newMessagesCount === 1
+                      ? "1 nouveau message"
+                      : `${newMessagesCount} nouveaux messages`}
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {(replyTo || editing) && (
@@ -818,6 +1115,13 @@ function Messagerie() {
                   )}
                 </p>
               </div>
+              {(replyTo ?? editing)?.message_image && (
+                <img
+                  className="compose-context-thumb"
+                  src={`${import.meta.env.VITE_API_URL}${(replyTo ?? editing)?.message_image}`}
+                  alt=""
+                />
+              )}
               <button
                 type="button"
                 aria-label={

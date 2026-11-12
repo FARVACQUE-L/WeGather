@@ -27,10 +27,39 @@
         min-height: 0;
         overflow-y: auto;
         scrollbar-width: thin;
-        scrollbar-color: transparent transparent;
+        scrollbar-color: #ff7e5f rgba(0, 0, 0, 0.05);
+        padding-right: 12px;
 
-        > :last-child .messagerie-box-messages-friends {
+        > .messagerie-box-messages-content
+          > :last-child
+          .messagerie-box-messages-friends {
           padding-bottom: 12px;
+        }
+
+        .new-messages-anchor {
+          position: sticky;
+          bottom: 0;
+          height: 0;
+          display: flex;
+          justify-content: center;
+        }
+
+        .new-messages-button {
+          position: absolute;
+          bottom: 12px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 999px;
+          background: var(--button-color);
+          color: var(--font-neutral);
+          font-family: inherit;
+          font-size: 0.85rem;
+          white-space: nowrap;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          cursor: pointer;
         }
 
         .message-actions {
@@ -73,6 +102,69 @@
           text-decoration: underline;
           text-underline-offset: 2px;
           overflow-wrap: anywhere;
+        }
+
+        .message-link-preview {
+          display: flex;
+          align-items: stretch;
+          width: min(360px, 55vw);
+          margin: 6px 0 4px;
+          overflow: hidden;
+          border: 1px solid rgb(0 0 0 / 10%);
+          border-radius: 10px;
+          background: rgb(0 0 0 / 6%);
+          color: inherit;
+          text-decoration: none;
+          transition: background 0.2s;
+
+          @media (hover: hover) {
+            &:hover {
+              background: rgb(0 0 0 / 10%);
+            }
+          }
+
+          .message-link-preview-image {
+            flex-shrink: 0;
+            width: 72px;
+            height: 72px;
+            align-self: center;
+            margin: 6px 0 6px 6px;
+            border-radius: 6px;
+            object-fit: cover;
+          }
+
+          .message-link-preview-body {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+            padding: 6px 10px;
+          }
+
+          .message-link-preview-site,
+          .message-link-preview-title,
+          .message-link-preview-description {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .message-link-preview-site {
+            font-size: 11px;
+            opacity: 0.7;
+          }
+
+          .message-link-preview-title {
+            font-size: 13px;
+            font-weight: 600;
+          }
+
+          .message-link-preview-description {
+            font-size: 12px;
+            opacity: 0.85;
+          }
         }
 
         .message-image-button {
@@ -141,7 +233,9 @@
         }
 
         .message-reply {
-          display: block;
+          display: flex;
+          align-items: center;
+          gap: 8px;
           margin-bottom: 4px;
           padding: 4px 8px;
           border-left: 3px solid currentColor;
@@ -149,9 +243,22 @@
           background: rgb(0 0 0 / 6%);
           font-size: 12px;
 
+          .message-reply-body {
+            flex: 1;
+            min-width: 0;
+          }
+
           .message-reply-author {
             display: block;
             font-weight: 600;
+          }
+
+          .message-reply-thumb {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            object-fit: cover;
           }
 
           .message-reply-text {
@@ -168,6 +275,23 @@
           font-size: 1.6em;
           line-height: 1;
           vertical-align: -0.15em;
+        }
+        .message-unread-separator {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin: 1rem 0;
+          color: #ff7e5f;
+          font-size: 0.8rem;
+          font-weight: 600;
+
+          &::before,
+          &::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #ff7e5f;
+          }
         }
         .message-date-separator {
           width: fit-content;
@@ -326,6 +450,14 @@
           text-overflow: ellipsis;
           white-space: nowrap;
           font-size: 13px;
+        }
+
+        .compose-context-thumb {
+          flex-shrink: 0;
+          width: 40px;
+          height: 40px;
+          border-radius: 6px;
+          object-fit: cover;
         }
 
         button {
@@ -624,5 +756,90 @@
     background: rgb(255 255 255 / 15%);
     color: white;
     cursor: pointer;
+  }
+}
+
+/* Modale de suppression : même style que les autres modales du site. */
+.MessageModal-Backdrop.swal2-backdrop-show {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.MessageModal {
+  width: min(90vw, 420px);
+  padding: 2rem;
+  row-gap: 1rem;
+  background: var(--bg-color);
+  border-radius: 2rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+
+  &.MessageModal-Show {
+    animation: MessageModal-Appear 0.25s ease;
+  }
+
+  .MessageModal-Title {
+    padding: 0;
+    font-size: x-large;
+    text-align: start;
+    color: var(--font-title);
+  }
+
+  .MessageModal-Text {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: start;
+    color: inherit;
+  }
+
+  .MessageModal-Actions {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    margin: 0.5rem 0 0;
+    padding: 0;
+
+    button {
+      flex: 1;
+      max-width: 12rem;
+      height: 2rem;
+      margin: 0;
+      border: none;
+      border-radius: 5rem;
+      box-shadow: 1px 1px 5px black;
+      cursor: pointer;
+      transition: transform 0.2s;
+
+      @media (hover: hover) and (min-width: 429px) {
+        &:hover {
+          transform: scale(0.95);
+        }
+      }
+    }
+
+    .MessageModal-Confirm {
+      background: var(--button-color);
+      color: var(--font-neutral);
+    }
+  }
+}
+
+@keyframes MessageModal-Appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media screen and (max-width: 429px) {
+  .MessageModal {
+    padding: 1.5rem;
   }
 }

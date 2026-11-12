@@ -39,7 +39,7 @@ function JoinForm({ onClose, onEventCreated }: JoinFormProps) {
       }
 
       const newEvent: EventData = await res.json();
-      onEventCreated(newEvent);
+      onEventCreated(newEvent, true);
       setCode("");
       onClose();
     } catch (err: unknown) {
