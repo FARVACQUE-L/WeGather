@@ -1,8 +1,17 @@
 import "./Messagerie.css";
 import type { EmojiClickData } from "emoji-picker-react";
 import EmojiPicker, { Categories, EmojiStyle } from "emoji-picker-react";
-import { motion } from "framer-motion";
-import { Ellipsis, Pencil, Plus, Reply, Send, Trash2, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowDown,
+  Ellipsis,
+  Pencil,
+  Plus,
+  Reply,
+  Send,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -168,6 +177,8 @@ function Messagerie() {
   const lastScrollTopRef = useRef(0);
   const lastMessageIdRef = useRef<number | null>(null);
   const messagesContentRef = useRef<HTMLDivElement | null>(null);
+  // Messages reçus pendant que l'utilisateur lit plus haut dans l'historique.
+  const [newMessagesCount, setNewMessagesCount] = useState(0);
 
   const scrollToBottom = useCallback(() => {
     const messagesElement = messagesRef.current;
@@ -186,23 +197,39 @@ function Messagerie() {
 
     if (scrollHeight - scrollTop - clientHeight < 80) {
       isAtBottomRef.current = true;
+      setNewMessagesCount(0);
     } else if (scrollTop < lastScrollTopRef.current) {
       isAtBottomRef.current = false;
     }
     lastScrollTopRef.current = scrollTop;
   };
 
+  // En changeant d'événement, on repart en bas d'une nouvelle conversation.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset à chaque événement
+  useLayoutEffect(() => {
+    isAtBottomRef.current = true;
+    lastMessageIdRef.current = null;
+    setNewMessagesCount(0);
+  }, [eventUuid]);
+
   // Après le rendu mais avant l'affichage, pour éviter un saut visible.
   useLayoutEffect(() => {
     const lastMessage = receptionMessagesUser.at(-1);
     if (!lastMessage) return;
 
-    const isNewOwnMessage =
-      lastMessage.message_id !== lastMessageIdRef.current &&
-      lastMessage.user_id === userId;
+    // Les identifiants croissent : un identifiant plus petit signifie que le
+    // dernier message a été supprimé, pas qu'un nouveau est arrivé.
+    const previousLastId = lastMessageIdRef.current;
+    const isNewMessage =
+      previousLastId !== null && lastMessage.message_id > previousLastId;
+    const isNewOwnMessage = isNewMessage && lastMessage.user_id === userId;
     lastMessageIdRef.current = lastMessage.message_id;
 
-    if (isAtBottomRef.current || isNewOwnMessage) scrollToBottom();
+    if (isAtBottomRef.current || isNewOwnMessage) {
+      scrollToBottom();
+    } else if (isNewMessage) {
+      setNewMessagesCount((count) => count + 1);
+    }
   }, [receptionMessagesUser, userId, scrollToBottom]);
 
   // Redescend quand la hauteur change après coup :
@@ -868,6 +895,33 @@ function Messagerie() {
                   </motion.div>
                 );
               })}
+            </div>
+
+            {/* Reste collé en bas de la zone visible sans occuper de place. */}
+            <div className="new-messages-anchor">
+              <AnimatePresence>
+                {newMessagesCount > 0 && (
+                  <motion.button
+                    type="button"
+                    className="new-messages-button"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() =>
+                      messagesRef.current?.scrollTo({
+                        top: messagesRef.current.scrollHeight,
+                        behavior: "smooth",
+                      })
+                    }
+                  >
+                    <ArrowDown size={16} />
+                    {newMessagesCount === 1
+                      ? "1 nouveau message"
+                      : `${newMessagesCount} nouveaux messages`}
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
