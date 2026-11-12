@@ -165,7 +165,9 @@ function Messagerie() {
   // Vrai tant que l'utilisateur est en bas de la conversation : on le garde
   // alors collé au dernier message, même si le contenu grandit ensuite.
   const isAtBottomRef = useRef(true);
+  const lastScrollTopRef = useRef(0);
   const lastMessageIdRef = useRef<number | null>(null);
+  const messagesContentRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = useCallback(() => {
     const messagesElement = messagesRef.current;
@@ -174,14 +176,20 @@ function Messagerie() {
     }
   }, []);
 
+  // Seul un défilement vers le haut fait quitter le bas. Un contenu qui
+  // grandit (image qui se charge…) éloigne aussi du bas, mais sans faire
+  // remonter la liste : on reste donc collé au dernier message.
   const handleMessagesScroll = () => {
     const messagesElement = messagesRef.current;
     if (!messagesElement) return;
-    isAtBottomRef.current =
-      messagesElement.scrollHeight -
-        messagesElement.scrollTop -
-        messagesElement.clientHeight <
-      80;
+    const { scrollTop, scrollHeight, clientHeight } = messagesElement;
+
+    if (scrollHeight - scrollTop - clientHeight < 80) {
+      isAtBottomRef.current = true;
+    } else if (scrollTop < lastScrollTopRef.current) {
+      isAtBottomRef.current = false;
+    }
+    lastScrollTopRef.current = scrollTop;
   };
 
   // Après le rendu mais avant l'affichage, pour éviter un saut visible.
@@ -197,23 +205,22 @@ function Messagerie() {
     if (isAtBottomRef.current || isNewOwnMessage) scrollToBottom();
   }, [receptionMessagesUser, userId, scrollToBottom]);
 
-  // La zone des messages rétrécit quand une réponse ou une image en attente
-  // s'affiche sous elle, ou quand le clavier mobile s'ouvre.
+  // Redescend quand la hauteur change après coup :
+  // - la zone visible rétrécit (réponse ou image en attente sous la liste,
+  //   clavier mobile) ;
+  // - les messages grandissent (image qui finit de se charger, réaction).
   useEffect(() => {
     const messagesElement = messagesRef.current;
-    if (!messagesElement) return;
+    const contentElement = messagesContentRef.current;
+    if (!messagesElement || !contentElement) return;
 
     const observer = new ResizeObserver(() => {
       if (isAtBottomRef.current) scrollToBottom();
     });
     observer.observe(messagesElement);
+    observer.observe(contentElement);
     return () => observer.disconnect();
   }, [scrollToBottom]);
-
-  // Une image n'a sa hauteur qu'une fois chargée.
-  const handleMessageImageLoad = () => {
-    if (isAtBottomRef.current) scrollToBottom();
-  };
   const isTouchScreen = window.matchMedia(
     "(pointer: coarse), (max-width: 428px)",
   ).matches;
@@ -672,192 +679,196 @@ function Messagerie() {
             className="messagerie-box-messages"
             onScroll={handleMessagesScroll}
           >
-            {receptionMessagesUser.map((reception, index) => {
-              const previousMessage = receptionMessagesUser[index - 1];
+            <div
+              ref={messagesContentRef}
+              className="messagerie-box-messages-content"
+            >
+              {receptionMessagesUser.map((reception, index) => {
+                const previousMessage = receptionMessagesUser[index - 1];
 
-              const currentDay = formatMessageDay(reception.message_date);
-              const previousDay = previousMessage
-                ? formatMessageDay(previousMessage.message_date)
-                : null;
+                const currentDay = formatMessageDay(reception.message_date);
+                const previousDay = previousMessage
+                  ? formatMessageDay(previousMessage.message_date)
+                  : null;
 
-              const isNewDay = currentDay !== previousDay;
+                const isNewDay = currentDay !== previousDay;
 
-              const isOwn = reception.user_id === userId;
-              const showAuthor =
-                !isOwn &&
-                (isNewDay || previousMessage?.user_id !== reception.user_id);
-              const isMenuOpen =
-                openMenu?.message.message_id === reception.message_id;
-              const hour = `${reception.message_edited_at ? "modifié · " : ""}${formatHour(reception.message_date)}`;
+                const isOwn = reception.user_id === userId;
+                const showAuthor =
+                  !isOwn &&
+                  (isNewDay || previousMessage?.user_id !== reception.user_id);
+                const isMenuOpen =
+                  openMenu?.message.message_id === reception.message_id;
+                const hour = `${reception.message_edited_at ? "modifié · " : ""}${formatHour(reception.message_date)}`;
 
-              const actions = (
-                <div className="message-actions">
-                  <button
-                    type="button"
-                    className="message-menu-button"
-                    aria-label="Actions sur le message"
-                    aria-haspopup="menu"
-                    aria-expanded={isMenuOpen}
-                    onClick={(e) => toggleMenu(reception, e.currentTarget)}
+                const actions = (
+                  <div className="message-actions">
+                    <button
+                      type="button"
+                      className="message-menu-button"
+                      aria-label="Actions sur le message"
+                      aria-haspopup="menu"
+                      aria-expanded={isMenuOpen}
+                      onClick={(e) => toggleMenu(reception, e.currentTarget)}
+                    >
+                      <Ellipsis size={18} />
+                    </button>
+                  </div>
+                );
+
+                return (
+                  <motion.div
+                    key={reception.message_id}
+                    initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    // Décalage compté depuis le bas : un nouveau message
+                    // apparaît tout de suite, même dans une longue conversation.
+                    transition={{
+                      duration: 0.25,
+                      delay:
+                        Math.min(receptionMessagesUser.length - 1 - index, 10) *
+                        0.03,
+                    }}
                   >
-                    <Ellipsis size={18} />
-                  </button>
-                </div>
-              );
-
-              return (
-                <motion.div
-                  key={reception.message_id}
-                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  // Décalage compté depuis le bas : un nouveau message
-                  // apparaît tout de suite, même dans une longue conversation.
-                  transition={{
-                    duration: 0.25,
-                    delay:
-                      Math.min(receptionMessagesUser.length - 1 - index, 10) *
-                      0.03,
-                  }}
-                >
-                  {isNewDay && (
-                    <div className="message-date-separator">{currentDay}</div>
-                  )}
-
-                  <div
-                    className={
-                      isOwn
-                        ? "messagerie-box-messages-user"
-                        : "messagerie-box-messages-friends"
-                    }
-                  >
-                    {showAuthor && (
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}${reception.user_profile_picture}`}
-                        alt="profil_ami"
-                      />
-                    )}
-                    {!isOwn && !showAuthor && (
-                      <span className="avatar-spacer" />
+                    {isNewDay && (
+                      <div className="message-date-separator">{currentDay}</div>
                     )}
 
-                    <section>
-                      <div className="message-bubble-row">
-                        {isOwn && actions}
-                        <p className="message-text">
-                          {showAuthor && (
-                            <span className="message-author">
-                              {reception.user_username}
-                            </span>
-                          )}
-                          {reception.message_reply_to !== null && (
-                            <span className="message-reply">
-                              <span className="message-reply-author">
-                                {reception.reply_username}
-                              </span>
-                              <span className="message-reply-text">
-                                {quoteText(
-                                  reception.reply_text,
-                                  reception.reply_image,
-                                )}
-                              </span>
-                            </span>
-                          )}
-                          {reception.message_image && (
-                            <button
-                              type="button"
-                              className="message-image-button"
-                              aria-label="Agrandir"
-                              onClick={() =>
-                                setViewerImage(
-                                  `${import.meta.env.VITE_API_URL}${reception.message_image}`,
-                                )
-                              }
-                            >
-                              <img
-                                className="message-image"
-                                src={`${import.meta.env.VITE_API_URL}${reception.message_image}`}
-                                alt={`Envoyée par ${reception.user_username}`}
-                                loading="lazy"
-                                onLoad={handleMessageImageLoad}
-                              />
-                            </button>
-                          )}
-                          {splitMessageText(reception.message_text).map(
-                            (part) => {
-                              if (part.kind === "emoji") {
-                                return (
-                                  <span
-                                    key={part.key}
-                                    className="message-emoji"
-                                  >
-                                    {part.value}
-                                  </span>
-                                );
-                              }
-                              if (part.kind === "link") {
-                                return (
-                                  <a
-                                    key={part.key}
-                                    className="message-link"
-                                    href={part.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    {part.value}
-                                  </a>
-                                );
-                              }
-                              return part.value;
-                            },
-                          )}
-                          {!isOwn && (
-                            <span className="message-hour">{hour}</span>
-                          )}
-                        </p>
-                        {!isOwn && actions}
-                      </div>
+                    <div
+                      className={
+                        isOwn
+                          ? "messagerie-box-messages-user"
+                          : "messagerie-box-messages-friends"
+                      }
+                    >
+                      {showAuthor && (
+                        <img
+                          src={`${import.meta.env.VITE_API_URL}${reception.user_profile_picture}`}
+                          alt="profil_ami"
+                        />
+                      )}
+                      {!isOwn && !showAuthor && (
+                        <span className="avatar-spacer" />
+                      )}
 
-                      {reception.reactions.length > 0 && (
-                        <div className="message-reactions">
-                          {reception.reactions.map((reaction) => {
-                            const isMine = reaction.users.some(
-                              (user) => user.user_id === userId,
-                            );
-                            const names = reaction.users
-                              .map((user) => user.user_username)
-                              .join(", ");
-
-                            return (
+                      <section>
+                        <div className="message-bubble-row">
+                          {isOwn && actions}
+                          <p className="message-text">
+                            {showAuthor && (
+                              <span className="message-author">
+                                {reception.user_username}
+                              </span>
+                            )}
+                            {reception.message_reply_to !== null && (
+                              <span className="message-reply">
+                                <span className="message-reply-author">
+                                  {reception.reply_username}
+                                </span>
+                                <span className="message-reply-text">
+                                  {quoteText(
+                                    reception.reply_text,
+                                    reception.reply_image,
+                                  )}
+                                </span>
+                              </span>
+                            )}
+                            {reception.message_image && (
                               <button
-                                key={reaction.emoji}
                                 type="button"
-                                className={`reaction-chip${isMine ? " is-mine" : ""}`}
-                                title={names}
-                                aria-label={`${reaction.emoji} ${reaction.users.length} : ${names}`}
-                                aria-pressed={isMine}
+                                className="message-image-button"
+                                aria-label="Agrandir"
                                 onClick={() =>
-                                  toggleReaction(
-                                    reception.message_id,
-                                    reaction.emoji,
+                                  setViewerImage(
+                                    `${import.meta.env.VITE_API_URL}${reception.message_image}`,
                                   )
                                 }
                               >
-                                <span className="reaction-emoji">
-                                  {reaction.emoji}
-                                </span>
-                                {reaction.users.length}
+                                <img
+                                  className="message-image"
+                                  src={`${import.meta.env.VITE_API_URL}${reception.message_image}`}
+                                  alt={`Envoyée par ${reception.user_username}`}
+                                  loading="lazy"
+                                />
                               </button>
-                            );
-                          })}
+                            )}
+                            {splitMessageText(reception.message_text).map(
+                              (part) => {
+                                if (part.kind === "emoji") {
+                                  return (
+                                    <span
+                                      key={part.key}
+                                      className="message-emoji"
+                                    >
+                                      {part.value}
+                                    </span>
+                                  );
+                                }
+                                if (part.kind === "link") {
+                                  return (
+                                    <a
+                                      key={part.key}
+                                      className="message-link"
+                                      href={part.href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      {part.value}
+                                    </a>
+                                  );
+                                }
+                                return part.value;
+                              },
+                            )}
+                            {!isOwn && (
+                              <span className="message-hour">{hour}</span>
+                            )}
+                          </p>
+                          {!isOwn && actions}
                         </div>
-                      )}
 
-                      {isOwn && <p className="hour-text">{hour}</p>}
-                    </section>
-                  </div>
-                </motion.div>
-              );
-            })}
+                        {reception.reactions.length > 0 && (
+                          <div className="message-reactions">
+                            {reception.reactions.map((reaction) => {
+                              const isMine = reaction.users.some(
+                                (user) => user.user_id === userId,
+                              );
+                              const names = reaction.users
+                                .map((user) => user.user_username)
+                                .join(", ");
+
+                              return (
+                                <button
+                                  key={reaction.emoji}
+                                  type="button"
+                                  className={`reaction-chip${isMine ? " is-mine" : ""}`}
+                                  title={names}
+                                  aria-label={`${reaction.emoji} ${reaction.users.length} : ${names}`}
+                                  aria-pressed={isMine}
+                                  onClick={() =>
+                                    toggleReaction(
+                                      reception.message_id,
+                                      reaction.emoji,
+                                    )
+                                  }
+                                >
+                                  <span className="reaction-emoji">
+                                    {reaction.emoji}
+                                  </span>
+                                  {reaction.users.length}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {isOwn && <p className="hour-text">{hour}</p>}
+                      </section>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
 
           {(replyTo || editing) && (
