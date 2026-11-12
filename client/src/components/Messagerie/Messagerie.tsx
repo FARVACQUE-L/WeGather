@@ -162,12 +162,58 @@ function Messagerie() {
       .catch(console.error);
   }, []);
 
+  // Vrai tant que l'utilisateur est en bas de la conversation : on le garde
+  // alors collé au dernier message, même si le contenu grandit ensuite.
+  const isAtBottomRef = useRef(true);
+  const lastMessageIdRef = useRef<number | null>(null);
+
+  const scrollToBottom = useCallback(() => {
+    const messagesElement = messagesRef.current;
+    if (messagesElement) {
+      messagesElement.scrollTop = messagesElement.scrollHeight;
+    }
+  }, []);
+
+  const handleMessagesScroll = () => {
+    const messagesElement = messagesRef.current;
+    if (!messagesElement) return;
+    isAtBottomRef.current =
+      messagesElement.scrollHeight -
+        messagesElement.scrollTop -
+        messagesElement.clientHeight <
+      80;
+  };
+
+  // Après le rendu mais avant l'affichage, pour éviter un saut visible.
+  useLayoutEffect(() => {
+    const lastMessage = receptionMessagesUser.at(-1);
+    if (!lastMessage) return;
+
+    const isNewOwnMessage =
+      lastMessage.message_id !== lastMessageIdRef.current &&
+      lastMessage.user_id === userId;
+    lastMessageIdRef.current = lastMessage.message_id;
+
+    if (isAtBottomRef.current || isNewOwnMessage) scrollToBottom();
+  }, [receptionMessagesUser, userId, scrollToBottom]);
+
+  // La zone des messages rétrécit quand une réponse ou une image en attente
+  // s'affiche sous elle, ou quand le clavier mobile s'ouvre.
   useEffect(() => {
     const messagesElement = messagesRef.current;
-    const messagesCount = receptionMessagesUser.length;
-    if (!messagesElement || messagesCount === 0) return;
-    messagesElement.scrollTop = messagesElement.scrollHeight;
-  }, [receptionMessagesUser]);
+    if (!messagesElement) return;
+
+    const observer = new ResizeObserver(() => {
+      if (isAtBottomRef.current) scrollToBottom();
+    });
+    observer.observe(messagesElement);
+    return () => observer.disconnect();
+  }, [scrollToBottom]);
+
+  // Une image n'a sa hauteur qu'une fois chargée.
+  const handleMessageImageLoad = () => {
+    if (isAtBottomRef.current) scrollToBottom();
+  };
   const isTouchScreen = window.matchMedia(
     "(pointer: coarse), (max-width: 428px)",
   ).matches;
@@ -621,7 +667,11 @@ function Messagerie() {
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1 }}
         >
-          <div ref={messagesRef} className="messagerie-box-messages">
+          <div
+            ref={messagesRef}
+            className="messagerie-box-messages"
+            onScroll={handleMessagesScroll}
+          >
             {receptionMessagesUser.map((reception, index) => {
               const previousMessage = receptionMessagesUser[index - 1];
 
@@ -660,7 +710,14 @@ function Messagerie() {
                   key={reception.message_id}
                   initial={{ opacity: 0, y: 15, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.25, delay: index * 0.03 }}
+                  // Décalage compté depuis le bas : un nouveau message
+                  // apparaît tout de suite, même dans une longue conversation.
+                  transition={{
+                    duration: 0.25,
+                    delay:
+                      Math.min(receptionMessagesUser.length - 1 - index, 10) *
+                      0.03,
+                  }}
                 >
                   {isNewDay && (
                     <div className="message-date-separator">{currentDay}</div>
@@ -721,6 +778,7 @@ function Messagerie() {
                                 src={`${import.meta.env.VITE_API_URL}${reception.message_image}`}
                                 alt={`Envoyée par ${reception.user_username}`}
                                 loading="lazy"
+                                onLoad={handleMessageImageLoad}
                               />
                             </button>
                           )}
