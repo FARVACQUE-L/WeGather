@@ -104,6 +104,69 @@
           overflow-wrap: anywhere;
         }
 
+        .message-link-preview {
+          display: flex;
+          align-items: stretch;
+          width: min(360px, 55vw);
+          margin: 6px 0 4px;
+          overflow: hidden;
+          border: 1px solid rgb(0 0 0 / 10%);
+          border-radius: 10px;
+          background: rgb(0 0 0 / 6%);
+          color: inherit;
+          text-decoration: none;
+          transition: background 0.2s;
+
+          @media (hover: hover) {
+            &:hover {
+              background: rgb(0 0 0 / 10%);
+            }
+          }
+
+          .message-link-preview-image {
+            flex-shrink: 0;
+            width: 72px;
+            height: 72px;
+            align-self: center;
+            margin: 6px 0 6px 6px;
+            border-radius: 6px;
+            object-fit: cover;
+          }
+
+          .message-link-preview-body {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+            padding: 6px 10px;
+          }
+
+          .message-link-preview-site,
+          .message-link-preview-title,
+          .message-link-preview-description {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .message-link-preview-site {
+            font-size: 11px;
+            opacity: 0.7;
+          }
+
+          .message-link-preview-title {
+            font-size: 13px;
+            font-weight: 600;
+          }
+
+          .message-link-preview-description {
+            font-size: 12px;
+            opacity: 0.85;
+          }
+        }
+
         .message-image-button {
           display: block;
           margin-bottom: 4px;

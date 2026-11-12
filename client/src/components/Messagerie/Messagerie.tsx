@@ -100,6 +100,11 @@ type ReceptionMessagesUser = {
   reply_image: string | null;
   reply_username: string | null;
   message_image: string | null;
+  message_link_url: string | null;
+  message_link_site: string | null;
+  message_link_title: string | null;
+  message_link_description: string | null;
+  message_link_image: string | null;
   user_name: string;
   user_username: string;
   user_id: number;
@@ -981,6 +986,41 @@ function Messagerie() {
                                 return part.value;
                               },
                             )}
+                            {reception.message_link_url &&
+                              reception.message_link_title && (
+                                <a
+                                  className="message-link-preview"
+                                  href={reception.message_link_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {reception.message_link_image && (
+                                    <img
+                                      className="message-link-preview-image"
+                                      src={reception.message_link_image}
+                                      alt=""
+                                      loading="lazy"
+                                      referrerPolicy="no-referrer"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = "none";
+                                      }}
+                                    />
+                                  )}
+                                  <span className="message-link-preview-body">
+                                    <span className="message-link-preview-site">
+                                      {reception.message_link_site}
+                                    </span>
+                                    <span className="message-link-preview-title">
+                                      {reception.message_link_title}
+                                    </span>
+                                    {reception.message_link_description && (
+                                      <span className="message-link-preview-description">
+                                        {reception.message_link_description}
+                                      </span>
+                                    )}
+                                  </span>
+                                </a>
+                              )}
                             {!isOwn && (
                               <span className="message-hour">{hour}</span>
                             )}

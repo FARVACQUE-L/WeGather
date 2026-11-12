@@ -1,5 +1,6 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import mysql from "../../../database/client";
+import type { LinkPreview } from "../../helper/linkPreview";
 
 type UnreadCountRow = RowDataPacket & {
   count: number;
@@ -10,6 +11,11 @@ type MessageOwnerRow = RowDataPacket & {
   message_id_event: number;
   message_id_user: number;
   message_image: string | null;
+};
+
+type MessageRow = RowDataPacket & {
+  message_id: number;
+  message_link_url: string | null;
 };
 
 export const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -33,6 +39,11 @@ const MESSAGE_SELECT = `SELECT
   m.message_edited_at,
   m.message_reply_to,
   m.message_image,
+  m.message_link_url,
+  m.message_link_site,
+  m.message_link_title,
+  m.message_link_description,
+  m.message_link_image,
   u.user_name,
   u.user_username,
   u.user_id,
@@ -75,7 +86,7 @@ class MessageRepository {
   }
 
   async readById(messageId: number) {
-    const [rows] = await mysql.query<RowDataPacket[]>(
+    const [rows] = await mysql.query<MessageRow[]>(
       `${MESSAGE_SELECT}
     WHERE m.message_id = ?`,
       [messageId],
@@ -129,7 +140,7 @@ class MessageRepository {
     return reactions;
   }
 
-  async attachReactions(messages: RowDataPacket[]) {
+  async attachReactions<T extends RowDataPacket>(messages: T[]) {
     const reactions = await this.readReactions(
       messages.map((message) => message.message_id),
     );
@@ -185,6 +196,35 @@ class MessageRepository {
     );
 
     return this.readById(messageId);
+  }
+
+  // N'écrit que si le texte n'a pas changé entre-temps : une modification
+  // du message pendant la récupération de l'aperçu garde la priorité.
+  async saveLinkPreview(
+    messageId: number,
+    messageText: string,
+    preview: LinkPreview | null,
+  ) {
+    const [result] = await mysql.query<ResultSetHeader>(
+      `UPDATE message
+    SET message_link_url = ?,
+      message_link_site = ?,
+      message_link_title = ?,
+      message_link_description = ?,
+      message_link_image = ?
+    WHERE message_id = ? AND message_text = ?`,
+      [
+        preview?.url ?? null,
+        preview?.site ?? null,
+        preview?.title ?? null,
+        preview?.description ?? null,
+        preview?.image ?? null,
+        messageId,
+        messageText,
+      ],
+    );
+
+    return result.affectedRows > 0 ? this.readById(messageId) : null;
   }
 
   async delete(messageId: number) {
