@@ -27,7 +27,7 @@
         min-height: 0;
         overflow-y: auto;
         scrollbar-width: thin;
-        scrollbar-color: transparent transparent;
+        scrollbar-color: #ff7e5f rgba(0, 0, 0, 0.05);
 
         > :last-child .messagerie-box-messages-friends {
           padding-bottom: 12px;
