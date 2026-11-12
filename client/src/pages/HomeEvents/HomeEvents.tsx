@@ -102,7 +102,7 @@ function HomeEvents() {
     toast.fire({
       icon: "success",
       text: joined ? "Événement rejoint" : "Événement créé",
-      customClass: { popup: "toast-error-popup" },
+      customClass: { popup: "toast-success-popup" },
     });
   };
   const handleEventUpdated = (updatedEvent: EventData) => {
