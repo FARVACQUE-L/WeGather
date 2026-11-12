@@ -550,7 +550,18 @@ function Messagerie() {
       showCancelButton: true,
       confirmButtonText: "Supprimer",
       cancelButtonText: "Annuler",
-      customClass: { popup: "toast-warning-popup" },
+      reverseButtons: true,
+      buttonsStyling: false,
+      showClass: { popup: "MessageModal-Show" },
+      customClass: {
+        container: "MessageModal-Backdrop",
+        popup: "MessageModal",
+        title: "MessageModal-Title",
+        htmlContainer: "MessageModal-Text",
+        actions: "MessageModal-Actions",
+        confirmButton: "MessageModal-Confirm",
+        cancelButton: "MessageModal-Cancel",
+      },
     });
     if (!isConfirmed) return;
 
