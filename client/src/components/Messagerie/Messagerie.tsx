@@ -286,6 +286,7 @@ function Messagerie() {
   }, [firstUnreadId, unreadCountOnArrival, userId, receptionMessagesUser]);
 
   // Après le rendu mais avant l'affichage, pour éviter un saut visible.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: userInEvent conditionne l'existence de la liste
   useLayoutEffect(() => {
     const lastMessage = receptionMessagesUser.at(-1);
     if (!lastMessage) return;
@@ -293,15 +294,16 @@ function Messagerie() {
     // Première ouverture : on attend de savoir où commencent les non-lus,
     // puis on se place sur la démarcation au lieu du dernier message.
     if (!initialPositionDoneRef.current) {
-      if (firstUnreadId === undefined) return;
+      // La liste n'existe pas encore pendant l'écran « Chargement... ».
+      const messagesElement = messagesRef.current;
+      if (firstUnreadId === undefined || !messagesElement) return;
       initialPositionDoneRef.current = true;
       lastMessageIdRef.current = lastMessage.message_id;
 
-      const messagesElement = messagesRef.current;
-      const separator = messagesElement?.querySelector(
+      const separator = messagesElement.querySelector(
         ".message-unread-separator",
       );
-      if (!messagesElement || !separator) {
+      if (!separator) {
         scrollToBottom();
         return;
       }
@@ -338,12 +340,16 @@ function Messagerie() {
     scrollToBottom,
     firstUnreadId,
     unreadCountOnArrival,
+    userInEvent,
   ]);
 
   // Redescend quand la hauteur change après coup :
   // - la zone visible rétrécit (réponse ou image en attente sous la liste,
   //   clavier mobile) ;
   // - les messages grandissent (image qui finit de se charger, réaction).
+  // Relancé quand userInEvent change : au premier rendu, la page affiche
+  // « Chargement... » et la liste n'existe pas encore.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: userInEvent conditionne l'existence de la liste
   useEffect(() => {
     const messagesElement = messagesRef.current;
     const contentElement = messagesContentRef.current;
@@ -357,7 +363,7 @@ function Messagerie() {
     observer.observe(messagesElement);
     observer.observe(contentElement);
     return () => observer.disconnect();
-  }, [scrollToBottom]);
+  }, [scrollToBottom, userInEvent]);
   const isTouchScreen = window.matchMedia(
     "(pointer: coarse), (max-width: 428px)",
   ).matches;
