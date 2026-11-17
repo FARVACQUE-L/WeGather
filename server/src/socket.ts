@@ -120,6 +120,15 @@ export const disconnectUser = (userId: number) => {
   io.in(socketIds).disconnectSockets(true);
 };
 
+// Prévient tous les appareils connectés d'un utilisateur (site et
+// application mobile), par exemple pour synchroniser les messages lus.
+export const emitToUser = (userId: number, event: string, payload: unknown) => {
+  const socketIds = getSocketIds(userId);
+  if (!io || socketIds.length === 0) return;
+
+  io.to(socketIds).emit(event, payload);
+};
+
 export const removeFromEventRoom = (userId: number, eventUuid: string) => {
   const socketIds = getSocketIds(userId);
   if (!io || socketIds.length === 0) return;

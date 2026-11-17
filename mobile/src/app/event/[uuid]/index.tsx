@@ -84,11 +84,18 @@ export default function EventScreen() {
       loadGroup().catch(() => {});
     };
 
+    // Messages lus sur un autre appareil (le site par exemple).
+    const handleMessagesRead = (data: { eventUuid: string }) => {
+      if (data.eventUuid === uuid) setUnreadCount(0);
+    };
+
     socket?.on("presence-changed", refreshPresence);
+    socket?.on("messages-read", handleMessagesRead);
     return () => {
       socket?.off("presence-changed", refreshPresence);
+      socket?.off("messages-read", handleMessagesRead);
     };
-  }, [loadGroup]);
+  }, [loadGroup, uuid]);
 
   const refresh = async () => {
     setIsRefreshing(true);

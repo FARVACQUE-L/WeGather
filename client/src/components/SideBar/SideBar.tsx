@@ -206,11 +206,18 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
       notificationAudioRef.current?.play().catch(() => {});
     };
 
+    // Messages lus sur un autre appareil (l'application mobile par exemple).
+    const handleMessagesRead = (data: { eventUuid: string }) => {
+      if (data.eventUuid === eventUuid) setUnreadCount(0);
+    };
+
     socket.on("new-message", handleNewMessage);
+    socket.on("messages-read", handleMessagesRead);
 
     return () => {
       socket.emit("leave-event", eventUuid);
       socket.off("new-message", handleNewMessage);
+      socket.off("messages-read", handleMessagesRead);
     };
   }, [eventUuid, userId]);
 
