@@ -16,20 +16,31 @@ const updatePresence = (userId: number, update: () => void): void => {
   }
 };
 
-const readUserId = async (
-  cookieHeader: string | undefined,
-): Promise<number | null> => {
-  const cookie = cookieHeader
+// Le site s'authentifie par le cookie auth_token, l'application mobile en
+// passant son token dans l'option auth de socket.io-client.
+const readCredentials = (handshake: {
+  auth: Record<string, unknown>;
+  headers: { cookie?: string };
+}): string | undefined => {
+  if (typeof handshake.auth.token === "string") {
+    return `Bearer ${handshake.auth.token}`;
+  }
+
+  const cookie = handshake.headers.cookie
     ?.split(";")
     .map((part) => part.trim())
     .find((part) => part.startsWith("auth_token="));
 
-  if (!cookie) return null;
+  return cookie && decodeURIComponent(cookie.slice("auth_token=".length));
+};
+
+const readUserId = async (
+  credentials: string | undefined,
+): Promise<number | null> => {
+  if (!credentials) return null;
 
   try {
-    const session = await readSession(
-      decodeURIComponent(cookie.slice("auth_token=".length)),
-    );
+    const session = await readSession(credentials);
     return session.status === "valid" ? session.user.id : null;
   } catch {
     return null;
@@ -55,7 +66,7 @@ export const initSocket = (server: HttpServer): SocketServer => {
   io.on("connection", (socket) => {
     console.log("Utilisateur connecté :", socket.id);
 
-    const userIdPromise = readUserId(socket.handshake.headers.cookie);
+    const userIdPromise = readUserId(readCredentials(socket.handshake));
 
     userIdPromise.then((userId) => {
       if (userId !== null && socket.connected) {

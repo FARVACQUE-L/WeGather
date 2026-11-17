@@ -36,15 +36,22 @@ export const readSession = async (
   return { status: "valid", user };
 };
 
+// L'application mobile envoie "Authorization: Bearer <token>", le site
+// le cookie auth_token (même format "Bearer <token>").
+const readCredentials = (req: Request): string | undefined => {
+  const header = req.get("Authorization");
+  if (header?.startsWith("Bearer ")) return header;
+
+  return req.cookies.auth_token as string | undefined;
+};
+
 const authorization = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const session = await readSession(
-      req.cookies.auth_token as string | undefined,
-    );
+    const session = await readSession(readCredentials(req));
 
     if (session.status === "banned") {
       res.clearCookie("auth_token", sessionCookieOptions());
