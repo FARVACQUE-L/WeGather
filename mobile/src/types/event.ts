@@ -11,4 +11,24 @@ export type EventData = {
   event_picture: string;
 };
 
+// GET /api/events/:uuid ajoute le code d'invitation.
+export type EventDetail = EventData & {
+  event_link_key: string;
+};
+
+export type PresenceStatus = "online" | "offline";
+
+// GET /api/events/:uuid/group
+export type GroupMember = {
+  euj_id_user: number;
+  user_username: string;
+  user_profile_picture: string | null;
+  status?: PresenceStatus;
+};
+
+export type Group = {
+  host_id: number;
+  members: GroupMember[];
+};
+
 export type EventFilter = "ongoing" | "finished" | "all";

@@ -2,6 +2,7 @@ import {
   BeVietnamPro_400Regular,
   BeVietnamPro_600SemiBold,
   BeVietnamPro_700Bold,
+  BeVietnamPro_700Bold_Italic,
   useFonts,
 } from "@expo-google-fonts/be-vietnam-pro";
 import { Stack } from "expo-router";
@@ -19,6 +20,7 @@ export default function RootLayout() {
     BeVietnamPro_400Regular,
     BeVietnamPro_600SemiBold,
     BeVietnamPro_700Bold,
+    BeVietnamPro_700Bold_Italic,
   });
 
   if (!fontsLoaded && !fontError) {

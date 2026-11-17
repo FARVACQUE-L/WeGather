@@ -16,6 +16,7 @@ export const fonts = {
   regular: "BeVietnamPro_400Regular",
   semiBold: "BeVietnamPro_600SemiBold",
   bold: "BeVietnamPro_700Bold",
+  boldItalic: "BeVietnamPro_700Bold_Italic",
 } as const;
 
 export const spacing = {

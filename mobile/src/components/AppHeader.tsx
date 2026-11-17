@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   brandItalic: {
-    fontStyle: "italic",
+    fontFamily: fonts.boldItalic,
   },
   avatar: {
     width: 40,

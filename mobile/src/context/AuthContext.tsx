@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { ApiError, api, setAuthToken, setUnauthorizedHandler } from "@/lib/api";
+import { connectSocket, disconnectSocket } from "@/lib/socket";
 
 const TOKEN_KEY = "auth_token";
 
@@ -41,6 +42,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     await SecureStore.deleteItemAsync(TOKEN_KEY);
   }, []);
+
+  // Connexion temps réel ouverte uniquement pendant une session.
+  useEffect(() => {
+    if (!token) return;
+
+    connectSocket(token);
+    return () => disconnectSocket();
+  }, [token]);
 
   useEffect(() => {
     setUnauthorizedHandler(() => {

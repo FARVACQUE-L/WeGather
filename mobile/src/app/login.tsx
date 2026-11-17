@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   brandItalic: {
-    fontStyle: "italic",
+    fontFamily: fonts.boldItalic,
   },
   card: {
     borderRadius: 16,

@@ -24,6 +24,14 @@ export const formatDay = (date: string) => `${parseDay(date).getDate()}`;
 
 export const formatMonth = (date: string) => MONTHS[parseDay(date).getMonth()];
 
+// "20 oct. 2026"
+export const formatLongDate = (date: string) =>
+  parseDay(date).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
 export const startOfToday = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
