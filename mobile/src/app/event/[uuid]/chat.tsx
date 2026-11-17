@@ -1,8 +1,9 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, SendHorizontal } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  AppState,
   FlatList,
   KeyboardAvoidingView,
   Pressable,
@@ -48,11 +49,30 @@ export default function ChatScreen() {
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState("");
 
+  // Vrai si des messages sont arrivés pendant que l'app était en
+  // arrière-plan : on les marquera comme lus au retour.
+  const hasPendingReadRef = useRef(false);
+
+  // Le statut « lu » est partagé avec le site : on ne marque comme lu
+  // que si l'app est au premier plan, sinon le site n'afficherait plus
+  // la ligne « Messages non lus » pour des messages jamais vus.
   const markAsRead = useCallback(() => {
+    if (AppState.currentState !== "active") {
+      hasPendingReadRef.current = true;
+      return;
+    }
+    hasPendingReadRef.current = false;
     api(`/api/messages/notification/${uuid}`, { method: "POST" }).catch(
       () => {},
     );
   }, [uuid]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active" && hasPendingReadRef.current) markAsRead();
+    });
+    return () => subscription.remove();
+  }, [markAsRead]);
 
   const loadMessages = useCallback(async () => {
     try {
