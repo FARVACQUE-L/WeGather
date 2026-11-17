@@ -166,8 +166,11 @@ export default function ChatScreen() {
     socket.on("message-deleted", handleDeleted);
     socket.on("message-reactions", handleReactions);
 
+    // Pas de leave-event ici : le chat s'ouvre par-dessus l'écran de
+    // l'événement, qui a besoin de rester dans le salon. C'est lui qui
+    // le quitte. Les salons ne sont pas comptés : un seul leave-event
+    // ferait sortir les deux écrans.
     return () => {
-      socket.emit("leave-event", uuid);
       socket.off("connect", handleReconnect);
       socket.off("new-message", handleNewMessage);
       socket.off("message-updated", handleUpdated);

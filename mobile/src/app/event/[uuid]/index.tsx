@@ -10,7 +10,7 @@ import {
   MessageCircle,
   Share2,
 } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -44,14 +44,25 @@ export default function EventScreen() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  // Vrai quand cet écran est affiché (faux quand le chat est ouvert
+  // par-dessus : ses messages sont lus, ils ne comptent pas).
+  const isFocusedRef = useRef(false);
+
+  const loadUnreadCount = useCallback(() => {
+    api<{ count: number }>(`/api/messages/unread/${uuid}`)
+      .then((result) => setUnreadCount(result.count))
+      .catch(() => {});
+  }, [uuid]);
 
   // Rechargé à chaque retour sur l'écran (par exemple en sortant du chat).
   useFocusEffect(
     useCallback(() => {
-      api<{ count: number }>(`/api/messages/unread/${uuid}`)
-        .then((result) => setUnreadCount(result.count))
-        .catch(() => {});
-    }, [uuid]),
+      isFocusedRef.current = true;
+      loadUnreadCount();
+      return () => {
+        isFocusedRef.current = false;
+      };
+    }, [loadUnreadCount]),
   );
 
   const loadGroup = useCallback(async () => {
@@ -89,13 +100,37 @@ export default function EventScreen() {
       if (data.eventUuid === uuid) setUnreadCount(0);
     };
 
+    // Nouveaux messages des autres membres : la pastille du bouton
+    // Messagerie augmente en direct.
+    const handleNewMessage = (message: { user_id: number }) => {
+      if (message.user_id !== user?.id && isFocusedRef.current) {
+        setUnreadCount((count) => count + 1);
+      }
+    };
+
+    // Le salon de l'événement est rejoint ici et quitté en sortant de
+    // cet écran. Le chat, ouvert par-dessus, ne le quitte pas.
+    // Après une coupure, le serveur a oublié le salon : on le rejoint
+    // et on recompte les messages arrivés entre-temps.
+    const join = () => socket?.emit("join-event", uuid);
+    const handleReconnect = () => {
+      join();
+      loadUnreadCount();
+    };
+
+    join();
+    socket?.on("connect", handleReconnect);
+    socket?.on("new-message", handleNewMessage);
     socket?.on("presence-changed", refreshPresence);
     socket?.on("messages-read", handleMessagesRead);
     return () => {
+      socket?.emit("leave-event", uuid);
+      socket?.off("connect", handleReconnect);
+      socket?.off("new-message", handleNewMessage);
       socket?.off("presence-changed", refreshPresence);
       socket?.off("messages-read", handleMessagesRead);
     };
-  }, [loadGroup, uuid]);
+  }, [loadGroup, loadUnreadCount, uuid, user?.id]);
 
   const refresh = async () => {
     setIsRefreshing(true);
