@@ -301,7 +301,18 @@ function SideBar({ activeComponent, handleChangeComponent }: SideBarProps) {
             <MessageCircle size={20} className="message" />
             <span>Messagerie</span>
             {unreadCount > 0 && (
-              <span className="notification-badge">{unreadCount}</span>
+              // La clé change avec le nombre : la pastille « pop » à
+              // chaque nouveau message.
+              <motion.span
+                key={unreadCount}
+                className="notification-badge"
+                aria-label={`${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}`}
+                initial={{ scale: 0.5 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 15 }}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </motion.span>
             )}
           </motion.button>
         </motion.li>
