@@ -1,44 +1,29 @@
-import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { API_URL } from "@/constants/config";
 import { colors, fonts, spacing } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
 
-type ServerStatus = "checking" | "ok" | "error";
-
-const statusLabels: Record<ServerStatus, string> = {
-  checking: "Connexion au serveur…",
-  ok: "Serveur joignable",
-  error: "Serveur injoignable",
-};
-
+// Écran d'accueil provisoire : la liste des événements arrive à l'étape 4.
 export default function HomeScreen() {
-  const [status, setStatus] = useState<ServerStatus>("checking");
-
-  useEffect(() => {
-    // Sans session, la route répond 401 : toute réponse HTTP prouve
-    // que le téléphone atteint bien le serveur.
-    fetch(`${API_URL}/api/auth/authVerif`)
-      .then(() => setStatus("ok"))
-      .catch(() => setStatus("error"));
-  }, []);
+  const { user, logout } = useAuth();
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.title}>WeGather</Text>
-        <Text style={styles.subtitle}>Bienvenue sur l'application mobile</Text>
-        <Text
-          style={[
-            styles.status,
-            status === "ok" && styles.statusOk,
-            status === "error" && styles.statusError,
+        <Text style={styles.title}>Bonjour {user?.username} 👋</Text>
+        <Text style={styles.subtitle}>Vous êtes connecté à WeGather.</Text>
+        <Text style={styles.detail}>{user?.email}</Text>
+
+        <Pressable
+          onPress={logout}
+          style={({ pressed }) => [
+            styles.logout,
+            pressed && styles.logoutPressed,
           ]}
         >
-          {statusLabels[status]}
-        </Text>
-        <Text style={styles.url}>{API_URL}</Text>
+          <Text style={styles.logoutText}>Se déconnecter</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -62,30 +47,34 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: fonts.bold,
-    fontSize: 36,
+    fontSize: 26,
     color: colors.title,
+    textAlign: "center",
   },
   subtitle: {
     fontFamily: fonts.regular,
-    fontSize: 16,
-    color: colors.text,
-    textAlign: "center",
-  },
-  status: {
-    marginTop: spacing.md,
-    fontFamily: fonts.semiBold,
     fontSize: 15,
-    color: colors.textMuted,
+    color: colors.text,
   },
-  statusOk: {
-    color: colors.positive,
-  },
-  statusError: {
-    color: colors.negative,
-  },
-  url: {
+  detail: {
     fontFamily: fonts.regular,
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textMuted,
+  },
+  logout: {
+    marginTop: spacing.md,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.accentDark,
+  },
+  logoutPressed: {
+    opacity: 0.6,
+  },
+  logoutText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    color: colors.accentDark,
   },
 });
