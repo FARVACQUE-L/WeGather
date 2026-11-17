@@ -55,6 +55,7 @@ function RootNavigator() {
     >
       <Stack.Protected guard={user !== null}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="event/[uuid]" />
       </Stack.Protected>
       <Stack.Protected guard={user === null}>
         <Stack.Screen name="login" />
