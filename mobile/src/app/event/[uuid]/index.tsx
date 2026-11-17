@@ -1,12 +1,13 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
   CalendarDays,
   ChevronLeft,
   Crown,
   MapPin,
+  MessageCircle,
   Share2,
 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -42,6 +43,16 @@ export default function EventScreen() {
   const [group, setGroup] = useState<Group | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Rechargé à chaque retour sur l'écran (par exemple en sortant du chat).
+  useFocusEffect(
+    useCallback(() => {
+      api<{ count: number }>(`/api/messages/unread/${uuid}`)
+        .then((result) => setUnreadCount(result.count))
+        .catch(() => {});
+    }, [uuid]),
+  );
 
   const loadGroup = useCallback(async () => {
     setGroup(await api<Group>(`/api/events/${uuid}/group`));
@@ -187,6 +198,42 @@ export default function EventScreen() {
               <Text style={styles.description}>{event.event_description}</Text>
             )}
           </View>
+
+          <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/event/[uuid]/chat",
+                params: { uuid, name: event.event_name },
+              })
+            }
+            style={({ pressed }) => [
+              styles.chatButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={
+              unreadCount > 0
+                ? `Messagerie, ${unreadCount} message${unreadCount > 1 ? "s" : ""} non lu${unreadCount > 1 ? "s" : ""}`
+                : "Messagerie"
+            }
+          >
+            <LinearGradient
+              colors={["#e98d66", "#b44708"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.chatButtonInner}
+            >
+              <MessageCircle size={20} color={colors.neutral} />
+              <Text style={styles.chatButtonText}>Messagerie</Text>
+              {unreadCount > 0 && (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </LinearGradient>
+          </Pressable>
 
           <View style={[styles.card, styles.codeCard]}>
             <View>
@@ -376,6 +423,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     color: colors.textMuted,
+  },
+  chatButton: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  chatButtonInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+    paddingVertical: 14,
+  },
+  chatButtonText: {
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    color: colors.neutral,
+  },
+  unreadBadge: {
+    minWidth: 22,
+    height: 22,
+    paddingHorizontal: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 11,
+    backgroundColor: colors.neutral,
+  },
+  unreadText: {
+    fontFamily: fonts.bold,
+    fontSize: 12,
+    color: colors.accentDark,
   },
   codeCard: {
     flexDirection: "row",
