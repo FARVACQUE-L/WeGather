@@ -70,7 +70,11 @@ const readUserName: RequestHandler = async (req, res, next) => {
   }
 };
 
+// Le site reçoit sa session dans un cookie httpOnly. L'application mobile
+// (en-tête X-Client: mobile) ne gère pas bien les cookies : elle reçoit le
+// token dans la réponse et le renvoie dans l'en-tête Authorization.
 const createSession = (
+  req: Parameters<RequestHandler>[0],
   res: Parameters<RequestHandler>[1],
   user: {
     user_id: number;
@@ -79,7 +83,7 @@ const createSession = (
     user_password: string;
     user_is_admin: number;
   },
-) => {
+): { token?: string } => {
   const token = encodeJWT({
     id: user.user_id,
     username: user.user_username,
@@ -88,7 +92,10 @@ const createSession = (
     pwd: passwordFingerprint(user.user_password),
   });
 
+  if (req.get("X-Client") === "mobile") return { token };
+
   res.cookie(...sessionCookie(token));
+  return {};
 };
 
 const add: RequestHandler = async (req, res, next) => {
@@ -235,7 +242,7 @@ const verifyEmail: RequestHandler = async (req, res, next) => {
 
     await userRepository.markVerified(user.user_id);
 
-    createSession(res, user);
+    createSession(req, res, user);
 
     res.status(200).json({ message: "Adresse e-mail confirmée 🎉" });
   } catch (err) {
@@ -339,9 +346,10 @@ const login: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    createSession(res, user);
+    const session = createSession(req, res, user);
 
     res.status(200).json({
+      ...session,
       message: "Connexion réussie",
       user: {
         id: user.user_id,
@@ -531,7 +539,10 @@ const changePassword: RequestHandler = async (req, res, next) => {
     await userRepository.resetPassword(userId, hashedPassword);
     disconnectUser(userId);
 
-    createSession(res, { ...user, user_password: hashedPassword });
+    const session = createSession(req, res, {
+      ...user,
+      user_password: hashedPassword,
+    });
 
     transporter
       .sendMail({
@@ -543,6 +554,7 @@ const changePassword: RequestHandler = async (req, res, next) => {
       .catch((_err) => {});
 
     res.status(200).json({
+      ...session,
       message: "Mot de passe modifié avec succès",
     });
   } catch (err) {

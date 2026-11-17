@@ -6,7 +6,7 @@ import { fetchLinkPreview, findFirstUrl } from "../../helper/linkPreview";
 import { removeUpload } from "../../helper/removeUpload";
 import { isId, LIMITS } from "../../helper/validation";
 import { UPLOADS_DIRECTORY } from "../../middleware/upload";
-import { getIo } from "../../socket";
+import { emitToUser, getIo } from "../../socket";
 import eventRepository from "../event/eventRepository";
 import eventUserJoiningRepository from "../event_user_joining/eventUserJoiningRepository";
 import messageRepository, { REACTION_EMOJIS } from "./messageRepository";
@@ -154,6 +154,12 @@ const notificationMessage: RequestHandler = async (req, res, next) => {
     if (!eventId || !req.user) return;
 
     await messageRepository.notificationMessage(eventId, req.user.id);
+
+    // Les messages lus sur un appareil le sont aussi sur les autres :
+    // le site et l'application retirent leur pastille de non-lus.
+    emitToUser(req.user.id, "messages-read", {
+      eventUuid: req.params.eventUuid,
+    });
 
     const message = await messageRepository.getMessagesByEventId(eventId);
 
