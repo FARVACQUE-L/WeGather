@@ -94,7 +94,7 @@ export default function LoginScreen() {
           <View style={styles.card}>
             <View style={styles.hero}>
               <Image
-                source={require("@/assets/images/ui/connexion.png")}
+                source={require("@/assets/images/ui/connexion.jpg")}
                 style={StyleSheet.absoluteFill}
                 contentFit="cover"
               />
