@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>WeGather</title>
+  <!-- Logo WeGather : W et soleil. Source des icônes de l'application. -->
+  <defs>
+    <linearGradient id="fond" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff9433"/>
+      <stop offset="1" stop-color="#ec4f08"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#fond)"/>
+  <g fill="none" stroke="#fffaf4" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="275,500 388,768 512,560 636,768 749,500" stroke-width="128"/>
+    <path d="M414 435.1 A100 100 0 0 1 610 435.1" stroke-width="38"/>
+    <g stroke-width="36">
+      <line x1="512" y1="295" x2="512" y2="217"/>
+      <line x1="608.3" y1="327.2" x2="655.2" y2="264.9"/>
+      <line x1="415.7" y1="327.2" x2="368.8" y2="264.9"/>
+      <line x1="665" y1="408.2" x2="739.6" y2="385.4"/>
+      <line x1="359" y1="408.2" x2="284.4" y2="385.4"/>
+    </g>
+  </g>
+</svg>
