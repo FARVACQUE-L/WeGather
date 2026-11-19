@@ -115,7 +115,7 @@ export default function DashboardScreen() {
     },
     {
       Icon: UsersRound,
-      title: "L'équipe au complet",
+      title: "L'équipe",
       value: String(group.members.length),
     },
     {
