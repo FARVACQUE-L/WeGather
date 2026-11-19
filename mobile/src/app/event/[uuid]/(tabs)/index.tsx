@@ -429,6 +429,7 @@ const styles = StyleSheet.create({
   stat: {
     flexGrow: 1,
     flexBasis: "40%",
+    alignItems: "center",
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: 16,
@@ -439,6 +440,7 @@ const styles = StyleSheet.create({
   statTitleRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 6,
   },
   statTitle: {
@@ -451,6 +453,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 22,
     color: colors.text,
+    textAlign: "center",
   },
   card: {
     gap: spacing.sm + 4,
