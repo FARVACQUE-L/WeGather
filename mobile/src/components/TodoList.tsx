@@ -2,6 +2,7 @@ import { Check, ListChecks, Pencil, Plus, Trash2 } from "lucide-react-native";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -103,6 +104,13 @@ export function TodoList({
     } catch (error) {
       setErrorMessage(errorText(error));
     }
+  };
+
+  const confirmRemove = (todo: Todo) => {
+    Alert.alert("Supprimer la tâche ?", `« ${todo.todo_name} »`, [
+      { text: "Annuler", style: "cancel" },
+      { text: "Supprimer", style: "destructive", onPress: () => remove(todo) },
+    ]);
   };
 
   const canAdd = draft.trim().length > 0 && !isAdding;
@@ -207,7 +215,7 @@ export function TodoList({
                 )}
               </Pressable>
               <Pressable
-                onPress={() => remove(todo)}
+                onPress={() => confirmRemove(todo)}
                 hitSlop={6}
                 style={styles.iconButton}
                 accessibilityRole="button"
