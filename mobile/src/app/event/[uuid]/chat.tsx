@@ -1,5 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
-import { ChevronLeft, SendHorizontal } from "lucide-react-native";
+import { SendHorizontal } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -18,8 +17,10 @@ import {
 } from "react-native-safe-area-context";
 
 import { MessageBubble } from "@/components/MessageBubble";
+import { ScreenHeader } from "@/components/ScreenHeader";
 import { colors, fonts, spacing } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { useEvent } from "@/context/EventContext";
 import { ApiError, api } from "@/lib/api";
 import { buildChatItems } from "@/lib/chat";
 import { getSocket } from "@/lib/socket";
@@ -37,10 +38,7 @@ const addMessage = (messages: Message[], message: Message) =>
     : [...messages, message];
 
 export default function ChatScreen() {
-  const { uuid, name } = useLocalSearchParams<{
-    uuid: string;
-    name?: string;
-  }>();
+  const { uuid, event } = useEvent();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[] | null>(null);
@@ -95,13 +93,10 @@ export default function ChatScreen() {
     const socket = getSocket();
     if (!socket) return;
 
-    const join = () => socket.emit("join-event", uuid);
-
-    // Après une coupure (téléphone en veille, réseau perdu), le serveur
-    // a oublié le salon : on le rejoint à nouveau et on recharge les
-    // messages arrivés entre-temps.
+    // Après une coupure (téléphone en veille, réseau perdu), on recharge
+    // les messages arrivés entre-temps. Le salon est rejoint par
+    // EventProvider, qui le garde pour tout l'événement.
     const handleReconnect = () => {
-      join();
       loadMessages();
     };
 
@@ -159,17 +154,12 @@ export default function ChatScreen() {
       );
     };
 
-    join();
     socket.on("connect", handleReconnect);
     socket.on("new-message", handleNewMessage);
     socket.on("message-updated", handleUpdated);
     socket.on("message-deleted", handleDeleted);
     socket.on("message-reactions", handleReactions);
 
-    // Pas de leave-event ici : le chat s'ouvre par-dessus l'écran de
-    // l'événement, qui a besoin de rester dans le salon. C'est lui qui
-    // le quitte. Les salons ne sont pas comptés : un seul leave-event
-    // ferait sortir les deux écrans.
     return () => {
       socket.off("connect", handleReconnect);
       socket.off("new-message", handleNewMessage);
@@ -177,7 +167,7 @@ export default function ChatScreen() {
       socket.off("message-deleted", handleDeleted);
       socket.off("message-reactions", handleReactions);
     };
-  }, [uuid, user?.id, loadMessages, markAsRead]);
+  }, [user?.id, loadMessages, markAsRead]);
 
   const items = useMemo(
     () => (messages ? buildChatItems(messages) : []),
@@ -212,23 +202,11 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={8}
-          style={styles.back}
-          accessibilityRole="button"
-          accessibilityLabel="Retour à l'événement"
-        >
-          <ChevronLeft size={26} color={colors.title} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {name || "Messagerie"}
-          </Text>
-          {name ? <Text style={styles.headerSubtitle}>Messagerie</Text> : null}
-        </View>
-      </View>
+      <ScreenHeader
+        title={event?.event_name ?? "Messagerie"}
+        subtitle="Messagerie"
+        backLabel="Retour à l'événement"
+      />
 
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
         {messages === null ? (
@@ -326,35 +304,6 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.background,
-  },
-  back: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerText: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontFamily: fonts.bold,
-    fontSize: 18,
-    color: colors.title,
-  },
-  headerSubtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.textMuted,
   },
   centered: {
     flex: 1,
