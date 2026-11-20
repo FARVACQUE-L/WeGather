@@ -37,3 +37,27 @@ export const startOfToday = () => {
   today.setHours(0, 0, 0, 0);
   return today;
 };
+
+// Dates d'un séjour en version courte, comme le tableau de bord du site :
+// "12 Déc", "12-14 Déc" ou "28 Déc - 2 Jan".
+export const formatStayDates = (start: string, end: string) => {
+  const startDate = parseDay(start);
+  const endDate = parseDay(end);
+  const endMonth = MONTHS[endDate.getMonth()];
+
+  if (
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getFullYear() === endDate.getFullYear()
+  ) {
+    if (startDate.getDate() === endDate.getDate()) {
+      return `${endDate.getDate()} ${endMonth}`;
+    }
+    return `${startDate.getDate()}-${endDate.getDate()} ${endMonth}`;
+  }
+
+  return `${startDate.getDate()} ${MONTHS[startDate.getMonth()]} - ${endDate.getDate()} ${endMonth}`;
+};
+
+// "20/10/2026"
+export const formatShortDate = (date: string) =>
+  parseDay(date).toLocaleDateString("fr-FR");
