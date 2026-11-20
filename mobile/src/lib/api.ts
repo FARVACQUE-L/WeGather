@@ -23,6 +23,12 @@ export const setUnauthorizedHandler = (handler: (() => void) | null) => {
   onUnauthorized = handler;
 };
 
+// En-têtes d'authentification, pour les téléchargements faits hors de api().
+export const authHeaders = (): Record<string, string> => ({
+  "X-Client": "mobile",
+  ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+});
+
 export const api = async <T>(
   path: string,
   init: { method?: string; body?: unknown } = {},
@@ -62,7 +68,12 @@ export const api = async <T>(
     }
     throw new ApiError(
       response.status,
-      typeof data.message === "string" ? data.message : "Erreur serveur",
+      // Certaines routes (contrôle des fichiers envoyés) répondent "error".
+      typeof data.message === "string"
+        ? data.message
+        : typeof data.error === "string"
+          ? data.error
+          : "Erreur serveur",
       data,
     );
   }

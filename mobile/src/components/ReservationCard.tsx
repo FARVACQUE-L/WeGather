@@ -6,33 +6,54 @@ import {
   ExternalLink,
   FileText,
   MapPin,
+  Paperclip,
   PencilLine,
   Trash2,
+  X,
 } from "lucide-react-native";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { colors, fonts, spacing } from "@/constants/theme";
+import { MAX_DOCUMENTS_PER_RESERVATION } from "@/lib/documents";
 import { imageUrl } from "@/lib/imageUrl";
 import {
   formatBadgeDate,
   formatSchedule,
   readTypeInfo,
 } from "@/lib/reservations";
-import type { Reservation } from "@/types/reservation";
+import type { Reservation, ReservationDocument } from "@/types/reservation";
 
 // Carte d'une réservation, reprise du « wallet » du site.
 export function ReservationCard({
   reservation,
   isPast,
   canManage,
+  canDeleteDocument,
+  isUploading,
+  openingDocumentId,
   onEdit,
   onDelete,
+  onAddDocument,
+  onOpenDocument,
+  onDeleteDocument,
 }: {
   reservation: Reservation;
   isPast: boolean;
   canManage: boolean;
-  onEdit?: () => void;
+  canDeleteDocument: (document: ReservationDocument) => boolean;
+  isUploading: boolean;
+  openingDocumentId: number | null;
+  onEdit: () => void;
   onDelete: () => void;
+  onAddDocument: () => void;
+  onOpenDocument: (document: ReservationDocument) => void;
+  onDeleteDocument: (document: ReservationDocument) => void;
 }) {
   const { label, Icon, cover, color } = readTypeInfo(
     reservation.reservation_type,
@@ -41,6 +62,8 @@ export function ReservationCard({
   const schedule = formatSchedule(reservation);
   const badge = formatBadgeDate(reservation.reservation_date_start);
   const link = reservation.reservation_link;
+  const canAddDocument =
+    reservation.documents.length < MAX_DOCUMENTS_PER_RESERVATION;
 
   return (
     <View style={[styles.card, isPast && styles.past]}>
@@ -100,18 +123,44 @@ export function ReservationCard({
           <View style={styles.documents}>
             {reservation.documents.map((document) => (
               <View key={document.document_id} style={styles.document}>
-                <FileText size={14} color={colors.title} />
-                <Text style={styles.documentName} numberOfLines={1}>
-                  {document.document_name}
-                </Text>
+                <Pressable
+                  onPress={() => onOpenDocument(document)}
+                  disabled={openingDocumentId !== null}
+                  style={({ pressed }) => [
+                    styles.documentOpen,
+                    pressed && styles.pressed,
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ouvrir ${document.document_name}`}
+                >
+                  {openingDocumentId === document.document_id ? (
+                    <ActivityIndicator size="small" color={colors.title} />
+                  ) : (
+                    <FileText size={14} color={colors.title} />
+                  )}
+                  <Text style={styles.documentName} numberOfLines={1}>
+                    {document.document_name}
+                  </Text>
+                </Pressable>
+                {canDeleteDocument(document) && (
+                  <Pressable
+                    onPress={() => onDeleteDocument(document)}
+                    hitSlop={8}
+                    style={styles.documentDelete}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Supprimer ${document.document_name}`}
+                  >
+                    <X size={14} color={colors.textMuted} />
+                  </Pressable>
+                )}
               </View>
             ))}
           </View>
         )}
 
-        {(link || canManage) && (
-          <View style={styles.actions}>
-            {link ? (
+        <View style={styles.actions}>
+          <View style={styles.links}>
+            {link && (
               <Pressable
                 onPress={() => WebBrowser.openBrowserAsync(link)}
                 hitSlop={6}
@@ -124,41 +173,58 @@ export function ReservationCard({
                 <ExternalLink size={14} color={colors.title} />
                 <Text style={styles.linkText}>Voir le site</Text>
               </Pressable>
-            ) : (
-              <View />
             )}
-            {canManage && (
-              <View style={styles.manage}>
-                {onEdit && (
-                  <Pressable
-                    onPress={onEdit}
-                    hitSlop={6}
-                    style={({ pressed }) => [
-                      styles.iconButton,
-                      pressed && styles.pressed,
-                    ]}
-                    accessibilityRole="button"
-                    accessibilityLabel="Modifier la réservation"
-                  >
-                    <PencilLine size={18} color={colors.textMuted} />
-                  </Pressable>
+            {canAddDocument && (
+              <Pressable
+                onPress={onAddDocument}
+                disabled={isUploading}
+                hitSlop={6}
+                style={({ pressed }) => [
+                  styles.linkButton,
+                  pressed && styles.pressed,
+                ]}
+                accessibilityRole="button"
+              >
+                {isUploading ? (
+                  <ActivityIndicator size="small" color={colors.title} />
+                ) : (
+                  <Paperclip size={14} color={colors.title} />
                 )}
-                <Pressable
-                  onPress={onDelete}
-                  hitSlop={6}
-                  style={({ pressed }) => [
-                    styles.iconButton,
-                    pressed && styles.pressed,
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Supprimer la réservation"
-                >
-                  <Trash2 size={18} color={colors.negative} />
-                </Pressable>
-              </View>
+                <Text style={styles.linkText}>
+                  {isUploading ? "Envoi…" : "Ajouter un billet"}
+                </Text>
+              </Pressable>
             )}
           </View>
-        )}
+          {canManage && (
+            <View style={styles.manage}>
+              <Pressable
+                onPress={onEdit}
+                hitSlop={6}
+                style={({ pressed }) => [
+                  styles.iconButton,
+                  pressed && styles.pressed,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Modifier la réservation"
+              >
+                <PencilLine size={18} color={colors.textMuted} />
+              </Pressable>
+              <Pressable
+                onPress={onDelete}
+                hitSlop={6}
+                style={({ pressed }) => [
+                  styles.iconButton,
+                  pressed && styles.pressed,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Supprimer la réservation"
+              >
+                <Trash2 size={18} color={colors.negative} />
+              </Pressable>
+            </View>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -269,11 +335,20 @@ const styles = StyleSheet.create({
   document: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
     borderRadius: 8,
     backgroundColor: colors.background,
+  },
+  documentOpen: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  documentDelete: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
   documentName: {
     flex: 1,
@@ -286,6 +361,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: spacing.xs,
+  },
+  links: {
+    flexShrink: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: spacing.md,
   },
   linkButton: {
     flexDirection: "row",

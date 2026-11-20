@@ -20,6 +20,7 @@ import { colors, fonts, spacing } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { useEvent } from "@/context/EventContext";
 import { ApiError, api } from "@/lib/api";
+import { openDocument, pickDocument, uploadDocument } from "@/lib/documents";
 import {
   formatCountdown,
   formatDayHeader,
@@ -30,7 +31,7 @@ import {
   type ReservationType,
   readTypeInfo,
 } from "@/lib/reservations";
-import type { Reservation } from "@/types/reservation";
+import type { Reservation, ReservationDocument } from "@/types/reservation";
 
 export default function ReservationsScreen() {
   const { user } = useAuth();
@@ -42,6 +43,10 @@ export default function ReservationsScreen() {
   const [showPast, setShowPast] = useState(false);
   // Nombre maximum de réservations, selon l'offre de l'hôte.
   const [limit, setLimit] = useState<number | null>(null);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [openingDocumentId, setOpeningDocumentId] = useState<number | null>(
+    null,
+  );
 
   // Positions des cartes, pour défiler jusqu'à la prochaine réservation.
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -86,6 +91,95 @@ export default function ReservationsScreen() {
   // Comme sur le site : l'auteur ou l'hôte de l'événement.
   const canManage = (reservation: Reservation) =>
     reservation.reservation_id_user === user.id || group.host_id === user.id;
+
+  const canDeleteDocument = (document: ReservationDocument) =>
+    document.document_id_user === user.id || group.host_id === user.id;
+
+  const showError = (title: string, error: unknown, fallback: string) =>
+    Alert.alert(title, error instanceof ApiError ? error.message : fallback);
+
+  const addDocument = async (reservation: Reservation) => {
+    let file: Awaited<ReturnType<typeof pickDocument>>;
+    try {
+      file = await pickDocument();
+    } catch (error) {
+      showError("Fichier illisible", error, "Impossible de lire ce fichier.");
+      return;
+    }
+    if (!file) return;
+
+    setUploadingId(reservation.reservation_id);
+    try {
+      const document = await uploadDocument(reservation.reservation_id, file);
+      setReservations(
+        (current) =>
+          current?.map((item) =>
+            item.reservation_id === reservation.reservation_id
+              ? { ...item, documents: [...item.documents, document] }
+              : item,
+          ) ?? null,
+      );
+    } catch (error) {
+      showError(
+        "Envoi impossible",
+        error,
+        `Impossible d'envoyer ${file.name}.`,
+      );
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
+  const showDocument = async (document: ReservationDocument) => {
+    setOpeningDocumentId(document.document_id);
+    try {
+      await openDocument(document);
+    } catch (error) {
+      showError(
+        "Ouverture impossible",
+        error,
+        "Impossible d'ouvrir le document.",
+      );
+    } finally {
+      setOpeningDocumentId(null);
+    }
+  };
+
+  const confirmDeleteDocument = (document: ReservationDocument) => {
+    Alert.alert(
+      "Supprimer le document ?",
+      `« ${document.document_name} » sera supprimé.`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await api(`/api/reservations/documents/${document.document_id}`, {
+                method: "DELETE",
+              });
+              setReservations(
+                (current) =>
+                  current?.map((item) => ({
+                    ...item,
+                    documents: item.documents.filter(
+                      (doc) => doc.document_id !== document.document_id,
+                    ),
+                  })) ?? null,
+              );
+            } catch (error) {
+              showError(
+                "Suppression impossible",
+                error,
+                "La suppression a échoué.",
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const confirmDelete = (reservation: Reservation) => {
     Alert.alert(
@@ -229,8 +323,14 @@ export default function ReservationsScreen() {
           reservation={reservation}
           isPast={isPast}
           canManage={canManage(reservation)}
+          canDeleteDocument={canDeleteDocument}
+          isUploading={uploadingId === reservation.reservation_id}
+          openingDocumentId={openingDocumentId}
           onEdit={() => openForm(reservation)}
           onDelete={() => confirmDelete(reservation)}
+          onAddDocument={() => addDocument(reservation)}
+          onOpenDocument={showDocument}
+          onDeleteDocument={confirmDeleteDocument}
         />
       </View>
     ));
