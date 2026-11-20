@@ -1,5 +1,5 @@
-import { useFocusEffect } from "expo-router";
-import { ChevronDown } from "lucide-react-native";
+import { router, useFocusEffect } from "expo-router";
+import { ChevronDown, Plus } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -40,6 +40,8 @@ export default function ReservationsScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeType, setActiveType] = useState<ReservationType | "all">("all");
   const [showPast, setShowPast] = useState(false);
+  // Nombre maximum de réservations, selon l'offre de l'hôte.
+  const [limit, setLimit] = useState<number | null>(null);
 
   // Positions des cartes, pour défiler jusqu'à la prochaine réservation.
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -48,9 +50,14 @@ export default function ReservationsScreen() {
 
   const load = useCallback(async () => {
     try {
-      setReservations(
-        await api<Reservation[]>(`/api/reservations/all/${uuid}`),
-      );
+      const [list, limitData] = await Promise.all([
+        api<Reservation[]>(`/api/reservations/all/${uuid}`),
+        api<{ limit: number }>(`/api/reservations/${uuid}/limit`).catch(
+          () => null,
+        ),
+      ]);
+      setReservations(list);
+      setLimit(limitData?.limit ?? null);
       setErrorMessage("");
     } catch (error) {
       setErrorMessage(
@@ -116,8 +123,42 @@ export default function ReservationsScreen() {
     );
   };
 
+  const openForm = (reservation?: Reservation) =>
+    router.push({
+      pathname: "/event/[uuid]/reservation-form",
+      params: reservation
+        ? { uuid, id: String(reservation.reservation_id) }
+        : { uuid },
+    });
+
+  const addReservation = () => {
+    if (limit !== null && reservations && reservations.length >= limit) {
+      Alert.alert(
+        "Limite atteinte",
+        `Un événement est limité à ${limit} réservations.`,
+      );
+      return;
+    }
+    openForm();
+  };
+
   const header = (
-    <ScreenHeader title="Réservations" subtitle={event.event_name} />
+    <ScreenHeader
+      title="Réservations"
+      subtitle={event.event_name}
+      action={
+        <Pressable
+          onPress={addReservation}
+          disabled={reservations === null}
+          hitSlop={6}
+          style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Ajouter une réservation"
+        >
+          <Plus size={22} color={colors.neutral} />
+        </Pressable>
+      }
+    />
   );
 
   if (reservations === null) {
@@ -188,6 +229,7 @@ export default function ReservationsScreen() {
           reservation={reservation}
           isPast={isPast}
           canManage={canManage(reservation)}
+          onEdit={() => openForm(reservation)}
           onDelete={() => confirmDelete(reservation)}
         />
       </View>
@@ -218,8 +260,7 @@ export default function ReservationsScreen() {
               Aucune réservation pour cet événement.
             </Text>
             <Text style={styles.emptyText}>
-              Ajoutez-en une depuis le site en attendant que ce soit possible
-              ici.
+              Ajoutez votre première réservation avec le bouton +.
             </Text>
           </View>
         ) : (
@@ -483,6 +524,14 @@ const styles = StyleSheet.create({
   },
   chevronOpen: {
     transform: [{ rotate: "180deg" }],
+  },
+  addButton: {
+    width: 38,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 19,
+    backgroundColor: colors.accentDark,
   },
   pressed: {
     opacity: 0.7,

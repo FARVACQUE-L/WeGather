@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { BackButton } from "@/components/BackButton";
@@ -8,10 +9,13 @@ export function ScreenHeader({
   title,
   subtitle,
   backLabel,
+  action,
 }: {
   title: string;
   subtitle?: string;
   backLabel?: string;
+  // Bouton facultatif à droite (ex. « ajouter »).
+  action?: ReactNode;
 }) {
   return (
     <View style={styles.header}>
@@ -26,6 +30,7 @@ export function ScreenHeader({
           </Text>
         ) : null}
       </View>
+      {action}
     </View>
   );
 }

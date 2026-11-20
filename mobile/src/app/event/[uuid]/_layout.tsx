@@ -62,6 +62,7 @@ function EventNavigator() {
     >
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="chat" />
+      <Stack.Screen name="reservation-form" />
     </Stack>
   );
 }
