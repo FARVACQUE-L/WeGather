@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from "expo-router";
 import { Tabs } from "expo-router/js-tabs";
-import { House, MessageCircle, UsersRound } from "lucide-react-native";
+import { Book, House, MessageCircle, UsersRound } from "lucide-react-native";
 import { useCallback } from "react";
 
 import { colors, fonts } from "@/constants/theme";
@@ -71,6 +71,13 @@ export default function EventTabsLayout() {
             event.preventDefault();
             router.push({ pathname: "/event/[uuid]/chat", params: { uuid } });
           },
+        }}
+      />
+      <Tabs.Screen
+        name="reservations"
+        options={{
+          title: "Réservations",
+          tabBarIcon: ({ color, size }) => <Book color={color} size={size} />,
         }}
       />
       <Tabs.Screen
