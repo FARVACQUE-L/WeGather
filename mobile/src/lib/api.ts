@@ -23,20 +23,36 @@ export const setUnauthorizedHandler = (handler: (() => void) | null) => {
   onUnauthorized = handler;
 };
 
+// En-têtes d'authentification, pour les téléchargements faits hors de api().
+export const authHeaders = (): Record<string, string> => ({
+  "X-Client": "mobile",
+  ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+});
+
 export const api = async <T>(
   path: string,
   init: { method?: string; body?: unknown } = {},
 ): Promise<T> => {
+  // Un FormData (envoi de fichiers) part tel quel : fetch ajoute lui-même
+  // l'en-tête multipart avec sa délimitation.
+  const isFormData = init.body instanceof FormData;
   const headers: Record<string, string> = { "X-Client": "mobile" };
   if (authToken) headers.Authorization = `Bearer ${authToken}`;
-  if (init.body !== undefined) headers["Content-Type"] = "application/json";
+  if (init.body !== undefined && !isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
 
   let response: Response;
   try {
     response = await fetch(`${API_URL}${path}`, {
       method: init.method ?? "GET",
       headers,
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      body:
+        init.body === undefined
+          ? undefined
+          : isFormData
+            ? (init.body as FormData)
+            : JSON.stringify(init.body),
     });
   } catch {
     throw new ApiError(0, "Impossible de joindre le serveur.");
@@ -52,7 +68,12 @@ export const api = async <T>(
     }
     throw new ApiError(
       response.status,
-      typeof data.message === "string" ? data.message : "Erreur serveur",
+      // Certaines routes (contrôle des fichiers envoyés) répondent "error".
+      typeof data.message === "string"
+        ? data.message
+        : typeof data.error === "string"
+          ? data.error
+          : "Erreur serveur",
       data,
     );
   }

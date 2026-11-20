@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import type { RequestHandler } from "express";
+import type { Request, RequestHandler } from "express";
 import { isEventMember as isMember } from "../../helper/eventMembership";
 import {
   DOCUMENT_FILENAME,
@@ -13,8 +13,22 @@ import reservationRepository from "./reservationRepository";
 
 const MAX_DOCUMENTS_PER_RESERVATION = 5;
 
-const readOriginalName = (file: Express.Multer.File) =>
-  Buffer.from(file.originalname, "latin1").toString("utf8").slice(0, 255);
+// Le navigateur envoie le nom en UTF-8, que multer lit en latin1.
+// L'app mobile (fetch d'Expo) l'envoie encodé comme une URL
+// (« billet%20%C3%A9t%C3%A9.pdf ») : on le décode.
+const readOriginalName = (req: Request, file: Express.Multer.File) => {
+  let name = Buffer.from(file.originalname, "latin1").toString("utf8");
+
+  if (req.get("X-Client") === "mobile") {
+    try {
+      name = decodeURIComponent(name);
+    } catch {
+      // Nom mal encodé : on garde tel quel.
+    }
+  }
+
+  return name.slice(0, 255);
+};
 
 const addDocument: RequestHandler = async (req, res, next) => {
   try {
@@ -59,7 +73,7 @@ const addDocument: RequestHandler = async (req, res, next) => {
     const document = {
       document_id_reservation: reservation.reservation_id,
       document_id_user: req.user.id,
-      document_name: readOriginalName(req.file),
+      document_name: readOriginalName(req, req.file),
       document_file: req.file.filename,
     };
     const documentId = await reservationDocumentRepository.create(document);

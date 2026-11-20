@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect, useIsFocused } from "expo-router";
+import { router, useFocusEffect, useIsFocused } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
   Book,
@@ -213,7 +213,16 @@ export default function DashboardScreen() {
           </View>
 
           <View style={styles.card}>
-            <SectionTitle Icon={CalendarClock} title="Réservations récentes" />
+            <SectionTitle
+              Icon={CalendarClock}
+              title="Réservations récentes"
+              onSeeAll={() =>
+                router.navigate({
+                  pathname: "/event/[uuid]/reservations",
+                  params: { uuid },
+                })
+              }
+            />
             {!isLoaded ? (
               <ActivityIndicator color={colors.accentDark} />
             ) : reservations.length === 0 ? (
@@ -351,11 +360,24 @@ export default function DashboardScreen() {
   );
 }
 
-function SectionTitle({ Icon, title }: { Icon: LucideIcon; title: string }) {
+function SectionTitle({
+  Icon,
+  title,
+  onSeeAll,
+}: {
+  Icon: LucideIcon;
+  title: string;
+  onSeeAll?: () => void;
+}) {
   return (
     <View style={styles.sectionTitleRow}>
       <Icon size={20} color={colors.title} />
       <Text style={styles.sectionTitle}>{title}</Text>
+      {onSeeAll && (
+        <Pressable onPress={onSeeAll} hitSlop={8} accessibilityRole="button">
+          <Text style={styles.seeAll}>Voir tout</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -471,7 +493,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.sm,
   },
+  seeAll: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: colors.accentDark,
+  },
   sectionTitle: {
+    flex: 1,
     fontFamily: fonts.bold,
     fontSize: 18,
     color: colors.title,
