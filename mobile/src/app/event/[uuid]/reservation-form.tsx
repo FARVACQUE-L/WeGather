@@ -557,6 +557,7 @@ const styles = StyleSheet.create({
   photoButtons: {
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "center",
     gap: spacing.sm,
     marginTop: spacing.sm,
   },
