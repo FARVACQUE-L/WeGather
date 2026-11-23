@@ -3,9 +3,9 @@ import { Tabs } from "expo-router/js-tabs";
 import {
   Book,
   House,
+  LayoutGrid,
   MessageCircle,
   PiggyBank,
-  UsersRound,
 } from "lucide-react-native";
 import { useCallback } from "react";
 
@@ -96,11 +96,11 @@ export default function EventTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="groupe"
+        name="plus"
         options={{
-          title: "Groupe",
+          title: "Plus",
           tabBarIcon: ({ color, size }) => (
-            <UsersRound color={color} size={size} />
+            <LayoutGrid color={color} size={size} />
           ),
         }}
       />
