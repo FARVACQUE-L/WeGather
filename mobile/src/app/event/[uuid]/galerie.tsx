@@ -1,6 +1,11 @@
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { EllipsisVertical, Heart, ImagePlus } from "lucide-react-native";
+import {
+  Download,
+  EllipsisVertical,
+  Heart,
+  ImagePlus,
+} from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -22,6 +27,7 @@ import { colors, fonts, spacing } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { useEvent } from "@/context/EventContext";
 import { ApiError, api } from "@/lib/api";
+import { requestSavePermission, savePhotoToDevice } from "@/lib/gallery";
 import { imageUrl } from "@/lib/imageUrl";
 import { photoFile } from "@/lib/photos";
 import type { Photo } from "@/types/gallery";
@@ -41,6 +47,11 @@ export default function GalleryScreen() {
   const [limit, setLimit] = useState<number | null>(null);
   // Formulaire ouvert : ajout (photo null) ou modification d'une photo.
   const [form, setForm] = useState<{ photo: Photo | null } | null>(null);
+  // Avancement de « tout enregistrer » (null : pas en cours).
+  const [saveProgress, setSaveProgress] = useState<{
+    done: number;
+    total: number;
+  } | null>(null);
   // Photos dont le « j'aime » est en cours d'envoi (évite le double appui).
   const pendingLikes = useRef(new Set<number>());
 
@@ -229,21 +240,107 @@ export default function GalleryScreen() {
       { text: "Annuler", style: "cancel" },
     ]);
 
+  // Enregistre une photo depuis l'aperçu ; renvoie true si c'est fait.
+  const saveOne = async (photo: Photo) => {
+    try {
+      await requestSavePermission();
+      await savePhotoToDevice(photo);
+      return true;
+    } catch (error) {
+      Alert.alert(
+        "Enregistrement impossible",
+        error instanceof ApiError ? error.message : "Erreur inconnue",
+      );
+      return false;
+    }
+  };
+
+  // Enregistre toutes les photos, une par une, en affichant l'avancement.
+  const saveAll = async (list: Photo[]) => {
+    try {
+      await requestSavePermission();
+    } catch (error) {
+      Alert.alert(
+        "Enregistrement impossible",
+        error instanceof ApiError ? error.message : "Erreur inconnue",
+      );
+      return;
+    }
+
+    let failed = 0;
+    for (const [index, photo] of list.entries()) {
+      setSaveProgress({ done: index, total: list.length });
+      try {
+        await savePhotoToDevice(photo);
+      } catch {
+        failed++;
+      }
+    }
+    setSaveProgress(null);
+
+    const saved = list.length - failed;
+    Alert.alert(
+      failed === 0 ? "Photos enregistrées" : "Enregistrement incomplet",
+      failed === 0
+        ? `${saved} photo${saved > 1 ? "s" : ""} ajoutée${saved > 1 ? "s" : ""} à la photothèque du téléphone.`
+        : `${saved} photo${saved > 1 ? "s" : ""} sur ${list.length} enregistrée${saved > 1 ? "s" : ""}. Réessayez pour les autres.`,
+    );
+  };
+
+  const confirmSaveAll = () => {
+    if (!photos || photos.length === 0 || saveProgress) return;
+    const list = photos;
+    Alert.alert(
+      "Tout enregistrer ?",
+      `Les ${list.length} photo${list.length > 1 ? "s" : ""} de la galerie seront ajoutées à la photothèque du téléphone.`,
+      [
+        { text: "Annuler", style: "cancel" },
+        { text: "Enregistrer", onPress: () => saveAll(list) },
+      ],
+    );
+  };
+
   const header = (
     <ScreenHeader
       title="Galerie"
       subtitle={event.event_name}
       action={
-        <Pressable
-          onPress={openAddForm}
-          disabled={photos === null}
-          hitSlop={6}
-          style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
-          accessibilityRole="button"
-          accessibilityLabel="Ajouter une photo"
-        >
-          <ImagePlus size={20} color={colors.neutral} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          {photos !== null && photos.length > 0 && (
+            <Pressable
+              onPress={confirmSaveAll}
+              disabled={saveProgress !== null}
+              hitSlop={6}
+              style={({ pressed }) => [
+                styles.saveAllButton,
+                pressed && styles.pressed,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Enregistrer toutes les photos dans le téléphone"
+            >
+              {saveProgress ? (
+                <Text style={styles.saveProgress}>
+                  {saveProgress.done}/{saveProgress.total}
+                </Text>
+              ) : (
+                <Download size={20} color={colors.title} />
+              )}
+            </Pressable>
+          )}
+          <Pressable
+            onPress={openAddForm}
+            disabled={photos === null}
+            hitSlop={6}
+            style={({ pressed }) => [
+              styles.addButton,
+              pressed && styles.pressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Ajouter une photo"
+          >
+            <ImagePlus size={20} color={colors.neutral} />
+          </Pressable>
+        </View>
       }
     />
   );
@@ -370,6 +467,7 @@ export default function GalleryScreen() {
         startIndex={viewerIndex}
         likedIds={likedIds}
         onLike={toggleLike}
+        onSave={saveOne}
         onClose={() => setViewerIndex(null)}
       />
 
@@ -471,6 +569,27 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 12,
     color: colors.textMuted,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  saveAllButton: {
+    minWidth: 38,
+    height: 38,
+    paddingHorizontal: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.neutral,
+  },
+  saveProgress: {
+    fontFamily: fonts.semiBold,
+    fontSize: 11,
+    color: colors.title,
   },
   addButton: {
     width: 38,

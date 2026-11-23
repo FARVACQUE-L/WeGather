@@ -1,7 +1,8 @@
 import { Image } from "expo-image";
-import { Heart, X } from "lucide-react-native";
+import { Check, Download, Heart, X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
@@ -23,6 +24,7 @@ export function PhotoViewer({
   startIndex,
   likedIds,
   onLike,
+  onSave,
   onClose,
 }: {
   photos: Photo[];
@@ -30,18 +32,37 @@ export function PhotoViewer({
   startIndex: number | null;
   likedIds: Set<number>;
   onLike: (photo: Photo) => void;
+  // Enregistre la photo dans le téléphone ; renvoie true si c'est fait.
+  onSave: (photo: Photo) => Promise<boolean>;
   onClose: () => void;
 }) {
   const { width } = useWindowDimensions();
   const [index, setIndex] = useState(0);
+  const [savingId, setSavingId] = useState<number | null>(null);
+  // Photos déjà enregistrées pendant cet aperçu (coche à la place).
+  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    if (startIndex !== null) setIndex(startIndex);
+    if (startIndex !== null) {
+      setIndex(startIndex);
+      setSavedIds(new Set());
+    }
   }, [startIndex]);
 
   // La liste peut raccourcir pendant l'aperçu (photo supprimée ailleurs).
   const current = photos[Math.min(index, photos.length - 1)];
   const isLiked = current ? likedIds.has(current.gallery_id) : false;
+  const isSaved = current ? savedIds.has(current.gallery_id) : false;
+
+  const save = async () => {
+    if (!current || savingId !== null) return;
+    setSavingId(current.gallery_id);
+    const id = current.gallery_id;
+    if (await onSave(current)) {
+      setSavedIds((saved) => new Set(saved).add(id));
+    }
+    setSavingId(null);
+  };
 
   return (
     <Modal
@@ -85,15 +106,35 @@ export function PhotoViewer({
           <Text style={styles.counter}>
             {Math.min(index, photos.length - 1) + 1} / {photos.length}
           </Text>
-          <Pressable
-            onPress={onClose}
-            hitSlop={8}
-            style={styles.roundButton}
-            accessibilityRole="button"
-            accessibilityLabel="Fermer la photo"
-          >
-            <X size={26} color={colors.neutral} />
-          </Pressable>
+          <View style={styles.topActions}>
+            <Pressable
+              onPress={save}
+              disabled={savingId !== null || isSaved}
+              hitSlop={8}
+              style={styles.roundButton}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isSaved ? "Photo enregistrée" : "Enregistrer dans le téléphone"
+              }
+            >
+              {savingId !== null ? (
+                <ActivityIndicator color={colors.neutral} />
+              ) : isSaved ? (
+                <Check size={22} color={colors.neutral} />
+              ) : (
+                <Download size={22} color={colors.neutral} />
+              )}
+            </Pressable>
+            <Pressable
+              onPress={onClose}
+              hitSlop={8}
+              style={styles.roundButton}
+              accessibilityRole="button"
+              accessibilityLabel="Fermer la photo"
+            >
+              <X size={26} color={colors.neutral} />
+            </Pressable>
+          </View>
         </SafeAreaView>
 
         {current && (
@@ -143,6 +184,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 14,
     color: colors.neutral,
+  },
+  topActions: {
+    flexDirection: "row",
+    gap: spacing.sm,
   },
   roundButton: {
     width: 40,
