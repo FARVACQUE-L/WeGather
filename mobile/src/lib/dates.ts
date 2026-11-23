@@ -61,3 +61,23 @@ export const formatStayDates = (start: string, end: string) => {
 // "20/10/2026"
 export const formatShortDate = (date: string) =>
   parseDay(date).toLocaleDateString("fr-FR");
+
+// Date d'un ajout, comme le budget du site : "aujourd'hui", "hier",
+// "avant-hier", "il y a 5 jours", puis "20/10/2026".
+// Reçoit une date complète (ISO), lue en heure locale.
+export const formatRelativeDay = (dateTime: string) => {
+  const date = new Date(dateTime);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const day = new Date(date);
+  day.setHours(0, 0, 0, 0);
+  const diffDays = Math.round(
+    (startOfToday().getTime() - day.getTime()) / (24 * 60 * 60 * 1000),
+  );
+
+  if (diffDays <= 0) return "aujourd'hui";
+  if (diffDays === 1) return "hier";
+  if (diffDays === 2) return "avant-hier";
+  if (diffDays <= 7) return `il y a ${diffDays} jours`;
+  return date.toLocaleDateString("fr-FR");
+};

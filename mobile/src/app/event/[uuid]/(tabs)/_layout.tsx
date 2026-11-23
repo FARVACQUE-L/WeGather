@@ -1,6 +1,12 @@
 import { router, useFocusEffect } from "expo-router";
 import { Tabs } from "expo-router/js-tabs";
-import { Book, House, MessageCircle, UsersRound } from "lucide-react-native";
+import {
+  Book,
+  House,
+  MessageCircle,
+  PiggyBank,
+  UsersRound,
+} from "lucide-react-native";
 import { useCallback } from "react";
 
 import { colors, fonts } from "@/constants/theme";
@@ -78,6 +84,15 @@ export default function EventTabsLayout() {
         options={{
           title: "Réservations",
           tabBarIcon: ({ color, size }) => <Book color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="budget"
+        options={{
+          title: "Budget",
+          tabBarIcon: ({ color, size }) => (
+            <PiggyBank color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
