@@ -290,7 +290,16 @@ export default function DashboardScreen() {
           <TodoList uuid={uuid} todos={todos} setTodos={setTodos} />
 
           <View style={styles.card}>
-            <SectionTitle Icon={Images} title="Galerie récente" />
+            <SectionTitle
+              Icon={Images}
+              title="Galerie récente"
+              onSeeAll={() =>
+                router.push({
+                  pathname: "/event/[uuid]/galerie",
+                  params: { uuid },
+                })
+              }
+            />
             {!isLoaded ? (
               <ActivityIndicator color={colors.accentDark} />
             ) : photos.length === 0 ? (

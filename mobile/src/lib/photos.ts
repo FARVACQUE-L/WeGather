@@ -6,15 +6,22 @@ import { Platform } from "react-native";
 // Même format que le recadrage du site : 4/3, 1200 px de large, JPEG.
 const RATIO = 4 / 3;
 const OUTPUT_WIDTH = 1200;
+// Photos de galerie : cadrage d'origine, plus grand côté limité.
+const GALLERY_MAX_SIDE = 2000;
 
 // Choisit une photo dans la galerie du téléphone et la prépare pour
 // l'envoi. Renvoie null si l'utilisateur annule.
-export const pickPhoto = async (): Promise<string | null> => {
+// crop: false garde le cadrage d'origine (galerie) au lieu du 4/3.
+export const pickPhoto = async ({
+  crop = true,
+}: {
+  crop?: boolean;
+} = {}): Promise<string | null> => {
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ["images"],
     // Recadrage manuel en 4/3 sur Android ; sur iPhone le recadrage
     // système est forcément carré, on recadre donc au centre ci-dessous.
-    allowsEditing: Platform.OS === "android",
+    allowsEditing: crop && Platform.OS === "android",
     aspect: [4, 3],
     quality: 1,
   });
@@ -23,7 +30,13 @@ export const pickPhoto = async (): Promise<string | null> => {
   const { uri, width, height } = result.assets[0];
   const context = ImageManipulator.manipulate(uri);
 
-  if (width > 0 && height > 0) {
+  if (!crop) {
+    if (width >= height && width > GALLERY_MAX_SIDE) {
+      context.resize({ width: GALLERY_MAX_SIDE, height: null });
+    } else if (height > width && height > GALLERY_MAX_SIDE) {
+      context.resize({ width: null, height: GALLERY_MAX_SIDE });
+    }
+  } else if (width > 0 && height > 0) {
     const cropWidth = width / height > RATIO ? height * RATIO : width;
     const cropHeight = cropWidth / RATIO;
     context.crop({

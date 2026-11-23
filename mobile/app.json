@@ -44,6 +44,14 @@
           "cameraPermission": false,
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "WeGather accède à vos photos pour illustrer vos réservations et la galerie de vos événements.",
+          "savePhotosPermission": "WeGather enregistre les photos de vos événements dans votre photothèque.",
+          "granularPermissions": []
+        }
       ]
     ],
     "experiments": {
