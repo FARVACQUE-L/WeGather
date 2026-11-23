@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
-import { Heart } from "lucide-react-native";
+import { EllipsisVertical, Heart, ImagePlus } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { PhotoFormModal } from "@/components/PhotoFormModal";
 import { PhotoViewer } from "@/components/PhotoViewer";
 import { ScreenHeader } from "@/components/ScreenHeader";
 import { colors, fonts, spacing } from "@/constants/theme";
@@ -22,19 +23,24 @@ import { useAuth } from "@/context/AuthContext";
 import { useEvent } from "@/context/EventContext";
 import { ApiError, api } from "@/lib/api";
 import { imageUrl } from "@/lib/imageUrl";
+import { photoFile } from "@/lib/photos";
 import type { Photo } from "@/types/gallery";
 
 const COLUMNS = 2;
 
 export default function GalleryScreen() {
   const { user } = useAuth();
-  const { uuid, event } = useEvent();
+  const { uuid, event, group } = useEvent();
   const { width } = useWindowDimensions();
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [errorMessage, setErrorMessage] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  // Nombre maximum de photos, selon l'offre de l'hôte.
+  const [limit, setLimit] = useState<number | null>(null);
+  // Formulaire ouvert : ajout (photo null) ou modification d'une photo.
+  const [form, setForm] = useState<{ photo: Photo | null } | null>(null);
   // Photos dont le « j'aime » est en cours d'envoi (évite le double appui).
   const pendingLikes = useRef(new Set<number>());
 
@@ -43,14 +49,16 @@ export default function GalleryScreen() {
   const load = useCallback(async () => {
     if (userId === undefined) return;
     try {
-      const [list, liked] = await Promise.all([
+      const [list, liked, limitData] = await Promise.all([
         api<Photo[]>(`/api/gallery/${uuid}`),
         api<number[]>(`/api/gallery/${uuid}/likes/${userId}`).catch(
           () => [] as number[],
         ),
+        api<{ limit: number }>(`/api/gallery/${uuid}/limit`).catch(() => null),
       ]);
       setPhotos(list);
       setLikedIds(new Set(liked));
+      setLimit(limitData?.limit ?? null);
       setErrorMessage("");
     } catch (error) {
       setErrorMessage(
@@ -123,9 +131,122 @@ export default function GalleryScreen() {
     }
   };
 
-  if (!event || !user) return null;
+  if (!event || !group || !user) return null;
 
-  const header = <ScreenHeader title="Galerie" subtitle={event.event_name} />;
+  // Comme le serveur : l'auteur de la photo ou l'hôte de l'événement.
+  const canManage = (photo: Photo) =>
+    photo.gallery_id_user === user.id || group.host_id === user.id;
+
+  const openAddForm = () => {
+    if (limit !== null && photos && photos.length >= limit) {
+      Alert.alert(
+        "Limite atteinte",
+        `La galerie est limitée à ${limit} photos. Supprimez-en une pour en ajouter une autre.`,
+      );
+      return;
+    }
+    setForm({ photo: null });
+  };
+
+  // Renvoie le message d'erreur à afficher dans le formulaire.
+  const savePhoto = async (photoUri: string | null, description: string) => {
+    const photo = form?.photo;
+    try {
+      if (photo) {
+        await api(`/api/gallery/${photo.gallery_id}/${user.id}`, {
+          method: "PUT",
+          body: { gallery_description: description },
+        });
+        setPhotos(
+          (current) =>
+            current?.map((item) =>
+              item.gallery_id === photo.gallery_id
+                ? { ...item, gallery_description: description || null }
+                : item,
+            ) ?? null,
+        );
+      } else if (photoUri) {
+        // Les champs texte avant le fichier, comme le formulaire du site.
+        const body = new FormData();
+        body.append("event_uuid", uuid);
+        body.append("gallery_description", description);
+        body.append("photo", photoFile(photoUri, "photo.jpg"));
+        await api("/api/gallery", { method: "POST", body });
+        await load();
+      }
+    } catch (error) {
+      return error instanceof ApiError
+        ? error.message
+        : "L'enregistrement a échoué.";
+    }
+    setForm(null);
+    return undefined;
+  };
+
+  const deletePhoto = async (photo: Photo) => {
+    try {
+      await api(`/api/gallery/${photo.gallery_id}/${user.id}`, {
+        method: "DELETE",
+      });
+      setPhotos(
+        (current) =>
+          current?.filter((item) => item.gallery_id !== photo.gallery_id) ??
+          null,
+      );
+    } catch (error) {
+      Alert.alert(
+        "Suppression impossible",
+        error instanceof ApiError ? error.message : "La suppression a échoué.",
+      );
+    }
+  };
+
+  const confirmDelete = (photo: Photo) =>
+    Alert.alert(
+      "Supprimer la photo ?",
+      "Elle sera retirée de la galerie pour tout le groupe.",
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => deletePhoto(photo),
+        },
+      ],
+    );
+
+  const openMenu = (photo: Photo) =>
+    Alert.alert("Photo", photo.gallery_description || undefined, [
+      {
+        text: "Modifier la description",
+        onPress: () => setForm({ photo }),
+      },
+      {
+        text: "Supprimer",
+        style: "destructive",
+        onPress: () => confirmDelete(photo),
+      },
+      { text: "Annuler", style: "cancel" },
+    ]);
+
+  const header = (
+    <ScreenHeader
+      title="Galerie"
+      subtitle={event.event_name}
+      action={
+        <Pressable
+          onPress={openAddForm}
+          disabled={photos === null}
+          hitSlop={6}
+          style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Ajouter une photo"
+        >
+          <ImagePlus size={20} color={colors.neutral} />
+        </Pressable>
+      }
+    />
+  );
   const tileSize = (width - spacing.md * 2 - spacing.md) / COLUMNS;
 
   if (photos === null) {
@@ -176,7 +297,8 @@ export default function GalleryScreen() {
               Aucune photo dans cet événement.
             </Text>
             <Text style={styles.emptyText}>
-              Partagez vos meilleurs souvenirs en ajoutant la première photo.
+              Partagez vos meilleurs souvenirs en ajoutant la première photo
+              avec le bouton en haut à droite.
             </Text>
           </View>
         }
@@ -186,6 +308,7 @@ export default function GalleryScreen() {
             <View style={[styles.tile, { width: tileSize }]}>
               <Pressable
                 onPress={() => setViewerIndex(index)}
+                onLongPress={canManage(item) ? () => openMenu(item) : undefined}
                 style={({ pressed }) => pressed && styles.pressed}
                 accessibilityRole="imagebutton"
                 accessibilityLabel={
@@ -226,6 +349,16 @@ export default function GalleryScreen() {
                     {Number(item.like_count)}
                   </Text>
                 </Pressable>
+                {canManage(item) && (
+                  <Pressable
+                    onPress={() => openMenu(item)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Gérer la photo"
+                  >
+                    <EllipsisVertical size={18} color={colors.textMuted} />
+                  </Pressable>
+                )}
               </View>
             </View>
           );
@@ -238,6 +371,15 @@ export default function GalleryScreen() {
         likedIds={likedIds}
         onLike={toggleLike}
         onClose={() => setViewerIndex(null)}
+      />
+
+      <PhotoFormModal
+        visible={form !== null}
+        initialDescription={
+          form?.photo ? (form.photo.gallery_description ?? "") : undefined
+        }
+        onCancel={() => setForm(null)}
+        onSubmit={savePhoto}
       />
     </SafeAreaView>
   );
@@ -329,6 +471,14 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 12,
     color: colors.textMuted,
+  },
+  addButton: {
+    width: 38,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 19,
+    backgroundColor: colors.accentDark,
   },
   pressed: {
     opacity: 0.7,
